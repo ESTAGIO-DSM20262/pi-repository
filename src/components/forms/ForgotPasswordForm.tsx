@@ -1,15 +1,21 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
+import { useState } from 'react'
 import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
 import Modal, { type Notice } from '@/components/ui/Modal'
-import {
-  descriptionClass, infoBoxClass, inputClass, labelClass,
-  linkClass, mutedLinkClass, primaryButtonClass, titleClass,
-} from '../../libs/styles'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
 import { requestPasswordReset } from '@/services/auth.service'
+import {
+  descriptionClass,
+  infoBoxClass,
+  inputClass,
+  labelClass,
+  linkClass,
+  mutedLinkClass,
+  primaryButtonClass,
+  titleClass,
+} from '../../libs/styles'
 
 const SHOW_DEMO = process.env.NEXT_PUBLIC_USE_MOCK_AUTH !== 'false'
 
@@ -69,7 +75,8 @@ export default function ForgotPasswordForm() {
       setNotice({
         variant: 'success',
         title: 'E-mail reenviado',
-        description: 'Enviamos um novo link para o seu e-mail. Se não encontrar, confira também a caixa de spam.',
+        description:
+          'Enviamos um novo link para o seu e-mail. Se não encontrar, confira também a caixa de spam.',
       })
     }
   }
@@ -97,20 +104,26 @@ export default function ForgotPasswordForm() {
       >
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full sm:h-16 sm:w-16 border border-border bg-surface-secondary text-primary">
-            <i className="fi fi-rr-envelope-dot flex text-xl leading-none sm:text-2xl" aria-hidden="true" />
+            <i
+              className="fi fi-rr-envelope-dot flex text-xl leading-none sm:text-2xl"
+              aria-hidden="true"
+            />
           </div>
 
           <h1 className={`mt-5 ${titleClass}`}>Verifique seu e-mail</h1>
           <p className="mt-2 text-[13px] font-medium leading-relaxed text-foreground sm:text-sm">
-            Se o endereço informado estiver cadastrado, você receberá um link para redefinir sua senha.
+            Se o endereço informado estiver cadastrado, você receberá um link para redefinir sua
+            senha.
           </p>
           <p className={`mt-2 ${descriptionClass}`}>
             Acesse sua caixa de entrada e clique no link enviado para continuar.
           </p>
 
-          <div className={`mt-4 flex items-center justify-center gap-2 px-3 py-2 text-left text-[11px] text-text-secondary sm:py-2.5 sm:text-xs ${infoBoxClass}`}>
-            <i className="fi fi-rr-clock flex shrink-0 text-primary" aria-hidden="true" />
-            O link é temporário e ficará disponível por tempo limitado.
+          <div
+            className={`mt-4 flex items-center justify-center gap-2 px-3 py-2 text-left text-[11px] text-text-secondary sm:py-2.5 sm:text-xs ${infoBoxClass}`}
+          >
+            <i className="fi fi-rr-clock flex shrink-0 text-primary" aria-hidden="true" />O link é
+            temporário e ficará disponível por tempo limitado.
           </div>
 
           <button
@@ -153,7 +166,9 @@ export default function ForgotPasswordForm() {
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
         <div>
-          <label htmlFor="email" className={labelClass}>E-mail institucional</label>
+          <label htmlFor="email" className={labelClass}>
+            E-mail institucional
+          </label>
           <input
             id="email"
             type="email"
@@ -174,7 +189,9 @@ export default function ForgotPasswordForm() {
 
       <p className="mt-5 text-center text-[13px] text-text-secondary sm:text-sm">
         Lembrou da senha?{' '}
-        <Link href="/login" className={linkClass}>Entrar</Link>
+        <Link href="/login" className={linkClass}>
+          Entrar
+        </Link>
       </p>
 
       {noticeModal}

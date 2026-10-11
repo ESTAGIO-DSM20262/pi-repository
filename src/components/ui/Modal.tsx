@@ -13,8 +13,16 @@ export interface Notice {
 
 const VARIANT: Record<ModalVariant, { icon: string; halo: string; core: string }> = {
   success: { icon: 'fi-rr-check', halo: 'bg-emerald-50', core: 'bg-emerald-100 text-emerald-700' },
-  error: { icon: 'fi-rr-exclamation', halo: 'bg-primary-light/60', core: 'bg-primary-light text-primary' },
-  warning: { icon: 'fi-rr-triangle-warning', halo: 'bg-primary-light/60', core: 'bg-primary-light text-primary' },
+  error: {
+    icon: 'fi-rr-exclamation',
+    halo: 'bg-primary-light/60',
+    core: 'bg-primary-light text-primary',
+  },
+  warning: {
+    icon: 'fi-rr-triangle-warning',
+    halo: 'bg-primary-light/60',
+    core: 'bg-primary-light text-primary',
+  },
 }
 
 interface ModalProps {
@@ -27,7 +35,15 @@ interface ModalProps {
   showClose?: boolean
 }
 
-export default function Modal({ open, variant, title, description, buttonLabel, onClose, showClose = true }: ModalProps) {
+export default function Modal({
+  open,
+  variant,
+  title,
+  description,
+  buttonLabel,
+  onClose,
+  showClose = true,
+}: ModalProps) {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
@@ -84,16 +100,32 @@ export default function Modal({ open, variant, title, description, buttonLabel, 
           </button>
         )}
 
-        <div className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full sm:h-24 sm:w-24 ${halo}`}>
-          <div className={`flex h-14 w-14 items-center justify-center rounded-full sm:h-16 sm:w-16 ${core}`}>
+        <div
+          className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full sm:h-24 sm:w-24 ${halo}`}
+        >
+          <div
+            className={`flex h-14 w-14 items-center justify-center rounded-full sm:h-16 sm:w-16 ${core}`}
+          >
             <i className={`fi ${icon} flex text-2xl leading-none sm:text-3xl`} aria-hidden="true" />
           </div>
         </div>
 
-        <h2 id="modal-title" className="mt-5 text-xl font-semibold text-slate-900 sm:mt-6 sm:text-2xl">{title}</h2>
-        <p className="mx-auto mt-2 max-w-[340px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:max-w-[360px] sm:text-[15px]">{description}</p>
+        <h2
+          id="modal-title"
+          className="mt-5 text-xl font-semibold text-slate-900 sm:mt-6 sm:text-2xl"
+        >
+          {title}
+        </h2>
+        <p className="mx-auto mt-2 max-w-[340px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:max-w-[360px] sm:text-[15px]">
+          {description}
+        </p>
 
-        <button ref={buttonRef} type="button" onClick={onClose} className={`mt-7 sm:mt-8 ${primaryButtonClass}`}>
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={onClose}
+          className={`mt-7 sm:mt-8 ${primaryButtonClass}`}
+        >
           {buttonLabel}
         </button>
       </div>

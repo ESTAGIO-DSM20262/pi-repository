@@ -1,5 +1,6 @@
 // Textos
-export const eyebrowClass = 'text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs'
+export const eyebrowClass =
+  'text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs'
 export const titleClass = 'text-xl font-semibold text-slate-900 sm:text-2xl'
 export const descriptionClass = 'text-[13px] leading-relaxed text-text-secondary sm:text-sm'
 export const labelClass =

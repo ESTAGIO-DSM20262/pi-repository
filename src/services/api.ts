@@ -5,8 +5,8 @@ export async function api(endpoint: string, options?: RequestInit) {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers
-    }
+      ...options?.headers,
+    },
   })
 
   return resposta

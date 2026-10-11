@@ -45,16 +45,28 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-6 sm:flex">
-          <Link href="/" className={linkClass}>Início</Link>
-          <Link href="/como-funciona" className={linkClass}>Como Funciona</Link>
-          {user && <Link href="/painel" className={linkClass}>Painel</Link>}
+          <Link href="/" className={linkClass}>
+            Início
+          </Link>
+          <Link href="/como-funciona" className={linkClass}>
+            Como Funciona
+          </Link>
+          {user && (
+            <Link href="/painel" className={linkClass}>
+              Painel
+            </Link>
+          )}
           {authItem}
         </nav>
       </div>
 
       <nav className="flex h-10 items-center justify-center gap-6 border-t border-gray-100 sm:hidden">
-        <Link href="/" className={linkClass}>Início</Link>
-        <Link href="/como-funciona" className={linkClass}>Como Funciona</Link>
+        <Link href="/" className={linkClass}>
+          Início
+        </Link>
+        <Link href="/como-funciona" className={linkClass}>
+          Como Funciona
+        </Link>
         {authItem}
       </nav>
     </header>

@@ -46,7 +46,7 @@ export function getStoredUser(): User | null {
 }
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
- 
+
 export async function requestPasswordReset(email: string): Promise<void> {
   if (USE_MOCK) {
     await delay(700)

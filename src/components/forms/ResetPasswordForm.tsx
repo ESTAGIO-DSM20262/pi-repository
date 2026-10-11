@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
 import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
 import Modal, { type ModalVariant } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
@@ -18,7 +18,10 @@ const REQUIREMENTS = [
 
 type ModalKey = 'required' | 'invalid' | 'mismatch' | 'failed' | 'success'
 
-const MODALS: Record<ModalKey, { variant: ModalVariant; title: string; description: string; button: string }> = {
+const MODALS: Record<
+  ModalKey,
+  { variant: ModalVariant; title: string; description: string; button: string }
+> = {
   required: {
     variant: 'warning',
     title: 'Preencha os campos obrigatórios',
@@ -28,19 +31,22 @@ const MODALS: Record<ModalKey, { variant: ModalVariant; title: string; descripti
   invalid: {
     variant: 'warning',
     title: 'Senha inválida',
-    description: 'A nova senha não atende aos requisitos mínimos. Verifique as orientações e tente novamente.',
+    description:
+      'A nova senha não atende aos requisitos mínimos. Verifique as orientações e tente novamente.',
     button: 'Entendi',
   },
   mismatch: {
     variant: 'error',
     title: 'As senhas não coincidem',
-    description: 'A confirmação da senha é diferente da nova senha. Verifique os campos e tente novamente.',
+    description:
+      'A confirmação da senha é diferente da nova senha. Verifique os campos e tente novamente.',
     button: 'Entendi',
   },
   failed: {
     variant: 'error',
     title: 'Não foi possível redefinir',
-    description: 'O link pode ter expirado. Solicite um novo link de recuperação e tente novamente.',
+    description:
+      'O link pode ter expirado. Solicite um novo link de recuperação e tente novamente.',
     button: 'Entendi',
   },
   success: {
@@ -90,7 +96,10 @@ export default function ResetPasswordForm() {
 
   return (
     <AuthCard>
-      <AuthCardHeader title="Redefinir senha" description="Crie uma nova senha para acessar sua conta." />
+      <AuthCardHeader
+        title="Redefinir senha"
+        description="Crie uma nova senha para acessar sua conta."
+      />
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
         <PasswordInput
@@ -111,18 +120,30 @@ export default function ResetPasswordForm() {
         />
 
         <div className={`p-3 sm:p-4 ${infoBoxClass}`}>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary sm:text-xs">Requisitos de segurança:</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary sm:text-xs">
+            Requisitos de segurança:
+          </p>
           <ul className="mt-2 space-y-1.5">
             {REQUIREMENTS.map((r) => {
               const met = r.test(password)
               return (
-                <li key={r.label} className={`flex items-center gap-2 text-xs sm:text-[13px] ${met ? 'text-emerald-700' : 'text-text-secondary'}`}>
+                <li
+                  key={r.label}
+                  className={`flex items-center gap-2 text-xs sm:text-[13px] ${met ? 'text-emerald-700' : 'text-text-secondary'}`}
+                >
                   <span
                     className={`flex h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4 items-center justify-center rounded-full border transition ${
-                      met ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-gray-400 bg-white'
+                      met
+                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        : 'border-gray-400 bg-white'
                     }`}
                   >
-                    {met && <i className="fi fi-br-check flex text-[7px] leading-none sm:text-[8px]" aria-hidden="true" />}
+                    {met && (
+                      <i
+                        className="fi fi-br-check flex text-[7px] leading-none sm:text-[8px]"
+                        aria-hidden="true"
+                      />
+                    )}
                   </span>
                   {r.label}
                 </li>

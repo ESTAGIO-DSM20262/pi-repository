@@ -28,7 +28,8 @@ export default function Home() {
         <>
           <h2 className="text-2xl font-semibold">Projetos Integradores da Fatec Itaquera</h2>
           <p className="mt-2 text-sm text-text-secondary">
-            Conheça os projetos desenvolvidos pelos alunos de DSM. Para cadastrar ou acompanhar projetos, entre com sua conta.
+            Conheça os projetos desenvolvidos pelos alunos de DSM. Para cadastrar ou acompanhar
+            projetos, entre com sua conta.
           </p>
           <Link
             href="/login"
