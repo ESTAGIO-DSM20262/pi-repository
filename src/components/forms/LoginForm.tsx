@@ -138,7 +138,6 @@ export default function LoginForm() {
             className={`${buttonClass} border border-[#8C8C8C] bg-white px-3 text-[#5E5E5E] hover:bg-[#f3f3f3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0067b8]`}
             style={{ fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
           >
-            {/* Logo oficial da Microsoft */}
             <svg width="16" height="16" viewBox="0 0 23 23" aria-hidden="true">
               <rect x="0" y="0" width="11" height="11" fill="#F25022" />
               <rect x="12" y="0" width="11" height="11" fill="#7FBA00" />

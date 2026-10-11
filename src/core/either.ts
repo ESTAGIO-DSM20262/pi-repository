@@ -1,7 +1,3 @@
-/**
- * Resultado explícito de domínio/aplicação: `Left` carrega o erro, `Right` o
- * sucesso. Evita `throw` dentro do domínio e obriga quem chama a tratar o erro.
- */
 export class Left<L, R> {
   readonly value: L
 

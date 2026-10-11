@@ -8,27 +8,14 @@ interface InstitutionalEmailProps {
   role: Role
 }
 
-// Regras de e-mail institucional do Centro Paula Souza.
-//
-// - Alunos:      nome.sobrenome@aluno.cps.sp.gov.br
-// - Professores: nome.sobrenome@cps.sp.gov.br
-//
-// O vínculo (papel) é derivado exclusivamente do domínio do e-mail. Esta é a
-// fonte única dessa regra, compartilhada entre o cliente e o servidor.
 const STUDENT_DOMAIN = 'aluno.cps.sp.gov.br'
 const PROFESSOR_DOMAIN = 'cps.sp.gov.br'
 
-// Correspondência exata de domínio para evitar a ambiguidade de sufixo entre
-// `aluno.cps.sp.gov.br` e `cps.sp.gov.br`.
 const DOMAIN_ROLE: Record<string, Role> = {
   [STUDENT_DOMAIN]: 'student',
   [PROFESSOR_DOMAIN]: 'professor',
 }
 
-/**
- * Value object que representa um e-mail institucional válido e o papel dele
- * derivado. Construído sempre via `create`, que devolve `Either`.
- */
 export class InstitutionalEmail extends ValueObject<InstitutionalEmailProps> {
   private constructor(props: InstitutionalEmailProps) {
     super(props)
@@ -64,7 +51,6 @@ export class InstitutionalEmail extends ValueObject<InstitutionalEmailProps> {
     return right(new InstitutionalEmail({ address: normalized, role }))
   }
 
-  /** Atalho booleano para validações de formulário. */
   static isValid(raw: string): boolean {
     return InstitutionalEmail.create(raw).isRight()
   }

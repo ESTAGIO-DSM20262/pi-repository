@@ -15,13 +15,8 @@ const socialProviders =
         microsoft: {
           clientId: microsoftClientId,
           clientSecret: microsoftClientSecret,
-          // Multi-tenant: aceita qualquer tenant corporativo/escolar (contas
-          // pessoais da Microsoft ficam de fora). O domínio do e-mail é
-          // validado no create hook abaixo.
           tenantId: process.env.MICROSOFT_TENANT_ID ?? 'organizations',
           prompt: 'select_account' as const,
-          // O Entra ID frequentemente não envia o claim `email`; nesse caso o
-          // UPN (`preferred_username`) é usado como e-mail institucional.
           mapProfileToUser: (profile: { email?: string; preferred_username?: string }) => ({
             email: (profile.email ?? profile.preferred_username ?? '').toLowerCase(),
           }),
@@ -39,7 +34,6 @@ export const auth = betterAuth({
     schema: { users, sessions, accounts, verifications },
   }),
 
-  // Contas são pré-provisionadas (seed/admin). Não há autocadastro.
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
@@ -58,17 +52,12 @@ export const auth = betterAuth({
     additionalFields: {
       role: {
         type: ['student', 'professor'],
-        // Preenchido no databaseHook `user.create.before` (derivado do domínio).
-        // Não pode ser `required: true`: o parser do OAuth rejeita o create
-        // antes do hook rodar quando o campo é obrigatório e `input: false`.
         required: false,
         input: false,
       },
     },
   },
 
-  // Fonte única de verdade para o papel: derivado do domínio do e-mail.
-  // Rejeita qualquer conta (seed, OAuth ou e-mail/senha) fora dos domínios.
   databaseHooks: {
     user: {
       create: {
@@ -100,6 +89,5 @@ export const auth = betterAuth({
     }),
   },
 
-  // Deve ser o último plugin: sincroniza o cookie de sessão com o Next.
   plugins: [nextCookies()],
 })

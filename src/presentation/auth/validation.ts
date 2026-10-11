@@ -1,10 +1,6 @@
 import { z } from 'zod'
 import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 
-// Esquemas de validação dos formulários de autenticação.
-// A regra de domínio institucional vem do value object `InstitutionalEmail`
-// para manter o cliente em sincronia com a validação feita no servidor.
-
 const INSTITUTIONAL_EMAIL_MESSAGE =
   'Use um e-mail institucional (@aluno.cps.sp.gov.br ou @cps.sp.gov.br).'
 
@@ -26,7 +22,6 @@ export const forgotPasswordSchema = z.object({
   email: institutionalEmailSchema,
 })
 
-/** Regras exibidas no checklist de senha (compartilhadas com o esquema). */
 export const passwordRules: ReadonlyArray<{ label: string; test: (password: string) => boolean }> =
   [
     { label: 'Mínimo de 8 caracteres', test: (password) => password.length >= 8 },

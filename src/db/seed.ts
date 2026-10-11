@@ -2,8 +2,6 @@ import 'dotenv/config'
 import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 import { auth } from '@/libs/auth'
 
-// Contas pré-provisionadas. Ajuste livremente antes de rodar `npm run db:seed`.
-// O papel (student/professor) é sempre derivado do domínio do e-mail.
 interface SeedUser {
   name: string
   email: string

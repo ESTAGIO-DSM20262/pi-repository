@@ -15,11 +15,6 @@ export interface MicrosoftSignInInput {
 
 export type EmailSignInResult = Either<InvalidCredentialsError, { user: User }>
 
-/**
- * Porta (interface) do gateway de autenticação. O domínio/aplicação dependem
- * desta abstração; a implementação concreta (better-auth) vive na
- * infraestrutura.
- */
 export interface AuthRepository {
   signInWithEmail(credentials: SignInCredentials): Promise<EmailSignInResult>
   signInWithMicrosoft(input: MicrosoftSignInInput): Promise<Either<AuthenticationError, void>>

@@ -13,7 +13,6 @@ import type {
 import { authClient } from './auth-client'
 import { type BetterAuthUser, toDomainUser } from './better-auth-user-mapper'
 
-// O better-auth devolve mensagens em inglês; normalizamos para o texto exibido.
 function toInvalidCredentials(message?: string): InvalidCredentialsError {
   if (message?.toLowerCase().includes('invalid email or password')) {
     return new InvalidCredentialsError()

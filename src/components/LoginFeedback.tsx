@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import Modal, { type Notice } from '@/components/ui/Modal'
 
-// Mensagens para os erros de callback OAuth devolvidos pelo better-auth
-// (via `?error=<code>&error_description=<mensagem>`).
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_INSTITUTIONAL_EMAIL:
     'Sua conta não pertence aos domínios institucionais permitidos (aluno.cps.sp.gov.br ou cps.sp.gov.br).',

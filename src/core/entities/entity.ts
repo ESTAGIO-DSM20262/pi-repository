@@ -1,9 +1,5 @@
 import { UniqueEntityId } from './unique-entity-id'
 
-/**
- * Base para entidades de domínio. Uma entidade tem identidade própria e é
- * comparada pelo id (não pelos atributos).
- */
 export abstract class Entity<Props> {
   private readonly _id: UniqueEntityId
   protected readonly props: Props

@@ -30,12 +30,10 @@ export class User extends Entity<UserProps> {
     return this.props.email
   }
 
-  /** Endereço do e-mail institucional (ex.: `joao.silva@aluno.cps.sp.gov.br`). */
   get emailAddress() {
     return this.props.email.address
   }
 
-  /** Papel derivado do domínio do e-mail. */
   get role(): Role {
     return this.props.email.role
   }

@@ -1,31 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Cores principais */
   --primary: #8d0000;
   --primary-hover: #750000;
   --primary-light: #f5e5e5;
 
-  /* Backgrounds */
   --background: #ede8e8;
   --surface: #ffffff;
   --surface-secondary: #f8f6f6;
 
-  /* Textos */
   --foreground: #1f1f1f;
   --text-secondary: #666666;
   --text-muted: #888888;
 
-  /* Bordas */
   --border: #e6e2e2;
   --border-light: #eeeeee;
 
-  /* Layout */
   --header-height: 48px;
   --footer-height: 32px;
   --content-max-width: 1400px;
 
-  /* Arredondamentos */
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;

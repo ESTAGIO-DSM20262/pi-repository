@@ -10,8 +10,6 @@ import { authClient } from '@/infrastructure/auth/auth-client'
 import { BetterAuthAuthRepository } from '@/infrastructure/auth/better-auth-auth-repository'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
 
-// Composition root do cliente: liga as portas às implementações de
-// infraestrutura e injeta nos casos de uso.
 const authRepository = new BetterAuthAuthRepository()
 const signInUseCase = new SignInUseCase(authRepository)
 const signOutUseCase = new SignOutUseCase(authRepository)
@@ -28,8 +26,6 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // A assinatura reativa da sessão é um detalhe de framework; fica na
-  // apresentação e mapeia para a entidade de domínio.
   const { data, isPending } = authClient.useSession()
   const user = data?.user ? toDomainUser(data.user) : null
 
