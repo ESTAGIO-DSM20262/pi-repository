@@ -3,7 +3,7 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { nextCookies } from 'better-auth/next-js'
 import { db } from '@/db'
-import { account, session, user, verification } from '@/db/schema'
+import { accounts, sessions, users, verifications } from '@/db/schema'
 import { roleFromEmail } from '@/libs/institutional-email'
 
 const microsoftClientId = process.env.MICROSOFT_CLIENT_ID
@@ -35,7 +35,8 @@ export const auth = betterAuth({
 
   database: drizzleAdapter(db, {
     provider: 'pg',
-    schema: { user, session, account, verification },
+    usePlural: true,
+    schema: { users, sessions, accounts, verifications },
   }),
 
   // Contas são pré-provisionadas (seed/admin). Não há autocadastro.

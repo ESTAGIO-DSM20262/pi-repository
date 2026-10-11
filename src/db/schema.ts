@@ -1,10 +1,12 @@
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 
 // Tabelas do better-auth (núcleo).
+// Nomes físicos no plural e colunas em snake_case; as chaves TS ficam em
+// camelCase (convenção do better-auth — ver `usePlural` em `src/libs/auth.ts`).
 // O `role` é preenchido no servidor a partir do domínio do e-mail — nunca
 // informado pelo cliente (ver `databaseHooks` em `src/libs/auth.ts`).
 
-export const user = pgTable('user', {
+export const users = pgTable('users', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
@@ -18,8 +20,8 @@ export const user = pgTable('user', {
     .notNull(),
 })
 
-export const session = pgTable(
-  'session',
+export const sessions = pgTable(
+  'sessions',
   {
     id: text('id').primaryKey(),
     expiresAt: timestamp('expires_at').notNull(),
@@ -33,20 +35,20 @@ export const session = pgTable(
     userAgent: text('user_agent'),
     userId: text('user_id')
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
+      .references(() => users.id, { onDelete: 'cascade' }),
   },
-  (table) => [index('session_user_id_idx').on(table.userId)],
+  (table) => [index('sessions_user_id_idx').on(table.userId)],
 )
 
-export const account = pgTable(
-  'account',
+export const accounts = pgTable(
+  'accounts',
   {
     id: text('id').primaryKey(),
     accountId: text('account_id').notNull(),
     providerId: text('provider_id').notNull(),
     userId: text('user_id')
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
+      .references(() => users.id, { onDelete: 'cascade' }),
     accessToken: text('access_token'),
     refreshToken: text('refresh_token'),
     idToken: text('id_token'),
@@ -60,11 +62,11 @@ export const account = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index('account_user_id_idx').on(table.userId)],
+  (table) => [index('accounts_user_id_idx').on(table.userId)],
 )
 
-export const verification = pgTable(
-  'verification',
+export const verifications = pgTable(
+  'verifications',
   {
     id: text('id').primaryKey(),
     identifier: text('identifier').notNull(),
@@ -76,5 +78,5 @@ export const verification = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index('verification_identifier_idx').on(table.identifier)],
+  (table) => [index('verifications_identifier_idx').on(table.identifier)],
 )
