@@ -1,8 +1,8 @@
 import { z } from 'zod'
 import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
+import { INSTITUTIONAL_EMAIL_VALIDATION_MESSAGE } from './institutional-email-hint'
 
-const INSTITUTIONAL_EMAIL_MESSAGE =
-  'Use um e-mail institucional (@aluno.cps.sp.gov.br ou @cps.sp.gov.br).'
+const INSTITUTIONAL_EMAIL_MESSAGE = INSTITUTIONAL_EMAIL_VALIDATION_MESSAGE
 
 const emailFormat = z.email('Digite um e-mail válido.')
 

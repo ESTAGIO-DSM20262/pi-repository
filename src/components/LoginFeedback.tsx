@@ -5,7 +5,7 @@ import Modal, { type Notice } from '@/components/ui/Modal'
 
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_INSTITUTIONAL_EMAIL:
-    'Sua conta não pertence aos domínios institucionais permitidos (aluno.cps.sp.gov.br ou cps.sp.gov.br).',
+    'Sua conta não está habilitada para acesso institucional. Use o e-mail institucional cadastrado na instituição.',
   email_not_found:
     'Não foi possível obter um e-mail institucional da sua conta Microsoft. Confirme se ela possui um e-mail do CPS.',
   email_not_verified:
