@@ -1,14 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
 import Modal, { type ModalVariant } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
 import { infoBoxClass, mutedLinkClass, primaryButtonClass } from '@/libs/styles'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
-import { resetPassword } from '@/services/auth.service'
 
 const REQUIREMENTS = [
   { label: 'Mínimo de 8 caracteres', test: (p: string) => p.length >= 8 },
@@ -16,7 +14,7 @@ const REQUIREMENTS = [
   { label: 'Pelo menos um número ou caractere especial', test: (p: string) => /[\d\W_]/.test(p) },
 ]
 
-type ModalKey = 'required' | 'invalid' | 'mismatch' | 'failed' | 'success'
+type ModalKey = 'required' | 'invalid' | 'mismatch' | 'deferred'
 
 const MODALS: Record<
   ModalKey,
@@ -42,57 +40,37 @@ const MODALS: Record<
       'A confirmação da senha é diferente da nova senha. Verifique os campos e tente novamente.',
     button: 'Entendi',
   },
-  failed: {
-    variant: 'error',
-    title: 'Não foi possível redefinir',
+  deferred: {
+    variant: 'warning',
+    title: 'Redefinição de senha em breve',
     description:
-      'O link pode ter expirado. Solicite um novo link de recuperação e tente novamente.',
+      'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
     button: 'Entendi',
-  },
-  success: {
-    variant: 'success',
-    title: 'Senha redefinida com sucesso!',
-    description: 'Sua senha foi alterada. Agora você já pode acessar sua conta com a nova senha.',
-    button: 'Ir para o login',
   },
 }
 
 export default function ResetPasswordForm() {
-  const router = useRouter()
-  const token = useSearchParams().get('token') ?? ''
-
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
-  const [submitting, setSubmitting] = useState(false)
   const [modal, setModal] = useState<ModalKey | null>(null)
 
   useResetOnLeave(() => {
     setPassword('')
     setConfirm('')
     setModal(null)
-    setSubmitting(false)
   })
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     if (!password || !confirm) return setModal('required')
     if (!REQUIREMENTS.every((r) => r.test(password))) return setModal('invalid')
     if (password !== confirm) return setModal('mismatch')
 
-    setSubmitting(true)
-    try {
-      await resetPassword(token, password)
-      setModal('success')
-    } catch {
-      setModal('failed')
-    } finally {
-      setSubmitting(false)
-    }
+    setModal('deferred')
   }
 
   const current = modal ? MODALS[modal] : null
-  const isSuccess = modal === 'success'
 
   return (
     <AuthCard>
@@ -152,8 +130,8 @@ export default function ResetPasswordForm() {
           </ul>
         </div>
 
-        <button type="submit" disabled={submitting} className={primaryButtonClass}>
-          {submitting ? 'Salvando…' : 'Redefinir senha'}
+        <button type="submit" className={primaryButtonClass}>
+          Redefinir senha
         </button>
       </form>
 
@@ -170,8 +148,7 @@ export default function ResetPasswordForm() {
         title={current?.title ?? ''}
         description={current?.description ?? ''}
         buttonLabel={current?.button ?? ''}
-        showClose={!isSuccess}
-        onClose={() => (isSuccess ? router.push('/login') : setModal(null))}
+        onClose={() => setModal(null)}
       />
     </AuthCard>
   )

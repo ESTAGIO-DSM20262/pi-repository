@@ -13,8 +13,8 @@ export default function Header() {
   const router = useRouter()
   const { user, signOut } = useAuth()
 
-  function handleSignOut() {
-    signOut()
+  async function handleSignOut() {
+    await signOut()
     router.push('/')
   }
 

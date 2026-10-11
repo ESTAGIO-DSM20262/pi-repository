@@ -1,4 +1,6 @@
-export type Role = 'admin' | 'professor' | 'aluno'
+import type { Role } from '@/libs/institutional-email'
+
+export type { Role }
 
 export interface User {
   id: string

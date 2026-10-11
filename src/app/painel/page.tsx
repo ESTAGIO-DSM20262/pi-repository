@@ -1,26 +1,15 @@
-'use client'
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { auth } from '@/libs/auth'
 
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { useAuth } from '@/app/contexts/AuthContext'
-import { ROLE_LABEL } from '@/libs/mock-users'
+// Lê a sessão no servidor para redirecionar por papel — bloqueia a rota.
+export const instant = false
 
-export default function PainelPage() {
-  const router = useRouter()
-  const { user, loading } = useAuth()
+// Dispatcher: autentica e encaminha para a área conforme o papel.
+export default async function PainelPage() {
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  useEffect(() => {
-    if (!loading && !user) router.replace('/login')
-  }, [loading, user, router])
+  if (!session) redirect('/login')
 
-  if (loading || !user) return null
-
-  return (
-    <section className="mx-auto max-w-3xl p-6">
-      <h2 className="text-2xl font-semibold">Olá, {user.name}</h2>
-      <p className="mt-2 text-sm text-text-secondary">
-        Você entrou como <strong>{ROLE_LABEL[user.role]}</strong> ({user.email}).
-      </p>
-    </section>
-  )
+  redirect(session.user.role === 'professor' ? '/professor' : '/aluno')
 }

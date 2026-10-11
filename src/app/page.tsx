@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/app/contexts/AuthContext'
-import { ROLE_LABEL } from '@/libs/mock-users'
+import { ROLE_LABEL } from '@/libs/institutional-email'
 
 export default function Home() {
   const { user, loading } = useAuth()

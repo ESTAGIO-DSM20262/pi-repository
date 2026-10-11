@@ -1,40 +1,56 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import * as authService from '@/services/auth.service'
+import { createContext, useContext } from 'react'
+import { authClient } from '@/libs/auth-client'
+import { normalizeRole } from '@/libs/institutional-email'
 import type { LoginCredentials, User } from '@/types/auth'
 
 interface AuthContextValue {
   user: User | null
   loading: boolean
   signIn: (credentials: LoginCredentials) => Promise<User>
-  signOut: () => void
+  signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+function toUser(sessionUser: {
+  id: string
+  name: string
+  email: string
+  role?: string | null
+}): User {
+  return {
+    id: sessionUser.id,
+    name: sessionUser.name,
+    email: sessionUser.email,
+    role: normalizeRole(sessionUser.role),
+  }
+}
 
-  useEffect(() => {
-    setUser(authService.getStoredUser())
-    setLoading(false)
-  }, [])
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { data, isPending } = authClient.useSession()
+  const user = data?.user ? toUser(data.user) : null
 
   async function signIn(credentials: LoginCredentials) {
-    const loggedUser = await authService.login(credentials)
-    setUser(loggedUser)
-    return loggedUser
+    const { data: result, error } = await authClient.signIn.email({
+      email: credentials.email.trim().toLowerCase(),
+      password: credentials.password,
+    })
+
+    if (error || !result?.user) {
+      throw new Error(error?.message ?? 'E-mail ou senha incorretos.')
+    }
+
+    return toUser(result.user)
   }
 
-  function signOut() {
-    authService.logout()
-    setUser(null)
+  async function signOut() {
+    await authClient.signOut()
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading: isPending, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

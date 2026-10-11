@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useAuth } from '@/app/contexts/AuthContext'
 import Modal, { type Notice } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
-import { MOCK_USERS, ROLE_LABEL } from '@/libs/mock-users'
+import { authClient } from '@/libs/auth-client'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
 import {
   buttonClass,
@@ -16,7 +16,13 @@ import {
   primaryButtonClass,
 } from '../../libs/styles'
 
-const SHOW_DEMO = process.env.NEXT_PUBLIC_USE_MOCK_AUTH !== 'false'
+function signInErrorMessage(message?: string): string {
+  if (!message) return 'E-mail ou senha incorretos.'
+  if (message.toLowerCase().includes('invalid email or password')) {
+    return 'E-mail ou senha incorretos.'
+  }
+  return message
+}
 
 export default function LoginForm() {
   const router = useRouter()
@@ -54,15 +60,35 @@ export default function LoginForm() {
       setEmail('')
       setPassword('')
 
-      router.push('/')
+      router.push('/painel')
     } catch (err) {
       setNotice({
         variant: 'error',
         title: 'Não foi possível entrar',
-        description: err instanceof Error ? err.message : 'Tente novamente em instantes.',
+        description:
+          err instanceof Error ? signInErrorMessage(err.message) : 'Tente novamente em instantes.',
       })
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleMicrosoft() {
+    setNotice(null)
+    const { error } = await authClient.signIn.social({
+      provider: 'microsoft',
+      callbackURL: '/painel',
+      errorCallbackURL: '/login',
+    })
+
+    if (error) {
+      setNotice({
+        variant: 'error',
+        title: 'Não foi possível entrar com a Microsoft',
+        description:
+          error.message ??
+          'Sua conta não está habilitada. Verifique se o e-mail é institucional e se já foi cadastrado.',
+      })
     }
   }
 
@@ -115,13 +141,7 @@ export default function LoginForm() {
 
           <button
             type="button"
-            onClick={() =>
-              setNotice({
-                variant: 'warning',
-                title: 'Em breve',
-                description: 'O login com Microsoft estará disponível em breve.',
-              })
-            }
+            onClick={handleMicrosoft}
             className={`${buttonClass} border border-[#8C8C8C] bg-white px-3 text-[#5E5E5E] hover:bg-[#f3f3f3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0067b8]`}
             style={{ fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}
           >
@@ -136,29 +156,6 @@ export default function LoginForm() {
           </button>
         </div>
       </form>
-
-      {SHOW_DEMO && (
-        <div className="mt-5 rounded-lg bg-surface-secondary p-3 sm:mt-6 sm:p-3.5">
-          <p className="text-[11px] text-text-muted sm:text-xs">
-            Contas de demonstração · senha 123456
-          </p>
-          <div className="mt-2 grid grid-cols-3 gap-1.5">
-            {MOCK_USERS.map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => {
-                  setEmail(u.email)
-                  setPassword(u.password)
-                }}
-                className="cursor-pointer rounded-md border border-border bg-white py-1.5 text-[11px] font-medium sm:py-2 sm:text-xs text-foreground transition hover:border-primary hover:text-primary"
-              >
-                {ROLE_LABEL[u.role]}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <Modal
         open={notice !== null}
