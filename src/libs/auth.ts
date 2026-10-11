@@ -66,7 +66,8 @@ export const auth = betterAuth({
           if (email.isLeft()) {
             throw new APIError('BAD_REQUEST', {
               code: 'INVALID_INSTITUTIONAL_EMAIL',
-              message: 'E-mail institucional inválido. Use aluno.cps.sp.gov.br ou cps.sp.gov.br.',
+              message:
+                'E-mail institucional inválido. Use o e-mail institucional cadastrado na instituição.',
             })
           }
           return { data: { ...newUser, role: email.value.role } }
@@ -82,7 +83,8 @@ export const auth = betterAuth({
         if (typeof email === 'string' && !InstitutionalEmail.isValid(email)) {
           throw new APIError('BAD_REQUEST', {
             code: 'INVALID_INSTITUTIONAL_EMAIL',
-            message: 'E-mail institucional inválido. Use aluno.cps.sp.gov.br ou cps.sp.gov.br.',
+            message:
+              'E-mail institucional inválido. Use o e-mail institucional cadastrado na instituição.',
           })
         }
       }
