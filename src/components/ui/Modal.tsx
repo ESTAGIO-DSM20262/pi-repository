@@ -75,17 +75,21 @@ export default function Modal({
 
   return (
     <div
-      onClick={onClose}
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm transition-opacity duration-200 motion-reduce:transition-none ${
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 motion-reduce:transition-none ${
         shown ? 'opacity-100' : 'opacity-0'
       }`}
     >
+      <button
+        type="button"
+        aria-label="Fechar"
+        onClick={onClose}
+        className="absolute inset-0 h-full w-full cursor-default bg-slate-900/40 backdrop-blur-sm"
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        onClick={(e) => e.stopPropagation()}
-        className={`relative w-full max-w-[460px] rounded-2xl border border-border bg-surface px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-12 sm:pb-10 sm:pt-12 ${
+        className={`relative z-10 w-full max-w-[460px] rounded-2xl border border-border bg-surface px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-12 sm:pb-10 sm:pt-12 ${
           shown ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
       >
