@@ -1,49 +1,50 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
 import Modal, { type Notice } from '@/components/ui/Modal'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
-import { inputClass, labelClass, linkClass, primaryButtonClass } from '../../libs/styles'
+import { type ForgotPasswordValues, forgotPasswordSchema } from '@/libs/validation/auth'
+import {
+  fieldErrorClass,
+  inputClass,
+  labelClass,
+  linkClass,
+  primaryButtonClass,
+} from '../../libs/styles'
+
+const DEFERRED_NOTICE: Notice = {
+  variant: 'warning',
+  title: 'Recuperação de senha em breve',
+  description:
+    'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
+}
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState('')
   const [notice, setNotice] = useState<Notice | null>(null)
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ForgotPasswordValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: 'onTouched',
+    defaultValues: { email: '' },
+  })
+
   useResetOnLeave(() => {
-    setEmail('')
+    reset()
     setNotice(null)
   })
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-
-    if (!email.trim()) {
-      setNotice({
-        variant: 'warning',
-        title: 'Informe seu e-mail',
-        description: 'Digite seu e-mail institucional para continuar.',
-      })
-      return
-    }
-
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setNotice({
-        variant: 'warning',
-        title: 'E-mail inválido',
-        description: 'Digite um e-mail válido, por exemplo nome@cps.sp.gov.br.',
-      })
-      return
-    }
-
-    setNotice({
-      variant: 'warning',
-      title: 'Recuperação de senha em breve',
-      description:
-        'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
-    })
-  }
+  const onSubmit = handleSubmit(() => {
+    setNotice(DEFERRED_NOTICE)
+  })
 
   return (
     <AuthCard>
@@ -52,7 +53,7 @@ export default function ForgotPasswordForm() {
         description="Informe seu e-mail institucional para receber um link de recuperação de senha."
       />
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
+      <form onSubmit={onSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
         <div>
           <label htmlFor="email" className={labelClass}>
             E-mail institucional
@@ -63,11 +64,16 @@ export default function ForgotPasswordForm() {
             inputMode="email"
             autoComplete="username"
             autoCapitalize="none"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="Digite seu e-mail institucional"
             className={inputClass}
+            aria-invalid={errors.email ? true : undefined}
+            {...register('email')}
           />
+          {errors.email && (
+            <p className={fieldErrorClass} role="alert">
+              {errors.email.message}
+            </p>
+          )}
         </div>
 
         <button type="submit" className={primaryButtonClass}>

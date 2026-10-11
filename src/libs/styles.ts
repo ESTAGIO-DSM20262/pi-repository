@@ -8,7 +8,8 @@ export const labelClass =
 
 // Campos
 export const inputClass =
-  'h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/15 sm:h-11 sm:px-3.5 sm:text-[15px]'
+  'h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/15 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus:border-red-400 aria-[invalid=true]:focus:ring-red-500/15 sm:h-11 sm:px-3.5 sm:text-[15px]'
+export const fieldErrorClass = 'mt-1.5 text-xs text-red-600 sm:text-[13px]'
 
 // Botões
 export const buttonClass =

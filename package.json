@@ -22,13 +22,16 @@
   },
   "dependencies": {
     "@flaticon/flaticon-uicons": "^3.3.1",
+    "@hookform/resolvers": "^5.9.1",
     "@neondatabase/serverless": "^1.2.0",
     "better-auth": "^1.7.7",
     "dotenv": "^18.0.7",
     "drizzle-orm": "^1.0.0-rc.4",
     "next": "16.4.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-hook-form": "^7.90.0",
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
@@ -45,5 +48,10 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5"
+  },
+  "overrides": {
+    "@typeschema/zod": {
+      "zod": "^4.0.0"
+    }
   }
 }

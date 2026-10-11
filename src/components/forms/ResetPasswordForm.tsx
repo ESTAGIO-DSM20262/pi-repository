@@ -1,76 +1,50 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
-import Modal, { type ModalVariant } from '@/components/ui/Modal'
+import Modal, { type Notice } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
-import { infoBoxClass, mutedLinkClass, primaryButtonClass } from '@/libs/styles'
+import { fieldErrorClass, infoBoxClass, mutedLinkClass, primaryButtonClass } from '@/libs/styles'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
+import {
+  passwordRules,
+  type ResetPasswordValues,
+  resetPasswordSchema,
+} from '@/libs/validation/auth'
 
-const REQUIREMENTS = [
-  { label: 'Mínimo de 8 caracteres', test: (p: string) => p.length >= 8 },
-  { label: 'Letra maiúscula e minúscula', test: (p: string) => /[a-z]/.test(p) && /[A-Z]/.test(p) },
-  { label: 'Pelo menos um número ou caractere especial', test: (p: string) => /[\d\W_]/.test(p) },
-]
-
-type ModalKey = 'required' | 'invalid' | 'mismatch' | 'deferred'
-
-const MODALS: Record<
-  ModalKey,
-  { variant: ModalVariant; title: string; description: string; button: string }
-> = {
-  required: {
-    variant: 'warning',
-    title: 'Preencha os campos obrigatórios',
-    description: 'Informe a nova senha e confirme a senha para continuar.',
-    button: 'Entendi',
-  },
-  invalid: {
-    variant: 'warning',
-    title: 'Senha inválida',
-    description:
-      'A nova senha não atende aos requisitos mínimos. Verifique as orientações e tente novamente.',
-    button: 'Entendi',
-  },
-  mismatch: {
-    variant: 'error',
-    title: 'As senhas não coincidem',
-    description:
-      'A confirmação da senha é diferente da nova senha. Verifique os campos e tente novamente.',
-    button: 'Entendi',
-  },
-  deferred: {
-    variant: 'warning',
-    title: 'Redefinição de senha em breve',
-    description:
-      'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
-    button: 'Entendi',
-  },
+const DEFERRED_NOTICE: Notice = {
+  variant: 'warning',
+  title: 'Redefinição de senha em breve',
+  description:
+    'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
 }
 
 export default function ResetPasswordForm() {
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [modal, setModal] = useState<ModalKey | null>(null)
+  const [deferred, setDeferred] = useState(false)
 
-  useResetOnLeave(() => {
-    setPassword('')
-    setConfirm('')
-    setModal(null)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<ResetPasswordValues>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: 'onTouched',
+    defaultValues: { password: '', confirm: '' },
   })
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  useResetOnLeave(() => {
+    reset()
+    setDeferred(false)
+  })
 
-    if (!password || !confirm) return setModal('required')
-    if (!REQUIREMENTS.every((r) => r.test(password))) return setModal('invalid')
-    if (password !== confirm) return setModal('mismatch')
+  const onSubmit = handleSubmit(() => setDeferred(true))
 
-    setModal('deferred')
-  }
-
-  const current = modal ? MODALS[modal] : null
+  const password = watch('password')
 
   return (
     <AuthCard>
@@ -79,34 +53,49 @@ export default function ResetPasswordForm() {
         description="Crie uma nova senha para acessar sua conta."
       />
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
-        <PasswordInput
-          id="new-password"
-          label="Nova senha"
-          value={password}
-          onChange={setPassword}
-          placeholder="Digite sua nova senha"
-          autoComplete="new-password"
-        />
-        <PasswordInput
-          id="confirm-password"
-          label="Confirmar nova senha"
-          value={confirm}
-          onChange={setConfirm}
-          placeholder="Confirme sua nova senha"
-          autoComplete="new-password"
-        />
+      <form onSubmit={onSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
+        <div>
+          <PasswordInput
+            id="new-password"
+            label="Nova senha"
+            placeholder="Digite sua nova senha"
+            autoComplete="new-password"
+            aria-invalid={errors.password ? true : undefined}
+            {...register('password')}
+          />
+          {errors.password && (
+            <p className={fieldErrorClass} role="alert">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <PasswordInput
+            id="confirm-password"
+            label="Confirmar nova senha"
+            placeholder="Confirme sua nova senha"
+            autoComplete="new-password"
+            aria-invalid={errors.confirm ? true : undefined}
+            {...register('confirm')}
+          />
+          {errors.confirm && (
+            <p className={fieldErrorClass} role="alert">
+              {errors.confirm.message}
+            </p>
+          )}
+        </div>
 
         <div className={`p-3 sm:p-4 ${infoBoxClass}`}>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary sm:text-xs">
             Requisitos de segurança:
           </p>
           <ul className="mt-2 space-y-1.5">
-            {REQUIREMENTS.map((r) => {
-              const met = r.test(password)
+            {passwordRules.map((rule) => {
+              const met = rule.test(password)
               return (
                 <li
-                  key={r.label}
+                  key={rule.label}
                   className={`flex items-center gap-2 text-xs sm:text-[13px] ${met ? 'text-emerald-700' : 'text-text-secondary'}`}
                 >
                   <span
@@ -123,7 +112,7 @@ export default function ResetPasswordForm() {
                       />
                     )}
                   </span>
-                  {r.label}
+                  {rule.label}
                 </li>
               )
             })}
@@ -143,12 +132,12 @@ export default function ResetPasswordForm() {
       </div>
 
       <Modal
-        open={modal !== null}
-        variant={current?.variant ?? 'error'}
-        title={current?.title ?? ''}
-        description={current?.description ?? ''}
-        buttonLabel={current?.button ?? ''}
-        onClose={() => setModal(null)}
+        open={deferred}
+        variant={DEFERRED_NOTICE.variant}
+        title={DEFERRED_NOTICE.title}
+        description={DEFERRED_NOTICE.description}
+        buttonLabel="Entendi"
+        onClose={() => setDeferred(false)}
       />
     </AuthCard>
   )

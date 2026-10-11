@@ -1,15 +1,19 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useAuth } from '@/app/contexts/AuthContext'
 import Modal, { type Notice } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
 import { authClient } from '@/libs/auth-client'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
+import { type LoginValues, loginSchema } from '@/libs/validation/auth'
 import {
   buttonClass,
+  fieldErrorClass,
   inputClass,
   labelClass,
   linkClass,
@@ -28,38 +32,31 @@ export default function LoginForm() {
   const router = useRouter()
   const { signIn } = useAuth()
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [notice, setNotice] = useState<Notice | null>(null)
-  const [submitting, setSubmitting] = useState(false)
 
-  useResetOnLeave(() => {
-    setEmail('')
-    setPassword('')
-    setNotice(null)
-    setSubmitting(false)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
+    defaultValues: { email: '', password: '' },
   })
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  useResetOnLeave(() => {
+    reset()
+    setNotice(null)
+  })
 
-    if (!email.trim() || !password) {
-      setNotice({
-        variant: 'warning',
-        title: 'Preencha os campos obrigatórios',
-        description: 'Informe seu e-mail e sua senha para entrar.',
-      })
-      return
-    }
-
-    setSubmitting(true)
+  const onSubmit = handleSubmit(async (values) => {
+    setNotice(null)
 
     try {
-      await signIn({ email, password })
+      await signIn(values)
 
-      setEmail('')
-      setPassword('')
-
+      reset()
       router.push('/painel')
     } catch (err) {
       setNotice({
@@ -68,10 +65,8 @@ export default function LoginForm() {
         description:
           err instanceof Error ? signInErrorMessage(err.message) : 'Tente novamente em instantes.',
       })
-    } finally {
-      setSubmitting(false)
     }
-  }
+  })
 
   async function handleMicrosoft() {
     setNotice(null)
@@ -94,7 +89,7 @@ export default function LoginForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
+      <form onSubmit={onSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
         <div>
           <label htmlFor="email" className={labelClass}>
             E-mail
@@ -105,22 +100,32 @@ export default function LoginForm() {
             autoComplete="username"
             inputMode="email"
             autoCapitalize="none"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="Digite seu e-mail institucional"
             className={inputClass}
+            aria-invalid={errors.email ? true : undefined}
+            {...register('email')}
           />
+          {errors.email && (
+            <p className={fieldErrorClass} role="alert">
+              {errors.email.message}
+            </p>
+          )}
         </div>
 
         <div>
           <PasswordInput
             id="password"
             label="Senha"
-            value={password}
-            onChange={setPassword}
             placeholder="Digite sua senha"
             autoComplete="current-password"
+            aria-invalid={errors.password ? true : undefined}
+            {...register('password')}
           />
+          {errors.password && (
+            <p className={fieldErrorClass} role="alert">
+              {errors.password.message}
+            </p>
+          )}
           <div className="mt-1.5 text-right">
             <Link href="/esqueci-senha" className={`text-xs sm:text-[13px] ${linkClass}`}>
               Esqueci minha senha
@@ -129,8 +134,8 @@ export default function LoginForm() {
         </div>
 
         <div className="space-y-2.5">
-          <button type="submit" disabled={submitting} className={primaryButtonClass}>
-            {submitting ? 'Entrando…' : 'Entrar'}
+          <button type="submit" disabled={isSubmitting} className={primaryButtonClass}>
+            {isSubmitting ? 'Entrando…' : 'Entrar'}
           </button>
 
           <div className="flex items-center gap-3" aria-hidden="true">
