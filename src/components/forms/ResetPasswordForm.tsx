@@ -13,7 +13,7 @@ import {
   passwordRules,
   type ResetPasswordValues,
   resetPasswordSchema,
-} from '@/libs/validation/auth'
+} from '@/presentation/auth/validation'
 
 const DEFERRED_NOTICE: Notice = {
   variant: 'warning',

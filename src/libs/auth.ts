@@ -4,7 +4,7 @@ import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { nextCookies } from 'better-auth/next-js'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
-import { roleFromEmail } from '@/libs/institutional-email'
+import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 
 const microsoftClientId = process.env.MICROSOFT_CLIENT_ID
 const microsoftClientSecret = process.env.MICROSOFT_CLIENT_SECRET
@@ -57,7 +57,7 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: {
-        type: ['aluno', 'professor'],
+        type: ['student', 'professor'],
         // Preenchido no databaseHook `user.create.before` (derivado do domínio).
         // Não pode ser `required: true`: o parser do OAuth rejeita o create
         // antes do hook rodar quando o campo é obrigatório e `input: false`.
@@ -73,14 +73,14 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (newUser) => {
-          const role = roleFromEmail(String(newUser.email ?? ''))
-          if (!role) {
+          const email = InstitutionalEmail.create(String(newUser.email ?? ''))
+          if (email.isLeft()) {
             throw new APIError('BAD_REQUEST', {
               code: 'INVALID_INSTITUTIONAL_EMAIL',
               message: 'E-mail institucional inválido. Use aluno.cps.sp.gov.br ou cps.sp.gov.br.',
             })
           }
-          return { data: { ...newUser, role } }
+          return { data: { ...newUser, role: email.value.role } }
         },
       },
     },
@@ -90,7 +90,7 @@ export const auth = betterAuth({
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === '/sign-in/email') {
         const email = (ctx.body as { email?: unknown } | undefined)?.email
-        if (typeof email === 'string' && !roleFromEmail(email)) {
+        if (typeof email === 'string' && !InstitutionalEmail.isValid(email)) {
           throw new APIError('BAD_REQUEST', {
             code: 'INVALID_INSTITUTIONAL_EMAIL',
             message: 'E-mail institucional inválido. Use aluno.cps.sp.gov.br ou cps.sp.gov.br.',

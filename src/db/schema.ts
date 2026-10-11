@@ -1,10 +1,12 @@
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
+import type { Role } from '@/domain/enterprise/entities/role'
 
 // Tabelas do better-auth (núcleo).
 // Nomes físicos no plural e colunas em snake_case; as chaves TS ficam em
 // camelCase (convenção do better-auth — ver `usePlural` em `src/libs/auth.ts`).
 // O `role` é preenchido no servidor a partir do domínio do e-mail — nunca
 // informado pelo cliente (ver `databaseHooks` em `src/libs/auth.ts`).
+// Valores persistidos: 'student' | 'professor' (vocabulário do domínio).
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -12,7 +14,7 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   emailVerified: boolean('email_verified').default(false).notNull(),
   image: text('image'),
-  role: text('role').notNull(),
+  role: text('role').$type<Role>().notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')
     .defaultNow()

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
-import { AuthProvider } from '@/app/contexts/AuthContext'
 import Footer from '@/components/Footer'
 import Header from '@/components/Header'
+import { AuthProvider } from '@/presentation/auth/auth-context'
 import '@flaticon/flaticon-uicons/css/regular/rounded.css'
 
 import './globals.css'

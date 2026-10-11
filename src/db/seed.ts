@@ -1,9 +1,9 @@
 import 'dotenv/config'
+import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 import { auth } from '@/libs/auth'
-import { roleFromEmail } from '@/libs/institutional-email'
 
 // Contas pré-provisionadas. Ajuste livremente antes de rodar `npm run db:seed`.
-// O papel (aluno/professor) é sempre derivado do domínio do e-mail.
+// O papel (student/professor) é sempre derivado do domínio do e-mail.
 interface SeedUser {
   name: string
   email: string
@@ -21,11 +21,13 @@ async function main() {
   const ctx = await auth.$context
 
   for (const account of USERS) {
-    const role = roleFromEmail(account.email)
-    if (!role) {
+    const email = InstitutionalEmail.create(account.email)
+    if (email.isLeft()) {
       console.warn(`Ignorado (domínio inválido): ${account.email}`)
       continue
     }
+
+    const role = email.value.role
 
     const existing = await ctx.internalAdapter.findUserByEmail(account.email)
     if (existing) {

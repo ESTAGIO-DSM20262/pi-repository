@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
 import Modal, { type Notice } from '@/components/ui/Modal'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
-import { type ForgotPasswordValues, forgotPasswordSchema } from '@/libs/validation/auth'
+import { type ForgotPasswordValues, forgotPasswordSchema } from '@/presentation/auth/validation'
 import {
   fieldErrorClass,
   inputClass,

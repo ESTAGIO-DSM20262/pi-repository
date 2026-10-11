@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
 import { auth } from '@/libs/auth'
 
 // Lê a sessão no servidor para redirecionar por papel — bloqueia a rota.
@@ -11,5 +12,9 @@ export default async function PainelPage() {
 
   if (!session) redirect('/login')
 
-  redirect(session.user.role === 'professor' ? '/professor' : '/aluno')
+  // O papel é derivado do domínio do e-mail (não do valor persistido).
+  const user = toDomainUser(session.user)
+  if (!user) redirect('/login')
+
+  redirect(user.role === 'professor' ? '/professor' : '/aluno')
 }

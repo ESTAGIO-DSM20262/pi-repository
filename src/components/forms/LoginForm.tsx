@@ -5,12 +5,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useAuth } from '@/app/contexts/AuthContext'
 import Modal, { type Notice } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
-import { authClient } from '@/libs/auth-client'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
-import { type LoginValues, loginSchema } from '@/libs/validation/auth'
+import { useAuth } from '@/presentation/auth/auth-context'
+import { type LoginValues, loginSchema } from '@/presentation/auth/validation'
 import {
   buttonClass,
   fieldErrorClass,
@@ -20,17 +19,9 @@ import {
   primaryButtonClass,
 } from '../../libs/styles'
 
-function signInErrorMessage(message?: string): string {
-  if (!message) return 'E-mail ou senha incorretos.'
-  if (message.toLowerCase().includes('invalid email or password')) {
-    return 'E-mail ou senha incorretos.'
-  }
-  return message
-}
-
 export default function LoginForm() {
   const router = useRouter()
-  const { signIn } = useAuth()
+  const { signIn, signInWithMicrosoft } = useAuth()
 
   const [notice, setNotice] = useState<Notice | null>(null)
 
@@ -62,27 +53,24 @@ export default function LoginForm() {
       setNotice({
         variant: 'error',
         title: 'Não foi possível entrar',
-        description:
-          err instanceof Error ? signInErrorMessage(err.message) : 'Tente novamente em instantes.',
+        description: err instanceof Error ? err.message : 'Tente novamente em instantes.',
       })
     }
   })
 
   async function handleMicrosoft() {
     setNotice(null)
-    const { error } = await authClient.signIn.social({
-      provider: 'microsoft',
-      callbackURL: '/painel',
-      errorCallbackURL: '/login',
-    })
 
-    if (error) {
+    try {
+      await signInWithMicrosoft()
+    } catch (err) {
       setNotice({
         variant: 'error',
         title: 'Não foi possível entrar com a Microsoft',
         description:
-          error.message ??
-          'Sua conta não está habilitada. Verifique se o e-mail é institucional e se já foi cadastrado.',
+          err instanceof Error
+            ? err.message
+            : 'Sua conta não está habilitada. Verifique se o e-mail é institucional e se já foi cadastrado.',
       })
     }
   }

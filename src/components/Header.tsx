@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/app/contexts/AuthContext'
+import { useAuth } from '@/presentation/auth/auth-context'
 
 const linkClass =
   'group relative py-1 text-sm text-gray-600 transition-colors duration-300 hover:text-primary focus-visible:text-primary ' +

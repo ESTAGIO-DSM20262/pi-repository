@@ -1,9 +1,9 @@
 import { z } from 'zod'
-import { isAllowedInstitutionalEmail } from '@/libs/institutional-email'
+import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 
 // Esquemas de validação dos formulários de autenticação.
-// A regra de domínio institucional vem de `isAllowedInstitutionalEmail` para
-// manter o cliente em sincronia com a validação feita no servidor.
+// A regra de domínio institucional vem do value object `InstitutionalEmail`
+// para manter o cliente em sincronia com a validação feita no servidor.
 
 const INSTITUTIONAL_EMAIL_MESSAGE =
   'Use um e-mail institucional (@aluno.cps.sp.gov.br ou @cps.sp.gov.br).'
@@ -15,7 +15,7 @@ export const institutionalEmailSchema = z
   .trim()
   .min(1, 'Informe seu e-mail.')
   .refine((value) => emailFormat.safeParse(value).success, 'Digite um e-mail válido.')
-  .refine(isAllowedInstitutionalEmail, INSTITUTIONAL_EMAIL_MESSAGE)
+  .refine((value) => InstitutionalEmail.isValid(value), INSTITUTIONAL_EMAIL_MESSAGE)
 
 export const loginSchema = z.object({
   email: institutionalEmailSchema,

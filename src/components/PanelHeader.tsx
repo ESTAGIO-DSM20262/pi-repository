@@ -1,4 +1,5 @@
-import { ROLE_LABEL, type Role } from '@/libs/institutional-email'
+import type { Role } from '@/domain/enterprise/entities/role'
+import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
 interface PanelHeaderProps {
   name: string
