@@ -1,4 +1,5 @@
 import LoginForm from '@/components/forms/LoginForm'
+import LoginFeedback from '@/components/LoginFeedback'
 import { cardClass, descriptionClass, eyebrowClass, pageClass, titleClass } from '@/libs/styles'
 
 export const metadata = { title: 'Entrar • Acervo Acadêmico' }
@@ -6,6 +7,7 @@ export const metadata = { title: 'Entrar • Acervo Acadêmico' }
 export default function LoginPage() {
   return (
     <div className={pageClass}>
+      <LoginFeedback />
       <div
         className={`w-full max-w-[920px] overflow-hidden sm:grid sm:grid-cols-[1.1fr_1fr] ${cardClass}`}
       >

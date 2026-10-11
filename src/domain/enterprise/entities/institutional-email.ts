@@ -1,0 +1,57 @@
+import { type Either, left, right } from '@/core/either'
+import { ValueObject } from '@/core/entities/value-object'
+import { InvalidInstitutionalEmailError } from '../errors/invalid-institutional-email-error'
+import type { Role } from './role'
+
+interface InstitutionalEmailProps {
+  address: string
+  role: Role
+}
+
+const STUDENT_DOMAIN = 'aluno.cps.sp.gov.br'
+const PROFESSOR_DOMAIN = 'cps.sp.gov.br'
+
+const DOMAIN_ROLE: Record<string, Role> = {
+  [STUDENT_DOMAIN]: 'student',
+  [PROFESSOR_DOMAIN]: 'professor',
+}
+
+export class InstitutionalEmail extends ValueObject<InstitutionalEmailProps> {
+  private constructor(props: InstitutionalEmailProps) {
+    super(props)
+  }
+
+  get address() {
+    return this.props.address
+  }
+
+  get role() {
+    return this.props.role
+  }
+
+  equals(other: InstitutionalEmail) {
+    return this.address === other.address
+  }
+
+  static create(raw: string): Either<InvalidInstitutionalEmailError, InstitutionalEmail> {
+    const normalized = (raw ?? '').trim().toLowerCase()
+    const atIndex = normalized.lastIndexOf('@')
+
+    if (atIndex <= 0 || atIndex === normalized.length - 1) {
+      return left(new InvalidInstitutionalEmailError(raw))
+    }
+
+    const domain = normalized.slice(atIndex + 1)
+    const role = DOMAIN_ROLE[domain]
+
+    if (!role) {
+      return left(new InvalidInstitutionalEmailError(raw))
+    }
+
+    return right(new InstitutionalEmail({ address: normalized, role }))
+  }
+
+  static isValid(raw: string): boolean {
+    return InstitutionalEmail.create(raw).isRight()
+  }
+}

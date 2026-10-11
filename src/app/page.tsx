@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useAuth } from '@/app/contexts/AuthContext'
-import { ROLE_LABEL } from '@/libs/mock-users'
+import { useAuth } from '@/presentation/auth/auth-context'
+import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
 export default function Home() {
   const { user, loading } = useAuth()

@@ -4,23 +4,9 @@ import { useState } from 'react'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
 import { inputClass, labelClass } from '../../libs/styles'
 
-interface PasswordInputProps {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-  placeholder: string
-  autoComplete?: string
-}
+type PasswordInputProps = React.ComponentProps<'input'> & { label: string }
 
-export default function PasswordInput({
-  id,
-  label,
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-}: PasswordInputProps) {
+export default function PasswordInput({ id, label, className, ...props }: PasswordInputProps) {
   const [visible, setVisible] = useState(false)
 
   useResetOnLeave(() => setVisible(false))
@@ -33,12 +19,9 @@ export default function PasswordInput({
       <div className="relative">
         <input
           id={id}
+          {...props}
           type={visible ? 'text' : 'password'}
-          autoComplete={autoComplete}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`${inputClass} pr-10`}
+          className={`${inputClass} pr-10 ${className ?? ''}`}
         />
         <button
           type="button"

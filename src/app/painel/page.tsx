@@ -1,26 +1,17 @@
-'use client'
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
+import { auth } from '@/libs/auth'
 
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { useAuth } from '@/app/contexts/AuthContext'
-import { ROLE_LABEL } from '@/libs/mock-users'
+export const instant = false
 
-export default function PainelPage() {
-  const router = useRouter()
-  const { user, loading } = useAuth()
+export default async function PainelPage() {
+  const session = await auth.api.getSession({ headers: await headers() })
 
-  useEffect(() => {
-    if (!loading && !user) router.replace('/login')
-  }, [loading, user, router])
+  if (!session) redirect('/login')
 
-  if (loading || !user) return null
+  const user = toDomainUser(session.user)
+  if (!user) redirect('/login')
 
-  return (
-    <section className="mx-auto max-w-3xl p-6">
-      <h2 className="text-2xl font-semibold">Olá, {user.name}</h2>
-      <p className="mt-2 text-sm text-text-secondary">
-        Você entrou como <strong>{ROLE_LABEL[user.role]}</strong> ({user.email}).
-      </p>
-    </section>
-  )
+  redirect(user.role === 'professor' ? '/professor' : '/aluno')
 }
