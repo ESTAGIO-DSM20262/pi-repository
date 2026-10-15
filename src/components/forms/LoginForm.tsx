@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import Modal, { type Notice } from '@/components/ui/Modal'
 import PasswordInput from '@/components/ui/PasswordInput'
@@ -21,7 +21,7 @@ import {
 
 export default function LoginForm() {
   const router = useRouter()
-  const { signIn, signInWithMicrosoft } = useAuth()
+  const { signIn, signInWithMicrosoft, showAuthAction, clearAuthAction } = useAuth()
 
   const [notice, setNotice] = useState<Notice | null>(null)
 
@@ -41,15 +41,20 @@ export default function LoginForm() {
     setNotice(null)
   })
 
+  useEffect(() => () => clearAuthAction(), [clearAuthAction])
+
   const onSubmit = handleSubmit(async (values) => {
     setNotice(null)
+    showAuthAction('Estamos verificando suas credenciais…')
 
     try {
       await signIn(values)
 
       reset()
       router.push('/painel')
+      router.refresh()
     } catch (err) {
+      clearAuthAction()
       setNotice({
         variant: 'error',
         title: 'Não foi possível entrar',
@@ -60,10 +65,12 @@ export default function LoginForm() {
 
   async function handleMicrosoft() {
     setNotice(null)
+    showAuthAction('Conectando sua conta institucional à Microsoft…')
 
     try {
       await signInWithMicrosoft()
     } catch (err) {
+      clearAuthAction()
       setNotice({
         variant: 'error',
         title: 'Não foi possível entrar com a Microsoft',

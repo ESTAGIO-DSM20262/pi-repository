@@ -13,5 +13,7 @@ export default async function PainelPage() {
   const user = toDomainUser(session.user)
   if (!user) redirect('/login')
 
-  redirect(user.role === 'professor' ? '/professor' : '/aluno')
+  if (user.role === 'admin') redirect('/admin')
+  if (user.role === 'professor') redirect('/professor')
+  redirect('/aluno')
 }

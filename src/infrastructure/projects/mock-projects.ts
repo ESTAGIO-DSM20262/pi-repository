@@ -1,0 +1,347 @@
+import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
+
+const JOAO = 'joao.silva@aluno.cps.sp.gov.br'
+const MARIA = 'maria.souza@aluno.cps.sp.gov.br'
+const BEATRIZ_EMAIL = 'beatriz.fernandes@aluno.cps.sp.gov.br'
+const GABRIEL_EMAIL = 'gabriel.santos@aluno.cps.sp.gov.br'
+const MARIANA_EMAIL = 'mariana.souza@aluno.cps.sp.gov.br'
+
+const CARLOS = { email: 'carlos.pereira@cps.sp.gov.br', name: 'Prof. Dr. Carlos Oliveira' }
+const ANA = { email: 'ana.lima@cps.sp.gov.br', name: 'Profa. Ana L.' }
+const MARCOS = { email: 'marcos.vieira@cps.sp.gov.br', name: 'Prof. Marcos V.' }
+
+const TEAM_LUCAS: ProjectTeamMember = {
+  studentEmail: JOAO,
+  name: 'João Silva',
+  githubUrl: 'https://github.com/search?q=Joao+Silva+Fatec&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Joao%20Silva%20Fatec',
+}
+const TEAM_BEATRIZ: ProjectTeamMember = {
+  studentEmail: BEATRIZ_EMAIL,
+  name: 'Beatriz Fernandes',
+  githubUrl: 'https://github.com/search?q=Beatriz+Fernandes&type=users',
+  linkedinUrl:
+    'https://www.linkedin.com/search/results/people/?keywords=Beatriz%20Fernandes%20Fatec',
+}
+const TEAM_GABRIEL: ProjectTeamMember = {
+  studentEmail: GABRIEL_EMAIL,
+  name: 'Gabriel Santos',
+  githubUrl: 'https://github.com/search?q=Gabriel+Santos&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Gabriel%20Santos%20Fatec',
+}
+const TEAM_MARIANA: ProjectTeamMember = {
+  studentEmail: MARIANA_EMAIL,
+  name: 'Mariana Souza',
+  githubUrl: 'https://github.com/search?q=Mariana+Souza&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Mariana%20Souza%20Fatec',
+}
+const TEAM_MARIA: ProjectTeamMember = {
+  studentEmail: MARIA,
+  name: 'Maria Souza',
+  githubUrl: 'https://github.com/search?q=Maria+Souza&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Maria%20Souza%20Fatec',
+}
+const TEAM_PEDRO: ProjectTeamMember = {
+  studentEmail: 'aluno5@aluno.cps.sp.gov.br',
+  name: 'Pedro Almeida',
+  githubUrl: 'https://github.com/search?q=Pedro+Almeida&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Pedro%20Almeida%20Fatec',
+}
+const TEAM_CAMILA: ProjectTeamMember = {
+  studentEmail: 'aluno6@aluno.cps.sp.gov.br',
+  name: 'Camila Rocha',
+  githubUrl: 'https://github.com/search?q=Camila+Rocha&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Camila%20Rocha%20Fatec',
+}
+const TEAM_RAFAEL: ProjectTeamMember = {
+  studentEmail: 'aluno7@aluno.cps.sp.gov.br',
+  name: 'Rafael Costa',
+  githubUrl: 'https://github.com/search?q=Rafael+Costa&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Rafael%20Costa%20Fatec',
+}
+const TEAM_FERNANDA: ProjectTeamMember = {
+  studentEmail: 'aluno8@aluno.cps.sp.gov.br',
+  name: 'Fernanda Alves',
+  githubUrl: 'https://github.com/search?q=Fernanda+Alves&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Fernanda%20Alves%20Fatec',
+}
+const TEAM_BRUNO: ProjectTeamMember = {
+  studentEmail: 'aluno9@aluno.cps.sp.gov.br',
+  name: 'Bruno Carvalho',
+  githubUrl: 'https://github.com/search?q=Bruno+Carvalho&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Bruno%20Carvalho%20Fatec',
+}
+const TEAM_ISABELA: ProjectTeamMember = {
+  studentEmail: 'aluno10@aluno.cps.sp.gov.br',
+  name: 'Isabela Ramos',
+  githubUrl: 'https://github.com/search?q=Isabela+Ramos&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Isabela%20Ramos%20Fatec',
+}
+const TEAM_DIEGO: ProjectTeamMember = {
+  studentEmail: 'aluno12@aluno.cps.sp.gov.br',
+  name: 'Diego Mendes',
+  githubUrl: 'https://github.com/search?q=Diego+Mendes&type=users',
+  linkedinUrl: 'https://www.linkedin.com/search/results/people/?keywords=Diego%20Mendes%20Fatec',
+}
+
+export const MOCK_PROJECTS: Project[] = [
+  {
+    id: '1',
+    accessCount: 83,
+    title: 'SALA — Sistema de Agendamento de Laboratórios',
+    summary:
+      'Plataforma web e mobile para gestão inteligente de horários, equipamentos e ocupação dos laboratórios de informática e mecatrônica do campus Fatec Itaquera — Prof. Miguel Reale.',
+    cycle: '2026/1',
+    semester: 5,
+    advisor: CARLOS,
+    memberEmails: [JOAO, BEATRIZ_EMAIL, GABRIEL_EMAIL, MARIANA_EMAIL],
+    teamMembers: [TEAM_LUCAS, TEAM_BEATRIZ, TEAM_GABRIEL, TEAM_MARIANA],
+    languages: ['TypeScript'],
+    stack: ['React', 'Node.js', 'PostgreSQL'],
+    theme: 'Gestão & Processos',
+    status: 'em_andamento',
+    verified: true,
+    cover: { icon: 'fi-rr-calendar', label: 'Gestão de laboratórios', tone: 'blue' },
+    publicDetails: {
+      courseLabel: 'Desenvolvimento de Software Multiplataforma (5º Semestre)',
+      overview:
+        'A Fatec Itaquera contava com agendamentos descentralizados de seus 8 laboratórios de computação e bancadas práticas via planilhas manuais. Esse fluxo gerava sobreposições de horários, ausência de rastreabilidade de equipamentos danificados e baixa precisão na alocação de turmas noturnas do curso de DSM e Mecatrônica.',
+      technologyGroups: [
+        {
+          title: 'Interface & Frontend',
+          icon: 'fi-rr-devices',
+          items: ['React 18', 'TypeScript', 'Tailwind CSS', 'Vite', 'TanStack Query'],
+        },
+        {
+          title: 'Serviços & Backend',
+          icon: 'fi-rr-server',
+          items: ['Node.js LTS', 'Express.js', 'Prisma ORM', 'JWT / SSO OAuth2', 'Zod Validation'],
+        },
+        {
+          title: 'Banco de Dados & DevOps',
+          icon: 'fi-rr-database',
+          items: [
+            'PostgreSQL 15',
+            'Docker Compose',
+            'AWS S3 (Comprovantes)',
+            'GitHub Actions CI/CD',
+          ],
+        },
+        {
+          title: 'Engenharia de Software',
+          icon: 'fi-rr-workflow',
+          items: ['C4 Model (Níveis 1 a 3)', 'Arquitetura Hexagonal', 'UML 2.5', 'Testes Vitest'],
+        },
+      ],
+      attachments: [
+        {
+          title: 'Manual do Usuário & Instalação',
+          fileType: 'PDF',
+          sizeLabel: '1.8 MB',
+          description: 'Guia de Operação',
+        },
+        {
+          title: 'Snapshot Release v1.4 (Fonte)',
+          fileType: 'ZIP',
+          sizeLabel: '14.2 MB',
+          description: 'Com Dockerfile',
+        },
+      ],
+      externalLinks: [
+        { label: 'Código Fonte (GitHub)' },
+        { label: 'Sistema hospedado (Vercel)' },
+        { label: 'Protótipo de Telas (Figma)' },
+      ],
+    },
+  },
+  {
+    id: '2',
+    accessCount: 65,
+    title: 'ReciclaTech — Logística Reversa Eletrônica',
+    summary: 'Mapeamento e logística reversa de componentes de hardware descartados.',
+    cycle: '2026/1',
+    semester: 3,
+    advisor: ANA,
+    memberEmails: [MARIA],
+    teamMembers: [TEAM_MARIA],
+    languages: ['Python'],
+    stack: ['Vue.js', 'FastAPI', 'MongoDB'],
+    theme: 'Sustentabilidade & ESG',
+    status: 'publicado',
+    verified: false,
+    cover: { icon: 'fi-rr-leaf', label: 'Logística reversa', tone: 'slate' },
+  },
+  {
+    id: '3',
+    accessCount: 74,
+    title: 'SmartCampus — Telemetria de Ambientes',
+    summary: 'Monitoramento em tempo real de consumo elétrico e conforto térmico nas salas.',
+    cycle: '2025/2',
+    semester: 4,
+    advisor: CARLOS,
+    memberEmails: ['aluno5@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_PEDRO],
+    languages: ['C++'],
+    stack: ['React', 'IoT', 'Docker'],
+    theme: 'Sustentabilidade & ESG',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-bolt', label: 'Telemetria', tone: 'blue' },
+  },
+  {
+    id: '4',
+    accessCount: 91,
+    title: 'ConectaFatec — Mentoria & Networking',
+    summary:
+      'Ecossistema digital que conecta alunos formandos a ex-alunos e profissionais do mercado.',
+    cycle: '2025/2',
+    semester: 6,
+    advisor: MARCOS,
+    memberEmails: ['aluno6@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_CAMILA],
+    languages: ['TypeScript'],
+    stack: ['Next.js', 'Tailwind', 'PostgreSQL'],
+    theme: 'Educação Tecnológica',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-users', label: 'Arquitetura serverless', tone: 'blue' },
+  },
+  {
+    id: '5',
+    accessCount: 48,
+    title: 'AutoLab — Bancadas de Teste Mecânico',
+    summary: 'Interface de aquisição de dados e calibração para ensaios mecânicos de bancada.',
+    cycle: '2026/1',
+    semester: 2,
+    advisor: MARCOS,
+    memberEmails: ['aluno7@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_RAFAEL],
+    languages: ['Python'],
+    stack: ['Flask', 'SQLite'],
+    theme: 'Gestão & Processos',
+    status: 'publicado',
+    verified: false,
+    cover: { icon: 'fi-rr-settings', label: 'Automação mecânica', tone: 'slate' },
+  },
+  {
+    id: '6',
+    accessCount: 80,
+    title: 'EduTrack — Rendimento em Programação',
+    summary: 'Dashboards com análise estatística de submissões de código e detecção de padrões.',
+    cycle: '2025/1',
+    semester: 5,
+    advisor: ANA,
+    memberEmails: ['aluno8@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_FERNANDA],
+    languages: ['Java'],
+    stack: ['React', 'Spring Boot', 'MySQL'],
+    theme: 'Educação Tecnológica',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-chart-histogram', label: 'Análise de rendimento', tone: 'red' },
+  },
+  {
+    id: '7',
+    accessCount: 17,
+    title: 'LabFlow — Fluxo de Reservas de Equipamentos',
+    summary:
+      'Controle de empréstimo e devolução de equipamentos dos laboratórios (em desenvolvimento).',
+    cycle: '2026/1',
+    semester: 5,
+    advisor: CARLOS,
+    memberEmails: [JOAO],
+    teamMembers: [TEAM_LUCAS],
+    languages: ['TypeScript'],
+    stack: ['React', 'Next.js'],
+    theme: 'Gestão & Processos',
+    status: 'em_andamento',
+    verified: false,
+    cover: { icon: 'fi-rr-code', label: 'Em desenvolvimento', tone: 'slate' },
+  },
+  {
+    id: '8',
+    accessCount: 56,
+    title: 'SegurApp — Gestão de Acessos',
+    summary: 'Controle de acesso por perfil com trilha de auditoria para sistemas acadêmicos.',
+    cycle: '2025/2',
+    semester: 6,
+    advisor: MARCOS,
+    memberEmails: ['aluno9@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_BRUNO],
+    languages: ['Java'],
+    stack: ['Spring Boot', 'Docker', 'PostgreSQL'],
+    theme: 'Segurança da Informação',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-shield-check', label: 'Segurança', tone: 'red' },
+  },
+  {
+    id: '9',
+    accessCount: 69,
+    title: 'SaúdeConecta — Triagem Acessível',
+    summary:
+      'Aplicativo de triagem inicial com foco em acessibilidade para pessoas com deficiência visual.',
+    cycle: '2025/1',
+    semester: 4,
+    advisor: ANA,
+    memberEmails: [JOAO],
+    teamMembers: [TEAM_LUCAS],
+    languages: ['JavaScript'],
+    stack: ['Vue.js', 'Node.js', 'MySQL'],
+    theme: 'Saúde & Acessibilidade',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-heart', label: 'Saúde & acessibilidade', tone: 'red' },
+  },
+  {
+    id: '10',
+    accessCount: 42,
+    title: 'EcoMonitor — Consumo de Energia',
+    summary: 'Painel de acompanhamento do consumo energético dos prédios do campus.',
+    cycle: '2024/2',
+    semester: 3,
+    advisor: CARLOS,
+    memberEmails: ['aluno10@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_ISABELA],
+    languages: ['Python'],
+    stack: ['Flask', 'Docker', 'MySQL'],
+    theme: 'Sustentabilidade & ESG',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-bolt', label: 'Eficiência energética', tone: 'blue' },
+  },
+  {
+    id: '11',
+    accessCount: 28,
+    title: 'CodeReview Hub — Revisão Colaborativa',
+    summary: 'Ferramenta para revisão de código entre pares em disciplinas de programação.',
+    cycle: '2026/1',
+    semester: 2,
+    advisor: ANA,
+    memberEmails: [MARIA],
+    teamMembers: [TEAM_MARIA],
+    languages: ['PHP'],
+    stack: ['MySQL'],
+    theme: 'Educação Tecnológica',
+    status: 'em_andamento',
+    verified: false,
+    cover: { icon: 'fi-rr-code', label: 'Em desenvolvimento', tone: 'slate' },
+  },
+  {
+    id: '12',
+    accessCount: 88,
+    title: 'Biblioteca Digital — Acervo de TCCs',
+    summary: 'Catálogo pesquisável de trabalhos de conclusão de curso da Fatec Itaquera.',
+    cycle: '2024/2',
+    semester: 6,
+    advisor: MARCOS,
+    memberEmails: ['aluno12@aluno.cps.sp.gov.br'],
+    teamMembers: [TEAM_DIEGO],
+    languages: ['TypeScript', 'JavaScript'],
+    stack: ['React', 'Node.js', 'PostgreSQL'],
+    theme: 'Gestão & Processos',
+    status: 'publicado',
+    verified: true,
+    cover: { icon: 'fi-rr-book', label: 'Acervo digital', tone: 'blue' },
+  },
+]
