@@ -1,3 +1,4 @@
+import { isRole } from '@/domain/enterprise/entities/role'
 import { User } from '@/domain/enterprise/entities/user'
 
 export interface BetterAuthUser {
@@ -7,6 +8,7 @@ export interface BetterAuthUser {
   emailVerified?: boolean
   image?: string | null
   createdAt?: Date | string
+  role?: unknown
 }
 
 export function toDomainUser(dto: BetterAuthUser): User | null {
@@ -17,6 +19,7 @@ export function toDomainUser(dto: BetterAuthUser): User | null {
       emailVerified: dto.emailVerified,
       image: dto.image ?? null,
       createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
+      role: isRole(dto.role) ? dto.role : undefined,
     },
     dto.id,
   )

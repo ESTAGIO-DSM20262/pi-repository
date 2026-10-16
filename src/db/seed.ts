@@ -1,60 +1,119 @@
 import 'dotenv/config'
+import { randomUUID } from 'node:crypto'
+import { and, eq } from 'drizzle-orm'
+import { db } from '@/db'
+import { accounts, users } from '@/db/schema'
 import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
+import type { Role } from '@/domain/enterprise/entities/role'
 import { auth } from '@/libs/auth'
 
 interface SeedUser {
   name: string
   email: string
-  password?: string
+  password: string
+  role: Role
 }
 
-const USERS: SeedUser[] = [
-  { name: 'João Silva', email: 'joao.silva@aluno.cps.sp.gov.br', password: 'Trocar@123' },
-  { name: 'Maria Souza', email: 'maria.souza@aluno.cps.sp.gov.br', password: 'Trocar@123' },
-  { name: 'Carlos Pereira', email: 'carlos.pereira@cps.sp.gov.br', password: 'Trocar@123' },
-  { name: 'Ana Lima', email: 'ana.lima@cps.sp.gov.br', password: 'Trocar@123' },
+const TEST_USERS: SeedUser[] = [
+  {
+    name: 'João Silva',
+    email: 'joao.silva@aluno.cps.sp.gov.br',
+    password: 'Aluno@123',
+    role: 'student',
+  },
+  {
+    name: 'Prof. Dr. Carlos Oliveira',
+    email: 'carlos.pereira@cps.sp.gov.br',
+    password: 'Professor@123',
+    role: 'professor',
+  },
+  {
+    name: 'Secretaria — Fatec Itaquera',
+    email: 'admin.acervo@cps.sp.gov.br',
+    password: 'Admin@123',
+    role: 'admin',
+  },
 ]
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('O seed de usuários de teste não pode ser executado em produção.')
+  }
+
   const ctx = await auth.$context
 
-  for (const account of USERS) {
-    const email = InstitutionalEmail.create(account.email)
-    if (email.isLeft()) {
-      console.warn(`Ignorado (domínio inválido): ${account.email}`)
-      continue
+  for (const account of TEST_USERS) {
+    const normalizedEmail = account.email.trim().toLowerCase()
+    const validation = InstitutionalEmail.create(normalizedEmail)
+
+    if (validation.isLeft()) {
+      throw new Error(`E-mail de teste não permitido: ${normalizedEmail}`)
     }
 
-    const role = email.value.role
+    const existingUsers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, normalizedEmail))
+      .limit(1)
 
-    const existing = await ctx.internalAdapter.findUserByEmail(account.email)
-    if (existing) {
-      console.log(`Já existe: ${account.email} (${role})`)
-      continue
-    }
+    const userId = existingUsers[0]?.id ?? randomUUID()
+    const now = new Date()
 
-    const created = await ctx.internalAdapter.createUser(
-      {
+    if (existingUsers.length > 0) {
+      await db
+        .update(users)
+        .set({
+          name: account.name,
+          email: normalizedEmail,
+          emailVerified: true,
+          role: account.role,
+          updatedAt: now,
+        })
+        .where(eq(users.id, userId))
+    } else {
+      await db.insert(users).values({
+        id: userId,
         name: account.name,
-        email: account.email,
+        email: normalizedEmail,
         emailVerified: true,
-      },
-      { method: 'admin' },
-    )
-
-    if (account.password) {
-      await ctx.internalAdapter.createAccount({
-        userId: created.id,
-        providerId: 'credential',
-        accountId: created.id,
-        password: await ctx.password.hash(account.password),
+        role: account.role,
+        createdAt: now,
+        updatedAt: now,
       })
     }
 
-    console.log(`Criado: ${account.email} (${created.role ?? role})`)
+    const passwordHash = await ctx.password.hash(account.password)
+    const existingCredentialAccounts = await db
+      .select({ id: accounts.id })
+      .from(accounts)
+      .where(and(eq(accounts.userId, userId), eq(accounts.providerId, 'credential')))
+      .limit(1)
+
+    if (existingCredentialAccounts.length > 0) {
+      await db
+        .update(accounts)
+        .set({
+          accountId: userId,
+          password: passwordHash,
+          updatedAt: now,
+        })
+        .where(eq(accounts.id, existingCredentialAccounts[0].id))
+    } else {
+      await db.insert(accounts).values({
+        id: randomUUID(),
+        accountId: userId,
+        providerId: 'credential',
+        userId,
+        password: passwordHash,
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+
+    console.log(`Conta de teste pronta: ${normalizedEmail} (${account.role})`)
   }
 
-  console.log('\nSeed concluído.')
+  console.log('\nSeed concluído. As senhas de teste estão documentadas em TEST_USERS.md.')
 }
 
 main()

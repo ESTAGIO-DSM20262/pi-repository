@@ -11,6 +11,7 @@ interface UserProps {
   emailVerified: boolean
   image: string | null
   createdAt: Date
+  role?: Role
 }
 
 interface CreateUserInput {
@@ -19,6 +20,7 @@ interface CreateUserInput {
   emailVerified?: boolean
   image?: string | null
   createdAt?: Date
+  role?: Role
 }
 
 export class User extends Entity<UserProps> {
@@ -35,7 +37,7 @@ export class User extends Entity<UserProps> {
   }
 
   get role(): Role {
-    return this.props.email.role
+    return this.props.role ?? this.props.email.role
   }
 
   get emailVerified() {
@@ -73,6 +75,7 @@ export class User extends Entity<UserProps> {
         emailVerified: input.emailVerified ?? false,
         image: input.image ?? null,
         createdAt: input.createdAt ?? new Date(),
+        role: input.role,
       },
       uniqueId,
     )

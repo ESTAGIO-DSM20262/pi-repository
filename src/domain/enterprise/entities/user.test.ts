@@ -28,6 +28,19 @@ describe('User', () => {
     }
   })
 
+  it('respeita o perfil administrativo persistido em uma conta institucional', () => {
+    const result = User.create({
+      name: 'Secretaria — Fatec Itaquera',
+      email: 'admin.acervo@cps.sp.gov.br',
+      role: 'admin',
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      expect(result.value.role).toBe('admin')
+    }
+  })
+
   it('retorna erro de domínio para e-mail inválido', () => {
     const result = User.create({
       name: 'Fulano',

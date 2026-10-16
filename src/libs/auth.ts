@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { nextCookies } from 'better-auth/next-js'
+import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
 import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
@@ -51,10 +52,13 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: {
-        type: ['student', 'professor'],
+        type: ['student', 'professor', 'admin'],
         required: false,
         input: false,
       },
+      registrationNumber: { type: 'string', required: false, input: false },
+      course: { type: 'string', required: false, input: false },
+      active: { type: 'boolean', required: false, defaultValue: true, input: false },
     },
   },
 
@@ -74,6 +78,26 @@ export const auth = betterAuth({
         },
       },
     },
+    session: {
+      create: {
+        before: async (newSession) => {
+          const existingUser = await db
+            .select({ active: users.active })
+            .from(users)
+            .where(eq(users.id, newSession.userId))
+            .limit(1)
+
+          if (existingUser[0]?.active === false) {
+            throw new APIError('FORBIDDEN', {
+              code: 'USER_DISABLED',
+              message: 'Esta conta está desativada. Entre em contato com a secretaria da Fatec.',
+            })
+          }
+
+          return { data: newSession }
+        },
+      },
+    },
   },
 
   hooks: {
@@ -86,6 +110,21 @@ export const auth = betterAuth({
             message:
               'E-mail institucional inválido. Use o e-mail institucional cadastrado na instituição.',
           })
+        }
+
+        if (typeof email === 'string') {
+          const existingUser = await db
+            .select({ active: users.active })
+            .from(users)
+            .where(eq(users.email, email.trim().toLowerCase()))
+            .limit(1)
+
+          if (existingUser[0]?.active === false) {
+            throw new APIError('FORBIDDEN', {
+              code: 'USER_DISABLED',
+              message: 'Esta conta está desativada. Entre em contato com a secretaria da Fatec.',
+            })
+          }
         }
       }
     }),

@@ -1,44 +1,26 @@
-'use client'
+import { headers } from 'next/headers'
+import { ListProjectsUseCase } from '@/application/projects/list-projects'
+import ProjectsExplorer from '@/components/projects/ProjectsExplorer'
+import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
+import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
+import { auth } from '@/libs/auth'
 
-import Link from 'next/link'
-import { useAuth } from '@/presentation/auth/auth-context'
-import { ROLE_LABEL } from '@/presentation/auth/role-label'
+export const instant = false
 
-export default function Home() {
-  const { user, loading } = useAuth()
+export default async function Home() {
+  const session = await auth.api.getSession({ headers: await headers() })
+  const user = session ? toDomainUser(session.user) : null
 
-  if (loading) return null
+  const useCase = new ListProjectsUseCase(new MockProjectRepository())
+  const { projects } = await useCase.execute({
+    viewer: user ? { email: user.emailAddress, role: user.role } : null,
+  })
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-16">
-      {user ? (
-        <>
-          <h2 className="text-2xl font-semibold">Olá, {user.name}</h2>
-          <p className="mt-2 text-sm text-text-secondary">
-            Você está logado como {ROLE_LABEL[user.role]}.
-          </p>
-          <Link
-            href="/painel"
-            className="mt-6 inline-flex h-11 items-center rounded-lg bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
-          >
-            Ir para o painel
-          </Link>
-        </>
-      ) : (
-        <>
-          <h2 className="text-2xl font-semibold">Projetos Integradores da Fatec Itaquera</h2>
-          <p className="mt-2 text-sm text-text-secondary">
-            Conheça os projetos desenvolvidos pelos alunos de DSM. Para cadastrar ou acompanhar
-            projetos, entre com sua conta.
-          </p>
-          <Link
-            href="/login"
-            className="mt-6 inline-flex h-11 items-center rounded-lg bg-primary px-5 text-sm font-semibold text-white transition hover:bg-primary-hover"
-          >
-            Entrar
-          </Link>
-        </>
-      )}
-    </section>
+    <ProjectsExplorer
+      projects={projects}
+      viewerRole={user?.role ?? null}
+      isAuthenticated={Boolean(session)}
+    />
   )
 }

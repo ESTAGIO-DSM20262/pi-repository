@@ -1,10 +1,11 @@
 'use client'
 
-import { createContext, useContext } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 import type { LoginCredentials } from '@/application/auth/dtos/login-credentials'
 import { SignInUseCase } from '@/application/auth/sign-in'
 import { SignInWithMicrosoftUseCase } from '@/application/auth/sign-in-with-microsoft'
 import { SignOutUseCase } from '@/application/auth/sign-out'
+import AuthActionOverlay from '@/components/ui/AuthActionOverlay'
 import type { User } from '@/domain/enterprise/entities/user'
 import { authClient } from '@/infrastructure/auth/auth-client'
 import { BetterAuthAuthRepository } from '@/infrastructure/auth/better-auth-auth-repository'
@@ -21,13 +22,18 @@ interface AuthContextValue {
   signIn: (credentials: LoginCredentials) => Promise<User>
   signInWithMicrosoft: () => Promise<void>
   signOut: () => Promise<void>
+  showAuthAction: (message: string) => void
+  clearAuthAction: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data, isPending } = authClient.useSession()
+  const [authActionMessage, setAuthActionMessage] = useState<string | null>(null)
   const user = data?.user ? toDomainUser(data.user) : null
+  const showAuthAction = useCallback((message: string) => setAuthActionMessage(message), [])
+  const clearAuthAction = useCallback(() => setAuthActionMessage(null), [])
 
   async function signIn(credentials: LoginCredentials): Promise<User> {
     const result = await signInUseCase.execute(credentials)
@@ -49,9 +55,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading: isPending, signIn, signInWithMicrosoft, signOut }}
+      value={{
+        user,
+        loading: isPending,
+        signIn,
+        signInWithMicrosoft,
+        signOut,
+        showAuthAction,
+        clearAuthAction,
+      }}
     >
       {children}
+      <AuthActionOverlay message={authActionMessage} />
     </AuthContext.Provider>
   )
 }
