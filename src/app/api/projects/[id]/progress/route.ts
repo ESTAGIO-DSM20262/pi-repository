@@ -29,8 +29,23 @@ function jsonError(message: string, status: number) {
   )
 }
 
-function parseTaskInput(body: unknown, memberEmails: string[]) {
-  if (!body || typeof body !== 'object') return { error: 'Informe os dados da tarefa.' } as const
+interface ParsedTaskInput {
+  title: string
+  description: string
+  targetStudentEmail: string | null
+  dueDate: string | null
+  status: TaskStatus | undefined
+  changeNote: string | null
+}
+
+type ParseTaskResult = { ok: true; value: ParsedTaskInput } | { ok: false; error: string }
+
+function parseError(error: string): ParseTaskResult {
+  return { ok: false, error }
+}
+
+function parseTaskInput(body: unknown, memberEmails: string[]): ParseTaskResult {
+  if (!body || typeof body !== 'object') return parseError('Informe os dados da tarefa.')
   const data = body as Record<string, unknown>
   const title = typeof data.title === 'string' ? data.title.trim() : ''
   const description = typeof data.description === 'string' ? data.description.trim() : ''
@@ -42,28 +57,28 @@ function parseTaskInput(body: unknown, memberEmails: string[]) {
   const statuses: TaskStatus[] = ['pending', 'in_progress', 'completed']
 
   if (title.length < 3 || title.length > 160) {
-    return { error: 'O título deve ter entre 3 e 160 caracteres.' } as const
+    return parseError('O título deve ter entre 3 e 160 caracteres.')
   }
   if (description.length < 5 || description.length > 5000) {
-    return { error: 'A descrição deve ter entre 5 e 5.000 caracteres.' } as const
+    return parseError('A descrição deve ter entre 5 e 5.000 caracteres.')
   }
   if (targetValue && !memberEmails.some((email) => email.trim().toLowerCase() === targetValue)) {
-    return { error: 'Selecione um integrante válido deste projeto.' } as const
+    return parseError('Selecione um integrante válido deste projeto.')
   }
   if (
     dueDateValue &&
     (!/^\d{4}-\d{2}-\d{2}$/.test(dueDateValue) ||
       Number.isNaN(Date.parse(`${dueDateValue}T00:00:00Z`)))
   ) {
-    return { error: 'Informe uma data de entrega válida.' } as const
+    return parseError('Informe uma data de entrega válida.')
   }
   if (statusValue !== undefined && !statuses.includes(statusValue as TaskStatus)) {
-    return { error: 'O status selecionado não é válido.' } as const
+    return parseError('O status selecionado não é válido.')
   }
-  if (changeNote.length > 500)
-    return { error: 'A observação deve ter no máximo 500 caracteres.' } as const
+  if (changeNote.length > 500) return parseError('A observação deve ter no máximo 500 caracteres.')
 
   return {
+    ok: true,
     value: {
       title,
       description,
@@ -72,7 +87,7 @@ function parseTaskInput(body: unknown, memberEmails: string[]) {
       status: statusValue as TaskStatus | undefined,
       changeNote: changeNote || null,
     },
-  } as const
+  }
 }
 
 export async function GET(request: Request, context: RouteContext) {
@@ -159,13 +174,7 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const parsed = parseTaskInput(body, access.project.memberEmails)
-    if (!('value' in parsed)) {
-      const message =
-        'error' in parsed && typeof parsed.error === 'string'
-          ? parsed.error
-          : 'Informe os dados da tarefa corretamente.'
-      return jsonError(message, 400)
-    }
+    if (!parsed.ok) return jsonError(parsed.error, 400)
 
     const [latestTask] = await db
       .select({ versionMajor: projectProgressTasks.versionMajor })

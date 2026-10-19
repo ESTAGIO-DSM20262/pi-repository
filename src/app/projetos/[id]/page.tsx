@@ -9,6 +9,8 @@ import type { Project } from '@/domain/enterprise/entities/project'
 import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
 import { auth } from '@/libs/auth'
 
+export const instant = false
+
 interface ProjectPageProps {
   params: Promise<{ id: string }>
 }
