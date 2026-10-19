@@ -23,6 +23,8 @@ export const users = pgTable('users', {
   role: text('role').$type<Role>().notNull(),
   registrationNumber: text('registration_number'),
   course: text('course'),
+  githubUrl: text('github_url'),
+  linkedinUrl: text('linkedin_url'),
   active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at')

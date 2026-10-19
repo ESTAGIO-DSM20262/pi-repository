@@ -13,18 +13,10 @@ Sistema desenvolvido para centralizar e disponibilizar os Projetos Integradores 
 
 ## Autenticação
 
-O acesso é restrito a e-mails institucionais do Centro Paula Souza:
-
-| Domínio                     | Papel      | Área após o login |
-| --------------------------- | ---------- | ----------------- |
-| `@aluno.cps.sp.gov.br`      | Aluno      | `/aluno`          |
-| `@cps.sp.gov.br`            | Professor  | `/professor`      |
-
-- Dois métodos de acesso: **e-mail e senha** ou **Microsoft (Entra ID)**.
-- O papel é derivado exclusivamente do domínio do e-mail — nunca informado pelo cliente.
-- E-mails fora dos domínios acima não conseguem autenticar (nem por senha, nem por Microsoft).
-- No login Microsoft (multi-tenant, `organizations`), a conta é criada automaticamente quando o e-mail é de domínio institucional válido; contas pessoais da Microsoft são recusadas e domínios inválidos são bloqueados.
-- Contas de **e-mail e senha** são **pré-provisionadas** (não há autocadastro). Use `npm run db:seed` para criar contas de desenvolvimento.
+- O sistema aceita endereços de e-mail válidos de qualquer domínio. O sufixo do e-mail não determina o papel ou as permissões da conta.
+- Os papéis (`student`, `professor` e `admin`) ficam registrados no banco de dados e são definidos no cadastro administrativo. Contas criadas automaticamente por autenticação social recebem `student` como papel inicial, que pode ser alterado por um administrador.
+- Dois métodos de acesso: **e-mail e senha** ou **Microsoft (Entra ID)**, quando configurado.
+- Contas de **e-mail e senha** são **pré-provisionadas** pelo painel administrativo (não há autocadastro). Use `npm run db:seed` para criar contas de desenvolvimento.
 
 ## Funcionalidades
 
@@ -67,6 +59,8 @@ npm run db:migrate
 npm run db:seed
 ```
 
+Além das migrations geradas na pasta `drizzle/`, confira e aplique no banco Neon de destino os scripts SQL pendentes de `src/db/migrations/`. A tela de perfil e os links sociais dos projetos exigem a migration `20261019_user_social_profiles.sql`, que adiciona as colunas `github_url` e `linkedin_url` à tabela `users`.
+
 Inicie o servidor de desenvolvimento:
 
 ```bash
@@ -77,4 +71,4 @@ npm run dev
 
 No Microsoft Entra ID, registre a URL de redirecionamento `{BETTER_AUTH_URL}/api/auth/callback/microsoft` e conceda as permissões delegadas `openid`, `profile`, `email`, `offline_access` e `User.Read`.
 
-O provedor opera em modo **multi-tenant** (`organizations`) por padrão: qualquer conta corporativa/escolar do Entra ID pode tentar entrar, mas apenas e-mails de `aluno.cps.sp.gov.br` ou `cps.sp.gov.br` são aceitos. Contas pessoais da Microsoft não são aceitas. Quando o token não traz o claim `email`, o UPN (`preferred_username`) é usado como e-mail institucional.
+O provedor opera em modo **multi-tenant** (`organizations`) por padrão. O e-mail recebido do Entra ID é usado para localizar a conta; o domínio não define as permissões, que vêm do papel cadastrado no banco. Quando o token não traz o claim `email`, o UPN (`preferred_username`) é usado como endereço de e-mail.

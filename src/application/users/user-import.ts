@@ -36,7 +36,7 @@ function findColumn(headers: string[], candidates: string[]): number {
   return headers.findIndex((header) => normalizedCandidates.includes(header))
 }
 
-function parseRole(value: string, sheetName: string, email: string): Role | null {
+function parseRole(value: string, sheetName: string): Role | null {
   const role = normalizeHeader(value)
   if (['aluno', 'aluna', 'estudante', 'student'].includes(role)) return 'student'
   if (['professor', 'professora', 'docente', 'teacher'].includes(role)) return 'professor'
@@ -46,9 +46,6 @@ function parseRole(value: string, sheetName: string, email: string): Role | null
   if (sheet.includes('aluno')) return 'student'
   if (sheet.includes('professor')) return 'professor'
 
-  const normalizedEmail = email.trim().toLowerCase()
-  if (normalizedEmail.endsWith('@aluno.cps.sp.gov.br')) return 'student'
-  if (normalizedEmail.endsWith('@cps.sp.gov.br')) return 'professor'
   return null
 }
 
@@ -82,10 +79,10 @@ export function parseUserWorkbook(bytes: Uint8Array): ImportParseResult {
       'Nome do Usuário',
     ])
     const emailIndex = findColumn(headers, [
-      'E-mail Institucional',
-      'Email Institucional',
       'E-mail',
       'Email',
+      'E-mail Institucional',
+      'Email Institucional',
     ])
     const registrationIndex = findColumn(headers, [
       'RA',
@@ -108,7 +105,7 @@ export function parseUserWorkbook(bytes: Uint8Array): ImportParseResult {
         errors.push({
           sheet: sheetName,
           rowNumber: 1,
-          reason: 'Cabeçalhos não reconhecidos. Verifique a coluna de nome e E-mail Institucional.',
+          reason: 'Cabeçalhos não reconhecidos. Verifique a coluna de nome e E-mail.',
         })
       }
       continue
@@ -121,7 +118,7 @@ export function parseUserWorkbook(bytes: Uint8Array): ImportParseResult {
       const name = cellText(row[nameIndex])
       const email = cellText(row[emailIndex]).toLowerCase()
       const roleValue = roleIndex >= 0 ? cellText(row[roleIndex]) : ''
-      const role = parseRole(roleValue, sheetName, email)
+      const role = parseRole(roleValue, sheetName)
       const registrationNumber = registrationIndex >= 0 ? cellText(row[registrationIndex]) : ''
       const course = courseIndex >= 0 ? cellText(row[courseIndex]) : ''
       const rowNumber = index + 1
@@ -130,7 +127,7 @@ export function parseUserWorkbook(bytes: Uint8Array): ImportParseResult {
         errors.push({
           sheet: sheetName,
           rowNumber,
-          reason: 'Não foi possível identificar o perfil pela aba, coluna Perfil ou e-mail.',
+          reason: 'Não foi possível identificar o perfil pela aba ou coluna Perfil.',
         })
         continue
       }
@@ -141,7 +138,7 @@ export function parseUserWorkbook(bytes: Uint8Array): ImportParseResult {
 
   if (rows.length === 0 && errors.length === 0) {
     throw new Error(
-      'Não encontrei linhas importáveis. Esperava as abas Alunos e Professores com nome e E-mail Institucional.',
+      'Não encontrei linhas importáveis. Esperava as abas Alunos e Professores com nome e E-mail.',
     )
   }
 

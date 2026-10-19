@@ -4,10 +4,8 @@ import { useEffect, useState } from 'react'
 import Modal, { type Notice } from '@/components/ui/Modal'
 
 const ERROR_MESSAGES: Record<string, string> = {
-  INVALID_INSTITUTIONAL_EMAIL:
-    'Sua conta não está habilitada para acesso institucional. Use o e-mail institucional cadastrado na instituição.',
-  email_not_found:
-    'Não foi possível obter um e-mail institucional da sua conta Microsoft. Confirme se ela possui um e-mail do CPS.',
+  INVALID_EMAIL: 'O endereço de e-mail informado é inválido.',
+  email_not_found: 'Não foi possível obter um endereço de e-mail da sua conta Microsoft.',
   email_not_verified:
     'O e-mail da sua conta Microsoft não foi verificado. Procure a coordenação do curso.',
   signup_disabled:
@@ -18,7 +16,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 }
 
 const FALLBACK =
-  'Não foi possível entrar com a Microsoft. Verifique sua conta institucional e tente novamente.'
+  'Não foi possível entrar com a Microsoft. Verifique a conta selecionada e tente novamente.'
 
 export default function LoginFeedback() {
   const [notice, setNotice] = useState<Notice | null>(null)

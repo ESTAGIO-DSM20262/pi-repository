@@ -50,13 +50,13 @@ export default function ForgotPasswordForm() {
     <AuthCard>
       <AuthCardHeader
         title="Esqueceu sua senha?"
-        description="Informe seu e-mail institucional para receber um link de recuperação de senha."
+        description="Informe o e-mail da sua conta para receber um link de recuperação de senha."
       />
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
         <div>
           <label htmlFor="email" className={labelClass}>
-            E-mail institucional
+            E-mail
           </label>
           <input
             id="email"
@@ -64,7 +64,7 @@ export default function ForgotPasswordForm() {
             inputMode="email"
             autoComplete="username"
             autoCapitalize="none"
-            placeholder="Digite seu e-mail institucional"
+            placeholder="Digite seu e-mail"
             className={inputClass}
             aria-invalid={errors.email ? true : undefined}
             {...register('email')}

@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server'
 import { type ImportedUserRow, parseUserWorkbook } from '@/application/users/user-import'
 import { db } from '@/db'
 import { accounts, sessions, users } from '@/db/schema'
-import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 import { isRole, type Role } from '@/domain/enterprise/entities/role'
 import { auth } from '@/libs/auth'
 
@@ -24,6 +23,8 @@ type CredentialResult = {
   email: string
   role: Role
   password: string
+  registrationNumber: string
+  course: string
 }
 
 class UserInputError extends Error {}
@@ -64,7 +65,7 @@ function normalizeAndValidate(input: UserInput): Omit<ImportedUserRow, 'sheet' |
   if (name.length < 3) throw new UserInputError('Informe o nome completo do usuário.')
   if (name.length > 160) throw new UserInputError('O nome deve ter no máximo 160 caracteres.')
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new UserInputError('Informe um e-mail institucional válido.')
+    throw new UserInputError('Informe um endereço de e-mail válido.')
   }
   if (!isRole(role))
     throw new UserInputError('Selecione um perfil válido: aluno, professor ou administrador.')
@@ -72,18 +73,6 @@ function normalizeAndValidate(input: UserInput): Omit<ImportedUserRow, 'sheet' |
     throw new UserInputError('RA/matrícula deve ter no máximo 80 caracteres.')
   if (course.length > 160) throw new UserInputError('O curso deve ter no máximo 160 caracteres.')
 
-  const institutionalEmail = InstitutionalEmail.create(email)
-  if (institutionalEmail.isLeft()) {
-    throw new UserInputError(
-      'Use um e-mail @aluno.cps.sp.gov.br para aluno ou @cps.sp.gov.br para professor/administrador.',
-    )
-  }
-  if (role === 'student' && institutionalEmail.value.role !== 'student') {
-    throw new UserInputError('O perfil Aluno exige um e-mail @aluno.cps.sp.gov.br.')
-  }
-  if (role !== 'student' && institutionalEmail.value.role !== 'professor') {
-    throw new UserInputError('O perfil Professor/Administrador exige um e-mail @cps.sp.gov.br.')
-  }
   if (role !== 'admin' && !registrationNumber) {
     throw new UserInputError(
       role === 'student' ? 'Informe o RA do aluno.' : 'Informe a matrícula funcional do professor.',
@@ -153,7 +142,14 @@ async function createUserAccount(
     throw error
   }
 
-  return { name: user.name, email: user.email, role: user.role, password }
+  return {
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    password,
+    registrationNumber: user.registrationNumber,
+    course: user.course,
+  }
 }
 
 async function handleSingleCreate(request: Request) {
@@ -195,6 +191,15 @@ async function handleBulkCreate(request: Request) {
   const seenEmails = new Set<string>()
 
   for (const row of parsed.rows) {
+    if (row.role === 'admin') {
+      errors.push({
+        sheet: row.sheet,
+        rowNumber: row.rowNumber,
+        email: row.email,
+        reason: 'Administradores devem ser cadastrados individualmente no painel.',
+      })
+      continue
+    }
     const email = row.email.trim().toLowerCase()
     if (email && seenEmails.has(email)) {
       skipped.push({
@@ -263,7 +268,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Falha ao listar usuários administrativos:', error)
     return jsonError(
-      'Não foi possível listar usuários. Confirme se a migração SQL de cadastro de usuários foi aplicada no Neon.',
+      'Não foi possível listar usuários. Confirme se as migrações SQL de usuários foram aplicadas no Neon.',
       500,
     )
   }
@@ -328,15 +333,11 @@ export async function PATCH(request: Request) {
 
     if (typeof nextName !== 'string' || nextName.trim().length < 3 || nextName.length > 160)
       return jsonError('Informe um nome válido (3 a 160 caracteres).', 400)
+    if (nextEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail))
+      return jsonError('Informe um endereço de e-mail válido.', 400)
     if (!isRole(nextRole)) return jsonError('Perfil inválido.', 400)
     if (typeof nextActive !== 'boolean') return jsonError('Status inválido.', 400)
 
-    const validation = InstitutionalEmail.create(nextEmail)
-    if (validation.isLeft()) return jsonError('Use um e-mail institucional válido.', 400)
-    if (nextRole === 'student' && validation.value.role !== 'student')
-      return jsonError('Aluno exige e-mail @aluno.cps.sp.gov.br.', 400)
-    if (nextRole !== 'student' && validation.value.role !== 'professor')
-      return jsonError('Professor/administrador exige e-mail @cps.sp.gov.br.', 400)
     if (nextRole !== 'admin' && !String(nextRegistration ?? '').trim())
       return jsonError('RA/matrícula é obrigatório para alunos e professores.', 400)
     if (nextRole === 'student' && !String(nextCourse ?? '').trim())

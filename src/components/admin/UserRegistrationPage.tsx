@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { type DragEvent, type FormEvent, type ReactNode, useRef, useState } from 'react'
+import * as XLSX from 'xlsx'
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -18,6 +19,8 @@ interface Credential {
   email: string
   role: Role
   password: string
+  registrationNumber: string
+  course: string
 }
 
 interface BatchResult {
@@ -73,29 +76,61 @@ function Feedback({ kind, children }: { kind: 'success' | 'error' | 'info'; chil
   )
 }
 
-function csvCell(value: string) {
-  return `"${value.replace(/"/g, '""')}"`
-}
+async function downloadCredentials(credentials: Credential[]) {
+  const response = await fetch('/modelo-cadastro-usuarios-acervo.xlsx')
+  if (!response.ok)
+    throw new Error('Não foi possível carregar a planilha modelo para gerar as credenciais.')
 
-function downloadCredentials(credentials: Credential[]) {
-  const header = ['Nome', 'E-mail institucional', 'Perfil', 'Senha temporária']
-  const rows = credentials.map((credential) => [
-    credential.name,
-    credential.email,
-    ROLE_LABEL[credential.role],
-    credential.password,
-  ])
-  const csv = `\uFEFF${[header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n')}`
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
-  const link = document.createElement('a')
-  link.href = url
-  link.download = 'credenciais-provisorias-acervo.csv'
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-}
+  const workbook = XLSX.read(await response.arrayBuffer(), { type: 'array', cellStyles: true })
+  const studentsSheet = workbook.Sheets.Alunos
+  const professorsSheet = workbook.Sheets.Professores
+  if (!studentsSheet || !professorsSheet) {
+    throw new Error('O arquivo modelo não contém as abas Alunos e Professores esperadas.')
+  }
 
+  const studentHeader = studentsSheet.D1
+  studentsSheet.E1 = { ...(studentHeader ?? {}), v: 'Senha temporária', t: 's' }
+  studentsSheet['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } })
+  const studentColumns = [...(studentsSheet['!cols'] ?? [])]
+  studentColumns[4] = { ...(studentColumns[4] ?? {}), wch: 24 }
+  studentsSheet['!cols'] = studentColumns
+
+  const professorHeader = professorsSheet.C1
+  professorsSheet.D1 = { ...(professorHeader ?? {}), v: 'Senha temporária', t: 's' }
+  professorsSheet['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } })
+  const professorColumns = [...(professorsSheet['!cols'] ?? [])]
+  professorColumns[3] = { ...(professorColumns[3] ?? {}), wch: 24 }
+  professorsSheet['!cols'] = professorColumns
+
+  const studentRows = credentials
+    .filter((credential) => credential.role === 'student')
+    .map((credential) => [
+      credential.course,
+      credential.registrationNumber,
+      credential.name,
+      credential.email,
+      credential.password,
+    ])
+  const professorRows = credentials
+    .filter((credential) => credential.role === 'professor')
+    .map((credential) => [
+      credential.registrationNumber,
+      credential.name,
+      credential.email,
+      credential.password,
+    ])
+
+  if (studentRows.length > 0) {
+    XLSX.utils.sheet_add_aoa(studentsSheet, studentRows, { origin: 'A2' })
+  }
+  if (professorRows.length > 0) {
+    XLSX.utils.sheet_add_aoa(professorsSheet, professorRows, { origin: 'A2' })
+  }
+
+  delete workbook.Sheets.Instruções
+  workbook.SheetNames = ['Alunos', 'Professores']
+  XLSX.writeFile(workbook, 'credenciais-provisorias-acervo.xlsx', { cellStyles: true })
+}
 export default function UserRegistrationPage() {
   const [role, setRole] = useState<Role>('student')
   const [form, setForm] = useState<UserForm>({
@@ -234,8 +269,8 @@ export default function UserRegistrationPage() {
               Cadastro de Usuários
             </h1>
             <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
-              Cadastre contas institucionais individualmente ou importe uma planilha do SIGA com
-              estudantes e professores.
+              Cadastre alunos, professores ou administradores individualmente, ou importe uma
+              planilha com alunos e professores.
             </p>
           </div>
         </div>
@@ -278,7 +313,7 @@ export default function UserRegistrationPage() {
               </label>
 
               <label className={labelClass}>
-                E-mail institucional <span className="text-primary">*</span>
+                E-mail <span className="text-primary">*</span>
                 <input
                   required
                   type="email"
@@ -289,7 +324,11 @@ export default function UserRegistrationPage() {
                   }
                   className={fieldClass}
                   placeholder={
-                    role === 'student' ? 'usuario@aluno.cps.sp.gov.br' : 'usuario@cps.sp.gov.br'
+                    role === 'student'
+                      ? 'aluno@exemplo.com'
+                      : role === 'professor'
+                        ? 'professor@exemplo.com'
+                        : 'admin@exemplo.com'
                   }
                 />
               </label>
@@ -370,13 +409,34 @@ export default function UserRegistrationPage() {
                         {singleCredential.password}
                       </code>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => void navigator.clipboard.writeText(singleCredential.password)}
-                      className="cursor-pointer inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 text-xs font-semibold text-slate-700 transition hover:bg-surface-secondary"
-                    >
-                      <i className="fi fi-rr-copy flex" aria-hidden="true" /> Copiar senha
-                    </button>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void navigator.clipboard.writeText(singleCredential.password)
+                        }
+                        className="cursor-pointer inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-xs font-semibold text-slate-700 transition hover:bg-surface-secondary"
+                      >
+                        <i className="fi fi-rr-copy flex" aria-hidden="true" /> Copiar senha
+                      </button>
+                      {singleCredential.role !== 'admin' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void downloadCredentials([singleCredential]).catch((error: unknown) => {
+                              setSingleError(
+                                error instanceof Error
+                                  ? error.message
+                                  : 'Não foi possível gerar a planilha de credenciais.',
+                              )
+                            })
+                          }}
+                          className="cursor-pointer inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary-hover"
+                        >
+                          <i className="fi fi-rr-download flex" aria-hidden="true" /> Baixar .xlsx
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <p className="text-[11px] leading-relaxed text-emerald-900">
                     Copie e entregue a senha ao usuário por um canal seguro. O sistema ainda não tem
@@ -497,11 +557,11 @@ export default function UserRegistrationPage() {
                 <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-text-secondary">
                   <p>
                     <strong className="text-slate-800">Aba Alunos:</strong> Curso · RA · Nome Aluno
-                    · E-mail Institucional
+                    · E-mail
                   </p>
                   <p>
                     <strong className="text-slate-800">Aba Professores:</strong> Matrícula ·
-                    Professores DSM · E-mail Institucional
+                    Professores DSM · E-mail
                   </p>
                 </div>
               </div>
@@ -545,11 +605,21 @@ export default function UserRegistrationPage() {
                   {batchResult.credentials.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => downloadCredentials(batchResult.credentials)}
+                      onClick={() => {
+                        void downloadCredentials(batchResult.credentials).catch(
+                          (error: unknown) => {
+                            setBatchError(
+                              error instanceof Error
+                                ? error.message
+                                : 'Não foi possível gerar a planilha de credenciais.',
+                            )
+                          },
+                        )
+                      }}
                       className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover"
                     >
                       <i className="fi fi-rr-download flex" aria-hidden="true" /> Baixar{' '}
-                      {batchResult.credentials.length} credenciais (.csv)
+                      {batchResult.credentials.length} credenciais (.xlsx)
                     </button>
                   )}
                   {batchResult.errors.length > 0 && (

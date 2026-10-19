@@ -62,14 +62,14 @@ src/
 ├─ domain/enterprise/
 │  ├─ entities/
 │  │  ├─ role.ts                   # ROLES = ['student', 'professor']
-│  │  ├─ institutional-email.ts    # VO: valida domínio + deriva papel
-│  │  ├─ institutional-email.test.ts
+│  │  ├─ email-address.ts          # VO: valida e normaliza endereço de e-mail
+│  │  ├─ email-address.test.ts
 │  │  ├─ user.ts                   # entidade User (role vem do e-mail)
 │  │  └─ user.test.ts
 │  ├─ errors/
 │  │  ├─ authentication-error.ts
 │  │  ├─ invalid-credentials-error.ts
-│  │  └─ invalid-institutional-email-error.ts
+│  │  └─ invalid-email-error.ts
 │  └─ repositories/auth-repository.ts  # PORTA AuthRepository
 ├─ application/auth/
 │  ├─ dtos/login-credentials.ts    # LoginCredentials (alias da porta)
@@ -128,29 +128,13 @@ Toda operação que pode falhar por regra de negócio devolve
   (`presentation/auth/role-label.ts`). As rotas seguem em PT (`/aluno`,
   `/professor`).
 
-### `InstitutionalEmail` (value object)
+### `EmailAddress` (value object)
 
-`@/domain/enterprise/entities/institutional-email.ts` é a **fonte única da
-verdade** da regra institucional:
-
-- `nome.sobrenome@aluno.cps.sp.gov.br` → `student`
-- `nome.sobrenome@cps.sp.gov.br` → `professor`
-- Correspondência **exata** de domínio (`DOMAIN_ROLE`), o que evita a
-  ambiguidade de sufixo entre `aluno.cps.sp.gov.br` e `cps.sp.gov.br`.
-- `create(raw)` normaliza (`trim().toLowerCase()`) e devolve
-  `Either<InvalidInstitutionalEmailError, InstitutionalEmail>`.
-- `isValid(raw)` é o atalho booleano usado pela validação de formulário.
-- O VO é usado no **cliente** e no **servidor**, garantindo a mesma regra nos
-  dois lados.
+`@/domain/enterprise/entities/email-address.ts` normaliza o endereço (`trim().toLowerCase()`) e valida apenas o formato geral do e-mail. O domínio/sufixo não determina o tipo de usuário nem suas permissões. A criação e a alteração do papel são realizadas de forma explícita pelo painel administrativo.
 
 ### `User` (entidade)
 
-`@/domain/enterprise/entities/user.ts`:
-
-- `create(input, id?)` devolve `Either<InvalidInstitutionalEmailError, User>`.
-- `role` é **getter derivado**: `this.props.email.role`. Não há campo `role`
-  independente na entidade — o papel é sempre consequência do e-mail.
-- `emailAddress` expõe o endereço já normalizado.
+`@/domain/enterprise/entities/user.ts` devolve `Either<InvalidEmailError, User>` e guarda o papel persistido na conta (`student`, `professor` ou `admin`). O papel não é inferido a partir do e-mail.
 
 ## 6. Casos de uso (camada de aplicação)
 
@@ -190,8 +174,7 @@ expõe `useAuth()` com `{ user, loading, signIn, signInWithMicrosoft, signOut }`
 Aqui os `Left` de regra de negócio são convertidos em `throw` para a UI.
 
 - `AuthProvider` faz o wiring e usa `authClient.useSession()` para a sessão.
-- `validation.ts` centraliza os schemas Zod; a regra institucional reusa
-  `InstitutionalEmail.isValid`, mantendo cliente e servidor em sincronia.
+- `validation.ts` centraliza os schemas Zod e valida o formato geral de e-mail; nenhum sufixo específico é obrigatório.
 - `AuthProvider` é montado em `src/app/layout.tsx`.
 
 ## 9. Rotas e proteção (server-side)
@@ -204,10 +187,10 @@ Aqui os `Left` de regra de negócio são convertidos em `throw` para a UI.
 - `api/auth/[...all]/route.ts`: `toNextJsHandler(auth)` expõe os endpoints do
   better-auth.
 
-**Regra importante:** as páginas de servidor derivam o papel **do e-mail da
-sessão** via `toDomainUser(session.user)`, e **não** do campo `role` persistido
-no banco. As páginas usam `export const instant = false` para leitura de sessão
-a cada requisição (bloqueia a rota).
+**Regra importante:** o papel (`student`, `professor` ou `admin`) é explícito e
+vem do campo `role` persistido no banco, mapeado pela sessão. Nunca derive o
+papel do domínio/sufixo do e-mail. As páginas usam `export const instant = false`
+para leitura de sessão a cada requisição (bloqueia a rota).
 
 ## 10. Fluxos
 
@@ -227,10 +210,7 @@ a cada requisição (bloqueia a rota).
 2. `SignInWithMicrosoftUseCase` → `AuthRepository.signInWithMicrosoft` →
    `authClient.signIn.social({ provider: 'microsoft', ... })`.
 3. `callbackURL = /painel`, `errorCallbackURL = /login`.
-4. No servidor, o better-auth: usa `mapProfileToUser` (fallback do UPN
-   `preferred_username` quando falta o claim `email`) e o `databaseHooks.user.create.before`
-   valida o e-mail pelo `InstitutionalEmail` e **grava `role` derivado**; e-mail
-   inválido lança `APIError` `INVALID_INSTITUTIONAL_EMAIL`.
+4. No servidor, o better-auth usa `mapProfileToUser` (fallback do UPN `preferred_username` quando falta o claim `email`). O papel persistido da conta é mantido; contas criadas por autenticação social sem um papel explícito recebem `student` como padrão. O formato do e-mail é validado sem restrição de domínio.
 5. `LoginFeedback` traduz os códigos de erro do callback OAuth em mensagens PT.
 
 ## 11. Regra do papel e o bug do loop de redirecionamento
@@ -243,12 +223,9 @@ Correções aplicadas (as duas, juntas):
 
 1. **Migração de dados** `drizzle/20261011165539_rename_role_values`:
    `UPDATE "users" SET "role" = 'student' WHERE "role" = 'aluno'`.
-2. **Papel derivado na leitura**: as páginas de servidor passaram a usar
-   `toDomainUser(session.user)` (papel vindo do domínio do e-mail), ignorando o
-   valor persistido — resiliente a dados legados.
+2. **Papel persistido na leitura**: as páginas usam o papel definido na conta, sem derivá-lo do e-mail.
 
-A escrita do papel continua no servidor (hook de criação), e o valor persistido
-passa a ser sempre `student`/`professor`.
+A escrita do papel é feita no servidor, por cadastro ou gestão administrativa, e aceita `student`, `professor` e `admin` independentemente do sufixo do e-mail.
 
 ## 12. Banco de dados e migrações
 
@@ -257,8 +234,8 @@ passa a ser sempre `student`/`professor`.
   ver `usePlural` na config).
 - `users.role` é `text().$type<Role>()`, preenchido **apenas no servidor**;
   nunca vem do cliente.
-- `db/seed.ts` pré-provisiona contas; o papel é derivado do e-mail via
-  `InstitutionalEmail`.
+- `db/seed.ts` pré-provisiona contas com papéis explícitos.
+- `users.github_url` e `users.linkedin_url` armazenam os links públicos opcionais usados no perfil e nas páginas dos projetos.
 - Comandos: `npm run db:generate`, `db:migrate`, `db:push`, `db:seed`,
   `db:studio`, `db:check`.
 
@@ -266,10 +243,7 @@ passa a ser sempre `student`/`professor`.
 
 - **Vitest** (`vitest.config.ts`); os testes ficam ao lado do código
   (`*.test.ts`). Rodar: `npm test` (ou `npm run test:watch`).
-- Cobertura atual (14 testes):
-  - `institutional-email.test.ts` — derivação de papel, normalização, rejeição
-    de domínios inválidos, não confusão de sufixos, `isValid`.
-  - `user.test.ts` — criação da entidade e derivação de papel.
+- Cobertura inclui `email-address.test.ts` (normalização, aceitação de domínios diversos e rejeição de formato inválido) e `user.test.ts` (criação da entidade e papel explícito).
   - `sign-in.test.ts` — normalização do e-mail e propagação de erro, usando um
     `InMemoryAuthRepository` (o que demonstra a testabilidade da porta).
 

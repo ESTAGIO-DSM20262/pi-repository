@@ -41,7 +41,7 @@ export interface Project {
   summary: string
   cycle: string
   semester: number
-  advisor: { email: string; name: string }
+  advisor: { email: string; name: string; githubUrl?: string; linkedinUrl?: string }
   memberEmails: string[]
   teamMembers?: ProjectTeamMember[]
   languages: string[]

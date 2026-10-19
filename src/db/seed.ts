@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { accounts, users } from '@/db/schema'
-import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { auth } from '@/libs/auth'
 
@@ -44,12 +43,6 @@ async function main() {
 
   for (const account of TEST_USERS) {
     const normalizedEmail = account.email.trim().toLowerCase()
-    const validation = InstitutionalEmail.create(normalizedEmail)
-
-    if (validation.isLeft()) {
-      throw new Error(`E-mail de teste não permitido: ${normalizedEmail}`)
-    }
-
     const existingUsers = await db
       .select({ id: users.id })
       .from(users)

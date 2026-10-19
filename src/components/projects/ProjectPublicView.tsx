@@ -9,6 +9,7 @@ import type {
   ProjectTechnologyGroup,
 } from '@/domain/enterprise/entities/project'
 import { getNameInitials } from '@/libs/initials'
+import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
 interface ProjectPublicViewProps {
   project: Project
@@ -130,6 +131,8 @@ function DashboardPreview() {
 
 function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
   const initials = getNameInitials(member.name)
+  const githubUrl = getSafeSocialProfileUrl(member.githubUrl, 'github')
+  const linkedinUrl = getSafeSocialProfileUrl(member.linkedinUrl, 'linkedin')
 
   return (
     <li className="flex min-w-0 items-center gap-2.5 py-1.5 sm:gap-3">
@@ -140,9 +143,9 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
         {member.name}
       </span>
       <div className="flex shrink-0 items-center gap-3 text-[#6f514b]">
-        {member.githubUrl ? (
+        {githubUrl && (
           <a
-            href={member.githubUrl}
+            href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
             title={`Abrir GitHub de ${member.name}`}
@@ -151,15 +154,10 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
           >
             <GithubIcon />
           </a>
-        ) : (
-          <span title="Perfil do GitHub não cadastrado">
-            <GithubIcon />
-            <span className="sr-only">GitHub de {member.name} não cadastrado</span>
-          </span>
         )}
-        {member.linkedinUrl ? (
+        {linkedinUrl && (
           <a
-            href={member.linkedinUrl}
+            href={linkedinUrl}
             target="_blank"
             rel="noopener noreferrer"
             title={`Abrir LinkedIn de ${member.name}`}
@@ -168,11 +166,6 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
           >
             <LinkedInIcon />
           </a>
-        ) : (
-          <span title="Perfil do LinkedIn não cadastrado">
-            <LinkedInIcon />
-            <span className="sr-only">LinkedIn de {member.name} não cadastrado</span>
-          </span>
         )}
       </div>
     </li>
@@ -289,6 +282,8 @@ export default function ProjectPublicView({
   const externalLinks = details?.externalLinks ?? []
   const courseLabel = details?.courseLabel ?? `DSM — ${project.semester}º Semestre`
   const summary = project.summary
+  const advisorGithubUrl = getSafeSocialProfileUrl(project.advisor.githubUrl, 'github')
+  const advisorLinkedinUrl = getSafeSocialProfileUrl(project.advisor.linkedinUrl, 'linkedin')
   const progressMembers = project.memberEmails.map((email, index) => {
     const normalizedEmail = email.trim().toLowerCase()
     const matchingMember =
@@ -361,9 +356,35 @@ export default function ProjectPublicView({
               <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
                 Orientador
               </p>
-              <p className="mt-0.5 text-[11px] font-bold leading-snug text-slate-900 sm:text-xs md:text-[13px]">
-                {project.advisor.name}
-              </p>
+              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <p className="text-[11px] font-bold leading-snug text-slate-900 sm:text-xs md:text-[13px]">
+                  {project.advisor.name}
+                </p>
+                {advisorGithubUrl && (
+                  <a
+                    href={advisorGithubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Abrir GitHub de ${project.advisor.name}`}
+                    aria-label={`GitHub de ${project.advisor.name}`}
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-primary hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    <GithubIcon />
+                  </a>
+                )}
+                {advisorLinkedinUrl && (
+                  <a
+                    href={advisorLinkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`Abrir LinkedIn de ${project.advisor.name}`}
+                    aria-label={`LinkedIn de ${project.advisor.name}`}
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-primary hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                  >
+                    <LinkedInIcon />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
           <div className="rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:min-w-[190px] md:items-center md:gap-2.5 md:border-l md:border-y-0 md:border-r-0 md:rounded-none md:bg-transparent md:py-0 md:pl-5 md:pr-0">

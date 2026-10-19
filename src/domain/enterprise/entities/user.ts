@@ -1,22 +1,22 @@
 import { type Either, left, right } from '@/core/either'
 import { Entity } from '@/core/entities/entity'
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import type { InvalidInstitutionalEmailError } from '../errors/invalid-institutional-email-error'
-import { InstitutionalEmail } from './institutional-email'
+import type { InvalidEmailError } from '../errors/invalid-email-error'
+import { EmailAddress } from './email-address'
 import type { Role } from './role'
 
 interface UserProps {
   name: string
-  email: InstitutionalEmail
+  email: EmailAddress
   emailVerified: boolean
   image: string | null
   createdAt: Date
-  role?: Role
+  role: Role
 }
 
 interface CreateUserInput {
   name: string
-  email: string | InstitutionalEmail
+  email: string | EmailAddress
   emailVerified?: boolean
   image?: string | null
   createdAt?: Date
@@ -37,7 +37,7 @@ export class User extends Entity<UserProps> {
   }
 
   get role(): Role {
-    return this.props.role ?? this.props.email.role
+    return this.props.role
   }
 
   get emailVerified() {
@@ -55,19 +55,18 @@ export class User extends Entity<UserProps> {
   static create(
     input: CreateUserInput,
     id?: UniqueEntityId | string,
-  ): Either<InvalidInstitutionalEmailError, User> {
-    let email: InstitutionalEmail
+  ): Either<InvalidEmailError, User> {
+    let email: EmailAddress
 
-    if (input.email instanceof InstitutionalEmail) {
+    if (input.email instanceof EmailAddress) {
       email = input.email
     } else {
-      const result = InstitutionalEmail.create(input.email)
+      const result = EmailAddress.create(input.email)
       if (result.isLeft()) return left(result.value)
       email = result.value
     }
 
     const uniqueId = typeof id === 'string' ? new UniqueEntityId(id) : (id ?? new UniqueEntityId())
-
     const user = new User(
       {
         name: input.name,
@@ -75,7 +74,7 @@ export class User extends Entity<UserProps> {
         emailVerified: input.emailVerified ?? false,
         image: input.image ?? null,
         createdAt: input.createdAt ?? new Date(),
-        role: input.role,
+        role: input.role ?? 'student',
       },
       uniqueId,
     )

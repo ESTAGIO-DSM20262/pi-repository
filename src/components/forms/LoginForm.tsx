@@ -77,7 +77,7 @@ export default function LoginForm() {
         description:
           err instanceof Error
             ? err.message
-            : 'Sua conta não está habilitada. Verifique se o e-mail é institucional e se já foi cadastrado.',
+            : 'Sua conta não está habilitada. Verifique se a conta foi cadastrada e está habilitada.',
       })
     }
   }
@@ -95,7 +95,7 @@ export default function LoginForm() {
             autoComplete="username"
             inputMode="email"
             autoCapitalize="none"
-            placeholder="Digite seu e-mail institucional"
+            placeholder="Digite seu e-mail"
             className={inputClass}
             aria-invalid={errors.email ? true : undefined}
             {...register('email')}

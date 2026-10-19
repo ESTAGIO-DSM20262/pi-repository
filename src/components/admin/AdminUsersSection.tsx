@@ -2,7 +2,9 @@
 
 import Link from 'next/link'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import Pagination from '@/components/projects/Pagination'
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog'
+import SelectDropdown from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -59,6 +61,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
   const [pendingDeactivation, setPendingDeactivation] = useState<AdminUserRecord | null>(null)
+  const [pendingActivation, setPendingActivation] = useState<AdminUserRecord | null>(null)
   const [changingStatus, setChangingStatus] = useState(false)
 
   const loadUsers = useCallback(async () => {
@@ -96,8 +99,6 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
   const pageCount = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
   const safePage = Math.min(page, pageCount)
   const visibleUsers = filteredUsers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
-  const shownFrom = filteredUsers.length ? (safePage - 1) * PAGE_SIZE + 1 : 0
-  const shownTo = Math.min(safePage * PAGE_SIZE, filteredUsers.length)
 
   function openEdit(user: AdminUserRecord) {
     setEditing(user)
@@ -153,10 +154,12 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
           : 'Usuário desativado. As sessões existentes foram encerradas.',
       )
       setPendingDeactivation(null)
+      setPendingActivation(null)
       await loadUsers()
     } catch (error) {
       setActionError(error instanceof Error ? error.message : 'Falha ao alterar status do usuário.')
       setPendingDeactivation(null)
+      setPendingActivation(null)
     } finally {
       setChangingStatus(false)
     }
@@ -234,22 +237,25 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
             className="h-10 w-full rounded-lg border border-transparent bg-[#f2f3f4] pl-9 pr-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10"
           />
         </label>
-        <label className="sm:w-[160px]">
-          <span className="sr-only">Filtrar por perfil</span>
-          <select
+        <div className="sm:w-[190px]">
+          <SelectDropdown
             value={roleFilter}
-            onChange={(event) => {
-              setRoleFilter(event.target.value as 'all' | Role)
+            ariaLabel="Filtrar por perfil"
+            size="compact"
+            tone="muted"
+            width="full"
+            options={[
+              { value: 'all', label: 'Todos os perfis' },
+              { value: 'student', label: 'Aluno' },
+              { value: 'professor', label: 'Professor' },
+              { value: 'admin', label: 'Administrador' },
+            ]}
+            onChange={(value) => {
+              setRoleFilter(value as 'all' | Role)
               setPage(1)
             }}
-            className="cursor-pointer h-10 w-full rounded-lg border border-transparent bg-[#f2f3f4] px-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white"
-          >
-            <option value="all">Todos os Perfis</option>
-            <option value="student">Aluno</option>
-            <option value="professor">Professor</option>
-            <option value="admin">Administrador</option>
-          </select>
-        </label>
+          />
+        </div>
         <button
           type="button"
           onClick={() => {
@@ -271,7 +277,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
             <tr>
               <th className="px-4 py-3.5">Usuário / Nome</th>
               <th className="px-4 py-3.5">R.A. / Registro acadêmico</th>
-              <th className="px-4 py-3.5">E-mail institucional</th>
+              <th className="px-4 py-3.5">E-mail</th>
               <th className="px-4 py-3.5">Perfil</th>
               <th className="px-4 py-3.5">Status</th>
               <th className="px-4 py-3.5">Ações</th>
@@ -348,7 +354,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                         type="button"
                         onClick={() => {
                           if (user.active) setPendingDeactivation(user)
-                          else void changeUserStatus(user, true)
+                          else setPendingActivation(user)
                         }}
                         disabled={changingStatus || (user.active && user.id === currentUserId)}
                         title={
@@ -382,31 +388,13 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
         </table>
       </div>
 
-      <div className="mt-3 flex flex-col gap-3 text-[11px] text-[#765e58] sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          Mostrando {shownFrom}–{shownTo} de {filteredUsers.length} usuários cadastrados
-        </p>
-        <div className="flex items-center gap-1 self-end sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setPage((current) => Math.max(1, current - 1))}
-            disabled={safePage <= 1}
-            className="cursor-pointer rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Anterior
-          </button>
-          <span className="min-w-7 rounded-md bg-primary px-2.5 py-1.5 text-center font-bold text-white">
-            {safePage}
-          </span>
-          <button
-            type="button"
-            onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
-            disabled={safePage >= pageCount}
-            className="cursor-pointer rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Próxima
-          </button>
-        </div>
+      <div className="mt-4">
+        <Pagination
+          page={safePage}
+          pageSize={PAGE_SIZE}
+          total={filteredUsers.length}
+          onChange={setPage}
+        />
       </div>
 
       {editing && (
@@ -459,7 +447,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                 />
               </label>
               <label className="block text-xs font-semibold text-slate-700">
-                E-mail institucional
+                E-mail
                 <input
                   required
                   type="email"
@@ -501,26 +489,35 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                   />
                 </label>
               </div>
-              <label className="block text-xs font-semibold text-slate-700">
-                Perfil
-                <select
-                  disabled={editing.id === currentUserId}
-                  value={editForm.role}
-                  onChange={(event) =>
-                    setEditForm((current) => ({ ...current, role: event.target.value as Role }))
-                  }
-                  className={`cursor-pointer ${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
-                >
-                  <option value="student">Aluno</option>
-                  <option value="professor">Professor</option>
-                  <option value="admin">Administrador</option>
-                </select>
+              <div>
+                <span className="block text-xs font-semibold text-slate-700">Perfil</span>
+                {editing.id === currentUserId ? (
+                  <div className={`${inputClass} flex items-center bg-slate-100 text-slate-500`}>
+                    {ROLE_LABEL[editForm.role]}
+                  </div>
+                ) : (
+                  <SelectDropdown
+                    value={editForm.role}
+                    ariaLabel="Perfil do usuário"
+                    width="full"
+                    tone="muted"
+                    className="mt-1.5"
+                    options={[
+                      { value: 'student', label: 'Aluno' },
+                      { value: 'professor', label: 'Professor' },
+                      { value: 'admin', label: 'Administrador' },
+                    ]}
+                    onChange={(value) =>
+                      setEditForm((current) => ({ ...current, role: value as Role }))
+                    }
+                  />
+                )}
                 {editing.id === currentUserId && (
                   <span className="mt-1 block text-[10px] font-normal text-text-muted">
                     Seu próprio perfil não pode ser alterado aqui.
                   </span>
                 )}
-              </label>
+              </div>
             </div>
             {actionError && (
               <div
@@ -567,6 +564,25 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
         onCancel={() => setPendingDeactivation(null)}
         onConfirm={() =>
           pendingDeactivation ? changeUserStatus(pendingDeactivation, false) : undefined
+        }
+      />
+
+      <ConfirmationDialog
+        open={pendingActivation !== null}
+        title="Reativar conta?"
+        description={
+          pendingActivation
+            ? `A conta de ${pendingActivation.name} será reativada e poderá voltar a acessar o Acervo Acadêmico. Deseja continuar?`
+            : ''
+        }
+        icon="fi-rr-check-circle"
+        tone="primary"
+        confirmLabel="Reativar conta"
+        cancelLabel="Manter inativa"
+        pending={changingStatus}
+        onCancel={() => setPendingActivation(null)}
+        onConfirm={() =>
+          pendingActivation ? changeUserStatus(pendingActivation, true) : undefined
         }
       />
     </section>

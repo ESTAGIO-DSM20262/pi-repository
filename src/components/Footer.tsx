@@ -21,9 +21,9 @@ export default function Footer() {
           </p>
         ) : (
           <p className="max-w-[280px] text-center text-[11px] leading-relaxed text-gray-500">
-            Acesso unificado com credenciais institucionais
+            Acesso unificado com a conta cadastrada
             <br />
-            (@aluno.sp.gov.br ou @cps.sp.gov.br)
+            (use o e-mail vinculado à sua conta)
           </p>
         )}
       </div>

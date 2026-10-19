@@ -5,7 +5,7 @@ import { nextCookies } from 'better-auth/next-js'
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
-import { InstitutionalEmail } from '@/domain/enterprise/entities/institutional-email'
+import { isRole } from '@/domain/enterprise/entities/role'
 
 const microsoftClientId = process.env.MICROSOFT_CLIENT_ID
 const microsoftClientSecret = process.env.MICROSOFT_CLIENT_SECRET
@@ -59,23 +59,17 @@ export const auth = betterAuth({
       registrationNumber: { type: 'string', required: false, input: false },
       course: { type: 'string', required: false, input: false },
       active: { type: 'boolean', required: false, defaultValue: true, input: false },
+      githubUrl: { type: 'string', required: false, input: false },
+      linkedinUrl: { type: 'string', required: false, input: false },
     },
   },
 
   databaseHooks: {
     user: {
       create: {
-        before: async (newUser) => {
-          const email = InstitutionalEmail.create(String(newUser.email ?? ''))
-          if (email.isLeft()) {
-            throw new APIError('BAD_REQUEST', {
-              code: 'INVALID_INSTITUTIONAL_EMAIL',
-              message:
-                'E-mail institucional inválido. Use o e-mail institucional cadastrado na instituição.',
-            })
-          }
-          return { data: { ...newUser, role: email.value.role } }
-        },
+        before: async (newUser) => ({
+          data: { ...newUser, role: isRole(newUser.role) ? newUser.role : 'student' },
+        }),
       },
     },
     session: {
@@ -104,14 +98,6 @@ export const auth = betterAuth({
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === '/sign-in/email') {
         const email = (ctx.body as { email?: unknown } | undefined)?.email
-        if (typeof email === 'string' && !InstitutionalEmail.isValid(email)) {
-          throw new APIError('BAD_REQUEST', {
-            code: 'INVALID_INSTITUTIONAL_EMAIL',
-            message:
-              'E-mail institucional inválido. Use o e-mail institucional cadastrado na instituição.',
-          })
-        }
-
         if (typeof email === 'string') {
           const existingUser = await db
             .select({ active: users.active })

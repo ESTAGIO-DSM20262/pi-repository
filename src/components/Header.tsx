@@ -75,7 +75,7 @@ function AccountMenu({
               </div>
             </div>
             <Link
-              href={PROFILE_ROUTE[role]}
+              href="/perfil"
               role="menuitem"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-3 text-sm text-slate-700 transition hover:bg-surface-secondary hover:text-primary"
