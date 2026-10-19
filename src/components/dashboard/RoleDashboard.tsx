@@ -412,14 +412,14 @@ export default function RoleDashboard({
       <button
         type="button"
         onClick={showPrototypeNotice}
-        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
+        className="cursor-pointer inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
       >
         <i className="fi fi-rr-plus flex" aria-hidden="true" /> Novo Projeto
       </button>
     ) : undefined
 
   return (
-    <div className="min-h-[calc(100vh-7rem)] bg-background">
+    <div className="bg-background">
       <section className="border-b border-border-light bg-background">
         <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-white text-primary shadow-sm sm:h-12 sm:w-12">
@@ -519,7 +519,7 @@ export default function RoleDashboard({
             <button
               type="button"
               onClick={() => setMainNotice(null)}
-              className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+              className="cursor-pointer mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
             >
               Entendi
             </button>

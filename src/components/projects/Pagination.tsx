@@ -42,7 +42,7 @@ export default function Pagination({ page, pageSize, total, onChange }: Paginati
             type="button"
             disabled={page === 1}
             onClick={() => onChange(page - 1)}
-            className={`${nav} text-slate-700 hover:text-primary`}
+            className={`cursor-pointer ${nav} text-slate-700 hover:text-primary`}
           >
             <i className="fi fi-rr-angle-small-left flex" aria-hidden="true" /> Anterior
           </button>
@@ -73,7 +73,7 @@ export default function Pagination({ page, pageSize, total, onChange }: Paginati
             type="button"
             disabled={page === last}
             onClick={() => onChange(page + 1)}
-            className={`${nav} text-slate-900 hover:text-primary`}
+            className={`cursor-pointer ${nav} text-slate-900 hover:text-primary`}
           >
             Próxima <i className="fi fi-rr-angle-small-right flex" aria-hidden="true" />
           </button>

@@ -22,5 +22,4 @@ export const alertClass =
 export const infoBoxClass = 'rounded-lg border border-border bg-surface-secondary'
 export const cardClass = 'rounded-xl border border-border bg-surface shadow-sm'
 
-export const pageClass =
-  'flex min-h-[calc(100vh-10rem)] items-center justify-center px-4 py-8 sm:px-6 sm:py-12'
+export const pageClass = 'flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12'

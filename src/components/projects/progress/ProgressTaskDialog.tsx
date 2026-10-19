@@ -211,7 +211,7 @@ export default function ProgressTaskDialog({
             onClick={onClose}
             disabled={saving}
             aria-label="Fechar"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 disabled:opacity-50"
+            className="cursor-pointer flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 disabled:opacity-50"
           >
             <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
           </button>
@@ -277,7 +277,7 @@ export default function ProgressTaskDialog({
                 </label>
                 <select
                   id="progress-task-target"
-                  className={inputClass}
+                  className={`${inputClass} cursor-pointer`}
                   value={targetStudentEmail}
                   onChange={(event) => setTargetStudentEmail(event.target.value)}
                 >
@@ -316,7 +316,7 @@ export default function ProgressTaskDialog({
                 </label>
                 <select
                   id="progress-task-status"
-                  className={inputClass}
+                  className={`${inputClass} cursor-pointer`}
                   value={status}
                   onChange={(event) => setStatus(event.target.value as ProjectProgressTaskStatus)}
                 >
@@ -360,14 +360,14 @@ export default function ProgressTaskDialog({
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="cursor-pointer inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65"
+              className="cursor-pointer inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65"
             >
               {saving ? (
                 <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />

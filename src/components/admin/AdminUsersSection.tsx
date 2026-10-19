@@ -210,7 +210,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
           <button
             type="button"
             onClick={() => void loadUsers()}
-            className="h-9 shrink-0 rounded-lg border border-rose-200 bg-white px-3 font-semibold text-rose-900 hover:bg-rose-100"
+            className="cursor-pointer h-9 shrink-0 rounded-lg border border-rose-200 bg-white px-3 font-semibold text-rose-900 hover:bg-rose-100"
           >
             Tentar novamente
           </button>
@@ -242,7 +242,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
               setRoleFilter(event.target.value as 'all' | Role)
               setPage(1)
             }}
-            className="h-10 w-full rounded-lg border border-transparent bg-[#f2f3f4] px-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white"
+            className="cursor-pointer h-10 w-full rounded-lg border border-transparent bg-[#f2f3f4] px-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white"
           >
             <option value="all">Todos os Perfis</option>
             <option value="student">Aluno</option>
@@ -259,7 +259,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
           }}
           title="Limpar filtros da listagem"
           aria-label="Limpar filtros da listagem"
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f3f4] text-[#765e58] transition hover:bg-primary-light hover:text-primary"
+          className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f3f4] text-[#765e58] transition hover:bg-primary-light hover:text-primary"
         >
           <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
         </button>
@@ -329,7 +329,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                         onClick={() => openEdit(user)}
                         title="Editar usuário"
                         aria-label={`Editar ${user.name}`}
-                        className="flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary"
+                        className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary"
                       >
                         <i className="fi fi-rr-pencil flex" aria-hidden="true" />
                       </button>
@@ -340,7 +340,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                         }
                         title="Ver histórico"
                         aria-label={`Ver histórico de ${user.name}`}
-                        className="flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary"
+                        className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary"
                       >
                         <i className="fi fi-rr-time-past flex" aria-hidden="true" />
                       </button>
@@ -359,7 +359,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                             : 'Reativar usuário'
                         }
                         aria-label={`${user.active ? 'Desativar' : 'Reativar'} ${user.name}`}
-                        className="flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                        className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <i
                           className={`fi ${user.active ? 'fi-rr-ban' : 'fi-rr-check-circle'} flex`}
@@ -391,7 +391,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
             type="button"
             onClick={() => setPage((current) => Math.max(1, current - 1))}
             disabled={safePage <= 1}
-            className="rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
           >
             Anterior
           </button>
@@ -402,7 +402,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
             type="button"
             onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
             disabled={safePage >= pageCount}
-            className="rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
+            className="cursor-pointer rounded-md bg-slate-100 px-3 py-1.5 font-semibold text-slate-700 transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-40"
           >
             Próxima
           </button>
@@ -439,7 +439,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                 disabled={saving}
                 onClick={() => setEditing(null)}
                 aria-label="Fechar"
-                className="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
+                className="cursor-pointer rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
               >
                 ✕
               </button>
@@ -509,7 +509,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                   onChange={(event) =>
                     setEditForm((current) => ({ ...current, role: event.target.value as Role }))
                   }
-                  className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
+                  className={`cursor-pointer ${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
                 >
                   <option value="student">Aluno</option>
                   <option value="professor">Professor</option>
@@ -535,14 +535,14 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
-                className="rounded-lg border border-border px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="cursor-pointer rounded-lg border border-border px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60"
+                className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60"
               >
                 {saving ? 'Salvando…' : 'Salvar alterações'}
               </button>

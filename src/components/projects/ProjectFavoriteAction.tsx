@@ -27,7 +27,7 @@ export default function ProjectFavoriteAction({
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
+          className="cursor-pointer text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
         >
           Tentar novamente
         </button>

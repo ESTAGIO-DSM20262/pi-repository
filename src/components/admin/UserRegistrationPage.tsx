@@ -47,7 +47,7 @@ function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => 
           type="button"
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
-          className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
+          className={`cursor-pointer inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
         >
           <i className={`fi ${option.icon} flex text-sm`} aria-hidden="true" />
           {option.label}
@@ -373,7 +373,7 @@ export default function UserRegistrationPage() {
                     <button
                       type="button"
                       onClick={() => void navigator.clipboard.writeText(singleCredential.password)}
-                      className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 text-xs font-semibold text-slate-700 transition hover:bg-surface-secondary"
+                      className="cursor-pointer inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-border px-3 text-xs font-semibold text-slate-700 transition hover:bg-surface-secondary"
                     >
                       <i className="fi fi-rr-copy flex" aria-hidden="true" /> Copiar senha
                     </button>
@@ -393,7 +393,7 @@ export default function UserRegistrationPage() {
                 <button
                   type="submit"
                   disabled={savingSingle}
-                  className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-wait disabled:opacity-60"
+                  className="cursor-pointer inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-wait disabled:opacity-60"
                 >
                   <i
                     className={`fi ${savingSingle ? 'fi-rr-spinner' : 'fi-rr-user-add'} flex`}
@@ -450,7 +450,7 @@ export default function UserRegistrationPage() {
                         setFile(null)
                         setBatchResult(null)
                       }}
-                      className="mt-2 text-xs font-semibold text-primary hover:underline"
+                      className="cursor-pointer mt-2 text-xs font-semibold text-primary hover:underline"
                     >
                       Remover arquivo
                     </button>
@@ -467,7 +467,7 @@ export default function UserRegistrationPage() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="mt-3 inline-flex h-9 items-center justify-center rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
+                      className="cursor-pointer mt-3 inline-flex h-9 items-center justify-center rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
                     >
                       Selecionar arquivo
                     </button>
@@ -546,7 +546,7 @@ export default function UserRegistrationPage() {
                     <button
                       type="button"
                       onClick={() => downloadCredentials(batchResult.credentials)}
-                      className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover"
+                      className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover"
                     >
                       <i className="fi fi-rr-download flex" aria-hidden="true" /> Baixar{' '}
                       {batchResult.credentials.length} credenciais (.csv)
@@ -602,7 +602,7 @@ export default function UserRegistrationPage() {
                 <button
                   type="submit"
                   disabled={!file || savingBatch}
-                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#e5e7e9] px-4 text-xs font-semibold text-slate-800 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="cursor-pointer inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#e5e7e9] px-4 text-xs font-semibold text-slate-800 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <i
                     className={`fi ${savingBatch ? 'fi-rr-spinner' : 'fi-rr-file-import'} flex`}

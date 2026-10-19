@@ -184,7 +184,7 @@ export default function ProjectProgressSection({
             <button
               type="button"
               onClick={openCreateDialog}
-              className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 sm:text-sm"
+              className="cursor-pointer inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 sm:text-sm"
             >
               <i className="fi fi-rr-plus flex" aria-hidden="true" /> Nova tarefa
             </button>
@@ -202,7 +202,7 @@ export default function ProjectProgressSection({
             onClick={() => {
               void loadTasks()
             }}
-            className="min-h-9 shrink-0 rounded-md border border-red-200 bg-white px-3 text-xs font-bold text-red-800 transition hover:bg-red-100"
+            className="cursor-pointer min-h-9 shrink-0 rounded-md border border-red-200 bg-white px-3 text-xs font-bold text-red-800 transition hover:bg-red-100"
           >
             Tentar novamente
           </button>
@@ -241,7 +241,7 @@ export default function ProjectProgressSection({
             <button
               type="button"
               onClick={openCreateDialog}
-              className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-bold text-white transition hover:bg-primary-hover"
+              className="cursor-pointer mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-primary px-4 text-xs font-bold text-white transition hover:bg-primary-hover"
             >
               <i className="fi fi-rr-plus flex" aria-hidden="true" /> Criar primeira tarefa
             </button>
@@ -302,7 +302,7 @@ export default function ProjectProgressSection({
                       <button
                         type="button"
                         onClick={() => openEditDialog(selectedTask)}
-                        className="inline-flex min-h-8 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-bold text-primary transition hover:border-primary hover:bg-primary-light/40"
+                        className="cursor-pointer inline-flex min-h-8 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-bold text-primary transition hover:border-primary hover:bg-primary-light/40"
                       >
                         <i className="fi fi-rr-edit flex" aria-hidden="true" /> Editar tarefa
                       </button>
@@ -315,7 +315,7 @@ export default function ProjectProgressSection({
                         type="button"
                         aria-expanded={showHistory}
                         onClick={() => setShowHistory((value) => !value)}
-                        className="flex min-h-9 w-full items-center justify-between gap-2 text-left text-xs font-bold text-slate-700 hover:text-primary"
+                        className="cursor-pointer flex min-h-9 w-full items-center justify-between gap-2 text-left text-xs font-bold text-slate-700 hover:text-primary"
                       >
                         <span className="flex items-center gap-2">
                           <i className="fi fi-rr-time-past flex text-primary" aria-hidden="true" />{' '}
@@ -423,7 +423,7 @@ export default function ProjectProgressSection({
                       type="button"
                       onClick={() => setSelectedTaskId(task.id)}
                       aria-pressed={selected}
-                      className="min-w-0 flex-1 py-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                      className="cursor-pointer min-w-0 flex-1 py-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span
@@ -449,7 +449,7 @@ export default function ProjectProgressSection({
                         onClick={() => openEditDialog(task)}
                         aria-label={`Editar ${task.title}`}
                         title="Editar tarefa"
-                        className="flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-md text-slate-500 transition hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        className="cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center self-start rounded-md text-slate-500 transition hover:bg-white hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                       >
                         <i className="fi fi-rr-edit flex" aria-hidden="true" />
                       </button>

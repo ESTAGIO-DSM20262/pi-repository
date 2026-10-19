@@ -4,18 +4,29 @@ import { INSTITUTIONAL_EMAIL_VALIDATION_MESSAGE } from './institutional-email-hi
 
 const INSTITUTIONAL_EMAIL_MESSAGE = INSTITUTIONAL_EMAIL_VALIDATION_MESSAGE
 
-const emailFormat = z.email('Digite um e-mail válido.')
+const EMAIL_REQUIRED_MESSAGE = 'Informe seu e-mail.'
+const EMAIL_FORMAT_MESSAGE = 'Digite um e-mail válido.'
+const PASSWORD_REQUIRED_MESSAGE = 'Informe sua senha.'
+
+export const LOGIN_EMAIL_ERROR_MESSAGES = [
+  EMAIL_REQUIRED_MESSAGE,
+  EMAIL_FORMAT_MESSAGE,
+  INSTITUTIONAL_EMAIL_MESSAGE,
+] as const
+export const LOGIN_PASSWORD_ERROR_MESSAGES = [PASSWORD_REQUIRED_MESSAGE] as const
+
+const emailFormat = z.email(EMAIL_FORMAT_MESSAGE)
 
 export const institutionalEmailSchema = z
   .string()
   .trim()
-  .min(1, 'Informe seu e-mail.')
-  .refine((value) => emailFormat.safeParse(value).success, 'Digite um e-mail válido.')
+  .min(1, EMAIL_REQUIRED_MESSAGE)
+  .refine((value) => emailFormat.safeParse(value).success, EMAIL_FORMAT_MESSAGE)
   .refine((value) => InstitutionalEmail.isValid(value), INSTITUTIONAL_EMAIL_MESSAGE)
 
 export const loginSchema = z.object({
   email: institutionalEmailSchema,
-  password: z.string().min(1, 'Informe sua senha.'),
+  password: z.string().min(1, PASSWORD_REQUIRED_MESSAGE),
 })
 
 export const forgotPasswordSchema = z.object({

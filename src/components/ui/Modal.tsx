@@ -144,7 +144,7 @@ export default function Modal({
           ref={buttonRef}
           type="button"
           onClick={onClose}
-          className={`mt-6 sm:mt-7 ${primaryButtonClass}`}
+          className={`cursor-pointer mt-6 sm:mt-7 ${primaryButtonClass}`}
         >
           {buttonLabel}
         </button>

@@ -48,7 +48,6 @@ html {
 }
 
 body {
-  min-height: 100vh;
   margin: 0;
 
   background-color: var(--background);
@@ -61,7 +60,15 @@ body {
 
 .acervo-app-shell {
   display: flex;
+  min-height: 100vh;
   flex-direction: column;
+  overflow: clip;
+}
+
+@supports (min-height: 100dvh) {
+  .acervo-app-shell {
+    min-height: 100dvh;
+  }
 }
 
 .acervo-app-main {
@@ -71,9 +78,23 @@ body {
   flex-direction: column;
 }
 
+.acervo-app-main > * {
+  flex: 1 0 auto;
+}
+
 .acervo-app-footer {
   flex-shrink: 0;
   margin-top: auto;
+}
+
+button,
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled {
+  cursor: not-allowed;
 }
 
 .modal-scrollbar {

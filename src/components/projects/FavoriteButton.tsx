@@ -88,7 +88,7 @@ export default function FavoriteButton({
         }
         aria-pressed={isFavorite}
         title={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-        className={`inline-flex ${buttonSize} items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary-light/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-60 ${isFavorite && showLabel ? 'bg-primary-light/70' : ''}`}
+        className={`cursor-pointer inline-flex ${buttonSize} items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary-light/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-60 ${isFavorite && showLabel ? 'bg-primary-light/70' : ''}`}
       >
         <svg
           key={`${animationKey}-${isFavorite ? 'on' : 'off'}`}

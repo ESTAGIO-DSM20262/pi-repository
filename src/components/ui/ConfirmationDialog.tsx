@@ -160,7 +160,7 @@ export default function ConfirmationDialog({
             type="button"
             disabled={pending}
             onClick={onCancel}
-            className="inline-flex min-h-11 min-w-[120px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+            className="cursor-pointer inline-flex min-h-11 min-w-[120px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
           >
             {cancelLabel}
           </button>
@@ -170,7 +170,7 @@ export default function ConfirmationDialog({
             onClick={() => {
               void onConfirm()
             }}
-            className={`inline-flex min-h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65 sm:flex-none ${buttonTone}`}
+            className={`cursor-pointer inline-flex min-h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65 sm:flex-none ${buttonTone}`}
           >
             {pending && <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />}
             {pending ? 'Processando…' : confirmLabel}
