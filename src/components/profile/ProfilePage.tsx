@@ -5,7 +5,7 @@ import { useState } from 'react'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
-// import { changePassword } from '@/presentation/profile/change-password'
+import { changePassword } from '@/presentation/profile/change-password'
 import { validateSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
 export interface ProfileRecord {
