@@ -5,6 +5,7 @@ import { useState } from 'react'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+// import { changePassword } from '@/presentation/profile/change-password'
 import { validateSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
 export interface ProfileRecord {
@@ -44,6 +45,15 @@ async function readError(response: Response) {
   return payload.error ?? 'Não foi possível salvar as alterações.'
 }
 
+function validateNewPassword(password: string, confirmation: string): string {
+  if (password.length < 8) return 'A senha deve ter no mínimo 8 caracteres.'
+  if (!/[a-z]/.test(password)) return 'Inclua ao menos uma letra minúscula.'
+  if (!/[A-Z]/.test(password)) return 'Inclua ao menos uma letra maiúscula.'
+  if (!/[\d\W_]/.test(password)) return 'Inclua ao menos um número ou símbolo.'
+  if (password !== confirmation) return 'As senhas não coincidem.'
+  return ''
+}
+
 export default function ProfilePage({ initialProfile }: { initialProfile: ProfileRecord }) {
   const [profile, setProfile] = useState(initialProfile)
   const [name, setName] = useState(initialProfile.name)
@@ -59,6 +69,27 @@ export default function ProfilePage({ initialProfile }: { initialProfile: Profil
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordTouched, setPasswordTouched] = useState({ new: false, confirm: false })
+  const [passwordSaving, setPasswordSaving] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordNotice, setPasswordNotice] = useState('')
+  const passwordFieldError = validateNewPassword(newPassword, confirmPassword)
+  const newPasswordError =
+    passwordTouched.new &&
+    newPassword &&
+    passwordFieldError &&
+    !passwordFieldError.includes('coincidem')
+      ? passwordFieldError
+      : ''
+  const confirmPasswordError =
+    passwordTouched.confirm && confirmPassword && newPassword !== confirmPassword
+      ? 'As senhas não coincidem.'
+      : ''
+
   const isAdmin = profile.role === 'admin'
   const roleColor =
     profile.role === 'admin'
@@ -105,6 +136,37 @@ export default function ProfilePage({ initialProfile }: { initialProfile: Profil
       setError(saveError instanceof Error ? saveError.message : 'Não foi possível salvar o perfil.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function submitPassword(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setPasswordError('')
+    setPasswordNotice('')
+    setPasswordTouched({ new: true, confirm: true })
+
+    const validationError = validateNewPassword(newPassword, confirmPassword)
+    if (validationError) {
+      setPasswordError(validationError)
+      return
+    }
+
+    setPasswordSaving(true)
+    try {
+      const result = await changePassword({ currentPassword, newPassword })
+      if (!result.ok) {
+        setPasswordError(result.error)
+        return
+      }
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setPasswordTouched({ new: false, confirm: false })
+      setPasswordNotice('Senha redefinida com sucesso.')
+    } catch {
+      setPasswordError('Não foi possível redefinir a senha. Tente novamente.')
+    } finally {
+      setPasswordSaving(false)
     }
   }
 
@@ -342,6 +404,125 @@ export default function ProfilePage({ initialProfile }: { initialProfile: Profil
                   : isAdmin
                     ? 'Salvar alterações'
                     : 'Salvar perfis profissionais'}
+              </button>
+            </div>
+          </form>
+
+          <form onSubmit={submitPassword} className="border-t border-border-light p-5 sm:p-7">
+            <h3 className="text-sm font-bold text-slate-900">Redefinição de senha</h3>
+            <p className="mt-1 max-w-2xl text-xs leading-relaxed text-text-secondary">
+              Para alterar sua senha, informe a senha atual e a nova senha. Se não deseja alterá-la,
+              deixe os campos em branco. A nova senha deve ter no mínimo 8 caracteres, com letras
+              maiúsculas e minúsculas e ao menos um número ou símbolo.
+            </p>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <label className={`${labelClass} sm:col-span-2 sm:max-w-sm`}>
+                Senha atual
+                <input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  onChange={(event) => {
+                    setCurrentPassword(event.target.value)
+                    setPasswordError('')
+                  }}
+                  placeholder="********"
+                  className={inputClass}
+                />
+              </label>
+
+              <label className={labelClass}>
+                Nova senha
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  maxLength={128}
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onBlur={() => setPasswordTouched((current) => ({ ...current, new: true }))}
+                  onChange={(event) => {
+                    setNewPassword(event.target.value)
+                    setPasswordError('')
+                  }}
+                  placeholder="********"
+                  aria-invalid={Boolean(newPasswordError)}
+                  aria-describedby={newPasswordError ? 'new-password-error' : undefined}
+                  className={`${inputClass} ${newPasswordError ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-100' : ''}`}
+                />
+                {newPasswordError && (
+                  <span
+                    id="new-password-error"
+                    role="alert"
+                    className="mt-1.5 block text-xs font-medium text-rose-700"
+                  >
+                    {newPasswordError}
+                  </span>
+                )}
+              </label>
+
+              <label className={labelClass}>
+                Confirmar nova senha
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  maxLength={128}
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onBlur={() => setPasswordTouched((current) => ({ ...current, confirm: true }))}
+                  onChange={(event) => {
+                    setConfirmPassword(event.target.value)
+                    setPasswordError('')
+                  }}
+                  placeholder="********"
+                  aria-invalid={Boolean(confirmPasswordError)}
+                  aria-describedby={confirmPasswordError ? 'confirm-password-error' : undefined}
+                  className={`${inputClass} ${confirmPasswordError ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-100' : ''}`}
+                />
+                {confirmPasswordError && (
+                  <span
+                    id="confirm-password-error"
+                    role="alert"
+                    className="mt-1.5 block text-xs font-medium text-rose-700"
+                  >
+                    {confirmPasswordError}
+                  </span>
+                )}
+              </label>
+            </div>
+
+            {passwordError && (
+              <div
+                role="alert"
+                className="mt-5 rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-3 text-xs text-rose-900"
+              >
+                {passwordError}
+              </div>
+            )}
+            {passwordNotice && (
+              <div
+                role="status"
+                className="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-xs text-emerald-900"
+              >
+                {passwordNotice}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end border-t border-border-light pt-5">
+              <button
+                type="submit"
+                disabled={passwordSaving}
+                className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-5 text-xs font-bold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {passwordSaving ? (
+                  <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />
+                ) : (
+                  <i className="fi fi-rr-check flex" aria-hidden="true" />
+                )}
+                {passwordSaving ? 'Redefinindo…' : 'Redefinir senha'}
               </button>
             </div>
           </form>
