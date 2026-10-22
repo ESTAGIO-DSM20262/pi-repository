@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import Modal, { type Notice } from '@/components/ui/Modal'
-import PasswordInput from '@/components/ui/PasswordInput'
+import { Modal, type Notice } from '@/components/ui/Modal'
+import { PasswordInput } from '@/components/ui/PasswordInput'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
 import { useAuth } from '@/presentation/auth/auth-context'
 import { type LoginValues, loginSchema } from '@/presentation/auth/validation'
@@ -19,7 +19,7 @@ import {
   primaryButtonClass,
 } from '../../libs/styles'
 
-export default function LoginForm() {
+export function LoginForm() {
   const router = useRouter()
   const { signIn, signInWithMicrosoft, showAuthAction, clearAuthAction } = useAuth()
 

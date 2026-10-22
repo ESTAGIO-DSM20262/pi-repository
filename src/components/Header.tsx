@@ -102,7 +102,7 @@ function AccountMenu({
   )
 }
 
-export default function Header() {
+export function Header() {
   const router = useRouter()
   const { user, signOut, loading, showAuthAction, clearAuthAction } = useAuth()
 

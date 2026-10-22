@@ -4,33 +4,44 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
-import Modal, { type Notice } from '@/components/ui/Modal'
-import { useResetOnLeave } from '@/libs/useResetOnLeave'
-import { type ForgotPasswordValues, forgotPasswordSchema } from '@/presentation/auth/validation'
+import { AuthCard, AuthCardHeader } from '@/components/ui/AuthCard'
+import { Modal, type Notice } from '@/components/ui/Modal'
 import {
   fieldErrorClass,
   inputClass,
   labelClass,
   linkClass,
   primaryButtonClass,
-} from '../../libs/styles'
+} from '@/libs/styles'
+import { useResetOnLeave } from '@/libs/useResetOnLeave'
+import { useAuth } from '@/presentation/auth/auth-context'
+import { type ForgotPasswordValues, forgotPasswordSchema } from '@/presentation/auth/validation'
 
-const DEFERRED_NOTICE: Notice = {
-  variant: 'warning',
-  title: 'Recuperação de senha em breve',
+const SENT_NOTICE: Notice = {
+  variant: 'success',
+  title: 'Verifique seu e-mail',
   description:
-    'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
+    'Se houver uma conta com este e-mail, você receberá um link para redefinir a senha em instantes. Verifique também a caixa de spam.',
 }
 
-export default function ForgotPasswordForm() {
+function failureNotice(error: unknown): Notice {
+  return {
+    variant: 'error',
+    title: 'Não foi possível enviar o link',
+    description:
+      error instanceof Error ? error.message : 'Não foi possível enviar o link. Tente novamente.',
+  }
+}
+
+export function ForgotPasswordForm() {
+  const { requestPasswordReset } = useAuth()
   const [notice, setNotice] = useState<Notice | null>(null)
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordValues>({
     resolver: zodResolver(forgotPasswordSchema),
     mode: 'onTouched',
@@ -42,8 +53,14 @@ export default function ForgotPasswordForm() {
     setNotice(null)
   })
 
-  const onSubmit = handleSubmit(() => {
-    setNotice(DEFERRED_NOTICE)
+  const onSubmit = handleSubmit(async ({ email }) => {
+    try {
+      await requestPasswordReset(email)
+      reset()
+      setNotice(SENT_NOTICE)
+    } catch (error) {
+      setNotice(failureNotice(error))
+    }
   })
 
   return (
@@ -76,8 +93,8 @@ export default function ForgotPasswordForm() {
           )}
         </div>
 
-        <button type="submit" className={primaryButtonClass}>
-          Enviar link de recuperação
+        <button type="submit" disabled={isSubmitting} className={primaryButtonClass}>
+          {isSubmitting ? 'Enviando…' : 'Enviar link de recuperação'}
         </button>
       </form>
 

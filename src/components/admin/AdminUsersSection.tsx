@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import Pagination from '@/components/projects/Pagination'
-import ConfirmationDialog from '@/components/ui/ConfirmationDialog'
-import SelectDropdown from '@/components/ui/SelectDropdown'
+import { Pagination } from '@/components/projects/Pagination'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -42,7 +42,7 @@ async function readError(response: Response, fallback: string) {
   return payload.error ?? fallback
 }
 
-export default function AdminUsersSection({ currentUserId }: { currentUserId: string }) {
+export function AdminUsersSection({ currentUserId }: { currentUserId: string }) {
   const [users, setUsers] = useState<AdminUserRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')

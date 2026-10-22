@@ -18,7 +18,7 @@ function pagesToShow(current: number, last: number): (number | '…')[] {
   return out
 }
 
-export default function Pagination({ page, pageSize, total, onChange }: PaginationProps) {
+export function Pagination({ page, pageSize, total, onChange }: PaginationProps) {
   if (total === 0) return null
   const last = Math.ceil(total / pageSize)
   const from = (page - 1) * pageSize + 1

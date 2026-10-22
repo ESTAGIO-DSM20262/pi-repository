@@ -24,7 +24,7 @@ interface SelectDropdownProps {
 
 const EXIT_DURATION = 150
 
-export default function SelectDropdown({
+export function SelectDropdown({
   value,
   options,
   onChange,

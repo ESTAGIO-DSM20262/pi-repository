@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import type { ListedProject } from '@/application/projects/list-projects'
-import AdminUsersSection from '@/components/admin/AdminUsersSection'
-import FavoriteButton from '@/components/projects/FavoriteButton'
+import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
+import { FavoriteButton } from '@/components/projects/FavoriteButton'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -365,7 +365,7 @@ function ProjectsSection({
   )
 }
 
-export default function RoleDashboard({
+export function RoleDashboard({
   currentUserId,
   name,
   email,

@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import ProfilePage from '@/components/profile/ProfilePage'
+import { ProfilePage } from '@/components/profile/ProfilePage'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { isRole } from '@/domain/enterprise/entities/role'

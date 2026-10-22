@@ -23,12 +23,13 @@ Sistema desenvolvido para centralizar e disponibilizar os Projetos Integradores 
 Atualmente, o projeto possui:
 
 - Login com e-mail/senha e com Microsoft
+- Redefinição de senha por e-mail (Resend)
 - Redirecionamento por papel (aluno / professor)
 - Áreas protegidas por sessão no servidor
 - Modais e pop-ups de aviso
 - Estrutura inicial para a Home e demais telas
 
-A tela de recuperação/redefinição de senha ainda está em desenvolvimento.
+A recuperação de senha envia um link por e-mail (válido por 1 hora) usando o [Resend](https://resend.com).
 
 ## Como executar
 
@@ -51,6 +52,8 @@ Preencha o `.env`:
 - `BETTER_AUTH_URL` — URL base da aplicação (ex.: `http://localhost:3000`).
 - `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` — credenciais do app no Microsoft Entra ID (opcionais em desenvolvimento).
 - `MICROSOFT_TENANT_ID` — opcional; escopo do provedor. Padrão `organizations` (qualquer tenant corporativo/escolar). Informe um Tenant ID/domínio para restringir a um único tenant.
+- `RESEND_API_KEY` — chave da API do Resend, usada no e-mail de redefinição de senha. Opcional em desenvolvimento: sem ela, o link de redefinição é impresso no console do `npm run dev`.
+- `EMAIL_FROM` — remetente dos e-mails, de um domínio verificado no Resend (ex.: `Acervo Acadêmico <no-reply@seu-dominio>`). Obrigatório em produção junto com `RESEND_API_KEY`.
 
 Aplique as migrações e crie as contas de desenvolvimento:
 

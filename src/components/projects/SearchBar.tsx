@@ -7,7 +7,7 @@ interface SearchBarProps {
   onSearch: (query: string) => void
 }
 
-export default function SearchBar({ value, onSearch }: SearchBarProps) {
+export function SearchBar({ value, onSearch }: SearchBarProps) {
   const [draft, setDraft] = useState(value)
   useEffect(() => setDraft(value), [value])
 

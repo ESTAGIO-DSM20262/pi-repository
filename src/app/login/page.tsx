@@ -1,5 +1,5 @@
-import LoginForm from '@/components/forms/LoginForm'
-import LoginFeedback from '@/components/LoginFeedback'
+import { LoginForm } from '@/components/forms/LoginForm'
+import { LoginFeedback } from '@/components/LoginFeedback'
 import { cardClass, descriptionClass, eyebrowClass, pageClass, titleClass } from '@/libs/styles'
 
 export const metadata = { title: 'Entrar • Acervo Acadêmico' }

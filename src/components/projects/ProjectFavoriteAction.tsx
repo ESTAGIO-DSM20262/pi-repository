@@ -1,6 +1,6 @@
 'use client'
 
-import FavoriteButton from '@/components/projects/FavoriteButton'
+import { FavoriteButton } from '@/components/projects/FavoriteButton'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 
 interface ProjectFavoriteActionProps {
@@ -9,7 +9,7 @@ interface ProjectFavoriteActionProps {
   isAuthenticated: boolean
 }
 
-export default function ProjectFavoriteAction({
+export function ProjectFavoriteAction({
   projectId,
   projectTitle,
   isAuthenticated,
