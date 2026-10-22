@@ -1,5 +1,7 @@
+import { sql } from 'drizzle-orm'
 import {
   boolean,
+  check,
   date,
   index,
   integer,
@@ -20,24 +22,33 @@ import type {
 } from '@/domain/enterprise/entities/project-progress'
 import type { Role } from '@/domain/enterprise/entities/role'
 
-export const users = pgTable('users', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  email: text('email').notNull().unique(),
-  emailVerified: boolean('email_verified').default(false).notNull(),
-  image: text('image'),
-  role: text('role').$type<Role>().notNull(),
-  registrationNumber: text('registration_number'),
-  course: text('course'),
-  githubUrl: text('github_url'),
-  linkedinUrl: text('linkedin_url'),
-  active: boolean('active').default(true).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at')
-    .defaultNow()
-    .$onUpdate(() => new Date())
-    .notNull(),
-})
+export const users = pgTable(
+  'users',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    email: text('email').notNull().unique(),
+    emailVerified: boolean('email_verified').default(false).notNull(),
+    image: text('image'),
+    role: text('role').$type<Role>().notNull(),
+    registrationNumber: text('registration_number'),
+    course: text('course'),
+    githubUrl: text('github_url'),
+    linkedinUrl: text('linkedin_url'),
+    active: boolean('active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index('users_role_idx').on(table.role),
+    index('users_registration_number_idx')
+      .on(table.registrationNumber)
+      .where(sql`${table.registrationNumber} IS NOT NULL`),
+  ],
+)
 
 export const sessions = pgTable(
   'sessions',
@@ -138,6 +149,12 @@ export const projectProgressTasks = pgTable(
     index('project_progress_tasks_project_id_idx').on(table.projectId),
     index('project_progress_tasks_target_email_idx').on(table.targetStudentEmail),
     index('project_progress_tasks_project_version_idx').on(table.projectId, table.versionMajor),
+    check('project_progress_tasks_version_major_check', sql`${table.versionMajor} > 0`),
+    check('project_progress_tasks_version_minor_check', sql`${table.versionMinor} >= 0`),
+    check(
+      'project_progress_tasks_status_check',
+      sql`${table.status} IN ('pending', 'in_progress', 'completed')`,
+    ),
   ],
 )
 
@@ -166,6 +183,16 @@ export const projectProgressRevisions = pgTable(
   (table) => [
     index('project_progress_revisions_task_id_idx').on(table.taskId),
     index('project_progress_revisions_project_id_idx').on(table.projectId),
+    check('project_progress_revisions_version_major_check', sql`${table.versionMajor} > 0`),
+    check('project_progress_revisions_version_minor_check', sql`${table.versionMinor} >= 0`),
+    check(
+      'project_progress_revisions_status_check',
+      sql`${table.status} IN ('pending', 'in_progress', 'completed')`,
+    ),
+    check(
+      'project_progress_revisions_action_check',
+      sql`${table.action} IN ('created', 'updated')`,
+    ),
   ],
 )
 
@@ -195,5 +222,7 @@ export const projects = pgTable(
   (table) => [
     index('projects_advisor_email_idx').on(table.advisorEmail),
     index('projects_status_idx').on(table.status),
+    check('projects_semester_check', sql`${table.semester} BETWEEN 1 AND 12`),
+    check('projects_status_check', sql`${table.status} IN ('publicado', 'em_andamento')`),
   ],
 )
