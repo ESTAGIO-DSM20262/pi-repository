@@ -25,6 +25,21 @@ Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.
 > `style/noDefaultExport` do Biome garante isso (exceções em `overrides` no
 > `biome.json`).
 
+> **Convenção de imports:**
+>
+> | Caso | Formato |
+> | --- | --- |
+> | Módulo do projeto | `import { X } from '@/components/ui/Modal'` — named import, nunca default |
+> | Arquivo de outra pasta | alias `@/` (→ `src/`), sem `../` |
+> | Arquivo da mesma pasta | relativo `./`: `import { FormFeedback } from './FormFeedback'` |
+> | Só tipos | `import type { Role } from '@/domain/enterprise/entities/role'` |
+> | Valores e tipos juntos | `type` inline: `import { Modal, type Notice } from '@/components/ui/Modal'` |
+> | Pacote externo | como a lib exporta: `import Link from 'next/link'`, `import { useForm } from 'react-hook-form'`; `import * as` só quando a lib exige (`import * as XLSX from 'xlsx'`) |
+>
+> Importe direto do arquivo que declara o item; não crie barrels (`index.ts` que só
+> reexporta). A ordem dos imports (pacotes, depois `@/`, depois `./`) é feita pelo
+> `organizeImports` do Biome em `npm run lint:fix` e no pre-commit — não ordene à mão.
+
 ## 1. Contexto
 
 O projeto é um app Next.js (App Router) com autenticação via **better-auth**,
