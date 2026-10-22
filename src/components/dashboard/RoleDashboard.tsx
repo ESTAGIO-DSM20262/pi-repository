@@ -202,12 +202,12 @@ function SectionHeading({
   className?: string
 }) {
   return (
-    <div
-      className={`${className} flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5`}
-    >
+    <div className={`${className} flex flex-wrap items-center justify-between gap-3`}>
       <div className="flex items-start gap-3">
         <span
-          className={`mt-1 h-6 w-2 shrink-0 rounded-full ${accent === 'green' ? 'bg-emerald-800' : 'bg-slate-600'}`}
+          className={`mt-1 h-6 w-2 shrink-0 rounded-full ${
+            accent === 'green' ? 'bg-emerald-800' : 'bg-slate-600'
+          }`}
           aria-hidden="true"
         />
         <div>
@@ -218,6 +218,7 @@ function SectionHeading({
           <p className="mt-0.5 text-xs text-[#765e58] sm:text-[13px]">{subtitle}</p>
         </div>
       </div>
+
       {action}
     </div>
   )
