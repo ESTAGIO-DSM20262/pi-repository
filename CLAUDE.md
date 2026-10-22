@@ -24,6 +24,7 @@ npm test                                      # vitest run (all src/**/*.test.ts
 npx vitest run src/application/auth/sign-in.test.ts   # single file
 npx vitest run -t "normaliza"                 # filter by test name
 npm run db:generate | db:migrate | db:push | db:seed | db:studio
+npm run email:dev                             # React Email preview at http://localhost:3001
 ```
 
 Commits go through husky: `pre-commit` runs lint-staged (`biome check --write`), `commit-msg` runs commitlint with `@commitlint/config-conventional` (e.g. `feat: ...`, `fix: ...`).

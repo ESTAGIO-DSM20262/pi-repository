@@ -21,9 +21,11 @@ Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.
 > **Convenção de exports:** use apenas exports nomeados (`export function X`,
 > `import { X } from …`). `export default` fica restrito aos arquivos especiais do
 > Next.js em `src/app` (`page`, `layout`, `loading`, `error`, `not-found`,
-> `template`, `default`, `global-error`) e aos arquivos `*.config.*`. A regra
-> `style/noDefaultExport` do Biome garante isso (exceções em `overrides` no
-> `biome.json`).
+> `template`, `default`, `global-error`), aos arquivos `*.config.*` e aos
+> templates React Email em `src/infrastructure/email/templates/*.tsx` (o preview
+> `npm run email:dev` só carrega o export default; esses arquivos exportam o
+> componente nomeado **e** `export default`). A regra `style/noDefaultExport` do
+> Biome garante isso (exceções em `overrides` no `biome.json`).
 
 > **Convenção de imports:**
 >
@@ -113,7 +115,9 @@ src/
 │  ├─ email/resend-password-reset-notifier.ts   # implementa PasswordResetNotifier (Resend)
 │  ├─ email/console-password-reset-notifier.ts  # adaptador de desenvolvimento
 │  ├─ email/make-password-reset-notifier.ts     # escolhe o adaptador pelo ambiente
-│  ├─ email/templates/password-reset-email.ts   # assunto/HTML/texto do e-mail
+│  ├─ email/templates/brand.ts                  # tema Tailwind e marca para e-mails
+│  ├─ email/templates/password-reset-email.tsx  # template React Email
+│  ├─ email/templates/render-password-reset-email.ts  # assunto + HTML + texto
 │  └─ http/api-client.ts           # wrapper de fetch
 ├─ test/repositories/              # implementações in-memory das portas (testes)
 ├─ presentation/auth/
@@ -221,6 +225,21 @@ apresentação.
   `EMAIL_FROM`: com ambos usa o Resend; sem eles usa o console fora de produção e,
   em produção, um notifier que sempre devolve `EmailDeliveryError` (não lança no
   carregamento, para não quebrar o `next build`).
+- **Templates de e-mail** (`infrastructure/email/templates/`): componentes
+  **React Email** (`@react-email/components`) estilizados com **Tailwind** via
+  `<Tailwind config={emailTailwindConfig}>` — use `className` com as mesmas
+  classes do app (`bg-primary`, `text-text-secondary`, `border-border`…), nunca
+  objetos `style`. No `render()`, as classes viram estilos inline (cores em `rgb()`,
+  medidas em px graças ao `pixelBasedPreset` e aos raios fixos), pois clientes de
+  e-mail não suportam folhas de estilo nem variáveis CSS. `<Head>` fica dentro de
+  `<Tailwind>`. `renderPasswordResetEmail` gera o HTML e a versão em texto
+  (`plainText: true`); o React escapa nome e URL. `brand.ts` exporta
+  `emailTailwindConfig` — cores, raios e fonte (Plus Jakarta Sans, fallback Arial)
+  que **espelham** os tokens de `src/app/globals.css`; ao mudar a paleta do app,
+  atualize os dois — e `emailBrand` (textos da marca: "F", "Acervo Acadêmico",
+  instituição).
+  Visualize com `npm run email:dev` (http://localhost:3001); `PreviewProps` no
+  componente define os dados de exemplo.
 - **Mapper** (`infrastructure/auth/better-auth-user-mapper.ts`): `toDomainUser`
   converte o usuário do better-auth em `User` (ou `null` se o e-mail for
   inválido). Sem `'use client'`, então serve ao cliente **e** ao servidor.
@@ -391,3 +410,4 @@ documente aqui.
 | `npm run test:watch` | testes em watch |
 | `npm run db:migrate` | aplica migrações Drizzle |
 | `npm run db:seed` | cria contas de desenvolvimento |
+| `npm run email:dev` | preview dos templates React Email (porta 3001) |

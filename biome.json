@@ -60,7 +60,8 @@
         "src/app/**/default.tsx",
         "src/app/**/global-error.tsx",
         "*.config.ts",
-        "*.config.mjs"
+        "*.config.mjs",
+        "src/infrastructure/email/templates/*.tsx"
       ],
       "linter": {
         "rules": {
