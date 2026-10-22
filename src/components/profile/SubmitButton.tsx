@@ -4,7 +4,7 @@ interface SubmitButtonProps {
   loadingLabel: string
 }
 
-export default function SubmitButton({ loading, label, loadingLabel }: SubmitButtonProps) {
+export function SubmitButton({ loading, label, loadingLabel }: SubmitButtonProps) {
   return (
     <div className="mt-6 flex justify-end border-t border-border-light pt-5">
       <button

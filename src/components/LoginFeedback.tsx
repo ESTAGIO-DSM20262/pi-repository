@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Modal, { type Notice } from '@/components/ui/Modal'
+import { Modal, type Notice } from '@/components/ui/Modal'
 
 const ERROR_MESSAGES: Record<string, string> = {
   INVALID_EMAIL: 'O endereço de e-mail informado é inválido.',
@@ -18,7 +18,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 const FALLBACK =
   'Não foi possível entrar com a Microsoft. Verifique a conta selecionada e tente novamente.'
 
-export default function LoginFeedback() {
+export function LoginFeedback() {
   const [notice, setNotice] = useState<Notice | null>(null)
 
   useEffect(() => {

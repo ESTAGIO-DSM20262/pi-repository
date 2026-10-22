@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import ProjectBackButton from '@/components/projects/ProjectBackButton'
-import ProjectFavoriteAction from '@/components/projects/ProjectFavoriteAction'
-import ProjectProgressSection from '@/components/projects/progress/ProjectProgressSection'
+import { ProjectBackButton } from '@/components/projects/ProjectBackButton'
+import { ProjectFavoriteAction } from '@/components/projects/ProjectFavoriteAction'
+import { ProjectProgressSection } from '@/components/projects/progress/ProjectProgressSection'
 import type {
   Project,
   ProjectAttachment,
@@ -259,7 +259,7 @@ function ExternalProjectLink({ label, url }: { label: string; url?: string }) {
   )
 }
 
-export default function ProjectPublicView({
+export function ProjectPublicView({
   project,
   isAuthenticated,
   canManageProgress,

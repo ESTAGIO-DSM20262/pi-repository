@@ -14,11 +14,11 @@ import {
   type SortKey,
   sortProjects,
 } from '@/presentation/projects/project-filters'
-import FilterPanel from './FilterPanel'
-import Pagination from './Pagination'
-import ProjectCard from './ProjectCard'
-import ResultsBar from './ResultsBar'
-import SearchBar from './SearchBar'
+import { FilterPanel } from './FilterPanel'
+import { Pagination } from './Pagination'
+import { ProjectCard } from './ProjectCard'
+import { ResultsBar } from './ResultsBar'
+import { SearchBar } from './SearchBar'
 
 const PAGE_SIZE = 6
 const GRID = 'grid gap-5 sm:grid-cols-2 xl:grid-cols-3'
@@ -104,11 +104,7 @@ interface ProjectsExplorerProps {
   isAuthenticated: boolean
 }
 
-export default function ProjectsExplorer({
-  projects,
-  viewerRole,
-  isAuthenticated,
-}: ProjectsExplorerProps) {
+export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: ProjectsExplorerProps) {
   const { favoriteIds, toggleFavorite } = useProjectFavorites(isAuthenticated)
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [sort, setSort] = useState<SortKey>('recent')

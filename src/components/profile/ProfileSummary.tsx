@@ -9,7 +9,7 @@ const ROLE_BADGE_CLASS: Record<Role, string> = {
   student: 'bg-slate-100 text-slate-700',
 }
 
-export default function ProfileSummary({ profile }: { profile: ProfileRecord }) {
+export function ProfileSummary({ profile }: { profile: ProfileRecord }) {
   return (
     <div className="flex flex-col gap-4 border-b border-border-light bg-surface-secondary/50 p-5 sm:flex-row sm:items-center sm:p-7">
       <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white shadow-sm">

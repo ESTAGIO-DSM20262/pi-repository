@@ -9,10 +9,10 @@ import {
   type ProfileFormOutput,
   toProfileFormValues,
 } from '@/presentation/profile/validation'
-import AccountFields from './AccountFields'
-import FormFeedback from './FormFeedback'
-import SocialLinksFields from './SocialLinksFields'
-import SubmitButton from './SubmitButton'
+import { AccountFields } from './AccountFields'
+import { FormFeedback } from './FormFeedback'
+import { SocialLinksFields } from './SocialLinksFields'
+import { SubmitButton } from './SubmitButton'
 
 const DEFAULT_ERROR = 'Não foi possível salvar o perfil.'
 
@@ -26,7 +26,7 @@ interface ProfileFormProps {
   onSaved: (profile: ProfileRecord) => void
 }
 
-export default function ProfileForm({ profile, onSaved }: ProfileFormProps) {
+export function ProfileForm({ profile, onSaved }: ProfileFormProps) {
   const isAdmin = profile.role === 'admin'
 
   const {

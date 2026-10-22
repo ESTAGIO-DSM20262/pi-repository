@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 
-export default function ProjectBackButton() {
+export function ProjectBackButton() {
   const router = useRouter()
 
   function goBack() {

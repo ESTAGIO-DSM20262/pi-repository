@@ -52,7 +52,7 @@ function SocialField({
   )
 }
 
-export default function SocialLinksFields({ register, errors }: SocialLinksFieldsProps) {
+export function SocialLinksFields({ register, errors }: SocialLinksFieldsProps) {
   return (
     <div className="mt-8 border-t border-border-light pt-6">
       <h3 className="text-sm font-bold text-slate-900">Perfis profissionais</h3>

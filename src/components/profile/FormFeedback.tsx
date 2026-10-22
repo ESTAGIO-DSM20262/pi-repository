@@ -3,7 +3,7 @@ interface FormFeedbackProps {
   success?: string
 }
 
-export default function FormFeedback({ error, success }: FormFeedbackProps) {
+export function FormFeedback({ error, success }: FormFeedbackProps) {
   if (error) {
     return (
       <div

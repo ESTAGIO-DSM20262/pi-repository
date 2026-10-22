@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { ListedProject } from '@/application/projects/list-projects'
-import FavoriteButton from './FavoriteButton'
+import { FavoriteButton } from './FavoriteButton'
 
 const TONE = {
   blue: 'from-slate-200 via-slate-100 to-blue-50',
@@ -15,7 +15,7 @@ interface ProjectCardProps {
   onToggleFavorite?: (projectId: string) => Promise<boolean>
 }
 
-export default function ProjectCard({
+export function ProjectCard({
   project: p,
   isAuthenticated = false,
   isFavorite = false,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import SelectDropdown from '@/components/ui/SelectDropdown'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import {
   type Chip,
   EMPTY_FILTERS,
@@ -224,7 +224,7 @@ function FilterFields({
   )
 }
 
-export default function FilterPanel({
+export function FilterPanel({
   facets,
   filters: filtersProp,
   onChange,

@@ -36,7 +36,7 @@ interface ModalProps {
   showClose?: boolean
 }
 
-export default function Modal({
+export function Modal({
   open,
   variant,
   title,

@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import type { ProfileRecord } from '@/presentation/profile/profile-record'
-import ChangePasswordForm from './ChangePasswordForm'
-import ProfileForm from './ProfileForm'
-import ProfilePageHeader from './ProfilePageHeader'
-import ProfileSummary from './ProfileSummary'
+import { ChangePasswordForm } from './ChangePasswordForm'
+import { ProfileForm } from './ProfileForm'
+import { ProfilePageHeader } from './ProfilePageHeader'
+import { ProfileSummary } from './ProfileSummary'
 
-export default function ProfilePage({ initialProfile }: { initialProfile: ProfileRecord }) {
+export function ProfilePage({ initialProfile }: { initialProfile: ProfileRecord }) {
   const [profile, setProfile] = useState(initialProfile)
 
   return (

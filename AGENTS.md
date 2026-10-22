@@ -18,6 +18,13 @@ Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.
 > fluxo pertence a este arquivo. Ao alterar o comportamento, atualize esta
 > documentação em vez de comentar o código.
 
+> **Convenção de exports:** use apenas exports nomeados (`export function X`,
+> `import { X } from …`). `export default` fica restrito aos arquivos especiais do
+> Next.js em `src/app` (`page`, `layout`, `loading`, `error`, `not-found`,
+> `template`, `default`, `global-error`) e aos arquivos `*.config.*`. A regra
+> `style/noDefaultExport` do Biome garante isso (exceções em `overrides` no
+> `biome.json`).
+
 ## 1. Contexto
 
 O projeto é um app Next.js (App Router) com autenticação via **better-auth**,

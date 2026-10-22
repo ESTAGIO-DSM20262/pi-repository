@@ -4,9 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { changePassword } from '@/presentation/profile/change-password'
 import { type ChangePasswordValues, changePasswordSchema } from '@/presentation/profile/validation'
-import FormFeedback from './FormFeedback'
+import { FormFeedback } from './FormFeedback'
 import { profileFieldErrorClass, profileFieldInputClass, profileLabelClass } from './profile-styles'
-import SubmitButton from './SubmitButton'
+import { SubmitButton } from './SubmitButton'
 
 const DEFAULT_ERROR = 'Não foi possível redefinir a senha. Tente novamente.'
 
@@ -30,7 +30,7 @@ const FIELDS: PasswordFieldConfig[] = [
   { name: 'confirm', label: 'Confirmar nova senha', autoComplete: 'new-password' },
 ]
 
-export default function ChangePasswordForm() {
+export function ChangePasswordForm() {
   const {
     register,
     handleSubmit,

@@ -1,6 +1,6 @@
 import { cardClass, descriptionClass, eyebrowClass, pageClass, titleClass } from '../../libs/styles'
 
-export default function AuthCard({
+export function AuthCard({
   children,
   footer,
 }: {

@@ -8,7 +8,7 @@ import type { Role } from '@/domain/enterprise/entities/role'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
 import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
 import { auth } from '@/libs/auth'
-import RoleDashboard, { type AdminUserMetrics } from './RoleDashboard'
+import { type AdminUserMetrics, RoleDashboard } from './RoleDashboard'
 
 const ROLE_PATH: Record<Role, string> = {
   student: '/aluno',
@@ -16,7 +16,7 @@ const ROLE_PATH: Record<Role, string> = {
   admin: '/admin',
 }
 
-export default async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
+export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session) redirect('/login')

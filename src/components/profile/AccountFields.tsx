@@ -23,7 +23,7 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   )
 }
 
-export default function AccountFields({ profile, register, errors }: AccountFieldsProps) {
+export function AccountFields({ profile, register, errors }: AccountFieldsProps) {
   const isAdmin = profile.role === 'admin'
   const editableClass = (invalid: boolean) =>
     isAdmin ? profileFieldInputClass(invalid) : profileReadOnlyInputClass

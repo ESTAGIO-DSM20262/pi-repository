@@ -5,7 +5,7 @@ import type { LoginCredentials } from '@/application/auth/dtos/login-credentials
 import { SignInUseCase } from '@/application/auth/sign-in'
 import { SignInWithMicrosoftUseCase } from '@/application/auth/sign-in-with-microsoft'
 import { SignOutUseCase } from '@/application/auth/sign-out'
-import AuthActionOverlay from '@/components/ui/AuthActionOverlay'
+import { AuthActionOverlay } from '@/components/ui/AuthActionOverlay'
 import type { User } from '@/domain/enterprise/entities/user'
 import { authClient } from '@/infrastructure/auth/auth-client'
 import { BetterAuthAuthRepository } from '@/infrastructure/auth/better-auth-auth-repository'

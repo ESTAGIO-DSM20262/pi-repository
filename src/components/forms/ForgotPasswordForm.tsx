@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import AuthCard, { AuthCardHeader } from '@/components/ui/AuthCard'
-import Modal, { type Notice } from '@/components/ui/Modal'
+import { AuthCard, AuthCardHeader } from '@/components/ui/AuthCard'
+import { Modal, type Notice } from '@/components/ui/Modal'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
 import { type ForgotPasswordValues, forgotPasswordSchema } from '@/presentation/auth/validation'
 import {
@@ -23,7 +23,7 @@ const DEFERRED_NOTICE: Notice = {
     'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
 }
 
-export default function ForgotPasswordForm() {
+export function ForgotPasswordForm() {
   const [notice, setNotice] = useState<Notice | null>(null)
 
   const {

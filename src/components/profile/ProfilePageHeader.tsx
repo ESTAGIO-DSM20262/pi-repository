@@ -7,7 +7,7 @@ const DASHBOARD_HREF: Record<Role, string> = {
   student: '/aluno',
 }
 
-export default function ProfilePageHeader({ role }: { role: Role }) {
+export function ProfilePageHeader({ role }: { role: Role }) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
       <div>

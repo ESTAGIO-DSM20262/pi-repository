@@ -7,7 +7,7 @@ interface PanelHeaderProps {
   role: Role
 }
 
-export default function PanelHeader({ name, email, role }: PanelHeaderProps) {
+export function PanelHeader({ name, email, role }: PanelHeaderProps) {
   return (
     <section className="mx-auto max-w-3xl p-6">
       <h2 className="text-2xl font-semibold">Olá, {name}</h2>

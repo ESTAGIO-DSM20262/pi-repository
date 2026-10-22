@@ -1,4 +1,4 @@
-import DashboardPage from '@/components/dashboard/DashboardPage'
+import { DashboardPage } from '@/components/dashboard/DashboardPage'
 
 export const metadata = { title: 'Área do professor • Acervo Acadêmico' }
 export const instant = false
