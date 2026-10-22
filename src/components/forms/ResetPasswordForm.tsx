@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { AuthCard, AuthCardHeader } from '@/components/ui/AuthCard'
@@ -9,28 +10,52 @@ import { Modal, type Notice } from '@/components/ui/Modal'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { fieldErrorClass, infoBoxClass, mutedLinkClass, primaryButtonClass } from '@/libs/styles'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
+import { useAuth } from '@/presentation/auth/auth-context'
 import {
   passwordRules,
   type ResetPasswordValues,
   resetPasswordSchema,
 } from '@/presentation/auth/validation'
+import { InvalidResetLink } from './InvalidResetLink'
 
-const DEFERRED_NOTICE: Notice = {
-  variant: 'warning',
-  title: 'Redefinição de senha em breve',
-  description:
-    'A redefinição de senha ainda não está disponível. Entre em contato com a coordenação para recuperar seu acesso.',
+const SUCCESS_NOTICE: Notice = {
+  variant: 'success',
+  title: 'Senha redefinida',
+  description: 'Sua senha foi alterada com sucesso. Entre novamente usando a nova senha.',
+}
+
+function failureNotice(error: unknown): Notice {
+  return {
+    variant: 'error',
+    title: 'Não foi possível redefinir a senha',
+    description:
+      error instanceof Error
+        ? error.message
+        : 'Não foi possível redefinir a senha. Tente novamente.',
+  }
 }
 
 export function ResetPasswordForm() {
-  const [deferred, setDeferred] = useState(false)
+  const searchParams = useSearchParams()
+  const token = searchParams.get('token')
+  const linkError = searchParams.get('error')
+
+  if (!token || linkError) return <InvalidResetLink />
+
+  return <ResetPasswordFields token={token} />
+}
+
+function ResetPasswordFields({ token }: { token: string }) {
+  const router = useRouter()
+  const { resetPassword } = useAuth()
+  const [notice, setNotice] = useState<Notice | null>(null)
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     mode: 'onTouched',
@@ -39,10 +64,24 @@ export function ResetPasswordForm() {
 
   useResetOnLeave(() => {
     reset()
-    setDeferred(false)
+    setNotice(null)
   })
 
-  const onSubmit = handleSubmit(() => setDeferred(true))
+  const onSubmit = handleSubmit(async ({ password }) => {
+    try {
+      await resetPassword(token, password)
+      reset()
+      setNotice(SUCCESS_NOTICE)
+    } catch (error) {
+      setNotice(failureNotice(error))
+    }
+  })
+
+  function closeNotice() {
+    const succeeded = notice?.variant === 'success'
+    setNotice(null)
+    if (succeeded) router.replace('/login')
+  }
 
   const password = watch('password')
 
@@ -119,8 +158,8 @@ export function ResetPasswordForm() {
           </ul>
         </div>
 
-        <button type="submit" className={primaryButtonClass}>
-          Redefinir senha
+        <button type="submit" disabled={isSubmitting} className={primaryButtonClass}>
+          {isSubmitting ? 'Redefinindo…' : 'Redefinir senha'}
         </button>
       </form>
 
@@ -132,12 +171,12 @@ export function ResetPasswordForm() {
       </div>
 
       <Modal
-        open={deferred}
-        variant={DEFERRED_NOTICE.variant}
-        title={DEFERRED_NOTICE.title}
-        description={DEFERRED_NOTICE.description}
-        buttonLabel="Entendi"
-        onClose={() => setDeferred(false)}
+        open={notice !== null}
+        variant={notice?.variant ?? 'success'}
+        title={notice?.title ?? ''}
+        description={notice?.description ?? ''}
+        buttonLabel={notice?.variant === 'success' ? 'Ir para o login' : 'Entendi'}
+        onClose={closeNotice}
       />
     </AuthCard>
   )

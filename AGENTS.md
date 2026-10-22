@@ -91,19 +91,31 @@ src/
 │  ├─ errors/
 │  │  ├─ authentication-error.ts
 │  │  ├─ invalid-credentials-error.ts
-│  │  └─ invalid-email-error.ts
-│  └─ repositories/auth-repository.ts  # PORTA AuthRepository
+│  │  ├─ invalid-email-error.ts
+│  │  ├─ invalid-reset-token-error.ts
+│  │  └─ email-delivery-error.ts
+│  └─ repositories/
+│     ├─ auth-repository.ts        # PORTA AuthRepository
+│     └─ password-reset-notifier.ts  # PORTA PasswordResetNotifier
 ├─ application/auth/
 │  ├─ dtos/login-credentials.ts    # LoginCredentials (alias da porta)
 │  ├─ sign-in.ts                   # SignInUseCase
 │  ├─ sign-in-with-microsoft.ts    # SignInWithMicrosoftUseCase
 │  ├─ sign-out.ts                  # SignOutUseCase
-│  └─ sign-in.test.ts
+│  ├─ request-password-reset.ts    # RequestPasswordResetUseCase
+│  ├─ reset-password.ts            # ResetPasswordUseCase
+│  ├─ send-password-reset-email.ts # SendPasswordResetEmailUseCase (servidor)
+│  └─ *.test.ts
 ├─ infrastructure/
 │  ├─ auth/auth-client.ts          # createAuthClient() (cliente better-auth)
 │  ├─ auth/better-auth-auth-repository.ts  # implementa AuthRepository
 │  ├─ auth/better-auth-user-mapper.ts      # better-auth -> User (domain)
+│  ├─ email/resend-password-reset-notifier.ts   # implementa PasswordResetNotifier (Resend)
+│  ├─ email/console-password-reset-notifier.ts  # adaptador de desenvolvimento
+│  ├─ email/make-password-reset-notifier.ts     # escolhe o adaptador pelo ambiente
+│  ├─ email/templates/password-reset-email.ts   # assunto/HTML/texto do e-mail
 │  └─ http/api-client.ts           # wrapper de fetch
+├─ test/repositories/              # implementações in-memory das portas (testes)
 ├─ presentation/auth/
 │  ├─ auth-context.tsx             # AuthProvider/useAuth + composition root
 │  ├─ role-label.ts                # rótulos PT para exibição
@@ -174,6 +186,15 @@ injeção no construtor:
 - `SignInWithMicrosoftUseCase.execute({ callbackURL, errorCallbackURL })` —
   delega a `signInWithMicrosoft`; devolve `Either<AuthenticationError, void>`.
 - `SignOutUseCase.execute()` — delega a `signOut`.
+- `RequestPasswordResetUseCase.execute({ email, redirectTo })` — normaliza o
+  e-mail e delega a `requestPasswordReset`; devolve `Either<AuthenticationError, void>`.
+- `ResetPasswordUseCase.execute({ token, newPassword })` — delega a
+  `resetPassword`; devolve `Either<InvalidResetTokenError | AuthenticationError, void>`.
+- `SendPasswordResetEmailUseCase.execute({ email, name, active, resetUrl })` —
+  roda **no servidor** e recebe a porta `PasswordResetNotifier`. Não envia nada
+  para contas inativas (devolve `right`), valida o destinatário com
+  `EmailAddress` (`left(InvalidEmailError)`) e repassa o `Either` do notifier
+  (`EmailDeliveryError` em falha).
 
 Não há `GetSessionUseCase` de propósito: a assinatura reativa da sessão
 (`authClient.useSession()`) é um detalhe de framework e permanece na
@@ -182,12 +203,24 @@ apresentação.
 ## 7. Infraestrutura (adaptadores)
 
 - **Porta** (`domain/enterprise/repositories/auth-repository.ts`): interface
-  `AuthRepository` com `signInWithEmail`, `signInWithMicrosoft` e `signOut`.
-  Define também `SignInCredentials`, `MicrosoftSignInInput` e
-  `EmailSignInResult`.
+  `AuthRepository` com `signInWithEmail`, `signInWithMicrosoft`, `signOut`,
+  `requestPasswordReset` e `resetPassword`. Define também `SignInCredentials`,
+  `MicrosoftSignInInput`, `PasswordResetRequest`, `PasswordResetInput` e os
+  tipos de resultado.
 - **Adaptador** (`infrastructure/auth/better-auth-auth-repository.ts`,
   `'use client'`): implementa a porta usando `authClient`; traduz os erros do
-  better-auth em erros de domínio (`toInvalidCredentials`).
+  better-auth em erros de domínio (`toInvalidCredentials`; código
+  `INVALID_TOKEN` → `InvalidResetTokenError`).
+- **Porta** (`domain/enterprise/repositories/password-reset-notifier.ts`):
+  `PasswordResetNotifier.notify({ to, name, resetUrl })` devolve
+  `Either<EmailDeliveryError, void>`. Adaptadores em `infrastructure/email/`:
+  `ResendPasswordResetNotifier` (SDK `resend`, renderiza o template e mapeia
+  erros do Resend para `EmailDeliveryError`) e `ConsolePasswordResetNotifier`
+  (desenvolvimento: imprime o link no console do servidor).
+  `makePasswordResetNotifier()` é o único ponto que lê `RESEND_API_KEY` e
+  `EMAIL_FROM`: com ambos usa o Resend; sem eles usa o console fora de produção e,
+  em produção, um notifier que sempre devolve `EmailDeliveryError` (não lança no
+  carregamento, para não quebrar o `next build`).
 - **Mapper** (`infrastructure/auth/better-auth-user-mapper.ts`): `toDomainUser`
   converte o usuário do better-auth em `User` (ou `null` se o e-mail for
   inválido). Sem `'use client'`, então serve ao cliente **e** ao servidor.
@@ -257,6 +290,35 @@ para leitura de sessão a cada requisição (bloqueia a rota).
 4. No servidor, o better-auth usa `mapProfileToUser` (fallback do UPN `preferred_username` quando falta o claim `email`). O papel persistido da conta é mantido; contas criadas por autenticação social sem um papel explícito recebem `student` como padrão. O formato do e-mail é validado sem restrição de domínio.
 5. `LoginFeedback` traduz os códigos de erro do callback OAuth em mensagens PT.
 
+### Redefinição de senha (e-mail via Resend)
+
+1. `/esqueci-senha`: `ForgotPasswordForm` valida com `forgotPasswordSchema` e
+   chama `useAuth().requestPasswordReset(email)` →
+   `RequestPasswordResetUseCase` → `authClient.requestPasswordReset({ email,
+   redirectTo: '/redefinir-senha' })`. A tela sempre mostra a mesma mensagem
+   genérica de sucesso, exista ou não a conta.
+2. No servidor, o better-auth gera um token (1 hora, `resetPasswordTokenExpiresIn`)
+   e chama `emailAndPassword.sendResetPassword` em `src/libs/auth.ts` (o
+   *composition root* do servidor), que executa `SendPasswordResetEmailUseCase`
+   com o notifier de `makePasswordResetNotifier()`. Um `Left` é apenas registrado
+   com `console.error`, nunca lançado, para a resposta não revelar se o e-mail
+   existe. Contas inativas não recebem e-mail.
+3. O link do e-mail aponta para `/api/auth/reset-password/:token`, que redireciona
+   para `/redefinir-senha?token=…` ou, se o token for inválido/expirado, para
+   `/redefinir-senha?error=INVALID_TOKEN`.
+4. `ResetPasswordForm` lê `token`/`error` com `useSearchParams()` (a página envolve
+   o formulário em `<Suspense>`). Sem token ou com erro, renderiza
+   `InvalidResetLink`. Caso contrário, valida com `resetPasswordSchema` e chama
+   `useAuth().resetPassword(token, senha)` → `ResetPasswordUseCase` →
+   `authClient.resetPassword`.
+5. Em sucesso, o better-auth revoga todas as sessões da conta
+   (`revokeSessionsOnPasswordReset`) e o modal leva para `/login`. Contas só da
+   Microsoft ganham uma senha nesse processo (o better-auth cria a conta
+   `credential`).
+
+Variáveis: `RESEND_API_KEY` e `EMAIL_FROM` (remetente de um domínio verificado no
+Resend). Sem elas, fora de produção, o link aparece no console do `npm run dev`.
+
 ## 11. Regra do papel e o bug do loop de redirecionamento
 
 Problema histórico: contas tinham `role = 'aluno'` (valor antigo em PT),
@@ -290,6 +352,12 @@ A escrita do papel é feita no servidor, por cadastro ou gestão administrativa,
 - Cobertura inclui `email-address.test.ts` (normalização, aceitação de domínios diversos e rejeição de formato inválido) e `user.test.ts` (criação da entidade e papel explícito).
   - `sign-in.test.ts` — normalização do e-mail e propagação de erro, usando um
     `InMemoryAuthRepository` (o que demonstra a testabilidade da porta).
+  - `request-password-reset.test.ts`, `reset-password.test.ts` e
+    `send-password-reset-email.test.ts` — normalização, token inválido/reuso,
+    contas inativas e falha de entrega.
+- As implementações *in-memory* das portas ficam em `src/test/repositories/`
+  (`InMemoryAuthRepository`, `InMemoryPasswordResetNotifier`) e são
+  compartilhadas pelos testes.
   - `presentation/profile/validation.test.ts` — links sociais, regras de nome/e-mail por
     papel e regras/confirmação da nova senha.
 

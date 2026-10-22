@@ -4,10 +4,15 @@ import { type Either, left, right } from '@/core/either'
 import type { User } from '@/domain/enterprise/entities/user'
 import { AuthenticationError } from '@/domain/enterprise/errors/authentication-error'
 import { InvalidCredentialsError } from '@/domain/enterprise/errors/invalid-credentials-error'
+import { InvalidResetTokenError } from '@/domain/enterprise/errors/invalid-reset-token-error'
 import type {
   AuthRepository,
   EmailSignInResult,
   MicrosoftSignInInput,
+  PasswordResetInput,
+  PasswordResetRequest,
+  PasswordResetRequestResult,
+  PasswordResetResult,
   SignInCredentials,
 } from '@/domain/enterprise/repositories/auth-repository'
 import { authClient } from './auth-client'
@@ -55,5 +60,32 @@ export class BetterAuthAuthRepository implements AuthRepository {
 
   async signOut(): Promise<void> {
     await authClient.signOut()
+  }
+
+  async requestPasswordReset({
+    email,
+    redirectTo,
+  }: PasswordResetRequest): Promise<PasswordResetRequestResult> {
+    const { error } = await authClient.requestPasswordReset({ email, redirectTo })
+
+    if (error) {
+      return left(new AuthenticationError())
+    }
+
+    return right(undefined)
+  }
+
+  async resetPassword({ token, newPassword }: PasswordResetInput): Promise<PasswordResetResult> {
+    const { error } = await authClient.resetPassword({ token, newPassword })
+
+    if (error?.code === 'INVALID_TOKEN') {
+      return left(new InvalidResetTokenError())
+    }
+
+    if (error) {
+      return left(new AuthenticationError())
+    }
+
+    return right(undefined)
   }
 }
