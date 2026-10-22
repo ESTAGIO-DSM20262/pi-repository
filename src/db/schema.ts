@@ -3,11 +3,17 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
   timestamp,
 } from 'drizzle-orm/pg-core'
+import type {
+  ProjectPublicDetails,
+  ProjectStatus,
+  ProjectTeamMember,
+} from '@/domain/enterprise/entities/project'
 import type {
   ProjectProgressRevisionAction,
   ProjectProgressTaskStatus,
@@ -160,5 +166,34 @@ export const projectProgressRevisions = pgTable(
   (table) => [
     index('project_progress_revisions_task_id_idx').on(table.taskId),
     index('project_progress_revisions_project_id_idx').on(table.projectId),
+  ],
+)
+
+export const projects = pgTable(
+  'projects',
+  {
+    id: text('id').primaryKey(),
+    title: text('title').notNull(),
+    summary: text('summary').notNull(),
+    cycle: text('cycle').notNull(),
+    semester: integer('semester').notNull(),
+    advisorEmail: text('advisor_email').notNull(),
+    advisorName: text('advisor_name').notNull(),
+    memberEmails: jsonb('member_emails').$type<string[]>().notNull().default([]),
+    teamMembers: jsonb('team_members').$type<ProjectTeamMember[]>().notNull().default([]),
+    languages: jsonb('languages').$type<string[]>().notNull().default([]),
+    stack: jsonb('stack').$type<string[]>().notNull().default([]),
+    theme: text('theme').notNull(),
+    status: text('status').$type<ProjectStatus>().notNull().default('em_andamento'),
+    verified: boolean('verified').notNull().default(false),
+    publicDetails: jsonb('public_details').$type<ProjectPublicDetails>(),
+    createdByUserId: text('created_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('projects_advisor_email_idx').on(table.advisorEmail),
+    index('projects_status_idx').on(table.status),
   ],
 )

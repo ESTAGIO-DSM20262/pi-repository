@@ -48,6 +48,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
   const [loadError, setLoadError] = useState('')
   const [query, setQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | Role>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const [page, setPage] = useState(1)
   const [editing, setEditing] = useState<AdminUserRecord | null>(null)
   const [editForm, setEditForm] = useState<EditForm>({
@@ -92,9 +93,11 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
         `${user.name} ${user.registrationNumber ?? ''} ${user.email}`
           .toLocaleLowerCase('pt-BR')
           .includes(normalized)
-      return matchesText && (roleFilter === 'all' || user.role === roleFilter)
+      const matchesStatus =
+        statusFilter === 'all' || (statusFilter === 'active' ? user.active : !user.active)
+      return matchesText && matchesStatus && (roleFilter === 'all' || user.role === roleFilter)
     })
-  }, [users, query, roleFilter])
+  }, [users, query, roleFilter, statusFilter])
 
   const pageCount = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE))
   const safePage = Math.min(page, pageCount)
@@ -234,7 +237,7 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
               setPage(1)
             }}
             placeholder="Buscar por nome, RA ou e-mail..."
-            className="h-10 w-full rounded-lg border border-transparent bg-[#f2f3f4] pl-9 pr-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10"
+            className="h-10 w-full rounded-lg border border-border bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10"
           />
         </label>
         <div className="sm:w-[190px]">
@@ -256,11 +259,30 @@ export default function AdminUsersSection({ currentUserId }: { currentUserId: st
             }}
           />
         </div>
+        <div className="sm:w-[170px]">
+          <SelectDropdown
+            value={statusFilter}
+            ariaLabel="Filtrar por status"
+            size="compact"
+            tone="muted"
+            width="full"
+            options={[
+              { value: 'all', label: 'Todos os status' },
+              { value: 'active', label: 'Ativo' },
+              { value: 'inactive', label: 'Inativo' },
+            ]}
+            onChange={(value) => {
+              setStatusFilter(value as 'all' | 'active' | 'inactive')
+              setPage(1)
+            }}
+          />
+        </div>
         <button
           type="button"
           onClick={() => {
             setQuery('')
             setRoleFilter('all')
+            setStatusFilter('all')
             setPage(1)
           }}
           title="Limpar filtros da listagem"

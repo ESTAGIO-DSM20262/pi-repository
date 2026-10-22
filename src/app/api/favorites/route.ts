@@ -2,7 +2,7 @@ import { and, asc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { projectFavorites } from '@/db/schema'
-import { MOCK_PROJECTS } from '@/infrastructure/projects/mock-projects'
+import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
 import { auth } from '@/libs/auth'
 
 function jsonError(message: string, status: number) {
@@ -20,8 +20,9 @@ async function getAuthenticatedUserId(request: Request): Promise<string | null> 
   return session?.user?.id ? String(session.user.id) : null
 }
 
-function isFavoriteableProject(projectId: string): boolean {
-  return MOCK_PROJECTS.some((project) => project.id === projectId && project.status === 'publicado')
+async function isFavoriteableProject(projectId: string): Promise<boolean> {
+  const project = await new DbProjectRepository().findById(projectId)
+  return project?.status === 'publicado'
 }
 
 export async function GET(request: Request) {
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       ? body.projectId.trim()
       : ''
 
-  if (!projectId || !isFavoriteableProject(projectId)) {
+  if (!projectId || !(await isFavoriteableProject(projectId))) {
     return jsonError('O projeto selecionado não existe ou não está publicado.', 400)
   }
 

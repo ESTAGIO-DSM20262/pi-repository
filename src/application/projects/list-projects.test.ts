@@ -28,6 +28,10 @@ class InMemoryProjectRepository implements ProjectRepository {
   async findAll() {
     return this.items
   }
+
+  async findById(id: string) {
+    return this.items.find((item) => item.id === id) ?? null
+  }
 }
 
 const joao: Viewer = { email: 'joao.silva@aluno.cps.sp.gov.br', role: 'student' }

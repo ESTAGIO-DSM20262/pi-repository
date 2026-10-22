@@ -6,8 +6,9 @@ import ProjectPublicView from '@/components/projects/ProjectPublicView'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
-import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
+import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
 import { auth } from '@/libs/auth'
+import { resolveProjectEditAccess } from '@/libs/project-edit-access'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
 export const instant = false
@@ -17,9 +18,7 @@ interface ProjectPageProps {
 }
 
 async function findProject(id: string): Promise<Project | null> {
-  const repository = new MockProjectRepository()
-  const projects = await repository.findAll()
-  return projects.find((project) => project.id === id) ?? null
+  return new DbProjectRepository().findById(id)
 }
 
 async function findPublicProject(id: string) {
@@ -115,6 +114,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const sessionUserId = session?.user?.id ? String(session.user.id) : ''
   let showProjectProgress = false
   let canManageProgress = false
+  let canEditProject = false
 
   if (sessionUserId) {
     const [account] = await db
@@ -137,6 +137,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       showProjectProgress = isInvolved
       canManageProgress = project.status === 'em_andamento' && (isAdmin || isAdvisor)
+
+      if (isAdmin || isAdvisor) {
+        const editAccess = await resolveProjectEditAccess({
+          sessionUserId,
+          projectId: project.id,
+        }).catch(() => null)
+        canEditProject = Boolean(editAccess?.ok)
+      }
     }
   }
 
@@ -148,6 +156,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       isAuthenticated={Boolean(session)}
       canManageProgress={canManageProgress}
       showProjectProgress={showProjectProgress}
+      canEditProject={canEditProject}
     />
   )
 }

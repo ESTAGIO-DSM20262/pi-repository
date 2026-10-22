@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
+import BackButton from '@/components/ui/BackButton'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -111,30 +111,30 @@ export default function ProfilePage({ initialProfile }: { initialProfile: Profil
   return (
     <div className="w-full bg-background px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-              Conta do usuário
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              Meu perfil
-            </h1>
-            <p className="mt-1 text-sm text-text-secondary">
-              Consulte seus dados e mantenha suas informações atualizadas.
-            </p>
+        <div className="mb-6 rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-6">
+          <div className="flex items-start gap-3">
+            <BackButton
+              href={
+                profile.role === 'admin'
+                  ? '/admin'
+                  : profile.role === 'professor'
+                    ? '/professor'
+                    : '/aluno'
+              }
+              label="Voltar ao painel"
+            />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+                Conta do usuário
+              </p>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                Meu perfil
+              </h1>
+              <p className="mt-1 text-sm text-text-secondary">
+                Consulte seus dados e mantenha suas informações atualizadas.
+              </p>
+            </div>
           </div>
-          <Link
-            href={
-              profile.role === 'admin'
-                ? '/admin'
-                : profile.role === 'professor'
-                  ? '/professor'
-                  : '/aluno'
-            }
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-border bg-white px-3.5 text-xs font-semibold text-slate-700 transition hover:border-primary/30 hover:text-primary"
-          >
-            <i className="fi fi-rr-apps flex" aria-hidden="true" /> Voltar ao painel
-          </Link>
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">

@@ -1,8 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 import { type DragEvent, type FormEvent, type ReactNode, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
+import BackButton from '@/components/ui/BackButton'
 import ConfirmationDialog from '@/components/ui/ConfirmationDialog'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -253,25 +253,21 @@ export default function UserRegistrationPage() {
   return (
     <div className="w-full bg-background px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-7 flex items-start gap-3 sm:mb-9">
-          <Link
-            href="/admin"
-            aria-label="Voltar ao painel administrativo"
-            className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-white text-[#765e58] shadow-sm transition hover:border-primary/30 hover:text-primary"
-          >
-            <i className="fi fi-rr-arrow-left flex" aria-hidden="true" />
-          </Link>
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
-              Painel administrativo
-            </p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-              Cadastro de Usuários
-            </h1>
-            <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
-              Cadastre alunos, professores ou administradores individualmente, ou importe uma
-              planilha com alunos e professores.
-            </p>
+        <div className="mb-7 rounded-2xl border border-border bg-white p-4 shadow-sm sm:mb-9 sm:p-6">
+          <div className="flex items-start gap-3">
+            <BackButton href="/admin" label="Voltar ao painel administrativo" />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+                Painel administrativo
+              </p>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                Cadastro de Usuários
+              </h1>
+              <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
+                Cadastre alunos, professores ou administradores individualmente, ou importe uma
+                planilha com alunos e professores.
+              </p>
+            </div>
           </div>
         </div>
 

@@ -5,7 +5,9 @@ import { useMemo, useState } from 'react'
 import type { ListedProject } from '@/application/projects/list-projects'
 import AdminUsersSection from '@/components/admin/AdminUsersSection'
 import FavoriteButton from '@/components/projects/FavoriteButton'
+import SelectDropdown from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
+import { formatPersonName } from '@/libs/initials'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
@@ -121,7 +123,7 @@ function AdminOverviewCards({
 
   return (
     <section aria-labelledby="admin-overview-title" className="space-y-4">
-      <div>
+      <div className="rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
         <h2
           id="admin-overview-title"
           className="text-lg font-bold tracking-tight text-slate-900 sm:text-xl"
@@ -170,7 +172,10 @@ function AdminOverviewCards({
         })}
       </div>
       {!userMetrics && (
-        <p role="status" className="text-xs text-amber-800">
+        <p
+          role="status"
+          className="rounded-xl border border-border bg-white px-4 py-3 text-xs text-amber-800 shadow-sm"
+        >
           Os indicadores de usuários não puderam ser carregados. Atualize o painel ou verifique a
           conexão com o banco de dados.
         </p>
@@ -197,7 +202,9 @@ function SectionHeading({
   className?: string
 }) {
   return (
-    <div className={`${className} flex flex-wrap items-center justify-between gap-3`}>
+    <div
+      className={`${className} flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5`}
+    >
       <div className="flex items-start gap-3">
         <span
           className={`mt-1 h-6 w-2 shrink-0 rounded-full ${accent === 'green' ? 'bg-emerald-800' : 'bg-slate-600'}`}
@@ -274,7 +281,7 @@ function DashboardProjectCard({
   const isPublished = project.status === 'publicado'
 
   return (
-    <article className="group flex min-w-0 gap-2.5 rounded-xl bg-[#f2f3f4] p-2.5 transition-colors hover:bg-slate-100 sm:gap-3 sm:p-3">
+    <article className="group flex min-w-0 gap-2.5 rounded-xl border border-border bg-white p-2.5 shadow-sm transition-colors hover:bg-surface-secondary sm:gap-3 sm:p-3">
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
@@ -322,6 +329,115 @@ function DashboardProjectCard({
   )
 }
 
+type ProjectStatusFilter = 'all' | 'em_andamento' | 'publicado'
+
+function normalizeText(value: string) {
+  return value.trim().toLocaleLowerCase('pt-BR')
+}
+
+function projectStudentNames(project: ListedProject): string {
+  const members = project.teamMembers?.length
+    ? project.teamMembers
+    : (project.publicDetails?.team ?? [])
+  return members.map((member) => member.name).join(' ')
+}
+
+const SEMESTER_FILTER_OPTIONS = [
+  { value: 'all', label: 'Todos os semestres' },
+  ...[1, 2, 3, 4, 5, 6].map((semester) => ({
+    value: String(semester),
+    label: `${semester}º semestre`,
+  })),
+]
+
+function ProjectFilters({
+  query,
+  onQueryChange,
+  status,
+  onStatusChange,
+  semester,
+  onSemesterChange,
+  cycle,
+  onCycleChange,
+  cycleOptions,
+  onClear,
+}: {
+  query: string
+  onQueryChange: (value: string) => void
+  status: ProjectStatusFilter
+  onStatusChange: (value: ProjectStatusFilter) => void
+  semester: string
+  onSemesterChange: (value: string) => void
+  cycle: string
+  onCycleChange: (value: string) => void
+  cycleOptions: Array<{ value: string; label: string; count: number }>
+  onClear: () => void
+}) {
+  return (
+    <div className="mb-4 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-end">
+      <label className="relative min-w-0 flex-1 lg:max-w-[340px]">
+        <span className="sr-only">Buscar projeto por título, orientador, tema ou aluno</span>
+        <i
+          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#765e58]"
+          aria-hidden="true"
+        />
+        <input
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder="Buscar por título, orientador, tema ou aluno..."
+          className="h-10 w-full rounded-lg border border-border bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition focus:border-primary/40 focus:bg-white focus:ring-2 focus:ring-primary/10"
+        />
+      </label>
+      <div className="lg:w-[180px]">
+        <SelectDropdown
+          value={status}
+          ariaLabel="Filtrar projetos por situação"
+          size="compact"
+          tone="muted"
+          width="full"
+          options={[
+            { value: 'all', label: 'Todas as situações' },
+            { value: 'em_andamento', label: 'Em andamento' },
+            { value: 'publicado', label: 'Concluído' },
+          ]}
+          onChange={(value) => onStatusChange(value as ProjectStatusFilter)}
+        />
+      </div>
+      <div className="lg:w-[190px]">
+        <SelectDropdown
+          value={semester}
+          ariaLabel="Filtrar projetos por semestre"
+          size="compact"
+          tone="muted"
+          width="full"
+          options={SEMESTER_FILTER_OPTIONS}
+          onChange={onSemesterChange}
+        />
+      </div>
+      <div className="lg:w-[170px]">
+        <SelectDropdown
+          value={cycle}
+          ariaLabel="Filtrar projetos por ciclo"
+          size="compact"
+          tone="muted"
+          width="full"
+          options={[{ value: 'all', label: 'Todos os ciclos' }, ...cycleOptions]}
+          onChange={onCycleChange}
+        />
+      </div>
+      <button
+        type="button"
+        onClick={onClear}
+        title="Limpar filtros dos projetos"
+        aria-label="Limpar filtros dos projetos"
+        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-[#f2f3f4] text-[#765e58] transition hover:bg-primary-light hover:text-primary lg:self-auto"
+      >
+        <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
+      </button>
+    </div>
+  )
+}
+
 function ProjectsSection({
   title,
   subtitle,
@@ -331,6 +447,7 @@ function ProjectsSection({
   onToggleFavorite,
   action,
   emptyText,
+  filterable = false,
 }: {
   title: string
   subtitle: string
@@ -340,13 +457,83 @@ function ProjectsSection({
   onToggleFavorite: (projectId: string) => Promise<boolean>
   action?: React.ReactNode
   emptyText: string
+  filterable?: boolean
 }) {
+  const [query, setQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
+  const [semesterFilter, setSemesterFilter] = useState('all')
+  const [cycleFilter, setCycleFilter] = useState('all')
+
+  const cycleOptions = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const project of projects) counts.set(project.cycle, (counts.get(project.cycle) ?? 0) + 1)
+    return [...counts.entries()]
+      .map(([value, count]) => ({ value, label: value, count }))
+      .sort((a, b) => b.value.localeCompare(a.value))
+  }, [projects])
+
+  const filteredProjects = useMemo(() => {
+    if (!filterable) return projects
+    const normalized = normalizeText(query)
+    return projects.filter((project) => {
+      const matchesText =
+        !normalized ||
+        normalizeText(
+          `${project.title} ${project.advisor.name} ${project.theme} ${project.summary} ${projectStudentNames(project)}`,
+        ).includes(normalized)
+      const matchesStatus = statusFilter === 'all' || project.status === statusFilter
+      const matchesSemester =
+        semesterFilter === 'all' || String(project.semester) === semesterFilter
+      const matchesCycle = cycleFilter === 'all' || project.cycle === cycleFilter
+      return matchesText && matchesStatus && matchesSemester && matchesCycle
+    })
+  }, [projects, filterable, query, statusFilter, semesterFilter, cycleFilter])
+
+  const hasActiveFilters =
+    query.trim() !== '' ||
+    statusFilter !== 'all' ||
+    semesterFilter !== 'all' ||
+    cycleFilter !== 'all'
+
+  function clearFilters() {
+    setQuery('')
+    setStatusFilter('all')
+    setSemesterFilter('all')
+    setCycleFilter('all')
+  }
+
   return (
-    <section className="rounded-xl border border-border bg-white p-4 shadow-sm sm:p-6 lg:p-8">
-      <SectionHeading title={title} subtitle={subtitle} icon={icon} action={action} />
-      {projects.length > 0 ? (
+    <section className="rounded-xl bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+      <SectionHeading
+        title={title}
+        subtitle={subtitle}
+        icon={icon}
+        action={action}
+        className="mb-5 border-0 bg-transparent p-0 shadow-none"
+      />
+      {filterable && projects.length > 0 && (
+        <>
+          <ProjectFilters
+            query={query}
+            onQueryChange={setQuery}
+            status={statusFilter}
+            onStatusChange={setStatusFilter}
+            semester={semesterFilter}
+            onSemesterChange={setSemesterFilter}
+            cycle={cycleFilter}
+            onCycleChange={setCycleFilter}
+            cycleOptions={cycleOptions}
+            onClear={clearFilters}
+          />
+          <p className="mb-3 text-[11px] text-[#765e58]" role="status">
+            Exibindo {filteredProjects.length} de {projects.length}{' '}
+            {projects.length === 1 ? 'projeto' : 'projetos'}.
+          </p>
+        </>
+      )}
+      {filteredProjects.length > 0 ? (
         <div className={GRID_CLASS}>
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <DashboardProjectCard
               key={project.id}
               project={project}
@@ -358,7 +545,20 @@ function ProjectsSection({
       ) : (
         <div className="rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-8 text-center">
           <i className="fi fi-rr-folder-open text-xl text-text-muted" aria-hidden="true" />
-          <p className="mt-2 text-sm text-text-secondary">{emptyText}</p>
+          <p className="mt-2 text-sm text-text-secondary">
+            {projects.length > 0 && hasActiveFilters
+              ? 'Nenhum projeto encontrado com esses filtros.'
+              : emptyText}
+          </p>
+          {projects.length > 0 && hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="cursor-pointer mt-3 text-xs font-semibold text-primary hover:underline"
+            >
+              Limpar filtros
+            </button>
+          )}
         </div>
       )}
     </section>
@@ -380,11 +580,10 @@ export default function RoleDashboard({
   const relatedProjects = useMemo(() => projects.filter((project) => project.related), [projects])
   const displayedProjects = role === 'admin' ? projects : relatedProjects
   const firstName =
-    name
-      .trim()
+    formatPersonName(name)
       .split(/\s+/)
       .find((part) => !/^(?:prof\.?|profa\.?|professor|professora|dr\.?|dra\.?)$/i.test(part)) ||
-    name
+    formatPersonName(name)
   const welcomeName =
     role === 'admin'
       ? 'Administrador'
@@ -397,52 +596,45 @@ export default function RoleDashboard({
     loading: favoritesLoading,
     loadError: favoritesLoadError,
   } = useProjectFavorites(true)
-  const [mainNotice, setMainNotice] = useState<{ title: string; body: string } | null>(null)
   const favoriteProjects = publishedProjects.filter((project) => favoriteIds.includes(project.id))
-
-  function showPrototypeNotice() {
-    setMainNotice({
-      title: 'Cadastro de projetos em preparação',
-      body: 'O botão está presente para validar a navegação visual. A criação persistente de projetos será conectada ao backend administrativo; nesta versão, os projetos continuam sendo dados demonstrativos.',
-    })
-  }
 
   const newProjectAction =
     role !== 'student' ? (
-      <button
-        type="button"
-        onClick={showPrototypeNotice}
-        className="cursor-pointer inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
+      <Link
+        href="/projetos/novo"
+        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
       >
         <i className="fi fi-rr-plus flex" aria-hidden="true" /> Novo Projeto
-      </button>
+      </Link>
     ) : undefined
 
   return (
     <div className="bg-background">
-      <section className="border-b border-border-light bg-background">
-        <div className="mx-auto flex max-w-[1400px] items-center gap-4 px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-white text-primary shadow-sm sm:h-12 sm:w-12">
-            <i
-              className={`fi ${role === 'admin' ? 'fi-rr-shield-check' : role === 'professor' ? 'fi-rr-chalkboard-user' : 'fi-rr-graduation-cap'} flex text-xl`}
-              aria-hidden="true"
-            />
-          </span>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary sm:text-[11px]">
-                Painel institucional
-              </p>
-              <span
-                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-800 text-white' : role === 'professor' ? 'bg-rose-100 text-rose-900' : 'bg-slate-100 text-slate-700'}`}
-              >
-                {ROLE_LABEL[role]}
-              </span>
+      <section className="bg-background">
+        <div className="mx-auto max-w-[1400px] px-4 pt-5 sm:px-6 sm:pt-7 lg:px-8">
+          <div className="flex items-center gap-4 rounded-2xl border border-border bg-white px-4 py-5 shadow-sm sm:px-6 sm:py-6">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/10 bg-white text-primary shadow-sm sm:h-12 sm:w-12">
+              <i
+                className={`fi ${role === 'admin' ? 'fi-rr-shield-check' : role === 'professor' ? 'fi-rr-chalkboard-user' : 'fi-rr-graduation-cap'} flex text-xl`}
+                aria-hidden="true"
+              />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary sm:text-[11px]">
+                  Painel institucional
+                </p>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-800 text-white' : role === 'professor' ? 'bg-rose-100 text-rose-900' : 'bg-slate-100 text-slate-700'}`}
+                >
+                  {ROLE_LABEL[role]}
+                </span>
+              </div>
+              <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+                Bem-vindo(a), {welcomeName}
+              </h1>
+              <p className="mt-1 truncate text-xs text-text-secondary sm:text-sm">{email}</p>
             </div>
-            <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
-              Bem-vindo(a), {welcomeName}
-            </h1>
-            <p className="mt-1 truncate text-xs text-text-secondary sm:text-sm">{email}</p>
           </div>
         </div>
       </section>
@@ -467,6 +659,7 @@ export default function RoleDashboard({
           favoriteIds={favoriteIds}
           onToggleFavorite={toggleFavorite}
           action={newProjectAction}
+          filterable={role !== 'student'}
           emptyText={
             role === 'admin'
               ? 'Ainda não há projetos cadastrados no acervo.'
@@ -491,41 +684,12 @@ export default function RoleDashboard({
         />
 
         {role === 'admin' && (
-          <p className="pb-2 text-center text-[10px] text-text-muted">
-            Usuários e permissões são gerenciados no banco. Os cards de projetos refletem o acervo
-            demonstrativo; os indicadores de usuários vêm do banco.
+          <p className="rounded-xl border border-border bg-white px-4 py-3 text-center text-[10px] text-text-muted shadow-sm">
+            Usuários, permissões e projetos cadastrados são gerenciados no banco. Os projetos
+            demonstrativos do acervo continuam sendo exibidos junto com os novos cadastros.
           </p>
         )}
       </div>
-
-      {mainNotice && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-label="Fechar aviso"
-            className="absolute inset-0 cursor-default"
-            onMouseDown={() => setMainNotice(null)}
-            onClick={(event) => {
-              if (event.detail === 0) setMainNotice(null)
-            }}
-          />
-          <div className="relative z-10 w-full max-w-sm rounded-2xl border border-border bg-white p-6 shadow-2xl">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-light text-primary">
-              <i className="fi fi-rr-info flex text-lg" aria-hidden="true" />
-            </span>
-            <h3 className="mt-4 text-lg font-semibold text-slate-900">{mainNotice.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-text-secondary">{mainNotice.body}</p>
-            <button
-              type="button"
-              onClick={() => setMainNotice(null)}
-              className="cursor-pointer mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
-            >
-              Entendi
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

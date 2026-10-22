@@ -2,7 +2,9 @@
 
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import SelectDropdown from '@/components/ui/SelectDropdown'
 import type { ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
+import { formatPersonName } from '@/libs/initials'
 
 export interface ProgressTask {
   id: string
@@ -272,22 +274,22 @@ export default function ProgressTaskDialog({
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <label className={labelClass} htmlFor="progress-task-target">
-                  Responsável pela entrega
-                </label>
-                <select
-                  id="progress-task-target"
-                  className={`${inputClass} cursor-pointer`}
+                <span className={labelClass}>Responsável pela entrega</span>
+                <SelectDropdown
                   value={targetStudentEmail}
-                  onChange={(event) => setTargetStudentEmail(event.target.value)}
-                >
-                  <option value="">Todo o grupo</option>
-                  {members.map((member) => (
-                    <option key={member.email} value={member.email}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
+                  ariaLabel="Responsável pela entrega"
+                  width="full"
+                  layer="modal"
+                  className="mt-1.5 min-h-11"
+                  options={[
+                    { value: '', label: 'Todo o grupo' },
+                    ...members.map((member) => ({
+                      value: member.email,
+                      label: formatPersonName(member.name),
+                    })),
+                  ]}
+                  onChange={setTargetStudentEmail}
+                />
                 <p className="mt-1 text-[10px] text-slate-500">
                   Tarefas individuais ficam visíveis apenas ao aluno selecionado.
                 </p>
@@ -311,21 +313,16 @@ export default function ProgressTaskDialog({
 
             {task && (
               <div>
-                <label className={labelClass} htmlFor="progress-task-status">
-                  Situação da entrega
-                </label>
-                <select
-                  id="progress-task-status"
-                  className={`${inputClass} cursor-pointer`}
+                <span className={labelClass}>Situação da entrega</span>
+                <SelectDropdown
                   value={status}
-                  onChange={(event) => setStatus(event.target.value as ProjectProgressTaskStatus)}
-                >
-                  {STATUS_OPTIONS.map((option) => (
-                    <option value={option.value} key={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  ariaLabel="Situação da entrega"
+                  width="full"
+                  layer="modal"
+                  className="mt-1.5 min-h-11"
+                  options={STATUS_OPTIONS}
+                  onChange={(value) => setStatus(value as ProjectProgressTaskStatus)}
+                />
               </div>
             )}
 

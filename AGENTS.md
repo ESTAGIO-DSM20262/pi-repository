@@ -277,3 +277,63 @@ documente aqui.
 | `npm run test:watch` | testes em watch |
 | `npm run db:migrate` | aplica migrações Drizzle |
 | `npm run db:seed` | cria contas de desenvolvimento |
+
+## 16. Cadastro de projetos e filtros do painel
+
+- **Persistência:** projetos criados pela interface ficam na tabela `projects`
+  (`src/db/migrations/20261021_projects.sql`, espelhada em `db/schema.ts`). Os projetos
+  demonstrativos continuam em `mock-projects.ts`. `DbProjectRepository`
+  (`infrastructure/projects/db-project-repository.ts`) devolve os dois conjuntos juntos e
+  implementa `findById`, usado por dashboard, home, página do projeto, favoritos e acesso ao
+  progresso. Se a tabela ainda não existir, o repositório registra o erro e exibe só os demonstrativos.
+- **Validação:** `application/projects/create-project.ts` (`parseCreateProjectInput`) valida e
+  normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. Exige título,
+  resumo, ciclo `AAAA/1|2`, semestre 1–12, tema, orientador e ao menos um aluno. As tarefas iniciais
+  são opcionais (zero ou mais) e o responsável de cada tarefa precisa ser um aluno do projeto.
+- **API:** `POST /api/projects` aceita apenas professor ou administrador ativos. O professor é sempre o
+  orientador do que cria; o administrador escolhe um professor ativo. Alunos precisam existir, estar
+  ativos e ter o papel `student`. Projeto, tarefas (versões `v1.0`, `v2.0`…) e revisões `created` são
+  gravados em uma única `db.batch`.
+- **Tela:** `/projetos/novo` e `/projetos/[id]/editar` usam o mesmo componente,
+  `components/projects/ProjectFormPage.tsx` (`mode="create" | "edit"`), restrito a professor e
+  administrador. O botão "Novo Projeto" do painel aponta para a criação.
+- **Filtros do painel:** a seção de projetos de administrador e professor tem busca (título,
+  orientador, tema, aluno), filtro de situação, filtro de semestre (1º ao 6º) e filtro de ciclo
+  (`AAAA/1|2`, montado a partir dos ciclos existentes na lista). A lista de usuários do
+  administrador ganhou o filtro de status (ativo/inativo), ao lado do filtro de perfil.
+- **Dropdowns:** todo seletor usa `components/ui/SelectDropdown`. Dentro de modais, use
+  `layer="modal"` para o menu ficar acima do diálogo.
+
+## 17. Edição de projetos e artefatos
+
+- **Quem edita:** `libs/project-edit-access.ts` (`resolveProjectEditAccess`) é a única fonte da regra.
+  O professor **orientador** do projeto tem escopo `full` (todos os dados, equipe, tecnologias e
+  artefatos). O administrador tem escopo `artifacts` em qualquer projeto (somente links e,
+  futuramente, imagens e arquivos). Aluno nunca edita. Projetos demonstrativos (`mock-projects.ts`)
+  não existem na tabela `projects` e por isso não são editáveis.
+- **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
+  `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
+  mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro. O orientador não
+  pode ser trocado na edição.
+- **API:** `PATCH /api/projects/[id]` valida com `parseUpdateProjectInput(body, scope)`
+  (`application/projects/update-project.ts`). No escopo `artifacts` só os links são lidos; o resto
+  do corpo é ignorado. No escopo `full`, a equipe é recalculada a partir da tabela `users`. Remover
+  um aluno que ainda tem tarefa individual atribuída devolve 409: reatribua ou exclua a tarefa antes.
+  `publicDetails` é sempre mesclado (`...currentDetails`) para preservar `attachments` e `images`.
+- **Tarefas:** não são editadas nesta tela. Na criação, as tarefas iniciais continuam opcionais; na
+  edição, a tela aponta para a seção de progresso da página do projeto.
+- **Links dos artefatos:** ficam em `publicDetails.externalLinks`, sem migração. Rótulos fixos em
+  `PROJECT_LINK_LABELS` (`domain/enterprise/entities/project-details.ts`): `Repositório`,
+  `Site no ar` e `Protótipo`. Qualquer outro rótulo é um link adicional (título + endereço, até 10).
+  Todos precisam ser HTTPS. `splitProjectLinks` e `buildProjectLinks` convertem entre a lista
+  persistida e os campos do formulário.
+- **Imagens e arquivos (ainda não funcionais):** o formulário já traz os campos
+  (`UploadSlot`, desabilitados por padrão, com `onFiles` e `disabled` prontos para a implementação).
+  O modelo já prevê `publicDetails.images` (`ProjectImage`) e `publicDetails.attachments`
+  (`ProjectAttachment`). Para ativar: implemente o armazenamento e o endpoint de upload, passe
+  `disabled={false}` e `onFiles` ao `UploadSlot` correspondente e inclua as listas no
+  `PATCH` (hoje elas são preservadas, não editadas).
+- **Botão de voltar:** `components/ui/BackButton.tsx` é o único botão de voltar das páginas
+  internas. Com `href` navega para o destino; sem `href` volta no histórico (ou para `/`). O link
+  "Voltar para o login" dentro dos cartões de autenticação é um link de texto e não faz parte do
+  padrão.

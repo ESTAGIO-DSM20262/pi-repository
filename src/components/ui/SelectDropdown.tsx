@@ -19,6 +19,7 @@ interface SelectDropdownProps {
   size?: 'default' | 'compact'
   width?: 'full' | 'auto'
   tone?: 'surface' | 'muted'
+  layer?: 'default' | 'modal'
   className?: string
 }
 
@@ -33,6 +34,7 @@ export default function SelectDropdown({
   size = 'default',
   width = 'full',
   tone = 'surface',
+  layer = 'default',
   className = '',
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -80,12 +82,13 @@ export default function SelectDropdown({
 
     setMenuStyle({
       position: 'fixed',
+      zIndex: layer === 'modal' ? 2147483647 : undefined,
       top,
       left,
       width: menuWidth,
       maxHeight: Math.min(320, viewportHeight - padding * 2),
     })
-  }, [options.length])
+  }, [options.length, layer])
 
   const closeMenu = useCallback((restoreFocus = false) => {
     setIsOpen(false)
@@ -130,19 +133,20 @@ export default function SelectDropdown({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
+        event.stopPropagation()
         closeMenu(true)
       }
     }
 
     updatePosition()
     document.addEventListener('pointerdown', handlePointerDown)
-    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', handleKeyDown, true)
     document.addEventListener('scroll', updatePosition, true)
     window.addEventListener('resize', updatePosition)
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown)
-      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keydown', handleKeyDown, true)
       document.removeEventListener('scroll', updatePosition, true)
       window.removeEventListener('resize', updatePosition)
     }
