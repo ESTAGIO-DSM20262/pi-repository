@@ -85,7 +85,13 @@ src/
 ├─ presentation/auth/
 │  ├─ auth-context.tsx             # AuthProvider/useAuth + composition root
 │  ├─ role-label.ts                # rótulos PT para exibição
-│  └─ validation.ts                # schemas Zod dos formulários
+│  └─ validation.ts                # schemas Zod dos formulários (inclui newPasswordSchema)
+├─ presentation/profile/
+│  ├─ profile-record.ts            # tipo ProfileRecord usado pela tela /perfil
+│  ├─ validation.ts                # schemas Zod do perfil e da troca de senha
+│  ├─ change-password.ts           # troca de senha via authClient
+│  └─ social-profile-url.ts        # validação/normalização de links GitHub/LinkedIn
+├─ components/profile/             # tela /perfil dividida em componentes
 ├─ libs/
 │  ├─ auth.ts                      # config do better-auth no SERVIDOR
 │  ├─ styles.ts                    # classes utilitárias de UI
@@ -176,6 +182,22 @@ Aqui os `Left` de regra de negócio são convertidos em `throw` para a UI.
 - `AuthProvider` faz o wiring e usa `authClient.useSession()` para a sessão.
 - `validation.ts` centraliza os schemas Zod e valida o formato geral de e-mail; nenhum sufixo específico é obrigatório.
 - `AuthProvider` é montado em `src/app/layout.tsx`.
+- Formulários usam **react-hook-form + Zod** (`zodResolver`, `mode: 'onTouched'`); não guarde
+  valores de campo, "touched", carregamento ou erro em `useState`. Erros vindos do servidor vão
+  em `setError('root.server', …)`, o carregamento vem de `formState.isSubmitting` e a mensagem de
+  sucesso de `formState.isSubmitSuccessful` (com `reset(..., { keepIsSubmitSuccessful: true })`).
+
+### Tela de perfil (`/perfil`)
+
+`components/profile/ProfilePage.tsx` só compõe: guarda o `ProfileRecord` salvo (para o
+resumo refletir o que o servidor devolveu) e renderiza `ProfilePageHeader`, `ProfileSummary`,
+`ProfileForm` (dados da conta + links sociais, `PATCH /api/profile`) e `ChangePasswordForm`
+(`authClient.changePassword`). Os schemas ficam em `presentation/profile/validation.ts`:
+`createProfileSchema(isAdmin)` só valida nome/e-mail para administradores (os demais não podem
+alterá-los e eles não são enviados), `socialProfileUrlSchema` reaproveita
+`validateSocialProfileUrl` e devolve a URL normalizada ou `null`, e `changePasswordSchema`
+reaproveita `newPasswordSchema` de `presentation/auth/validation.ts`, o mesmo usado em
+`/redefinir-senha`. A API continua revalidando tudo no servidor.
 
 ## 9. Rotas e proteção (server-side)
 
@@ -246,6 +268,8 @@ A escrita do papel é feita no servidor, por cadastro ou gestão administrativa,
 - Cobertura inclui `email-address.test.ts` (normalização, aceitação de domínios diversos e rejeição de formato inválido) e `user.test.ts` (criação da entidade e papel explícito).
   - `sign-in.test.ts` — normalização do e-mail e propagação de erro, usando um
     `InMemoryAuthRepository` (o que demonstra a testabilidade da porta).
+  - `presentation/profile/validation.test.ts` — links sociais, regras de nome/e-mail por
+    papel e regras/confirmação da nova senha.
 
 ## 14. Como evoluir (receita para uma nova fatia)
 
