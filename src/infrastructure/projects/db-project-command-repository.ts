@@ -1,14 +1,14 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks, projects } from '@/db/schema'
+import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
 import type {
-  ProjectRepository,
   ProjectCreateRecord,
   ProjectFullUpdateRecord,
+  ProjectRepository,
   ProjectRevisionCreateRecord,
   ProjectTaskCreateRecord,
 } from '@/domain/enterprise/repositories/project-repository'
-import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
 
 export class DbProjectCommandRepository implements ProjectRepository {
   async create(

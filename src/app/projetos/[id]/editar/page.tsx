@@ -1,14 +1,14 @@
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import {
-  ProjectFormPage,
   type ProjectFormInitialValues,
+  ProjectFormPage,
 } from '@/components/projects/ProjectFormPage'
-import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'
 import { splitProjectLinks } from '@/domain/enterprise/entities/project-details'
-import type { ProjectPersonOption } from '@/presentation/projects/project-person'
+import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'
 import { auth } from '@/libs/auth'
 import { resolveProjectEditAccess } from '@/libs/project-edit-access'
+import type { ProjectPersonOption } from '@/presentation/projects/project-person'
 
 export const metadata = { title: 'Editar projeto • Acervo Acadêmico' }
 export const instant = false

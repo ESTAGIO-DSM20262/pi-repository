@@ -1,13 +1,16 @@
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
+import {
+  buildProjectLinks,
+  buildTechnologyGroups,
+} from '@/domain/enterprise/entities/project-details'
 import type {
-  ProjectRepository,
   ProjectCreateRecord,
+  ProjectRepository,
   ProjectRevisionCreateRecord,
   ProjectTaskCreateRecord,
 } from '@/domain/enterprise/repositories/project-repository'
 import type { ProjectUserDirectory } from '@/domain/enterprise/repositories/project-user-directory'
-import { buildProjectLinks, buildTechnologyGroups } from '@/domain/enterprise/entities/project-details'
 import { parseCreateProjectInput } from './create-project'
 import { ProjectOperationError } from './project-operation-error'
 
@@ -29,9 +32,10 @@ export class CreateProjectUseCase
     private readonly users: ProjectUserDirectory,
   ) {}
 
-  async execute({ sessionUserId, body }: CreateProjectRequest): Promise<
-    Either<ProjectOperationError, CreateProjectResponse>
-  > {
+  async execute({
+    sessionUserId,
+    body,
+  }: CreateProjectRequest): Promise<Either<ProjectOperationError, CreateProjectResponse>> {
     if (!sessionUserId) {
       return left(new ProjectOperationError('É necessário entrar no sistema.', 401))
     }
@@ -52,10 +56,13 @@ export class CreateProjectUseCase
     }
     const input = parsed.value
 
-    const advisorEmail = account.role === 'professor' ? account.email.toLowerCase() : input.advisorEmail
+    const advisorEmail =
+      account.role === 'professor' ? account.email.toLowerCase() : input.advisorEmail
     const advisor = await this.users.findActiveAdvisorByEmail(advisorEmail)
     if (!advisor) {
-      return left(new ProjectOperationError('O professor orientador selecionado não é válido.', 400))
+      return left(
+        new ProjectOperationError('O professor orientador selecionado não é válido.', 400),
+      )
     }
 
     const students = await this.users.findActiveStudentsByEmails(input.studentEmails)

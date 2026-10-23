@@ -1,11 +1,11 @@
+import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
 import type {
-  ProjectRepository,
   ProjectCreateRecord,
   ProjectFullUpdateRecord,
+  ProjectRepository,
   ProjectRevisionCreateRecord,
   ProjectTaskCreateRecord,
 } from '@/domain/enterprise/repositories/project-repository'
-import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
 
 export class InMemoryProjectCommandRepository implements ProjectRepository {
   readonly projects = new Map<string, ProjectCreateRecord>()

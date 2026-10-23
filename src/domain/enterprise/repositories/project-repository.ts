@@ -1,5 +1,12 @@
-import type { ProjectPublicDetails, ProjectStatus, ProjectTeamMember } from '@/domain/enterprise/entities/project'
-import type { ProjectProgressRevisionAction, ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
+import type {
+  ProjectPublicDetails,
+  ProjectStatus,
+  ProjectTeamMember,
+} from '@/domain/enterprise/entities/project'
+import type {
+  ProjectProgressRevisionAction,
+  ProjectProgressTaskStatus,
+} from '@/domain/enterprise/entities/project-progress'
 
 export interface ProjectCreateRecord {
   id: string

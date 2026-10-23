@@ -4,9 +4,9 @@ import type { ChangeEvent } from 'react'
 import {
   Badge,
   FormSection,
-  Required,
   fieldClass,
   labelClass,
+  Required,
 } from '@/components/projects/form/ProjectFormPrimitives'
 
 export interface DraftProjectLink {
@@ -108,10 +108,7 @@ export function ProjectArtifactsSection({
   onUpdateExtraLink,
   onRemoveExtraLink,
 }: ProjectArtifactsSectionProps) {
-  function changeValue(
-    event: ChangeEvent<HTMLInputElement>,
-    onChange: (value: string) => void,
-  ) {
+  function changeValue(event: ChangeEvent<HTMLInputElement>, onChange: (value: string) => void) {
     onChange(event.target.value)
   }
 
@@ -129,7 +126,9 @@ export function ProjectArtifactsSection({
           />
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div>
-              <label className={labelClass} htmlFor="project-repository">Repositório</label>
+              <label className={labelClass} htmlFor="project-repository">
+                Repositório
+              </label>
               <input
                 id="project-repository"
                 type="url"
@@ -141,7 +140,9 @@ export function ProjectArtifactsSection({
               />
             </div>
             <div>
-              <label className={labelClass} htmlFor="project-live-url">Site no ar</label>
+              <label className={labelClass} htmlFor="project-live-url">
+                Site no ar
+              </label>
               <input
                 id="project-live-url"
                 type="url"
@@ -153,7 +154,9 @@ export function ProjectArtifactsSection({
               />
             </div>
             <div>
-              <label className={labelClass} htmlFor="project-prototype-url">Protótipo</label>
+              <label className={labelClass} htmlFor="project-prototype-url">
+                Protótipo
+              </label>
               <input
                 id="project-prototype-url"
                 type="url"
@@ -203,9 +206,7 @@ export function ProjectArtifactsSection({
                       type="url"
                       className={fieldClass}
                       value={link.url}
-                      onChange={(event) =>
-                        onUpdateExtraLink(link.key, { url: event.target.value })
-                      }
+                      onChange={(event) => onUpdateExtraLink(link.key, { url: event.target.value })}
                       maxLength={300}
                       placeholder="Insira o endereço web desejado"
                     />

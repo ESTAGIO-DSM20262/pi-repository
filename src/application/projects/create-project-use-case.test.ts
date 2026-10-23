@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { CreateProjectUseCase } from './create-project-use-case'
 import { InMemoryProjectCommandRepository } from '@/test/repositories/in-memory-project-command-repository'
 import { InMemoryProjectUserDirectory } from '@/test/repositories/in-memory-project-user-directory'
+import { CreateProjectUseCase } from './create-project-use-case'
 
 const professor = {
   id: 'prof-1',

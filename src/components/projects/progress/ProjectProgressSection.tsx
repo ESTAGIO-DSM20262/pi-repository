@@ -1,13 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { formatPersonName } from '@/libs/initials'
 import {
   type ProgressMember,
   type ProgressRevision,
   type ProgressTask,
   ProgressTaskDialog,
 } from './ProgressTaskDialog'
-import { formatPersonName } from '@/libs/initials'
 
 interface ProjectProgressSectionProps {
   projectId: string

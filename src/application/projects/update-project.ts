@@ -1,11 +1,7 @@
 import { type Either, left, right } from '@/core/either'
 import type { ProjectLinkSet } from '@/domain/enterprise/entities/project-details'
 import { InvalidProjectError } from '@/domain/enterprise/errors/invalid-project-error'
-import {
-  type ProjectFieldsInput,
-  parseProjectFields,
-  parseProjectLinks,
-} from './project-fields'
+import { type ProjectFieldsInput, parseProjectFields, parseProjectLinks } from './project-fields'
 
 export type ProjectEditScope = 'full' | 'artifacts'
 

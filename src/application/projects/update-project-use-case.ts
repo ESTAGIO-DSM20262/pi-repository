@@ -1,11 +1,14 @@
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import type { ProjectPublicDetails, ProjectTeamMember } from '@/domain/enterprise/entities/project'
+import {
+  buildProjectLinks,
+  buildTechnologyGroups,
+} from '@/domain/enterprise/entities/project-details'
 import type { ProjectRepository } from '@/domain/enterprise/repositories/project-repository'
 import type { ProjectUserDirectory } from '@/domain/enterprise/repositories/project-user-directory'
-import { buildProjectLinks, buildTechnologyGroups } from '@/domain/enterprise/entities/project-details'
-import { parseUpdateProjectInput, type ProjectEditScope } from './update-project'
 import { ProjectOperationError } from './project-operation-error'
+import { type ProjectEditScope, parseUpdateProjectInput } from './update-project'
 
 interface ExistingProjectForUpdate {
   id: string
@@ -27,9 +30,11 @@ export class UpdateProjectUseCase
     private readonly users: ProjectUserDirectory,
   ) {}
 
-  async execute({ project, scope, body }: UpdateProjectRequest): Promise<
-    Either<ProjectOperationError, { id: string }>
-  > {
+  async execute({
+    project,
+    scope,
+    body,
+  }: UpdateProjectRequest): Promise<Either<ProjectOperationError, { id: string }>> {
     const parsed = parseUpdateProjectInput(body, scope)
     if (parsed.isLeft()) {
       return left(new ProjectOperationError(parsed.value.message, 400))
@@ -61,7 +66,10 @@ export class UpdateProjectUseCase
     const removed = project.memberEmails
       .map((email) => email.trim().toLowerCase())
       .filter((email) => !fields.studentEmails.includes(email))
-    if (removed.length > 0 && (await this.projects.hasTasksAssignedToMembers(project.id, removed))) {
+    if (
+      removed.length > 0 &&
+      (await this.projects.hasTasksAssignedToMembers(project.id, removed))
+    ) {
       return left(
         new ProjectOperationError(
           'Há tarefas atribuídas a um aluno que foi removido do grupo. Reatribua ou exclua essas tarefas no progresso do projeto antes de removê-lo.',

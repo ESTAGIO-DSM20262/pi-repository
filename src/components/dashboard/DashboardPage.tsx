@@ -5,10 +5,10 @@ import { ListProjectsUseCase } from '@/application/projects/list-projects'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Role } from '@/domain/enterprise/entities/role'
-import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
+import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
 import { type AdminUserMetrics, RoleDashboard } from './RoleDashboard'
 
 export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {

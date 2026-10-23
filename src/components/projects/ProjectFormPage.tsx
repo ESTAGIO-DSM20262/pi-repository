@@ -1,33 +1,33 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { type KeyboardEvent, useMemo, useState } from 'react'
-import { BackButton } from '@/components/ui/BackButton'
-import { ProjectTeamSection } from '@/components/projects/form/ProjectTeamSection'
+import { useForm } from 'react-hook-form'
 import {
-  ProjectArtifactsSection,
   type DraftProjectLink,
+  ProjectArtifactsSection,
 } from '@/components/projects/form/ProjectArtifactsSection'
-import { SelectDropdown } from '@/components/ui/SelectDropdown'
-import type { ProjectStatus, ProjectTeamMember } from '@/domain/enterprise/entities/project'
-import type { ProjectExtraLink } from '@/domain/enterprise/entities/project-details'
-import type { Role } from '@/domain/enterprise/entities/role'
-import type { ProjectPersonOption } from '@/presentation/projects/project-person'
 import {
   Badge,
   FieldError,
   FormSection,
-  Required,
   fieldClass,
   hintClass,
   labelClass,
+  Required,
   sectionClass,
 } from '@/components/projects/form/ProjectFormPrimitives'
+import { ProjectTeamSection } from '@/components/projects/form/ProjectTeamSection'
+import { BackButton } from '@/components/ui/BackButton'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
+import type { ProjectStatus, ProjectTeamMember } from '@/domain/enterprise/entities/project'
+import type { ProjectExtraLink } from '@/domain/enterprise/entities/project-details'
+import type { Role } from '@/domain/enterprise/entities/role'
 import { comparePersonNames, getNameInitials } from '@/libs/initials'
-import { projectFormSchema, type ProjectFormValues } from '@/presentation/projects/validation'
+import type { ProjectPersonOption } from '@/presentation/projects/project-person'
+import { type ProjectFormValues, projectFormSchema } from '@/presentation/projects/validation'
 
 export interface ProjectFormInitialValues {
   title: string
@@ -390,11 +390,17 @@ export function ProjectFormPage({
 
     if (canEditDetails) {
       if (selectedEmails.length === 0) {
-        setError('root.server', { type: 'validation', message: 'Atribua pelo menos um aluno ao projeto.' })
+        setError('root.server', {
+          type: 'validation',
+          message: 'Atribua pelo menos um aluno ao projeto.',
+        })
         return
       }
       if (!advisorEmail) {
-        setError('root.server', { type: 'validation', message: 'Selecione o professor orientador.' })
+        setError('root.server', {
+          type: 'validation',
+          message: 'Selecione o professor orientador.',
+        })
         return
       }
     }

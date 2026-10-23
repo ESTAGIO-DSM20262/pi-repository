@@ -87,7 +87,7 @@ export function SelectDropdown({
       width: menuWidth,
       maxHeight: Math.min(320, viewportHeight - padding * 2),
     })
-  }, [options.length, layer])
+  }, [options.length])
 
   const closeMenu = useCallback((restoreFocus = false) => {
     setIsOpen(false)

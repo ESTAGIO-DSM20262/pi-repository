@@ -1,7 +1,7 @@
 import { and, asc, eq } from 'drizzle-orm'
-import type { Role } from '@/domain/enterprise/entities/role'
 import { db } from '@/db'
 import { users } from '@/db/schema'
+import type { Role } from '@/domain/enterprise/entities/role'
 import type { ProjectPersonOption } from '@/presentation/projects/project-person'
 
 export async function listActiveProjectPeople(role: Role): Promise<ProjectPersonOption[]> {

@@ -49,8 +49,7 @@ export function ProjectTeamSection({
       subtitle="Defina um líder e a função opcional de cada integrante."
       badge={
         <Badge tone="green">
-          {selectedStudents.length}{' '}
-          {selectedStudents.length === 1 ? 'integrante' : 'integrantes'}
+          {selectedStudents.length} {selectedStudents.length === 1 ? 'integrante' : 'integrantes'}
         </Badge>
       }
     >
@@ -78,8 +77,7 @@ export function ProjectTeamSection({
               onClick={onAddStudentFromQuery}
               className="cursor-pointer inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover"
             >
-              <i className="fi fi-rr-user-add flex" aria-hidden="true" /> Adicionar
-              discente
+              <i className="fi fi-rr-user-add flex" aria-hidden="true" /> Adicionar discente
             </button>
           </div>
 
@@ -100,9 +98,7 @@ export function ProjectTeamSection({
                         {formatPersonName(student.name)}
                       </span>
                       <span className="block truncate text-[11px] text-text-secondary">
-                        {student.registrationNumber
-                          ? `RA ${student.registrationNumber} · `
-                          : ''}
+                        {student.registrationNumber ? `RA ${student.registrationNumber} · ` : ''}
                         {student.email}
                       </span>
                     </span>
@@ -120,16 +116,14 @@ export function ProjectTeamSection({
               {studentNotice}
             </p>
           )}
-          {students.length === 0 && (
-            <p className={hintClass}>Nenhum aluno ativo cadastrado.</p>
-          )}
+          {students.length === 0 && <p className={hintClass}>Nenhum aluno ativo cadastrado.</p>}
         </div>
       )}
 
       {!canEditDetails && (
         <p className={hintClass}>
           Como administrador, você pode editar somente os links dos artefatos. A equipe e as funções
-        dos integrantes não podem ser alteradas por este perfil.
+          dos integrantes não podem ser alteradas por este perfil.
         </p>
       )}
 
@@ -164,8 +158,7 @@ export function ProjectTeamSection({
                     </span>
                     {isLeader && (
                       <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-2 py-0.5 text-[10px] font-bold text-primary">
-                        <i className="fi fi-rr-crown flex" aria-hidden="true" /> Líder do
-                        grupo
+                        <i className="fi fi-rr-crown flex" aria-hidden="true" /> Líder do grupo
                       </span>
                     )}
                   </span>
@@ -176,10 +169,7 @@ export function ProjectTeamSection({
                       aria-label={`Remover ${formatPersonName(student.name)}`}
                       className="cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
                     >
-                      <i
-                        className="fi fi-rr-cross-small flex text-base"
-                        aria-hidden="true"
-                      />
+                      <i className="fi fi-rr-cross-small flex text-base" aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -189,17 +179,14 @@ export function ProjectTeamSection({
                       className="mb-1 block text-[11px] font-semibold text-slate-700"
                       htmlFor={memberRoleId}
                     >
-                      Função no grupo{' '}
-                      <span className="font-normal text-slate-500">(opcional)</span>
+                      Função no grupo <span className="font-normal text-slate-500">(opcional)</span>
                     </label>
                     <input
                       id={memberRoleId}
                       className={`${fieldClass} h-9 text-xs disabled:cursor-not-allowed disabled:opacity-70`}
                       value={memberTitles[normalizedEmail] ?? ''}
                       disabled={!canEditTeam}
-                      onChange={(event) =>
-                        onMemberTitleChange(normalizedEmail, event.target.value)
-                      }
+                      onChange={(event) => onMemberTitleChange(normalizedEmail, event.target.value)}
                       maxLength={40}
                       placeholder="Ex.: Front-end, UX/UI, Banco de dados"
                     />
@@ -208,9 +195,7 @@ export function ProjectTeamSection({
                     type="button"
                     aria-pressed={isLeader}
                     disabled={!canEditTeam}
-                    onClick={() =>
-                      onToggleLeader(normalizedEmail)
-                    }
+                    onClick={() => onToggleLeader(normalizedEmail)}
                     className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                       isLeader
                         ? 'border-primary bg-primary text-white hover:bg-primary-hover'

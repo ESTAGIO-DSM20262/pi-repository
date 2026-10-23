@@ -12,9 +12,7 @@ export const projectFormSchema = z.object({
     .min(10, 'O resumo deve ter entre 10 e 600 caracteres.')
     .max(600, 'O resumo deve ter entre 10 e 600 caracteres.'),
   overview: z.string().max(5000, 'A descrição detalhada deve ter no máximo 5.000 caracteres.'),
-  cycle: z
-    .string()
-    .regex(/^\d{4}\/[12]$/, 'Informe o ciclo no formato AAAA/1 ou AAAA/2.'),
+  cycle: z.string().regex(/^\d{4}\/[12]$/, 'Informe o ciclo no formato AAAA/1 ou AAAA/2.'),
   semester: z.enum(['1', '2', '3', '4', '5', '6'], {
     error: 'Informe um semestre entre 1 e 6.',
   }),
