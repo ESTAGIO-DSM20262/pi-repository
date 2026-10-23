@@ -6,15 +6,10 @@ import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
-import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
+import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
 import { type AdminUserMetrics, RoleDashboard } from './RoleDashboard'
-
-const ROLE_PATH: Record<Role, string> = {
-  student: '/aluno',
-  professor: '/professor',
-  admin: '/admin',
-}
 
 export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -23,9 +18,9 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
 
   const user = toDomainUser(session.user)
   if (!user) redirect('/login')
-  if (user.role !== requiredRole) redirect(ROLE_PATH[user.role])
+  if (user.role !== requiredRole) redirect(ROLE_DASHBOARD_PATH[user.role])
 
-  const useCase = new ListProjectsUseCase(new MockProjectRepository())
+  const useCase = new ListProjectsUseCase(new CompositeProjectRepository())
   const { projects } = await useCase.execute({
     viewer: { email: user.emailAddress, role: user.role },
   })

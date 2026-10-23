@@ -1,8 +1,16 @@
 export type ProjectStatus = 'publicado' | 'em_andamento'
 
+export interface ProjectTeamAssignment {
+  studentEmail: string
+  roleTitle?: string
+  isLeader?: boolean
+}
+
 export interface ProjectTeamMember {
   studentEmail?: string
   name: string
+  roleTitle?: string
+  isLeader?: boolean
   githubUrl?: string
   linkedinUrl?: string
 }
@@ -26,12 +34,18 @@ export interface ProjectExternalLink {
   url?: string
 }
 
+export interface ProjectImage {
+  title: string
+  url: string
+}
+
 export interface ProjectPublicDetails {
   courseLabel?: string
   overview?: string
   team?: ProjectTeamMember[]
   technologyGroups?: ProjectTechnologyGroup[]
   attachments?: ProjectAttachment[]
+  images?: ProjectImage[]
   externalLinks?: ProjectExternalLink[]
 }
 

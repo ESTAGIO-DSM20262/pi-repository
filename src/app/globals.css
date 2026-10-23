@@ -19,6 +19,7 @@
   --header-height: 48px;
   --footer-height: 32px;
   --content-max-width: 1400px;
+  --z-modal-dropdown: 2147483647;
 
   --radius-sm: 4px;
   --radius-md: 6px;

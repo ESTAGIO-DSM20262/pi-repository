@@ -1,13 +1,14 @@
 import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { users } from '@/db/schema'
-import { MOCK_PROJECTS } from '@/infrastructure/projects/mock-projects'
+import type { Project } from '@/domain/enterprise/entities/project'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 
 export type ProgressAccess =
   | {
       ok: true
-      project: (typeof MOCK_PROJECTS)[number]
+      project: Project
       user: { id: string; email: string; name: string; role: 'student' | 'professor' | 'admin' }
       canManage: boolean
       canViewAllTasks: boolean
@@ -22,7 +23,7 @@ export async function resolveProjectProgressAccess(
   request: Request,
   projectId: string,
 ): Promise<ProgressAccess> {
-  const project = MOCK_PROJECTS.find((item) => item.id === projectId)
+  const project = await new CompositeProjectRepository().findById(projectId)
   if (!project) {
     return { ok: false, status: 404, message: 'O projeto não foi encontrado.' }
   }

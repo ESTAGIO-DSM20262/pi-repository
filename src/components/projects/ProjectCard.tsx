@@ -22,7 +22,7 @@ export function ProjectCard({
   onToggleFavorite,
 }: ProjectCardProps) {
   const advisorLabel = p.advisor.name.startsWith('Profa') ? 'Orientadora' : 'Orientador'
-  const chips = [...p.languages, ...p.stack].slice(0, 4)
+  const chips = [...new Set([...p.languages, ...p.stack])].slice(0, 4)
   const showFavorite = isAuthenticated && p.status === 'publicado' && Boolean(onToggleFavorite)
 
   return (

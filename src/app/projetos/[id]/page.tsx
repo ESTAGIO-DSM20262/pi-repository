@@ -6,6 +6,7 @@ import { ProjectPublicView } from '@/components/projects/ProjectPublicView'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
 import { auth } from '@/libs/auth'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
@@ -17,9 +18,7 @@ interface ProjectPageProps {
 }
 
 async function findProject(id: string): Promise<Project | null> {
-  const repository = new MockProjectRepository()
-  const projects = await repository.findAll()
-  return projects.find((project) => project.id === id) ?? null
+  return new CompositeProjectRepository().findById(id)
 }
 
 async function findPublicProject(id: string) {
@@ -54,8 +53,8 @@ async function addRegisteredSocialProfiles(project: Project): Promise<Project> {
 
   const profiles = new Map(records.map((record) => [record.email.trim().toLowerCase(), record]))
   const advisorProfile = profiles.get(project.advisor.email.trim().toLowerCase())
-  const team: ProjectTeamMember[] = sourceTeam.map((member, index) => {
-    const email = (member.studentEmail ?? project.memberEmails[index])?.trim().toLowerCase()
+  const team: ProjectTeamMember[] = sourceTeam.map((member) => {
+    const email = member.studentEmail?.trim().toLowerCase()
     const registered = email ? profiles.get(email) : undefined
     return {
       ...member,
@@ -115,6 +114,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const sessionUserId = session?.user?.id ? String(session.user.id) : ''
   let showProjectProgress = false
   let canManageProgress = false
+  let canEditProject = false
 
   if (sessionUserId) {
     const [account] = await db
@@ -137,6 +137,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       showProjectProgress = isInvolved
       canManageProgress = project.status === 'em_andamento' && (isAdmin || isAdvisor)
+      if (isAdmin || isAdvisor) {
+        const isExampleProject = Boolean(await new MockProjectRepository().findById(project.id))
+        canEditProject = !isExampleProject
+      }
     }
   }
 
@@ -148,6 +152,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       isAuthenticated={Boolean(session)}
       canManageProgress={canManageProgress}
       showProjectProgress={showProjectProgress}
+      canEditProject={canEditProject}
     />
   )
 }

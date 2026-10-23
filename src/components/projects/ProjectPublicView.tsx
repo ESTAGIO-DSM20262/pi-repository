@@ -1,14 +1,14 @@
 import Link from 'next/link'
-import { ProjectBackButton } from '@/components/projects/ProjectBackButton'
 import { ProjectFavoriteAction } from '@/components/projects/ProjectFavoriteAction'
 import { ProjectProgressSection } from '@/components/projects/progress/ProjectProgressSection'
+import { BackButton } from '@/components/ui/BackButton'
 import type {
   Project,
   ProjectAttachment,
   ProjectTeamMember,
   ProjectTechnologyGroup,
 } from '@/domain/enterprise/entities/project'
-import { getNameInitials } from '@/libs/initials'
+import { comparePersonNames, formatPersonName, getNameInitials } from '@/libs/initials'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
 interface ProjectPublicViewProps {
@@ -16,6 +16,7 @@ interface ProjectPublicViewProps {
   isAuthenticated: boolean
   canManageProgress: boolean
   showProjectProgress: boolean
+  canEditProject?: boolean
 }
 
 function GithubIcon() {
@@ -130,26 +131,47 @@ function DashboardPreview() {
 }
 
 function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
-  const initials = getNameInitials(member.name)
+  const displayName = formatPersonName(member.name)
+  const initials = getNameInitials(displayName)
   const githubUrl = getSafeSocialProfileUrl(member.githubUrl, 'github')
   const linkedinUrl = getSafeSocialProfileUrl(member.linkedinUrl, 'linkedin')
 
   return (
     <li className="flex min-w-0 items-center gap-2.5 py-1.5 sm:gap-3">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-primary">
+      <span
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+          member.isLeader ? 'bg-primary text-white' : 'bg-slate-200 text-primary'
+        }`}
+      >
         {initials}
       </span>
-      <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-slate-900 sm:text-sm">
-        {member.name}
-      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] font-semibold text-slate-900 sm:text-sm">
+          {displayName}
+        </p>
+        {(member.isLeader || member.roleTitle) && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {member.isLeader && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                <i className="fi fi-rr-crown flex" aria-hidden="true" /> Líder
+              </span>
+            )}
+            {member.roleTitle && (
+              <span className="inline-flex max-w-full items-center rounded border border-slate-300 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+                <span className="truncate">{member.roleTitle}</span>
+              </span>
+            )}
+          </div>
+        )}
+      </div>
       <div className="flex shrink-0 items-center gap-3 text-[#6f514b]">
         {githubUrl && (
           <a
             href={githubUrl}
             target="_blank"
             rel="noopener noreferrer"
-            title={`Abrir GitHub de ${member.name}`}
-            aria-label={`GitHub de ${member.name}`}
+            title={`Abrir GitHub de ${displayName}`}
+            aria-label={`GitHub de ${displayName}`}
             className="rounded-sm transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <GithubIcon />
@@ -160,8 +182,8 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
             href={linkedinUrl}
             target="_blank"
             rel="noopener noreferrer"
-            title={`Abrir LinkedIn de ${member.name}`}
-            aria-label={`LinkedIn de ${member.name}`}
+            title={`Abrir LinkedIn de ${displayName}`}
+            aria-label={`LinkedIn de ${displayName}`}
             className="rounded-sm transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <LinkedInIcon />
@@ -235,10 +257,34 @@ function AttachmentRow({ attachment }: { attachment: ProjectAttachment }) {
   )
 }
 
+function getTeamMemberKey(member: ProjectTeamMember) {
+  const email = member.studentEmail?.trim().toLocaleLowerCase('pt-BR')
+  if (email) return email
+
+  return [
+    member.name.trim().toLocaleLowerCase('pt-BR'),
+    member.roleTitle?.trim().toLocaleLowerCase('pt-BR') ?? '',
+    member.githubUrl?.trim().toLocaleLowerCase('pt-BR') ?? '',
+    member.linkedinUrl?.trim().toLocaleLowerCase('pt-BR') ?? '',
+    member.isLeader ? 'leader' : 'member',
+  ].join('::')
+}
+
+function externalProjectLinkIcon(label: string) {
+  const normalizedLabel = label.trim().toLocaleLowerCase('pt-BR')
+
+  if (normalizedLabel === 'repositório') return 'fi-rr-code-branch'
+  if (normalizedLabel === 'site no ar') return 'fi-rr-server'
+  if (normalizedLabel === 'protótipo') return 'fi-rr-pencil'
+  return 'fi-rr-link'
+}
+
 function ExternalProjectLink({ label, url }: { label: string; url?: string }) {
   const className =
     'flex min-h-10 w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 sm:text-[13px]'
-  const icon = <i className="fi fi-rr-arrow-up-right-from-square flex text-xs" aria-hidden="true" />
+  const icon = (
+    <i className={`fi ${externalProjectLinkIcon(label)} flex text-xs`} aria-hidden="true" />
+  )
 
   if (url) {
     return (
@@ -264,9 +310,11 @@ export function ProjectPublicView({
   isAuthenticated,
   canManageProgress,
   showProjectProgress,
+  canEditProject = false,
 }: ProjectPublicViewProps) {
   const details = project.publicDetails
   const team = project.teamMembers?.length ? project.teamMembers : (details?.team ?? [])
+  const sortedTeam = [...team].sort((a, b) => comparePersonNames(a.name, b.name))
   const technologyGroups = details?.technologyGroups?.length
     ? details.technologyGroups
     : [
@@ -284,18 +332,20 @@ export function ProjectPublicView({
   const summary = project.summary
   const advisorGithubUrl = getSafeSocialProfileUrl(project.advisor.githubUrl, 'github')
   const advisorLinkedinUrl = getSafeSocialProfileUrl(project.advisor.linkedinUrl, 'linkedin')
-  const progressMembers = project.memberEmails.map((email, index) => {
-    const normalizedEmail = email.trim().toLowerCase()
-    const matchingMember =
-      team.find((member) => member.studentEmail?.trim().toLowerCase() === normalizedEmail) ??
-      team[index]
-    return { email: normalizedEmail, name: matchingMember?.name ?? email }
-  })
+  const progressMembers = project.memberEmails
+    .map((email) => {
+      const normalizedEmail = email.trim().toLowerCase()
+      const matchingMember = team.find(
+        (member) => member.studentEmail?.trim().toLowerCase() === normalizedEmail,
+      )
+      return { email: normalizedEmail, name: matchingMember?.name ?? email }
+    })
+    .sort((a, b) => comparePersonNames(a.name, b.name))
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-6 sm:py-8 lg:px-6">
       <div className="mb-4 flex min-w-0 flex-wrap items-center gap-3 sm:mb-6">
-        <ProjectBackButton />
+        <BackButton />
         <nav
           aria-label="Caminho de navegação"
           className="flex min-w-0 items-center gap-1.5 text-xs sm:text-[13px]"
@@ -312,6 +362,14 @@ export function ProjectPublicView({
           />
           <span className="truncate font-semibold text-slate-800">{project.title}</span>
         </nav>
+        {canEditProject && (
+          <Link
+            href={`/projetos/${encodeURIComponent(project.id)}/editar`}
+            className="ml-auto inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+          >
+            <i className="fi fi-rr-pencil flex" aria-hidden="true" /> Editar projeto
+          </Link>
+        )}
       </div>
 
       <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-6 lg:p-7">
@@ -348,54 +406,66 @@ export function ProjectPublicView({
         <p className="mt-2 text-[12px] leading-relaxed text-slate-600 sm:hidden">{summary}</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:items-center md:gap-5 md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2">
-          <div className="min-w-0 rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:flex-1 md:items-center md:gap-2.5 md:border-0 md:bg-transparent md:p-0">
+          <div className="flex min-h-[62px] min-w-0 items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:flex-1 md:gap-2.5 md:border-0 md:bg-transparent md:p-0">
             <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white md:flex">
               {getNameInitials(project.advisor.name)}
             </span>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
                 Orientador
               </p>
-              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                <p className="text-[11px] font-bold leading-snug text-slate-900 sm:text-xs md:text-[13px]">
-                  {project.advisor.name}
-                </p>
+              <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] leading-snug sm:gap-1.5 sm:text-xs md:text-[13px]">
+                <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
+                  {formatPersonName(project.advisor.name)}
+                </span>
                 {advisorGithubUrl && (
-                  <a
-                    href={advisorGithubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={`Abrir GitHub de ${project.advisor.name}`}
-                    aria-label={`GitHub de ${project.advisor.name}`}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-primary hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  >
-                    <GithubIcon />
-                  </a>
+                  <>
+                    <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
+                      /
+                    </span>
+                    <a
+                      href={advisorGithubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Abrir GitHub de ${project.advisor.name}`}
+                      aria-label={`GitHub de ${project.advisor.name}`}
+                      className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-primary focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    >
+                      <GithubIcon />
+                      <span className="hidden sm:inline">GitHub</span>
+                    </a>
+                  </>
                 )}
                 {advisorLinkedinUrl && (
-                  <a
-                    href={advisorLinkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={`Abrir LinkedIn de ${project.advisor.name}`}
-                    aria-label={`LinkedIn de ${project.advisor.name}`}
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 shadow-sm transition hover:border-primary hover:bg-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                  >
-                    <LinkedInIcon />
-                  </a>
+                  <>
+                    <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
+                      /
+                    </span>
+                    <a
+                      href={advisorLinkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`Abrir LinkedIn de ${project.advisor.name}`}
+                      aria-label={`LinkedIn de ${project.advisor.name}`}
+                      className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-[#0a66c2] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    >
+                      <LinkedInIcon />
+                      <span className="hidden sm:inline">LinkedIn</span>
+                    </a>
+                  </>
                 )}
               </div>
             </div>
           </div>
-          <div className="rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:min-w-[190px] md:items-center md:gap-2.5 md:border-l md:border-y-0 md:border-r-0 md:rounded-none md:bg-transparent md:py-0 md:pl-5 md:pr-0">
+          <div className="flex min-h-[62px] items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:min-w-[190px] md:gap-2.5 md:border-l md:border-y-0 md:border-r-0 md:rounded-none md:bg-transparent md:py-0 md:pl-5 md:pr-0">
             <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-primary md:flex">
               <i className="fi fi-rr-calendar flex" aria-hidden="true" />
             </span>
-            <div>
+            <div className="min-w-0">
               <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
                 Período
               </p>
-              <p className="mt-0.5 text-[11px] font-bold text-slate-900 sm:text-xs md:text-[13px]">
+              <p className="mt-0.5 truncate text-[11px] font-bold text-slate-900 sm:text-xs md:text-[13px]">
                 {project.cycle}
               </p>
             </div>
@@ -423,8 +493,8 @@ export function ProjectPublicView({
           </div>
           {team.length > 0 ? (
             <ul className="mt-3 divide-y divide-slate-100">
-              {team.map((member) => (
-                <TeamMemberRow key={member.name} member={member} />
+              {sortedTeam.map((member) => (
+                <TeamMemberRow key={getTeamMemberKey(member)} member={member} />
               ))}
             </ul>
           ) : (
@@ -481,7 +551,7 @@ export function ProjectPublicView({
               {externalLinks.length > 0 ? (
                 <ul className="space-y-2.5">
                   {externalLinks.map((link) => (
-                    <li key={link.label}>
+                    <li key={`${link.label}-${link.url ?? ''}`}>
                       <ExternalProjectLink label={link.label} url={link.url} />
                     </li>
                   ))}

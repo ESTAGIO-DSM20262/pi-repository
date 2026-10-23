@@ -19,6 +19,7 @@ interface SelectDropdownProps {
   size?: 'default' | 'compact'
   width?: 'full' | 'auto'
   tone?: 'surface' | 'muted'
+  layer?: 'default' | 'modal'
   className?: string
 }
 
@@ -33,6 +34,7 @@ export function SelectDropdown({
   size = 'default',
   width = 'full',
   tone = 'surface',
+  layer = 'default',
   className = '',
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -130,19 +132,20 @@ export function SelectDropdown({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
+        event.stopPropagation()
         closeMenu(true)
       }
     }
 
     updatePosition()
     document.addEventListener('pointerdown', handlePointerDown)
-    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keydown', handleKeyDown, true)
     document.addEventListener('scroll', updatePosition, true)
     window.addEventListener('resize', updatePosition)
 
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown)
-      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keydown', handleKeyDown, true)
       document.removeEventListener('scroll', updatePosition, true)
       window.removeEventListener('resize', updatePosition)
     }
@@ -226,7 +229,7 @@ export function SelectDropdown({
             aria-hidden={!isOpen}
             inert={!isOpen}
             style={menuStyle}
-            className={`z-[100] overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
+            className={`${layer === 'modal' ? 'z-[var(--z-modal-dropdown)]' : 'z-[100]'} overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
               isOpen
                 ? 'visible translate-y-0 scale-100 opacity-100'
                 : 'invisible -translate-y-1 scale-[0.98] opacity-0'
