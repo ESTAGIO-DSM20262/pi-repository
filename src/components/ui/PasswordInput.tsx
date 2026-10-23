@@ -6,7 +6,7 @@ import { inputClass, labelClass } from '../../libs/styles'
 
 type PasswordInputProps = React.ComponentProps<'input'> & { label: string }
 
-export default function PasswordInput({ id, label, className, ...props }: PasswordInputProps) {
+export function PasswordInput({ id, label, className, ...props }: PasswordInputProps) {
   const [visible, setVisible] = useState(false)
 
   useResetOnLeave(() => setVisible(false))

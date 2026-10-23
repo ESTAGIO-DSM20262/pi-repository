@@ -2,27 +2,27 @@ import { describe, expect, it } from 'vitest'
 import { comparePersonNames, formatPersonName, getNameInitials } from './initials'
 
 describe('formatPersonName', () => {
-  it('converts names saved in uppercase to conventional casing', () => {
+  it('converte nomes salvos em maiúsculas para capitalização convencional', () => {
     expect(formatPersonName('LUCAS GABRIEL DA SILVA')).toBe('Lucas Gabriel da Silva')
   })
 
-  it('preserves accents and capitalization in hyphenated names', () => {
+  it('preserva acentos e capitalização em nomes hifenizados', () => {
     expect(formatPersonName("MARIA-CLARA D'ÁVILA")).toBe("Maria-Clara D'Ávila")
   })
 
-  it('returns an empty string for an absent name', () => {
+  it('retorna uma string vazia quando o nome está ausente', () => {
     expect(formatPersonName('   ')).toBe('')
   })
 })
 
 describe('getNameInitials', () => {
-  it('returns uppercase initials', () => {
+  it('retorna iniciais em maiúsculas', () => {
     expect(getNameInitials(formatPersonName('LUCAS SILVA'))).toBe('LS')
   })
 })
 
 describe('comparePersonNames', () => {
-  it('sorts names alphabetically without separating accented names', () => {
+  it('ordena nomes alfabeticamente sem separar nomes acentuados', () => {
     const names = ['Lucas Silva', 'Beatriz Fernandes', 'Álvaro Santos', 'Mariana Souza']
 
     expect([...names].sort(comparePersonNames)).toEqual([

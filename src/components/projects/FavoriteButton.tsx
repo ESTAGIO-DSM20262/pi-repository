@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import ConfirmationDialog from '@/components/ui/ConfirmationDialog'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 
 interface FavoriteButtonProps {
   projectId: string
@@ -14,7 +14,7 @@ interface FavoriteButtonProps {
   disabled?: boolean
 }
 
-export default function FavoriteButton({
+export function FavoriteButton({
   projectId,
   projectTitle,
   isFavorite,

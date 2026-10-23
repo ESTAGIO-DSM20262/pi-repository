@@ -46,10 +46,10 @@ describe('parseUpdateProjectInput', () => {
     }
   })
 
-  it('permite ao administrador editar líder e função sem mudar o restante', () => {
+  it('ignora atribuições de equipe na edição de artefatos', () => {
     const result = parseUpdateProjectInput(
       {
-        liveUrl: 'https://a.com',
+        repositoryUrl: 'https://github.com/org/projeto',
         teamAssignments: [
           {
             studentEmail: 'a@aluno.cps.sp.gov.br',
@@ -59,34 +59,13 @@ describe('parseUpdateProjectInput', () => {
         ],
       },
       'artifacts',
-      ['A@aluno.cps.sp.gov.br'],
     )
 
     expect(result.isRight()).toBe(true)
     if (result.isRight() && result.value.scope === 'artifacts') {
-      expect(result.value.teamAssignments).toEqual([
-        {
-          studentEmail: 'a@aluno.cps.sp.gov.br',
-          roleTitle: 'Desenvolvimento Front-end',
-          isLeader: true,
-        },
-      ])
+      expect(result.value.links.repositoryUrl).toBe('https://github.com/org/projeto')
+      expect('teamAssignments' in result.value).toBe(false)
     }
-  })
-
-  it('rejeita mais de um líder na atualização da equipe pelo administrador', () => {
-    const result = parseUpdateProjectInput(
-      {
-        teamAssignments: [
-          { studentEmail: 'a@aluno.cps.sp.gov.br', isLeader: true },
-          { studentEmail: 'b@aluno.cps.sp.gov.br', isLeader: true },
-        ],
-      },
-      'artifacts',
-      ['a@aluno.cps.sp.gov.br', 'b@aluno.cps.sp.gov.br'],
-    )
-
-    expect(result.isLeft()).toBe(true)
   })
 
   it('rejeita link inválido na edição de artefatos', () => {

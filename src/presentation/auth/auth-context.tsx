@@ -2,10 +2,12 @@
 
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { LoginCredentials } from '@/application/auth/dtos/login-credentials'
+import { RequestPasswordResetUseCase } from '@/application/auth/request-password-reset'
+import { ResetPasswordUseCase } from '@/application/auth/reset-password'
 import { SignInUseCase } from '@/application/auth/sign-in'
 import { SignInWithMicrosoftUseCase } from '@/application/auth/sign-in-with-microsoft'
 import { SignOutUseCase } from '@/application/auth/sign-out'
-import AuthActionOverlay from '@/components/ui/AuthActionOverlay'
+import { AuthActionOverlay } from '@/components/ui/AuthActionOverlay'
 import type { User } from '@/domain/enterprise/entities/user'
 import { authClient } from '@/infrastructure/auth/auth-client'
 import { BetterAuthAuthRepository } from '@/infrastructure/auth/better-auth-auth-repository'
@@ -15,6 +17,10 @@ const authRepository = new BetterAuthAuthRepository()
 const signInUseCase = new SignInUseCase(authRepository)
 const signOutUseCase = new SignOutUseCase(authRepository)
 const signInWithMicrosoftUseCase = new SignInWithMicrosoftUseCase(authRepository)
+const requestPasswordResetUseCase = new RequestPasswordResetUseCase(authRepository)
+const resetPasswordUseCase = new ResetPasswordUseCase(authRepository)
+
+const RESET_PASSWORD_PATH = '/redefinir-senha'
 
 interface AuthContextValue {
   user: User | null
@@ -22,6 +28,8 @@ interface AuthContextValue {
   signIn: (credentials: LoginCredentials) => Promise<User>
   signInWithMicrosoft: () => Promise<void>
   signOut: () => Promise<void>
+  requestPasswordReset: (email: string) => Promise<void>
+  resetPassword: (token: string, newPassword: string) => Promise<void>
   showAuthAction: (message: string) => void
   clearAuthAction: () => void
 }
@@ -53,6 +61,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signOutUseCase.execute()
   }
 
+  async function requestPasswordReset(email: string): Promise<void> {
+    const result = await requestPasswordResetUseCase.execute({
+      email,
+      redirectTo: RESET_PASSWORD_PATH,
+    })
+    if (result.isLeft()) throw result.value
+  }
+
+  async function resetPassword(token: string, newPassword: string): Promise<void> {
+    const result = await resetPasswordUseCase.execute({ token, newPassword })
+    if (result.isLeft()) throw result.value
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -61,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signInWithMicrosoft,
         signOut,
+        requestPasswordReset,
+        resetPassword,
         showAuthAction,
         clearAuthAction,
       }}

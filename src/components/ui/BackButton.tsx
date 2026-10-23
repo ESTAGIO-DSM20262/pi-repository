@@ -12,7 +12,7 @@ interface BackButtonProps {
 const BACK_BUTTON_CLASS =
   'cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-white text-[#765e58] shadow-sm transition hover:border-primary/30 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30'
 
-export default function BackButton({ href, label = 'Voltar', replace = false }: BackButtonProps) {
+export function BackButton({ href, label = 'Voltar', replace = false }: BackButtonProps) {
   const router = useRouter()
 
   if (href) {

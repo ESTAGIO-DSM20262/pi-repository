@@ -18,6 +18,30 @@ Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.
 > fluxo pertence a este arquivo. Ao alterar o comportamento, atualize esta
 > documentação em vez de comentar o código.
 
+> **Convenção de exports:** use apenas exports nomeados (`export function X`,
+> `import { X } from …`). `export default` fica restrito aos arquivos especiais do
+> Next.js em `src/app` (`page`, `layout`, `loading`, `error`, `not-found`,
+> `template`, `default`, `global-error`), aos arquivos `*.config.*` e aos
+> templates React Email em `src/infrastructure/email/templates/*.tsx` (o preview
+> `npm run email:dev` só carrega o export default; esses arquivos exportam o
+> componente nomeado **e** `export default`). A regra `style/noDefaultExport` do
+> Biome garante isso (exceções em `overrides` no `biome.json`).
+
+> **Convenção de imports:**
+>
+> | Caso | Formato |
+> | --- | --- |
+> | Módulo do projeto | `import { X } from '@/components/ui/Modal'` — named import, nunca default |
+> | Arquivo de outra pasta | alias `@/` (→ `src/`), sem `../` |
+> | Arquivo da mesma pasta | relativo `./`: `import { FormFeedback } from './FormFeedback'` |
+> | Só tipos | `import type { Role } from '@/domain/enterprise/entities/role'` |
+> | Valores e tipos juntos | `type` inline: `import { Modal, type Notice } from '@/components/ui/Modal'` |
+> | Pacote externo | como a lib exporta: `import Link from 'next/link'`, `import { useForm } from 'react-hook-form'`; `import * as` só quando a lib exige (`import * as XLSX from 'xlsx'`) |
+>
+> Importe direto do arquivo que declara o item; não crie barrels (`index.ts` que só
+> reexporta). A ordem dos imports (pacotes, depois `@/`, depois `./`) é feita pelo
+> `organizeImports` do Biome em `npm run lint:fix` e no pre-commit — não ordene à mão.
+
 ## 1. Contexto
 
 O projeto é um app Next.js (App Router) com autenticação via **better-auth**,
@@ -69,23 +93,43 @@ src/
 │  ├─ errors/
 │  │  ├─ authentication-error.ts
 │  │  ├─ invalid-credentials-error.ts
-│  │  └─ invalid-email-error.ts
-│  └─ repositories/auth-repository.ts  # PORTA AuthRepository
+│  │  ├─ invalid-email-error.ts
+│  │  ├─ invalid-reset-token-error.ts
+│  │  └─ email-delivery-error.ts
+│  └─ repositories/
+│     ├─ auth-repository.ts        # PORTA AuthRepository
+│     └─ password-reset-notifier.ts  # PORTA PasswordResetNotifier
 ├─ application/auth/
 │  ├─ dtos/login-credentials.ts    # LoginCredentials (alias da porta)
 │  ├─ sign-in.ts                   # SignInUseCase
 │  ├─ sign-in-with-microsoft.ts    # SignInWithMicrosoftUseCase
 │  ├─ sign-out.ts                  # SignOutUseCase
-│  └─ sign-in.test.ts
+│  ├─ request-password-reset.ts    # RequestPasswordResetUseCase
+│  ├─ reset-password.ts            # ResetPasswordUseCase
+│  ├─ send-password-reset-email.ts # SendPasswordResetEmailUseCase (servidor)
+│  └─ *.test.ts
 ├─ infrastructure/
 │  ├─ auth/auth-client.ts          # createAuthClient() (cliente better-auth)
 │  ├─ auth/better-auth-auth-repository.ts  # implementa AuthRepository
 │  ├─ auth/better-auth-user-mapper.ts      # better-auth -> User (domain)
+│  ├─ email/resend-password-reset-notifier.ts   # implementa PasswordResetNotifier (Resend)
+│  ├─ email/console-password-reset-notifier.ts  # adaptador de desenvolvimento
+│  ├─ email/make-password-reset-notifier.ts     # escolhe o adaptador pelo ambiente
+│  ├─ email/templates/brand.ts                  # tema Tailwind e marca para e-mails
+│  ├─ email/templates/password-reset-email.tsx  # template React Email
+│  ├─ email/templates/render-password-reset-email.ts  # assunto + HTML + texto
 │  └─ http/api-client.ts           # wrapper de fetch
+├─ test/repositories/              # implementações in-memory das portas (testes)
 ├─ presentation/auth/
 │  ├─ auth-context.tsx             # AuthProvider/useAuth + composition root
 │  ├─ role-label.ts                # rótulos PT para exibição
-│  └─ validation.ts                # schemas Zod dos formulários
+│  └─ validation.ts                # schemas Zod dos formulários (inclui newPasswordSchema)
+├─ presentation/profile/
+│  ├─ profile-record.ts            # tipo ProfileRecord usado pela tela /perfil
+│  ├─ validation.ts                # schemas Zod do perfil e da troca de senha
+│  ├─ change-password.ts           # troca de senha via authClient
+│  └─ social-profile-url.ts        # validação/normalização de links GitHub/LinkedIn
+├─ components/profile/             # tela /perfil dividida em componentes
 ├─ libs/
 │  ├─ auth.ts                      # config do better-auth no SERVIDOR
 │  ├─ styles.ts                    # classes utilitárias de UI
@@ -146,6 +190,15 @@ injeção no construtor:
 - `SignInWithMicrosoftUseCase.execute({ callbackURL, errorCallbackURL })` —
   delega a `signInWithMicrosoft`; devolve `Either<AuthenticationError, void>`.
 - `SignOutUseCase.execute()` — delega a `signOut`.
+- `RequestPasswordResetUseCase.execute({ email, redirectTo })` — normaliza o
+  e-mail e delega a `requestPasswordReset`; devolve `Either<AuthenticationError, void>`.
+- `ResetPasswordUseCase.execute({ token, newPassword })` — delega a
+  `resetPassword`; devolve `Either<InvalidResetTokenError | AuthenticationError, void>`.
+- `SendPasswordResetEmailUseCase.execute({ email, name, active, resetUrl })` —
+  roda **no servidor** e recebe a porta `PasswordResetNotifier`. Não envia nada
+  para contas inativas (devolve `right`), valida o destinatário com
+  `EmailAddress` (`left(InvalidEmailError)`) e repassa o `Either` do notifier
+  (`EmailDeliveryError` em falha).
 
 Não há `GetSessionUseCase` de propósito: a assinatura reativa da sessão
 (`authClient.useSession()`) é um detalhe de framework e permanece na
@@ -154,12 +207,39 @@ apresentação.
 ## 7. Infraestrutura (adaptadores)
 
 - **Porta** (`domain/enterprise/repositories/auth-repository.ts`): interface
-  `AuthRepository` com `signInWithEmail`, `signInWithMicrosoft` e `signOut`.
-  Define também `SignInCredentials`, `MicrosoftSignInInput` e
-  `EmailSignInResult`.
+  `AuthRepository` com `signInWithEmail`, `signInWithMicrosoft`, `signOut`,
+  `requestPasswordReset` e `resetPassword`. Define também `SignInCredentials`,
+  `MicrosoftSignInInput`, `PasswordResetRequest`, `PasswordResetInput` e os
+  tipos de resultado.
 - **Adaptador** (`infrastructure/auth/better-auth-auth-repository.ts`,
   `'use client'`): implementa a porta usando `authClient`; traduz os erros do
-  better-auth em erros de domínio (`toInvalidCredentials`).
+  better-auth em erros de domínio (`toInvalidCredentials`; código
+  `INVALID_TOKEN` → `InvalidResetTokenError`).
+- **Porta** (`domain/enterprise/repositories/password-reset-notifier.ts`):
+  `PasswordResetNotifier.notify({ to, name, resetUrl })` devolve
+  `Either<EmailDeliveryError, void>`. Adaptadores em `infrastructure/email/`:
+  `ResendPasswordResetNotifier` (SDK `resend`, renderiza o template e mapeia
+  erros do Resend para `EmailDeliveryError`) e `ConsolePasswordResetNotifier`
+  (desenvolvimento: imprime o link no console do servidor).
+  `makePasswordResetNotifier()` é o único ponto que lê `RESEND_API_KEY` e
+  `EMAIL_FROM`: com ambos usa o Resend; sem eles usa o console fora de produção e,
+  em produção, um notifier que sempre devolve `EmailDeliveryError` (não lança no
+  carregamento, para não quebrar o `next build`).
+- **Templates de e-mail** (`infrastructure/email/templates/`): componentes
+  **React Email** (`@react-email/components`) estilizados com **Tailwind** via
+  `<Tailwind config={emailTailwindConfig}>` — use `className` com as mesmas
+  classes do app (`bg-primary`, `text-text-secondary`, `border-border`…), nunca
+  objetos `style`. No `render()`, as classes viram estilos inline (cores em `rgb()`,
+  medidas em px graças ao `pixelBasedPreset` e aos raios fixos), pois clientes de
+  e-mail não suportam folhas de estilo nem variáveis CSS. `<Head>` fica dentro de
+  `<Tailwind>`. `renderPasswordResetEmail` gera o HTML e a versão em texto
+  (`plainText: true`); o React escapa nome e URL. `brand.ts` exporta
+  `emailTailwindConfig` — cores, raios e fonte (Plus Jakarta Sans, fallback Arial)
+  que **espelham** os tokens de `src/app/globals.css`; ao mudar a paleta do app,
+  atualize os dois — e `emailBrand` (textos da marca: "F", "Acervo Acadêmico",
+  instituição).
+  Visualize com `npm run email:dev` (http://localhost:3001); `PreviewProps` no
+  componente define os dados de exemplo.
 - **Mapper** (`infrastructure/auth/better-auth-user-mapper.ts`): `toDomainUser`
   converte o usuário do better-auth em `User` (ou `null` se o e-mail for
   inválido). Sem `'use client'`, então serve ao cliente **e** ao servidor.
@@ -176,6 +256,22 @@ Aqui os `Left` de regra de negócio são convertidos em `throw` para a UI.
 - `AuthProvider` faz o wiring e usa `authClient.useSession()` para a sessão.
 - `validation.ts` centraliza os schemas Zod e valida o formato geral de e-mail; nenhum sufixo específico é obrigatório.
 - `AuthProvider` é montado em `src/app/layout.tsx`.
+- Formulários usam **react-hook-form + Zod** (`zodResolver`, `mode: 'onTouched'`); não guarde
+  valores de campo, "touched", carregamento ou erro em `useState`. Erros vindos do servidor vão
+  em `setError('root.server', …)`, o carregamento vem de `formState.isSubmitting` e a mensagem de
+  sucesso de `formState.isSubmitSuccessful` (com `reset(..., { keepIsSubmitSuccessful: true })`).
+
+### Tela de perfil (`/perfil`)
+
+`components/profile/ProfilePage.tsx` só compõe: guarda o `ProfileRecord` salvo (para o
+resumo refletir o que o servidor devolveu) e renderiza `ProfilePageHeader`, `ProfileSummary`,
+`ProfileForm` (dados da conta + links sociais, `PATCH /api/profile`) e `ChangePasswordForm`
+(`authClient.changePassword`). Os schemas ficam em `presentation/profile/validation.ts`:
+`createProfileSchema(isAdmin)` só valida nome/e-mail para administradores (os demais não podem
+alterá-los e eles não são enviados), `socialProfileUrlSchema` reaproveita
+`validateSocialProfileUrl` e devolve a URL normalizada ou `null`, e `changePasswordSchema`
+reaproveita `newPasswordSchema` de `presentation/auth/validation.ts`, o mesmo usado em
+`/redefinir-senha`. A API continua revalidando tudo no servidor.
 
 ## 9. Rotas e proteção (server-side)
 
@@ -213,6 +309,35 @@ para leitura de sessão a cada requisição (bloqueia a rota).
 4. No servidor, o better-auth usa `mapProfileToUser` (fallback do UPN `preferred_username` quando falta o claim `email`). O papel persistido da conta é mantido; contas criadas por autenticação social sem um papel explícito recebem `student` como padrão. O formato do e-mail é validado sem restrição de domínio.
 5. `LoginFeedback` traduz os códigos de erro do callback OAuth em mensagens PT.
 
+### Redefinição de senha (e-mail via Resend)
+
+1. `/esqueci-senha`: `ForgotPasswordForm` valida com `forgotPasswordSchema` e
+   chama `useAuth().requestPasswordReset(email)` →
+   `RequestPasswordResetUseCase` → `authClient.requestPasswordReset({ email,
+   redirectTo: '/redefinir-senha' })`. A tela sempre mostra a mesma mensagem
+   genérica de sucesso, exista ou não a conta.
+2. No servidor, o better-auth gera um token (1 hora, `resetPasswordTokenExpiresIn`)
+   e chama `emailAndPassword.sendResetPassword` em `src/libs/auth.ts` (o
+   *composition root* do servidor), que executa `SendPasswordResetEmailUseCase`
+   com o notifier de `makePasswordResetNotifier()`. Um `Left` é apenas registrado
+   com `console.error`, nunca lançado, para a resposta não revelar se o e-mail
+   existe. Contas inativas não recebem e-mail.
+3. O link do e-mail aponta para `/api/auth/reset-password/:token`, que redireciona
+   para `/redefinir-senha?token=…` ou, se o token for inválido/expirado, para
+   `/redefinir-senha?error=INVALID_TOKEN`.
+4. `ResetPasswordForm` lê `token`/`error` com `useSearchParams()` (a página envolve
+   o formulário em `<Suspense>`). Sem token ou com erro, renderiza
+   `InvalidResetLink`. Caso contrário, valida com `resetPasswordSchema` e chama
+   `useAuth().resetPassword(token, senha)` → `ResetPasswordUseCase` →
+   `authClient.resetPassword`.
+5. Em sucesso, o better-auth revoga todas as sessões da conta
+   (`revokeSessionsOnPasswordReset`) e o modal leva para `/login`. Contas só da
+   Microsoft ganham uma senha nesse processo (o better-auth cria a conta
+   `credential`).
+
+Variáveis: `RESEND_API_KEY` e `EMAIL_FROM` (remetente de um domínio verificado no
+Resend). Sem elas, fora de produção, o link aparece no console do `npm run dev`.
+
 ## 11. Regra do papel e o bug do loop de redirecionamento
 
 Problema histórico: contas tinham `role = 'aluno'` (valor antigo em PT),
@@ -229,15 +354,21 @@ A escrita do papel é feita no servidor, por cadastro ou gestão administrativa,
 
 ## 12. Banco de dados e migrações
 
-- `db/schema.ts` define as tabelas do better-auth: `users`, `sessions`,
-  `accounts`, `verifications` (nomes físicos no plural, colunas em snake_case —
-  ver `usePlural` na config).
-- `users.role` é `text().$type<Role>()`, preenchido **apenas no servidor**;
-  nunca vem do cliente.
-- `db/seed.ts` pré-provisiona contas com papéis explícitos.
-- `users.github_url` e `users.linkedin_url` armazenam os links públicos opcionais usados no perfil e nas páginas dos projetos.
-- Comandos: `npm run db:generate`, `db:migrate`, `db:push`, `db:seed`,
-  `db:studio`, `db:check`.
+- `src/db/schema.ts` descreve as tabelas do better-auth (`users`, `sessions`,
+  `accounts`, `verifications`) e as tabelas de domínio (`project_favorites`,
+  `project_progress_tasks`, `project_progress_revisions` e `projects`). Os nomes físicos
+  usam plural e as colunas usam `snake_case`.
+- `users.role` é `text().$type<Role>()`, preenchido **apenas no servidor**; nunca vem do cliente.
+- `users.registration_number`, `course`, `active`, `github_url` e `linkedin_url` armazenam os
+  dados de matrícula, estado da conta e links públicos usados no perfil e nas páginas de projetos.
+- **Fontes de migração:** `drizzle/` mantém as migrações Drizzle já existentes; os SQLs manuais em
+  `src/db/migrations/` provisionam/atualizam tabelas de domínio e extensões do usuário e precisam
+  ser executados no Neon em ordem de dependência. `npm run db:migrate` não executa esses SQLs.
+  Antes de gerar uma migração nova, revise o diff do Drizzle Kit: o snapshot histórico de `drizzle/`
+  não registra todas as tabelas já gerenciadas por SQL manual, então gerar cegamente pode propor
+  recriar objetos que já existem. Mantenha as definições de `schema.ts` refletidas no SQL manual.
+- `src/db/seed.ts` pré-provisiona contas de desenvolvimento com papéis explícitos.
+- Comandos: `npm run db:generate`, `db:migrate`, `db:push`, `db:seed`, `db:studio`, `db:check`.
 
 ## 13. Testes
 
@@ -246,6 +377,14 @@ A escrita do papel é feita no servidor, por cadastro ou gestão administrativa,
 - Cobertura inclui `email-address.test.ts` (normalização, aceitação de domínios diversos e rejeição de formato inválido) e `user.test.ts` (criação da entidade e papel explícito).
   - `sign-in.test.ts` — normalização do e-mail e propagação de erro, usando um
     `InMemoryAuthRepository` (o que demonstra a testabilidade da porta).
+  - `request-password-reset.test.ts`, `reset-password.test.ts` e
+    `send-password-reset-email.test.ts` — normalização, token inválido/reuso,
+    contas inativas e falha de entrega.
+- As implementações *in-memory* das portas ficam em `src/test/repositories/`
+  (`InMemoryAuthRepository`, `InMemoryPasswordResetNotifier`) e são
+  compartilhadas pelos testes.
+  - `presentation/profile/validation.test.ts` — links sociais, regras de nome/e-mail por
+    papel e regras/confirmação da nova senha.
 
 ## 14. Como evoluir (receita para uma nova fatia)
 
@@ -277,23 +416,27 @@ documente aqui.
 | `npm run test:watch` | testes em watch |
 | `npm run db:migrate` | aplica migrações Drizzle |
 | `npm run db:seed` | cria contas de desenvolvimento |
+| `npm run email:dev` | preview dos templates React Email (porta 3001) |
 
 ## 16. Cadastro de projetos e filtros do painel
 
 - **Persistência:** projetos criados pela interface ficam na tabela `projects`
   (`src/db/migrations/20261021_projects.sql`, espelhada em `db/schema.ts`). Os projetos
   demonstrativos continuam em `mock-projects.ts`. `DbProjectRepository`
-  (`infrastructure/projects/db-project-repository.ts`) devolve os dois conjuntos juntos e
-  implementa `findById`, usado por dashboard, home, página do projeto, favoritos e acesso ao
-  progresso. Se a tabela ainda não existir, o repositório registra o erro e exibe só os demonstrativos.
+  (`infrastructure/projects/db-project-repository.ts`) lê somente registros persistidos e faz
+  a busca por ID diretamente no banco. `CompositeProjectRepository` combina o adaptador de banco
+  com `MockProjectRepository` na raiz de composição. Erros de banco não são ocultados.
 - **Validação:** `application/projects/create-project.ts` (`parseCreateProjectInput`) valida e
-  normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. Exige título,
-  resumo, ciclo `AAAA/1|2`, semestre 1–12, tema, orientador e ao menos um aluno. As tarefas iniciais
-  são opcionais (zero ou mais) e o responsável de cada tarefa precisa ser um aluno do projeto.
-- **API:** `POST /api/projects` aceita apenas professor ou administrador ativos. O professor é sempre o
-  orientador do que cria; o administrador escolhe um professor ativo. Alunos precisam existir, estar
-  ativos e ter o papel `student`. Projeto, tarefas (versões `v1.0`, `v2.0`…) e revisões `created` são
-  gravados em uma única `db.batch`.
+  normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. O formulário usa
+  React Hook Form + Zod (`presentation/projects/validation.ts`, `mode: 'onTouched'`) e também valida
+  no servidor. Exige título, resumo, ciclo `AAAA/1|2`, semestre 1–6, tema, orientador e ao menos um
+  aluno. As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
+- **Aplicação e persistência:** `CreateProjectUseCase` (`application/projects/create-project-use-case.ts`)
+  valida o papel do usuário, revalida orientador e alunos ativos e monta as tarefas iniciais.
+  `ProjectRepository` é a porta de escrita; `DbProjectCommandRepository` grava projeto, tarefas
+  e revisões. `DbProjectUserDirectory` implementa a porta de consulta de contas e pessoas. Os casos
+  de uso são testados com implementações in-memory; falhas esperadas retornam
+  `Either<ProjectOperationError, ...>`.
 - **Tela:** `/projetos/novo` e `/projetos/[id]/editar` usam o mesmo componente,
   `components/projects/ProjectFormPage.tsx` (`mode="create" | "edit"`), restrito a professor e
   administrador. O botão "Novo Projeto" do painel aponta para a criação.
@@ -308,18 +451,18 @@ documente aqui.
 
 - **Quem edita:** `libs/project-edit-access.ts` (`resolveProjectEditAccess`) é a única fonte da regra.
   O professor **orientador** do projeto tem escopo `full` (todos os dados, equipe, tecnologias e
-  artefatos). O administrador tem escopo `artifacts` em qualquer projeto (somente links e,
-  futuramente, imagens e arquivos). Aluno nunca edita. Projetos demonstrativos (`mock-projects.ts`)
+  artefatos). O administrador tem escopo `artifacts` em qualquer projeto (somente links; imagens e arquivos ainda não são editáveis). Aluno nunca edita. Projetos demonstrativos (`mock-projects.ts`)
   não existem na tabela `projects` e por isso não são editáveis.
 - **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
   `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
   mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro. O orientador não
   pode ser trocado na edição.
-- **API:** `PATCH /api/projects/[id]` valida com `parseUpdateProjectInput(body, scope)`
-  (`application/projects/update-project.ts`). No escopo `artifacts` só os links são lidos; o resto
-  do corpo é ignorado. No escopo `full`, a equipe é recalculada a partir da tabela `users`. Remover
-  um aluno que ainda tem tarefa individual atribuída devolve 409: reatribua ou exclua a tarefa antes.
-  `publicDetails` é sempre mesclado (`...currentDetails`) para preservar `attachments` e `images`.
+- **Aplicação e API:** `POST /api/projects` e `PATCH /api/projects/[id]` delegam a orquestração a casos de uso (`CreateProjectUseCase` e `UpdateProjectUseCase`) e dependem das portas `ProjectRepository` e `ProjectUserDirectory`. Os testes usam implementações in-memory. `PATCH /api/projects/[id]` verifica acesso em `resolveProjectEditAccess` e
+  delega a atualização a `UpdateProjectUseCase` (`application/projects/update-project-use-case.ts`).
+  No escopo `artifacts`, somente links são atualizados; funções/liderança e os demais campos do corpo
+  são ignorados. No escopo `full`, a equipe é recalculada a partir dos alunos ativos. Remover um aluno
+  com tarefa individual atribuída devolve 409. `publicDetails` é mesclado para preservar `attachments`
+  e `images`.
 - **Tarefas:** não são editadas nesta tela. Na criação, as tarefas iniciais continuam opcionais; na
   edição, a tela aponta para a seção de progresso da página do projeto.
 - **Links dos artefatos:** ficam em `publicDetails.externalLinks`, sem migração. Rótulos fixos em
@@ -337,3 +480,5 @@ documente aqui.
   internas. Com `href` navega para o destino; sem `href` volta no histórico (ou para `/`). O link
   "Voltar para o login" dentro dos cartões de autenticação é um link de texto e não faz parte do
   padrão.
+
+- **Migrações de restrições:** `src/db/migrations/20261022_project_constraints.sql` garante que os índices e checks do schema existam também em bancos Neon que receberam migrações manuais parciais. O script usa `IF NOT EXISTS`/consultas a `pg_constraint` para poder ser repetido sem recriar restrições já corretas. Os índices de usuários também estão em `20261014_admin_user_registration.sql`; os checks de progresso, em `20261014_project_progress.sql`; e os checks de semestre/status, em `20261021_projects.sql`. Os arquivos desta pasta são SQL manual: execute-os em ordem cronológica no SQL Editor do Neon. `npm run db:migrate` usa o diretório `drizzle/` e não aplica automaticamente estes arquivos manuais.

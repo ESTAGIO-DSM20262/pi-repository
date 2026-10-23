@@ -25,7 +25,7 @@ interface SelectDropdownProps {
 
 const EXIT_DURATION = 150
 
-export default function SelectDropdown({
+export function SelectDropdown({
   value,
   options,
   onChange,
@@ -82,7 +82,6 @@ export default function SelectDropdown({
 
     setMenuStyle({
       position: 'fixed',
-      zIndex: layer === 'modal' ? 2147483647 : undefined,
       top,
       left,
       width: menuWidth,
@@ -230,7 +229,7 @@ export default function SelectDropdown({
             aria-hidden={!isOpen}
             inert={!isOpen}
             style={menuStyle}
-            className={`z-[100] overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
+            className={`${layer === 'modal' ? 'z-[var(--z-modal-dropdown)]' : 'z-[100]'} overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
               isOpen
                 ? 'visible translate-y-0 scale-100 opacity-100'
                 : 'invisible -translate-y-1 scale-[0.98] opacity-0'

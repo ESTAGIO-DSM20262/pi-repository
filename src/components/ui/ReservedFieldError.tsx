@@ -6,11 +6,7 @@ interface ReservedFieldErrorProps {
 
 const textClass = 'col-start-1 row-start-1 text-xs leading-4 sm:text-[13px] sm:leading-4'
 
-export default function ReservedFieldError({
-  message,
-  reserve,
-  className = '',
-}: ReservedFieldErrorProps) {
+export function ReservedFieldError({ message, reserve, className = '' }: ReservedFieldErrorProps) {
   return (
     <div className={`grid pt-1.5 ${className}`}>
       {reserve.map((text) => (

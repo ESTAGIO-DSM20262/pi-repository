@@ -2,13 +2,13 @@ import { and, eq, inArray, sql } from 'drizzle-orm'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import ProjectPublicView from '@/components/projects/ProjectPublicView'
+import { ProjectPublicView } from '@/components/projects/ProjectPublicView'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
-import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
+import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
 import { auth } from '@/libs/auth'
-import { resolveProjectEditAccess } from '@/libs/project-edit-access'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
 export const instant = false
@@ -18,7 +18,7 @@ interface ProjectPageProps {
 }
 
 async function findProject(id: string): Promise<Project | null> {
-  return new DbProjectRepository().findById(id)
+  return new CompositeProjectRepository().findById(id)
 }
 
 async function findPublicProject(id: string) {
@@ -53,8 +53,8 @@ async function addRegisteredSocialProfiles(project: Project): Promise<Project> {
 
   const profiles = new Map(records.map((record) => [record.email.trim().toLowerCase(), record]))
   const advisorProfile = profiles.get(project.advisor.email.trim().toLowerCase())
-  const team: ProjectTeamMember[] = sourceTeam.map((member, index) => {
-    const email = (member.studentEmail ?? project.memberEmails[index])?.trim().toLowerCase()
+  const team: ProjectTeamMember[] = sourceTeam.map((member) => {
+    const email = member.studentEmail?.trim().toLowerCase()
     const registered = email ? profiles.get(email) : undefined
     return {
       ...member,
@@ -137,13 +137,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
       showProjectProgress = isInvolved
       canManageProgress = project.status === 'em_andamento' && (isAdmin || isAdvisor)
-
       if (isAdmin || isAdvisor) {
-        const editAccess = await resolveProjectEditAccess({
-          sessionUserId,
-          projectId: project.id,
-        }).catch(() => null)
-        canEditProject = Boolean(editAccess?.ok)
+        const isExampleProject = Boolean(await new MockProjectRepository().findById(project.id))
+        canEditProject = !isExampleProject
       }
     }
   }

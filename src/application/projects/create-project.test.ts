@@ -87,6 +87,22 @@ describe('parseCreateProjectInput', () => {
     ).toBe(true)
   })
 
+  it('rejeita prazos com datas inexistentes no calendário', () => {
+    const result = parseCreateProjectInput({
+      ...valid,
+      tasks: [
+        {
+          title: 'Entregar documentação',
+          description: 'Preparar e revisar a documentação técnica.',
+          targetStudentEmail: 'a@aluno.cps.sp.gov.br',
+          dueDate: '2026-02-31',
+        },
+      ],
+    })
+
+    expect(result.isLeft()).toBe(true)
+  })
+
   it('rejeita responsável que não pertence ao projeto', () => {
     const result = parseCreateProjectInput({
       ...valid,

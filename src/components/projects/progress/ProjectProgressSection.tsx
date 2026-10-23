@@ -1,12 +1,13 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { formatPersonName } from '@/libs/initials'
-import ProgressTaskDialog, {
+import {
   type ProgressMember,
   type ProgressRevision,
   type ProgressTask,
+  ProgressTaskDialog,
 } from './ProgressTaskDialog'
+import { formatPersonName } from '@/libs/initials'
 
 interface ProjectProgressSectionProps {
   projectId: string
@@ -58,7 +59,7 @@ function versionLabel(task: Pick<ProgressTask, 'versionMajor' | 'versionMinor'>)
   return `v${task.versionMajor}.${task.versionMinor}`
 }
 
-export default function ProjectProgressSection({
+export function ProjectProgressSection({
   projectId,
   projectTitle,
   projectStatus,

@@ -5,27 +5,22 @@ import { ListProjectsUseCase } from '@/application/projects/list-projects'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Role } from '@/domain/enterprise/entities/role'
+import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
-import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
-import RoleDashboard, { type AdminUserMetrics } from './RoleDashboard'
+import { type AdminUserMetrics, RoleDashboard } from './RoleDashboard'
 
-const ROLE_PATH: Record<Role, string> = {
-  student: '/aluno',
-  professor: '/professor',
-  admin: '/admin',
-}
-
-export default async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
+export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (!session) redirect('/login')
 
   const user = toDomainUser(session.user)
   if (!user) redirect('/login')
-  if (user.role !== requiredRole) redirect(ROLE_PATH[user.role])
+  if (user.role !== requiredRole) redirect(ROLE_DASHBOARD_PATH[user.role])
 
-  const useCase = new ListProjectsUseCase(new DbProjectRepository())
+  const useCase = new ListProjectsUseCase(new CompositeProjectRepository())
   const { projects } = await useCase.execute({
     viewer: { email: user.emailAddress, role: user.role },
   })

@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Project } from '@/domain/enterprise/entities/project'
-import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 
 export type ProgressAccess =
@@ -23,7 +23,7 @@ export async function resolveProjectProgressAccess(
   request: Request,
   projectId: string,
 ): Promise<ProgressAccess> {
-  const project = await new DbProjectRepository().findById(projectId)
+  const project = await new CompositeProjectRepository().findById(projectId)
   if (!project) {
     return { ok: false, status: 404, message: 'O projeto não foi encontrado.' }
   }

@@ -2,27 +2,32 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { type KeyboardEvent, useMemo, useState } from 'react'
+import { BackButton } from '@/components/ui/BackButton'
+import { ProjectTeamSection } from '@/components/projects/form/ProjectTeamSection'
 import {
-  type FormEvent,
-  type KeyboardEvent,
-  type ReactNode,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import BackButton from '@/components/ui/BackButton'
-import SelectDropdown from '@/components/ui/SelectDropdown'
+  ProjectArtifactsSection,
+  type DraftProjectLink,
+} from '@/components/projects/form/ProjectArtifactsSection'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { ProjectStatus, ProjectTeamMember } from '@/domain/enterprise/entities/project'
 import type { ProjectExtraLink } from '@/domain/enterprise/entities/project-details'
 import type { Role } from '@/domain/enterprise/entities/role'
-import { comparePersonNames, formatPersonName, getNameInitials } from '@/libs/initials'
-
-export interface ProjectPersonOption {
-  email: string
-  name: string
-  registrationNumber: string | null
-  course: string | null
-}
+import type { ProjectPersonOption } from '@/presentation/projects/project-person'
+import {
+  Badge,
+  FieldError,
+  FormSection,
+  Required,
+  fieldClass,
+  hintClass,
+  labelClass,
+  sectionClass,
+} from '@/components/projects/form/ProjectFormPrimitives'
+import { comparePersonNames, getNameInitials } from '@/libs/initials'
+import { projectFormSchema, type ProjectFormValues } from '@/presentation/projects/validation'
 
 export interface ProjectFormInitialValues {
   title: string
@@ -63,12 +68,6 @@ interface DraftTask {
   dueDate: string
 }
 
-interface DraftLink {
-  key: string
-  title: string
-  url: string
-}
-
 const COURSE_LABEL = 'Desenvolvimento de Software Multiplataforma (DSM)'
 
 const THEME_SUGGESTIONS = [
@@ -90,12 +89,7 @@ const STATUS_OPTIONS = [
   { value: 'publicado', label: 'Concluído (público no acervo)' },
 ]
 
-const fieldClass =
-  'block h-10 w-full rounded-lg border border-border bg-surface-secondary px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15 read-only:cursor-not-allowed read-only:text-slate-500'
 const textareaClass = `${fieldClass} h-auto min-h-28 resize-y py-2.5 leading-relaxed`
-const labelClass = 'mb-1.5 block text-xs font-bold text-slate-800'
-const hintClass = 'mt-1.5 text-[11px] leading-relaxed text-[#765e58]'
-const sectionClass = 'rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7'
 const softButtonClass =
   'cursor-pointer inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-surface-secondary px-3.5 text-xs font-semibold text-slate-800 transition hover:border-primary/40 hover:text-primary'
 const textActionClass =
@@ -112,54 +106,6 @@ function newKey(prefix: string) {
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase('pt-BR')
-}
-
-function FormSection({
-  icon,
-  title,
-  subtitle,
-  badge,
-  children,
-}: {
-  icon: string
-  title: string
-  subtitle: string
-  badge?: ReactNode
-  children: ReactNode
-}) {
-  return (
-    <section className={sectionClass}>
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
-            <i className={`fi ${icon} flex text-lg`} aria-hidden="true" />
-          </span>
-          <div className="min-w-0">
-            <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-              {title}
-            </h2>
-            <p className="mt-0.5 text-xs text-[#765e58] sm:text-[13px]">{subtitle}</p>
-          </div>
-        </div>
-        {badge}
-      </div>
-      {children}
-    </section>
-  )
-}
-
-function Badge({ tone, children }: { tone: 'slate' | 'green'; children: ReactNode }) {
-  return (
-    <span
-      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${tone === 'green' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200 text-slate-700'}`}
-    >
-      {children}
-    </span>
-  )
-}
-
-function Required() {
-  return <span className="text-primary">*</span>
 }
 
 function TagField({
@@ -244,68 +190,7 @@ function TagField({
   )
 }
 
-function UploadSlot({
-  icon,
-  title,
-  hint,
-  accept,
-  multiple = true,
-  disabled = true,
-  onFiles,
-}: {
-  icon: string
-  title: string
-  hint: string
-  accept: string
-  multiple?: boolean
-  disabled?: boolean
-  onFiles?: (files: File[]) => void
-}) {
-  return (
-    <label
-      className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-surface-secondary/60 px-4 py-8 text-center transition ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:border-primary/40 hover:bg-primary-light/30'}`}
-    >
-      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-primary shadow-sm">
-        <i className={`fi ${icon} flex text-xl`} aria-hidden="true" />
-      </span>
-      <span className="mt-1 text-sm font-bold text-slate-900">{title}</span>
-      <span className="text-[11px] text-[#765e58]">{hint}</span>
-      <input
-        type="file"
-        className="sr-only"
-        accept={accept}
-        multiple={multiple}
-        disabled={disabled}
-        onChange={(event) => {
-          if (onFiles && event.target.files) onFiles(Array.from(event.target.files))
-          event.target.value = ''
-        }}
-      />
-    </label>
-  )
-}
-
-function ArtifactSubheading({
-  title,
-  description,
-  soon = false,
-}: {
-  title: string
-  description: string
-  soon?: boolean
-}) {
-  return (
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-      <div>
-        <h3 className="text-sm font-bold text-slate-900">{title}</h3>
-        <p className="mt-0.5 text-[11px] text-[#765e58]">{description}</p>
-      </div>
-      {soon && <Badge tone="slate">Em breve</Badge>}
-    </div>
-  )
-}
-
-export default function ProjectFormPage({
+export function ProjectFormPage({
   mode,
   scope = 'full',
   role,
@@ -319,19 +204,40 @@ export default function ProjectFormPage({
   const router = useRouter()
   const canEditDetails = scope === 'full'
   const isEdit = mode === 'edit'
-  const canEditTeam = canEditDetails || (isEdit && role === 'admin')
+  const canEditTeam = canEditDetails
 
-  const [title, setTitle] = useState(initialValues?.title ?? '')
-  const [summary, setSummary] = useState(initialValues?.summary ?? '')
-  const [overview, setOverview] = useState(initialValues?.overview ?? '')
-  const [cycle, setCycle] = useState(initialValues?.cycle ?? defaultCycle())
-  const [semester, setSemester] = useState(String(initialValues?.semester ?? 1))
-  const [theme, setTheme] = useState(initialValues?.theme ?? '')
-  const [status, setStatus] = useState<string>(initialValues?.status ?? 'em_andamento')
-  const [advisorEmail, setAdvisorEmail] = useState(
-    initialValues?.advisorEmail ??
-      (role === 'professor' ? currentUserEmail : (professors[0]?.email ?? '')),
-  )
+  const {
+    register,
+    watch,
+    setValue,
+    handleSubmit,
+    setError,
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<ProjectFormValues>({
+    resolver: zodResolver(projectFormSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      title: initialValues?.title ?? '',
+      summary: initialValues?.summary ?? '',
+      overview: initialValues?.overview ?? '',
+      cycle: initialValues?.cycle ?? defaultCycle(),
+      semester: String(initialValues?.semester ?? 1) as ProjectFormValues['semester'],
+      theme: initialValues?.theme ?? '',
+      status: initialValues?.status ?? 'em_andamento',
+      advisorEmail:
+        initialValues?.advisorEmail ??
+        (role === 'professor' ? currentUserEmail : (professors[0]?.email ?? '')),
+    },
+  })
+  const title = watch('title')
+  const summary = watch('summary')
+  const overview = watch('overview')
+  const cycle = watch('cycle')
+  const semester = watch('semester')
+  const theme = watch('theme')
+  const status = watch('status')
+  const advisorEmail = watch('advisorEmail')
   const [languages, setLanguages] = useState<string[]>(initialValues?.languages ?? [])
   const [stack, setStack] = useState<string[]>(initialValues?.stack ?? [])
   const [selectedEmails, setSelectedEmails] = useState<string[]>(initialValues?.studentEmails ?? [])
@@ -353,15 +259,12 @@ export default function ProjectFormPage({
   const [repositoryUrl, setRepositoryUrl] = useState(initialValues?.repositoryUrl ?? '')
   const [liveUrl, setLiveUrl] = useState(initialValues?.liveUrl ?? '')
   const [prototypeUrl, setPrototypeUrl] = useState(initialValues?.prototypeUrl ?? '')
-  const [extraLinks, setExtraLinks] = useState<DraftLink[]>(
+  const [extraLinks, setExtraLinks] = useState<DraftProjectLink[]>(
     (initialValues?.extraLinks ?? []).map((link, index) => ({
       key: `initial-link-${index}`,
       ...link,
     })),
   )
-  const [saving, setSaving] = useState(false)
-  const submittingRef = useRef(false)
-  const [error, setError] = useState('')
 
   const selectedStudents = useMemo(
     () =>
@@ -472,7 +375,7 @@ export default function ProjectFormPage({
     setExtraLinks((current) => [...current, { key: newKey('link'), title: '', url: '' }])
   }
 
-  function updateExtraLink(key: string, changes: Partial<DraftLink>) {
+  function updateExtraLink(key: string, changes: Partial<DraftProjectLink>) {
     setExtraLinks((current) =>
       current.map((link) => (link.key === key ? { ...link, ...changes } : link)),
     )
@@ -482,18 +385,16 @@ export default function ProjectFormPage({
     setExtraLinks((current) => current.filter((link) => link.key !== key))
   }
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (submittingRef.current) return
-    setError('')
+  async function submit() {
+    clearErrors('root.server')
 
     if (canEditDetails) {
       if (selectedEmails.length === 0) {
-        setError('Atribua pelo menos um aluno ao projeto.')
+        setError('root.server', { type: 'validation', message: 'Atribua pelo menos um aluno ao projeto.' })
         return
       }
       if (!advisorEmail) {
-        setError('Selecione o professor orientador.')
+        setError('root.server', { type: 'validation', message: 'Selecione o professor orientador.' })
         return
       }
     }
@@ -545,8 +446,6 @@ export default function ProjectFormPage({
           })),
         }
 
-    submittingRef.current = true
-    setSaving(true)
     try {
       const response = await fetch(
         isEdit ? `/api/projects/${encodeURIComponent(projectId ?? '')}` : '/api/projects',
@@ -580,16 +479,15 @@ export default function ProjectFormPage({
       else router.push(projectHref)
       router.refresh()
     } catch (caught) {
-      setError(
-        caught instanceof Error && caught.name === 'TimeoutError'
-          ? 'A solicitação demorou demais. Verifique sua conexão e tente novamente.'
-          : caught instanceof Error
-            ? caught.message
-            : 'Ocorreu um erro ao salvar o projeto.',
-      )
-    } finally {
-      submittingRef.current = false
-      setSaving(false)
+      setError('root.server', {
+        type: 'server',
+        message:
+          caught instanceof Error && caught.name === 'TimeoutError'
+            ? 'A solicitação demorou demais. Verifique sua conexão e tente novamente.'
+            : caught instanceof Error
+              ? caught.message
+              : 'Ocorreu um erro ao salvar o projeto.',
+      })
     }
   }
 
@@ -598,7 +496,7 @@ export default function ProjectFormPage({
     ? 'Preencha as informações, atribua os alunos e, se quiser, já defina as primeiras tarefas.'
     : canEditDetails
       ? 'Atualize as informações do projeto, a equipe, as tecnologias e os artefatos.'
-      : 'Como administrador, você pode editar artefatos e funções dos integrantes.'
+      : 'Como administrador, você pode atualizar os links dos artefatos do projeto.'
 
   return (
     <div className="w-full bg-background px-3 py-4 sm:px-6 sm:py-9 lg:px-8">
@@ -624,7 +522,7 @@ export default function ProjectFormPage({
           </div>
         </div>
 
-        <form onSubmit={submit} className="space-y-4 sm:space-y-5">
+        <form noValidate onSubmit={handleSubmit(submit)} className="space-y-4 sm:space-y-5">
           {canEditDetails || (isEdit && role === 'admin') ? (
             <>
               {canEditDetails && (
@@ -643,13 +541,14 @@ export default function ProjectFormPage({
                         <input
                           id="project-title"
                           className={fieldClass}
-                          value={title}
-                          onChange={(event) => setTitle(event.target.value)}
+                          {...register('title')}
                           minLength={3}
                           maxLength={160}
                           placeholder="Ex.: SALA — Sistema de Agendamento de Laboratórios"
                           required
+                          aria-invalid={Boolean(errors.title)}
                         />
+                        <FieldError message={errors.title?.message} />
                         <p className={hintClass}>
                           Use títulos concisos com acrônimo inicial quando aplicável e objetivo
                           funcional.
@@ -678,8 +577,14 @@ export default function ProjectFormPage({
                             width="full"
                             tone="muted"
                             options={SEMESTER_OPTIONS}
-                            onChange={setSemester}
+                            onChange={(value) =>
+                              setValue('semester', value as ProjectFormValues['semester'], {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              })
+                            }
                           />
+                          <FieldError message={errors.semester?.message} />
                         </div>
                       </div>
 
@@ -691,12 +596,13 @@ export default function ProjectFormPage({
                           <input
                             id="project-cycle"
                             className={fieldClass}
-                            value={cycle}
-                            onChange={(event) => setCycle(event.target.value)}
+                            {...register('cycle')}
                             pattern="\d{4}/[12]"
                             placeholder="2026/2"
                             required
+                            aria-invalid={Boolean(errors.cycle)}
                           />
+                          <FieldError message={errors.cycle?.message} />
                           <p className={hintClass}>Formato AAAA/1 ou AAAA/2.</p>
                         </div>
                         <div>
@@ -706,14 +612,15 @@ export default function ProjectFormPage({
                           <input
                             id="project-theme"
                             className={fieldClass}
-                            value={theme}
-                            onChange={(event) => setTheme(event.target.value)}
+                            {...register('theme')}
                             list="project-theme-suggestions"
                             minLength={2}
                             maxLength={80}
                             placeholder="Ex.: Gestão & Processos"
                             required
+                            aria-invalid={Boolean(errors.theme)}
                           />
+                          <FieldError message={errors.theme?.message} />
                           <datalist id="project-theme-suggestions">
                             {THEME_SUGGESTIONS.map((suggestion) => (
                               <option key={suggestion} value={suggestion} />
@@ -728,7 +635,12 @@ export default function ProjectFormPage({
                             width="full"
                             tone="muted"
                             options={STATUS_OPTIONS}
-                            onChange={setStatus}
+                            onChange={(value) =>
+                              setValue('status', value as ProjectFormValues['status'], {
+                                shouldDirty: true,
+                                shouldValidate: true,
+                              })
+                            }
                           />
                         </div>
                       </div>
@@ -750,7 +662,12 @@ export default function ProjectFormPage({
                               width="full"
                               tone="muted"
                               options={advisorOptions}
-                              onChange={setAdvisorEmail}
+                              onChange={(value) =>
+                                setValue('advisorEmail', value, {
+                                  shouldDirty: true,
+                                  shouldValidate: true,
+                                })
+                              }
                             />
                           )
                         ) : (
@@ -768,6 +685,7 @@ export default function ProjectFormPage({
                             </div>
                           </div>
                         )}
+                        <FieldError message={errors.advisorEmail?.message} />
                         {!isEdit && role === 'professor' && (
                           <p className={hintClass}>Você será o orientador deste projeto.</p>
                         )}
@@ -798,13 +716,14 @@ export default function ProjectFormPage({
                         <textarea
                           id="project-summary"
                           className={textareaClass}
-                          value={summary}
-                          onChange={(event) => setSummary(event.target.value)}
+                          {...register('summary')}
                           minLength={10}
                           maxLength={600}
                           placeholder="Descreva a problemática e a solução do projeto em poucas linhas."
                           required
+                          aria-invalid={Boolean(errors.summary)}
                         />
+                        <FieldError message={errors.summary?.message} />
                       </div>
                       <div>
                         <div className="flex items-end justify-between gap-3">
@@ -819,214 +738,43 @@ export default function ProjectFormPage({
                         <textarea
                           id="project-overview"
                           className={`${textareaClass} min-h-36`}
-                          value={overview}
-                          onChange={(event) => setOverview(event.target.value)}
+                          {...register('overview')}
                           maxLength={5000}
                           placeholder="Contexto, problema, objetivos e resultados esperados."
+                          aria-invalid={Boolean(errors.overview)}
                         />
+                        <FieldError message={errors.overview?.message} />
                       </div>
                     </div>
                   </FormSection>
                 </>
               )}
 
-              <FormSection
-                icon="fi-rr-users"
-                title="Equipe Discente"
-                subtitle="Defina um líder e a função opcional de cada integrante."
-                badge={
-                  <Badge tone="green">
-                    {selectedStudents.length}{' '}
-                    {selectedStudents.length === 1 ? 'integrante' : 'integrantes'}
-                  </Badge>
+              <ProjectTeamSection
+                canEditDetails={canEditDetails}
+                canEditTeam={canEditTeam}
+                students={students}
+                selectedStudents={selectedStudents}
+                studentQuery={studentQuery}
+                studentNotice={studentNotice}
+                suggestions={suggestions}
+                memberTitles={memberTitles}
+                leaderEmail={leaderEmail}
+                onStudentQueryChange={(value) => {
+                  setStudentQuery(value)
+                  setStudentNotice('')
+                }}
+                onStudentKeyDown={handleStudentKeyDown}
+                onAddStudentFromQuery={addStudentFromQuery}
+                onAddStudent={addStudent}
+                onRemoveStudent={removeStudent}
+                onMemberTitleChange={(email, value) =>
+                  setMemberTitles((current) => ({ ...current, [email]: value }))
                 }
-              >
-                {canEditDetails && (
-                  <div className="relative">
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <label className="relative block min-w-0 flex-1">
-                        <span className="sr-only">Buscar aluno por RA, nome ou e-mail</span>
-                        <i
-                          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#765e58]"
-                          aria-hidden="true"
-                        />
-                        <input
-                          value={studentQuery}
-                          onChange={(event) => {
-                            setStudentQuery(event.target.value)
-                            setStudentNotice('')
-                          }}
-                          onKeyDown={handleStudentKeyDown}
-                          placeholder="Informe o RA, o nome ou o e-mail institucional do aluno..."
-                          className={`${fieldClass} pl-9`}
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={addStudentFromQuery}
-                        className="cursor-pointer inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover"
-                      >
-                        <i className="fi fi-rr-user-add flex" aria-hidden="true" /> Adicionar
-                        discente
-                      </button>
-                    </div>
-
-                    {suggestions.length > 0 && (
-                      <ul className="mt-2 divide-y divide-border-light overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-                        {suggestions.map((student) => (
-                          <li key={student.email}>
-                            <button
-                              type="button"
-                              onClick={() => addStudent(student.email)}
-                              className="cursor-pointer flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-surface-secondary"
-                            >
-                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-primary">
-                                {getNameInitials(student.name)}
-                              </span>
-                              <span className="min-w-0 flex-1">
-                                <span className="block truncate text-[13px] font-semibold text-slate-900">
-                                  {formatPersonName(student.name)}
-                                </span>
-                                <span className="block truncate text-[11px] text-text-secondary">
-                                  {student.registrationNumber
-                                    ? `RA ${student.registrationNumber} · `
-                                    : ''}
-                                  {student.email}
-                                </span>
-                              </span>
-                              <i
-                                className="fi fi-rr-plus flex shrink-0 text-sm text-primary"
-                                aria-hidden="true"
-                              />
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {studentNotice && (
-                      <p role="status" className="mt-2 text-xs font-semibold text-primary">
-                        {studentNotice}
-                      </p>
-                    )}
-                    {students.length === 0 && (
-                      <p className={hintClass}>Nenhum aluno ativo cadastrado.</p>
-                    )}
-                  </div>
-                )}
-
-                {!canEditDetails && (
-                  <p className={hintClass}>
-                    Como administrador, você pode editar a função e o líder dos integrantes
-                    existentes, mas não alterar a composição da equipe.
-                  </p>
-                )}
-
-                {selectedStudents.length > 0 ? (
-                  <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {selectedStudents.map((student) => {
-                      const normalizedEmail = student.email.toLowerCase()
-                      const isLeader = leaderEmail === normalizedEmail
-                      const memberRoleId = `member-role-${encodeURIComponent(normalizedEmail)}`
-
-                      return (
-                        <li
-                          key={student.email}
-                          className="min-w-0 rounded-xl border border-border bg-white p-3.5 shadow-sm"
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <span
-                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                                isLeader ? 'bg-primary text-white' : 'bg-slate-200 text-primary'
-                              }`}
-                            >
-                              {getNameInitials(student.name)}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="block truncate text-sm font-bold text-slate-900">
-                                {formatPersonName(student.name)}
-                              </span>
-                              <span className="block truncate text-[11px] text-text-secondary">
-                                {student.registrationNumber
-                                  ? `RA: ${student.registrationNumber}`
-                                  : student.email}
-                              </span>
-                              {isLeader && (
-                                <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-2 py-0.5 text-[10px] font-bold text-primary">
-                                  <i className="fi fi-rr-crown flex" aria-hidden="true" /> Líder do
-                                  grupo
-                                </span>
-                              )}
-                            </span>
-                            {canEditDetails && (
-                              <button
-                                type="button"
-                                onClick={() => removeStudent(student.email)}
-                                aria-label={`Remover ${formatPersonName(student.name)}`}
-                                className="cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
-                              >
-                                <i
-                                  className="fi fi-rr-cross-small flex text-base"
-                                  aria-hidden="true"
-                                />
-                              </button>
-                            )}
-                          </div>
-                          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-                            <div>
-                              <label
-                                className="mb-1 block text-[11px] font-semibold text-slate-700"
-                                htmlFor={memberRoleId}
-                              >
-                                Função no grupo{' '}
-                                <span className="font-normal text-slate-500">(opcional)</span>
-                              </label>
-                              <input
-                                id={memberRoleId}
-                                className={`${fieldClass} h-9 text-xs`}
-                                value={memberTitles[normalizedEmail] ?? ''}
-                                onChange={(event) =>
-                                  setMemberTitles((current) => ({
-                                    ...current,
-                                    [normalizedEmail]: event.target.value,
-                                  }))
-                                }
-                                maxLength={40}
-                                placeholder="Ex.: Front-end, UX/UI, Banco de dados"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              aria-pressed={isLeader}
-                              onClick={() =>
-                                setLeaderEmail((current) =>
-                                  current === normalizedEmail ? '' : normalizedEmail,
-                                )
-                              }
-                              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${
-                                isLeader
-                                  ? 'border-primary bg-primary text-white hover:bg-primary-hover'
-                                  : 'border-rose-200 bg-rose-50 text-primary hover:bg-rose-100'
-                              }`}
-                            >
-                              <i
-                                className={`fi ${isLeader ? 'fi-rr-crown' : 'fi-rr-star'} flex`}
-                                aria-hidden="true"
-                              />
-                              {isLeader ? 'Líder definido' : 'Definir líder'}
-                            </button>
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                ) : (
-                  <p className="mt-4 rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-6 text-center text-sm text-text-secondary">
-                    {canEditDetails
-                      ? 'Nenhum aluno atribuído ainda. Busque pelo RA, nome ou e-mail para adicionar.'
-                      : 'Nenhum integrante cadastrado neste projeto.'}
-                  </p>
-                )}
-              </FormSection>
+                onToggleLeader={(email) =>
+                  setLeaderEmail((current) => (current === email ? '' : email))
+                }
+              />
 
               {canEditDetails && (
                 <>
@@ -1215,161 +963,25 @@ export default function ProjectFormPage({
             </section>
           )}
 
-          <FormSection
-            icon="fi-rr-folder-open"
-            title="Artefatos do Projeto"
-            subtitle="Links, imagens e documentos referentes ao projeto"
-          >
-            <div className="space-y-8">
-              <div>
-                <ArtifactSubheading
-                  title="Links do projeto"
-                  description="Endereços HTTPS do código, do sistema publicado e da prototipagem."
-                />
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <div>
-                    <label className={labelClass} htmlFor="project-repository">
-                      Repositório
-                    </label>
-                    <input
-                      id="project-repository"
-                      type="url"
-                      className={fieldClass}
-                      value={repositoryUrl}
-                      onChange={(event) => setRepositoryUrl(event.target.value)}
-                      maxLength={300}
-                      placeholder="https://github.com/organizacao/projeto"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass} htmlFor="project-live-url">
-                      Site no ar
-                    </label>
-                    <input
-                      id="project-live-url"
-                      type="url"
-                      className={fieldClass}
-                      value={liveUrl}
-                      onChange={(event) => setLiveUrl(event.target.value)}
-                      maxLength={300}
-                      placeholder="https://meu-projeto.vercel.app"
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass} htmlFor="project-prototype-url">
-                      Protótipo
-                    </label>
-                    <input
-                      id="project-prototype-url"
-                      type="url"
-                      className={fieldClass}
-                      value={prototypeUrl}
-                      onChange={(event) => setPrototypeUrl(event.target.value)}
-                      maxLength={300}
-                      placeholder="https://www.figma.com/design/..."
-                    />
-                  </div>
-                </div>
-              </div>
+          <ProjectArtifactsSection
+            repositoryUrl={repositoryUrl}
+            onRepositoryUrlChange={setRepositoryUrl}
+            liveUrl={liveUrl}
+            onLiveUrlChange={setLiveUrl}
+            prototypeUrl={prototypeUrl}
+            onPrototypeUrlChange={setPrototypeUrl}
+            extraLinks={extraLinks}
+            onAddExtraLink={addExtraLink}
+            onUpdateExtraLink={updateExtraLink}
+            onRemoveExtraLink={removeExtraLink}
+          />
 
-              <div>
-                <ArtifactSubheading
-                  title="Outros links"
-                  description="Vídeo de apresentação, documentação, artigo ou qualquer endereço relevante."
-                />
-                {extraLinks.length > 0 && (
-                  <ul className="space-y-3">
-                    {extraLinks.map((link, index) => (
-                      <li
-                        key={link.key}
-                        className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1.6fr_auto] md:items-end"
-                      >
-                        <div>
-                          <label className={labelClass} htmlFor={`${link.key}-title`}>
-                            Título <Required />
-                          </label>
-                          <input
-                            id={`${link.key}-title`}
-                            className={fieldClass}
-                            value={link.title}
-                            onChange={(event) =>
-                              updateExtraLink(link.key, { title: event.target.value })
-                            }
-                            maxLength={60}
-                            placeholder="Insira um título para o link"
-                          />
-                        </div>
-                        <div>
-                          <label className={labelClass} htmlFor={`${link.key}-url`}>
-                            Endereço <Required />
-                          </label>
-                          <input
-                            id={`${link.key}-url`}
-                            type="url"
-                            className={fieldClass}
-                            value={link.url}
-                            onChange={(event) =>
-                              updateExtraLink(link.key, { url: event.target.value })
-                            }
-                            maxLength={300}
-                            placeholder="Insira o endereço web desejado"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeExtraLink(link.key)}
-                          aria-label={`Remover link adicional ${index + 1}`}
-                          className="cursor-pointer flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
-                        >
-                          <i className="fi fi-rr-trash flex" aria-hidden="true" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <div className={`flex justify-end ${extraLinks.length > 0 ? 'mt-3' : ''}`}>
-                  <button type="button" onClick={addExtraLink} className={textActionClass}>
-                    <i className="fi fi-rr-plus flex" aria-hidden="true" /> Anexar link
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <ArtifactSubheading
-                  title="Imagens do projeto"
-                  description="Capturas de tela, banners e fotos que ilustram o projeto."
-                  soon
-                />
-                <UploadSlot
-                  icon="fi-rr-picture"
-                  title="Envio de imagens indisponível por enquanto"
-                  hint="Formatos previstos: PNG, JPG ou WEBP, até 5 MB por imagem."
-                  accept="image/png,image/jpeg,image/webp"
-                />
-              </div>
-
-              <div>
-                <ArtifactSubheading
-                  title="Arquivos e documentos"
-                  description="Proposta, termo de compromisso, documentação técnica e repositório compactado."
-                  soon
-                />
-                <UploadSlot
-                  icon="fi-rr-upload"
-                  title="Envio de arquivos indisponível por enquanto"
-                  hint="Formatos previstos: TXT, PDF, DOC, DOCX ou ZIP, até 25 MB por arquivo."
-                  accept=".txt,.pdf,.doc,.docx,.zip"
-                />
-              </div>
-            </div>
-          </FormSection>
-
-          {error && (
+          {errors.root?.server?.message && (
             <p
               role="alert"
               className="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800"
             >
-              {error}
+              {errors.root.server.message}
             </p>
           )}
 
@@ -1382,15 +994,15 @@ export default function ProjectFormPage({
             </Link>
             <button
               type="submit"
-              disabled={saving || (!isEdit && role === 'admin' && professors.length === 0)}
+              disabled={isSubmitting || (!isEdit && role === 'admin' && professors.length === 0)}
               className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-wait disabled:opacity-65"
             >
-              {saving ? (
+              {isSubmitting ? (
                 <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />
               ) : (
                 <i className="fi fi-rr-check flex" aria-hidden="true" />
               )}
-              {saving
+              {isSubmitting
                 ? isEdit
                   ? 'Salvando…'
                   : 'Registrando…'

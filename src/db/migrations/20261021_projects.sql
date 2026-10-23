@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
   title text NOT NULL,
   summary text NOT NULL,
   cycle text NOT NULL,
-  semester integer NOT NULL CHECK (semester BETWEEN 1 AND 12),
+  semester integer NOT NULL CHECK (semester BETWEEN 1 AND 6),
   advisor_email text NOT NULL,
   advisor_name text NOT NULL,
   member_emails jsonb NOT NULL DEFAULT '[]'::jsonb,

@@ -1,7 +1,7 @@
 import type { UseCase } from '@/core/application/use-case'
 import type { Project } from '@/domain/enterprise/entities/project'
 import type { Role } from '@/domain/enterprise/entities/role'
-import type { ProjectRepository } from '@/domain/enterprise/repositories/project-repository'
+import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 
 export type ViewerRole = Role
 
@@ -38,7 +38,7 @@ function canSee(project: Project, viewer: Viewer | null): boolean {
 }
 
 export class ListProjectsUseCase implements UseCase<ListProjectsInput, ListProjectsOutput> {
-  constructor(private readonly projectRepository: ProjectRepository) {}
+  constructor(private readonly projectRepository: ProjectReader) {}
 
   async execute({ viewer }: ListProjectsInput): Promise<ListProjectsOutput> {
     const all = await this.projectRepository.findAll()

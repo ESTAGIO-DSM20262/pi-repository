@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import ProjectFavoriteAction from '@/components/projects/ProjectFavoriteAction'
-import ProjectProgressSection from '@/components/projects/progress/ProjectProgressSection'
-import BackButton from '@/components/ui/BackButton'
+import { ProjectFavoriteAction } from '@/components/projects/ProjectFavoriteAction'
+import { ProjectProgressSection } from '@/components/projects/progress/ProjectProgressSection'
+import { BackButton } from '@/components/ui/BackButton'
 import type {
   Project,
   ProjectAttachment,
@@ -305,7 +305,7 @@ function ExternalProjectLink({ label, url }: { label: string; url?: string }) {
   )
 }
 
-export default function ProjectPublicView({
+export function ProjectPublicView({
   project,
   isAuthenticated,
   canManageProgress,
@@ -333,11 +333,11 @@ export default function ProjectPublicView({
   const advisorGithubUrl = getSafeSocialProfileUrl(project.advisor.githubUrl, 'github')
   const advisorLinkedinUrl = getSafeSocialProfileUrl(project.advisor.linkedinUrl, 'linkedin')
   const progressMembers = project.memberEmails
-    .map((email, index) => {
+    .map((email) => {
       const normalizedEmail = email.trim().toLowerCase()
-      const matchingMember =
-        team.find((member) => member.studentEmail?.trim().toLowerCase() === normalizedEmail) ??
-        team[index]
+      const matchingMember = team.find(
+        (member) => member.studentEmail?.trim().toLowerCase() === normalizedEmail,
+      )
       return { email: normalizedEmail, name: matchingMember?.name ?? email }
     })
     .sort((a, b) => comparePersonNames(a.name, b.name))
@@ -365,7 +365,6 @@ export default function ProjectPublicView({
         {canEditProject && (
           <Link
             href={`/projetos/${encodeURIComponent(project.id)}/editar`}
-            replace
             className="ml-auto inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
           >
             <i className="fi fi-rr-pencil flex" aria-hidden="true" /> Editar projeto

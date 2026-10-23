@@ -18,7 +18,12 @@ const MAX_TASKS = 30
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 
 function isValidDate(value: string) {
-  return DATE_PATTERN.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
+  if (!DATE_PATTERN.test(value)) return false
+
+  const timestamp = Date.parse(`${value}T00:00:00Z`)
+  if (Number.isNaN(timestamp)) return false
+
+  return new Date(timestamp).toISOString().slice(0, 10) === value
 }
 
 export function parseCreateProjectInput(

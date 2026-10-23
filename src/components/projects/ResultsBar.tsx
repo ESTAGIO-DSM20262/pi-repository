@@ -1,6 +1,6 @@
 'use client'
 
-import SelectDropdown from '@/components/ui/SelectDropdown'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import { type Chip, SORT_LABEL, type SortKey } from '@/presentation/projects/project-filters'
 
 interface ResultsBarProps {
@@ -13,7 +13,7 @@ interface ResultsBarProps {
   mine?: { value: boolean; onChange: (v: boolean) => void; count: number; label: string }
 }
 
-export default function ResultsBar({
+export function ResultsBar({
   chips,
   onRemove,
   onClear,

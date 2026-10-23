@@ -161,8 +161,8 @@ export function parseProjectFields(
     return fail('A descrição detalhada deve ter no máximo 5.000 caracteres.')
   }
   if (!CYCLE_PATTERN.test(cycle)) return fail('Informe o ciclo no formato AAAA/1 ou AAAA/2.')
-  if (!Number.isInteger(semester) || semester < 1 || semester > 12) {
-    return fail('Informe um semestre entre 1 e 12.')
+  if (!Number.isInteger(semester) || semester < 1 || semester > 6) {
+    return fail('Informe um semestre entre 1 e 6.')
   }
   if (theme.length < 2 || theme.length > 80) return fail('Informe o tema do projeto.')
   if (studentEmails.length === 0) return fail('Atribua pelo menos um aluno ao projeto.')

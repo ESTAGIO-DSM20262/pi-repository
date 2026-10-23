@@ -7,7 +7,7 @@ interface AuthActionOverlayProps {
   message: string | null
 }
 
-export default function AuthActionOverlay({ message }: AuthActionOverlayProps) {
+export function AuthActionOverlay({ message }: AuthActionOverlayProps) {
   useEffect(() => {
     if (!message) return
 

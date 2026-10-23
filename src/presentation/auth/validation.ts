@@ -37,21 +37,26 @@ export const passwordRules: ReadonlyArray<{ label: string; test: (password: stri
     },
   ]
 
+export const newPasswordSchema = z
+  .string()
+  .min(1, 'Informe a nova senha.')
+  .refine((value) => value.length >= 8, 'A senha deve ter no mínimo 8 caracteres.')
+  .refine((value) => value.length <= 128, 'A senha deve ter no máximo 128 caracteres.')
+  .refine(
+    (value) => /[a-z]/.test(value) && /[A-Z]/.test(value),
+    'A senha deve conter letras maiúsculas e minúsculas.',
+  )
+  .refine(
+    (value) => /[\d\W_]/.test(value),
+    'A senha deve conter ao menos um número ou caractere especial.',
+  )
+
+export const confirmPasswordSchema = z.string().min(1, 'Confirme a nova senha.')
+
 export const resetPasswordSchema = z
   .object({
-    password: z
-      .string()
-      .min(1, 'Informe a nova senha.')
-      .refine((value) => value.length >= 8, 'A senha deve ter no mínimo 8 caracteres.')
-      .refine(
-        (value) => /[a-z]/.test(value) && /[A-Z]/.test(value),
-        'A senha deve conter letras maiúsculas e minúsculas.',
-      )
-      .refine(
-        (value) => /[\d\W_]/.test(value),
-        'A senha deve conter ao menos um número ou caractere especial.',
-      ),
-    confirm: z.string().min(1, 'Confirme a nova senha.'),
+    password: newPasswordSchema,
+    confirm: confirmPasswordSchema,
   })
   .refine((data) => data.password === data.confirm, {
     path: ['confirm'],

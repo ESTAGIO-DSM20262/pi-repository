@@ -8,7 +8,7 @@ interface PanelHeaderProps {
   role: Role
 }
 
-export default function PanelHeader({ name, email, role }: PanelHeaderProps) {
+export function PanelHeader({ name, email, role }: PanelHeaderProps) {
   return (
     <section className="mx-auto max-w-3xl p-6">
       <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-6">

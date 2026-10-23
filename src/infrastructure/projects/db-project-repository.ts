@@ -1,9 +1,8 @@
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { projects } from '@/db/schema'
 import type { Project } from '@/domain/enterprise/entities/project'
-import type { ProjectRepository } from '@/domain/enterprise/repositories/project-repository'
-import { MockProjectRepository } from './mock-project-repository'
+import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 
 type ProjectRow = typeof projects.$inferSelect
 
@@ -32,26 +31,14 @@ export function toDomainProject(row: ProjectRow): Project {
   }
 }
 
-export class DbProjectRepository implements ProjectRepository {
-  private readonly mock = new MockProjectRepository()
-
-  private async findStored(): Promise<Project[]> {
-    try {
-      const rows = await db.select().from(projects).orderBy(desc(projects.createdAt))
-      return rows.map(toDomainProject)
-    } catch (error) {
-      console.error('[DbProjectRepository]', error)
-      return []
-    }
-  }
-
+export class DbProjectRepository implements ProjectReader {
   async findAll(): Promise<Project[]> {
-    const [stored, seeded] = await Promise.all([this.findStored(), this.mock.findAll()])
-    return [...stored, ...seeded]
+    const rows = await db.select().from(projects).orderBy(desc(projects.createdAt))
+    return rows.map(toDomainProject)
   }
 
   async findById(id: string): Promise<Project | null> {
-    const all = await this.findAll()
-    return all.find((project) => project.id === id) ?? null
+    const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
+    return row ? toDomainProject(row) : null
   }
 }

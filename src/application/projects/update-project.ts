@@ -1,24 +1,21 @@
 import { type Either, left, right } from '@/core/either'
-import type { ProjectTeamAssignment } from '@/domain/enterprise/entities/project'
 import type { ProjectLinkSet } from '@/domain/enterprise/entities/project-details'
 import { InvalidProjectError } from '@/domain/enterprise/errors/invalid-project-error'
 import {
   type ProjectFieldsInput,
   parseProjectFields,
   parseProjectLinks,
-  parseProjectTeamAssignments,
 } from './project-fields'
 
 export type ProjectEditScope = 'full' | 'artifacts'
 
 export type UpdateProjectInput =
   | { scope: 'full'; fields: ProjectFieldsInput }
-  | { scope: 'artifacts'; links: ProjectLinkSet; teamAssignments?: ProjectTeamAssignment[] }
+  | { scope: 'artifacts'; links: ProjectLinkSet }
 
 export function parseUpdateProjectInput(
   body: unknown,
   scope: ProjectEditScope,
-  existingMemberEmails: string[] = [],
 ): Either<InvalidProjectError, UpdateProjectInput> {
   if (!body || typeof body !== 'object') {
     return left(new InvalidProjectError('Informe os dados do projeto.'))
@@ -28,14 +25,6 @@ export function parseUpdateProjectInput(
   if (scope === 'artifacts') {
     const links = parseProjectLinks(data)
     if (links.isLeft()) return left(links.value)
-    if (Array.isArray(data.teamAssignments)) {
-      const teamAssignments = parseProjectTeamAssignments(
-        existingMemberEmails,
-        data.teamAssignments,
-      )
-      if (teamAssignments.isLeft()) return left(teamAssignments.value)
-      return right({ scope, links: links.value, teamAssignments: teamAssignments.value })
-    }
     return right({ scope, links: links.value })
   }
 

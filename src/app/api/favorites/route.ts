@@ -2,7 +2,7 @@ import { and, asc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { projectFavorites } from '@/db/schema'
-import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 
 function jsonError(message: string, status: number) {
@@ -21,7 +21,7 @@ async function getAuthenticatedUserId(request: Request): Promise<string | null> 
 }
 
 async function isFavoriteableProject(projectId: string): Promise<boolean> {
-  const project = await new DbProjectRepository().findById(projectId)
+  const project = await new CompositeProjectRepository().findById(projectId)
   return project?.status === 'publicado'
 }
 

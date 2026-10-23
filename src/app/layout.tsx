@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { Suspense } from 'react'
-import Footer from '@/components/Footer'
-import Header from '@/components/Header'
+import { Footer } from '@/components/Footer'
+import { Header } from '@/components/Header'
 import { AuthProvider } from '@/presentation/auth/auth-context'
 import '@flaticon/flaticon-uicons/css/regular/rounded.css'
 

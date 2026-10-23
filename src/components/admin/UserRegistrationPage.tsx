@@ -2,8 +2,8 @@
 
 import { type DragEvent, type FormEvent, type ReactNode, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
-import BackButton from '@/components/ui/BackButton'
-import ConfirmationDialog from '@/components/ui/ConfirmationDialog'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { BackButton } from '@/components/ui/BackButton'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
@@ -131,7 +131,7 @@ async function downloadCredentials(credentials: Credential[]) {
   workbook.SheetNames = ['Alunos', 'Professores']
   XLSX.writeFile(workbook, 'credenciais-provisorias-acervo.xlsx', { cellStyles: true })
 }
-export default function UserRegistrationPage() {
+export function UserRegistrationPage() {
   const [role, setRole] = useState<Role>('student')
   const [form, setForm] = useState<UserForm>({
     name: '',

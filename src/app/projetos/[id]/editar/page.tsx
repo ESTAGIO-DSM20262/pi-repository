@@ -1,14 +1,12 @@
-import { and, asc, eq } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
-import ProjectFormPage, {
+import {
+  ProjectFormPage,
   type ProjectFormInitialValues,
-  type ProjectPersonOption,
 } from '@/components/projects/ProjectFormPage'
-import { db } from '@/db'
-import { users } from '@/db/schema'
+import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'
 import { splitProjectLinks } from '@/domain/enterprise/entities/project-details'
-import type { Role } from '@/domain/enterprise/entities/role'
+import type { ProjectPersonOption } from '@/presentation/projects/project-person'
 import { auth } from '@/libs/auth'
 import { resolveProjectEditAccess } from '@/libs/project-edit-access'
 
@@ -17,25 +15,6 @@ export const instant = false
 
 interface EditProjectPageProps {
   params: Promise<{ id: string }>
-}
-
-async function listActive(role: Role): Promise<ProjectPersonOption[]> {
-  const rows = await db
-    .select({
-      email: users.email,
-      name: users.name,
-      registrationNumber: users.registrationNumber,
-      course: users.course,
-    })
-    .from(users)
-    .where(and(eq(users.role, role), eq(users.active, true)))
-    .orderBy(asc(users.name))
-  return rows.map((row) => ({
-    email: row.email.toLowerCase(),
-    name: row.name,
-    registrationNumber: row.registrationNumber,
-    course: row.course,
-  }))
 }
 
 export default async function EditProjectPage({ params }: EditProjectPageProps) {
@@ -53,16 +32,16 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
 
   const { project, scope, user } = access
   const [activeStudents, professors] = await Promise.all([
-    listActive('student'),
-    listActive('professor'),
+    listActiveProjectPeople('student'),
+    listActiveProjectPeople('professor'),
   ])
   const links = splitProjectLinks(project.publicDetails?.externalLinks)
   const sourceTeam = project.teamMembers?.length
     ? project.teamMembers
     : (project.publicDetails?.team ?? [])
-  const editableTeam = sourceTeam.map((member, index) => ({
+  const editableTeam = sourceTeam.map((member) => ({
     ...member,
-    studentEmail: (member.studentEmail ?? project.memberEmails[index])?.trim().toLowerCase(),
+    studentEmail: member.studentEmail?.trim().toLowerCase(),
   }))
 
   const initialValues: ProjectFormInitialValues = {

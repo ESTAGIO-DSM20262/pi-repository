@@ -222,7 +222,7 @@ export const projects = pgTable(
   (table) => [
     index('projects_advisor_email_idx').on(table.advisorEmail),
     index('projects_status_idx').on(table.status),
-    check('projects_semester_check', sql`${table.semester} BETWEEN 1 AND 12`),
+    check('projects_semester_check', sql`${table.semester} BETWEEN 1 AND 6`),
     check('projects_status_check', sql`${table.status} IN ('publicado', 'em_andamento')`),
   ],
 )

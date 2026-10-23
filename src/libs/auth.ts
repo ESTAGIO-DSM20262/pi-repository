@@ -3,9 +3,13 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { nextCookies } from 'better-auth/next-js'
 import { eq } from 'drizzle-orm'
+import { SendPasswordResetEmailUseCase } from '@/application/auth/send-password-reset-email'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
 import { isRole } from '@/domain/enterprise/entities/role'
+import { makePasswordResetNotifier } from '@/infrastructure/email/make-password-reset-notifier'
+
+const sendPasswordResetEmail = new SendPasswordResetEmailUseCase(makePasswordResetNotifier())
 
 const microsoftClientId = process.env.MICROSOFT_CLIENT_ID
 const microsoftClientSecret = process.env.MICROSOFT_CLIENT_SECRET
@@ -38,6 +42,19 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
+    resetPasswordTokenExpiresIn: 60 * 60,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      const result = await sendPasswordResetEmail.execute({
+        email: user.email,
+        name: user.name,
+        active: (user as { active?: boolean | null }).active !== false,
+        resetUrl: url,
+      })
+      if (result.isLeft()) {
+        console.error('Falha ao enviar e-mail de redefinição de senha:', result.value.message)
+      }
+    },
   },
 
   socialProviders,

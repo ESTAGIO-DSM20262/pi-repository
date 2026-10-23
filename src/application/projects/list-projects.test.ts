@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Project } from '@/domain/enterprise/entities/project'
-import type { ProjectRepository } from '@/domain/enterprise/repositories/project-repository'
+import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 import { ListProjectsUseCase, type Viewer } from './list-projects'
 
 function makeProject(id: string, overrides: Partial<Project> = {}): Project {
@@ -22,7 +22,7 @@ function makeProject(id: string, overrides: Partial<Project> = {}): Project {
   }
 }
 
-class InMemoryProjectRepository implements ProjectRepository {
+class InMemoryProjectRepository implements ProjectReader {
   constructor(private readonly items: Project[]) {}
 
   async findAll() {
