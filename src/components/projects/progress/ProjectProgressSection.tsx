@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { formatPersonName } from '@/libs/initials'
 import {
   type ProgressMember,
   type ProgressRevision,
@@ -130,7 +131,8 @@ export function ProjectProgressSection({
   )
   const nextVersionMajor = Math.max(0, ...tasks.map((task) => task.versionMajor)) + 1
   const memberNameByEmail = useMemo(
-    () => new Map(members.map((member) => [member.email.toLowerCase(), member.name])),
+    () =>
+      new Map(members.map((member) => [member.email.toLowerCase(), formatPersonName(member.name)])),
     [members],
   )
 

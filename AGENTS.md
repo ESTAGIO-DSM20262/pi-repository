@@ -354,15 +354,21 @@ A escrita do papel é feita no servidor, por cadastro ou gestão administrativa,
 
 ## 12. Banco de dados e migrações
 
-- `db/schema.ts` define as tabelas do better-auth: `users`, `sessions`,
-  `accounts`, `verifications` (nomes físicos no plural, colunas em snake_case —
-  ver `usePlural` na config).
-- `users.role` é `text().$type<Role>()`, preenchido **apenas no servidor**;
-  nunca vem do cliente.
-- `db/seed.ts` pré-provisiona contas com papéis explícitos.
-- `users.github_url` e `users.linkedin_url` armazenam os links públicos opcionais usados no perfil e nas páginas dos projetos.
-- Comandos: `npm run db:generate`, `db:migrate`, `db:push`, `db:seed`,
-  `db:studio`, `db:check`.
+- `src/db/schema.ts` descreve as tabelas do better-auth (`users`, `sessions`,
+  `accounts`, `verifications`) e as tabelas de domínio (`project_favorites`,
+  `project_progress_tasks`, `project_progress_revisions` e `projects`). Os nomes físicos
+  usam plural e as colunas usam `snake_case`.
+- `users.role` é `text().$type<Role>()`, preenchido **apenas no servidor**; nunca vem do cliente.
+- `users.registration_number`, `course`, `active`, `github_url` e `linkedin_url` armazenam os
+  dados de matrícula, estado da conta e links públicos usados no perfil e nas páginas de projetos.
+- **Fontes de migração:** `drizzle/` mantém as migrações Drizzle já existentes; os SQLs manuais em
+  `src/db/migrations/` provisionam/atualizam tabelas de domínio e extensões do usuário e precisam
+  ser executados no Neon em ordem de dependência. `npm run db:migrate` não executa esses SQLs.
+  Antes de gerar uma migração nova, revise o diff do Drizzle Kit: o snapshot histórico de `drizzle/`
+  não registra todas as tabelas já gerenciadas por SQL manual, então gerar cegamente pode propor
+  recriar objetos que já existem. Mantenha as definições de `schema.ts` refletidas no SQL manual.
+- `src/db/seed.ts` pré-provisiona contas de desenvolvimento com papéis explícitos.
+- Comandos: `npm run db:generate`, `db:migrate`, `db:push`, `db:seed`, `db:studio`, `db:check`.
 
 ## 13. Testes
 
@@ -411,3 +417,68 @@ documente aqui.
 | `npm run db:migrate` | aplica migrações Drizzle |
 | `npm run db:seed` | cria contas de desenvolvimento |
 | `npm run email:dev` | preview dos templates React Email (porta 3001) |
+
+## 16. Cadastro de projetos e filtros do painel
+
+- **Persistência:** projetos criados pela interface ficam na tabela `projects`
+  (`src/db/migrations/20261021_projects.sql`, espelhada em `db/schema.ts`). Os projetos
+  demonstrativos continuam em `mock-projects.ts`. `DbProjectRepository`
+  (`infrastructure/projects/db-project-repository.ts`) lê somente registros persistidos e faz
+  a busca por ID diretamente no banco. `CompositeProjectRepository` combina o adaptador de banco
+  com `MockProjectRepository` na raiz de composição. Erros de banco não são ocultados.
+- **Validação:** `application/projects/create-project.ts` (`parseCreateProjectInput`) valida e
+  normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. O formulário usa
+  React Hook Form + Zod (`presentation/projects/validation.ts`, `mode: 'onTouched'`) e também valida
+  no servidor. Exige título, resumo, ciclo `AAAA/1|2`, semestre 1–6, tema, orientador e ao menos um
+  aluno. As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
+- **Aplicação e persistência:** `CreateProjectUseCase` (`application/projects/create-project-use-case.ts`)
+  valida o papel do usuário, revalida orientador e alunos ativos e monta as tarefas iniciais.
+  `ProjectRepository` é a porta de escrita; `DbProjectCommandRepository` grava projeto, tarefas
+  e revisões. `DbProjectUserDirectory` implementa a porta de consulta de contas e pessoas. Os casos
+  de uso são testados com implementações in-memory; falhas esperadas retornam
+  `Either<ProjectOperationError, ...>`.
+- **Tela:** `/projetos/novo` e `/projetos/[id]/editar` usam o mesmo componente,
+  `components/projects/ProjectFormPage.tsx` (`mode="create" | "edit"`), restrito a professor e
+  administrador. O botão "Novo Projeto" do painel aponta para a criação.
+- **Filtros do painel:** a seção de projetos de administrador e professor tem busca (título,
+  orientador, tema, aluno), filtro de situação, filtro de semestre (1º ao 6º) e filtro de ciclo
+  (`AAAA/1|2`, montado a partir dos ciclos existentes na lista). A lista de usuários do
+  administrador ganhou o filtro de status (ativo/inativo), ao lado do filtro de perfil.
+- **Dropdowns:** todo seletor usa `components/ui/SelectDropdown`. Dentro de modais, use
+  `layer="modal"` para o menu ficar acima do diálogo.
+
+## 17. Edição de projetos e artefatos
+
+- **Quem edita:** `libs/project-edit-access.ts` (`resolveProjectEditAccess`) é a única fonte da regra.
+  O professor **orientador** do projeto tem escopo `full` (todos os dados, equipe, tecnologias e
+  artefatos). O administrador tem escopo `artifacts` em qualquer projeto (somente links; imagens e arquivos ainda não são editáveis). Aluno nunca edita. Projetos demonstrativos (`mock-projects.ts`)
+  não existem na tabela `projects` e por isso não são editáveis.
+- **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
+  `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
+  mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro. O orientador não
+  pode ser trocado na edição.
+- **Aplicação e API:** `POST /api/projects` e `PATCH /api/projects/[id]` delegam a orquestração a casos de uso (`CreateProjectUseCase` e `UpdateProjectUseCase`) e dependem das portas `ProjectRepository` e `ProjectUserDirectory`. Os testes usam implementações in-memory. `PATCH /api/projects/[id]` verifica acesso em `resolveProjectEditAccess` e
+  delega a atualização a `UpdateProjectUseCase` (`application/projects/update-project-use-case.ts`).
+  No escopo `artifacts`, somente links são atualizados; funções/liderança e os demais campos do corpo
+  são ignorados. No escopo `full`, a equipe é recalculada a partir dos alunos ativos. Remover um aluno
+  com tarefa individual atribuída devolve 409. `publicDetails` é mesclado para preservar `attachments`
+  e `images`.
+- **Tarefas:** não são editadas nesta tela. Na criação, as tarefas iniciais continuam opcionais; na
+  edição, a tela aponta para a seção de progresso da página do projeto.
+- **Links dos artefatos:** ficam em `publicDetails.externalLinks`, sem migração. Rótulos fixos em
+  `PROJECT_LINK_LABELS` (`domain/enterprise/entities/project-details.ts`): `Repositório`,
+  `Site no ar` e `Protótipo`. Qualquer outro rótulo é um link adicional (título + endereço, até 10).
+  Todos precisam ser HTTPS. `splitProjectLinks` e `buildProjectLinks` convertem entre a lista
+  persistida e os campos do formulário.
+- **Imagens e arquivos (ainda não funcionais):** o formulário já traz os campos
+  (`UploadSlot`, desabilitados por padrão, com `onFiles` e `disabled` prontos para a implementação).
+  O modelo já prevê `publicDetails.images` (`ProjectImage`) e `publicDetails.attachments`
+  (`ProjectAttachment`). Para ativar: implemente o armazenamento e o endpoint de upload, passe
+  `disabled={false}` e `onFiles` ao `UploadSlot` correspondente e inclua as listas no
+  `PATCH` (hoje elas são preservadas, não editadas).
+- **Botão de voltar:** `components/ui/BackButton.tsx` é o único botão de voltar das páginas
+  internas. Com `href` navega para o destino; sem `href` volta no histórico (ou para `/`). O link
+  "Voltar para o login" dentro dos cartões de autenticação é um link de texto e não faz parte do
+  padrão.
+
+- **Migrações de restrições:** `src/db/migrations/20261022_project_constraints.sql` garante que os índices e checks do schema existam também em bancos Neon que receberam migrações manuais parciais. O script usa `IF NOT EXISTS`/consultas a `pg_constraint` para poder ser repetido sem recriar restrições já corretas. Os índices de usuários também estão em `20261014_admin_user_registration.sql`; os checks de progresso, em `20261014_project_progress.sql`; e os checks de semestre/status, em `20261021_projects.sql`. Os arquivos desta pasta são SQL manual: execute-os em ordem cronológica no SQL Editor do Neon. `npm run db:migrate` usa o diretório `drizzle/` e não aplica automaticamente estes arquivos manuais.

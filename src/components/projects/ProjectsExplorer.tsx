@@ -76,7 +76,7 @@ function Group({
 }) {
   return (
     <section>
-      <div className="mb-3 flex items-center gap-3">
+      <div className="mb-3 flex items-center gap-3 rounded-xl border border-border bg-white px-4 py-3 shadow-sm">
         <h2 className="text-base font-bold text-slate-900">{title}</h2>
         <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-xs font-semibold text-text-secondary">
           {count}
@@ -277,7 +277,7 @@ export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: Proj
             </div>
           )}
 
-          <aside className="flex flex-col gap-4 rounded-xl bg-surface-secondary p-5 sm:flex-row sm:items-center">
+          <aside className="flex flex-col gap-4 rounded-xl border border-border bg-white p-5 shadow-sm sm:flex-row sm:items-center">
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-border text-primary">
               <i className="fi fi-rr-graduation-cap flex text-xl" aria-hidden="true" />
             </span>
