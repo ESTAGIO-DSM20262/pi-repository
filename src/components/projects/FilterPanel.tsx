@@ -72,7 +72,7 @@ const RAIL = [
   {
     icon: 'fi-rr-calendar',
     title: 'Semestre letivo',
-    active: (f: Filters) => f.cycles.length > 0,
+    active: (f: Filters) => f.cycle !== '',
     on: 'bg-primary-light text-primary',
   },
   {
@@ -134,15 +134,19 @@ function FilterFields({
       </div>
 
       <Group title="Semestre letivo">
-        {facets.cycles.map((o) => (
-          <CheckRow
-            key={o.value}
-            label={o.value}
-            count={o.count}
-            checked={filters.cycles.includes(o.value)}
-            onChange={() => onChange({ cycles: toggleValue(filters.cycles, o.value) })}
-          />
-        ))}
+        <SelectDropdown
+          ariaLabel="Semestre letivo"
+          value={filters.cycle}
+          onChange={(cycle) => onChange({ cycle })}
+          options={[
+            { value: '', label: 'Todos os semestres letivos' },
+            ...facets.cycles.map((option) => ({
+              value: option.value,
+              label: option.value,
+              count: option.count,
+            })),
+          ]}
+        />
       </Group>
 
       <Group title="Matriz & semestre DSM">

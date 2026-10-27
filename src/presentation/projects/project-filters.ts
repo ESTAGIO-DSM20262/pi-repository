@@ -4,7 +4,7 @@ export interface Filters {
   query: string
   verified: boolean
   unverified: boolean
-  cycles: string[]
+  cycle: string
   semesters: number[]
   stack: string[]
   languages: string[]
@@ -16,7 +16,7 @@ export const EMPTY_FILTERS: Filters = {
   query: '',
   verified: false,
   unverified: false,
-  cycles: [],
+  cycle: '',
   semesters: [],
   stack: [],
   languages: [],
@@ -53,7 +53,7 @@ export function applyFilters(list: ListedProject[], f: Filters): ListedProject[]
     }
     if (f.verified && !f.unverified && !p.verified) return false
     if (f.unverified && !f.verified && p.verified) return false
-    if (f.cycles.length && !f.cycles.includes(p.cycle)) return false
+    if (f.cycle && p.cycle !== f.cycle) return false
     if (f.semesters.length && !f.semesters.includes(p.semester)) return false
     if (f.stack.length && !f.stack.some((s) => p.stack.includes(s))) return false
     if (f.languages.length && !f.languages.some((l) => p.languages.includes(l))) return false
@@ -133,9 +133,7 @@ export function getChips(f: Filters, advisors: Facets['advisors']): Chip[] {
 
   if (f.query) chips.push({ id: 'q', label: `Busca: “${f.query}”` })
 
-  f.cycles.forEach((c) => {
-    chips.push({ id: `cycle:${c}`, label: c })
-  })
+  if (f.cycle) chips.push({ id: 'cycle', label: f.cycle })
 
   f.semesters.forEach((s) => {
     chips.push({ id: `sem:${s}`, label: `DSM ${s}º` })
@@ -182,7 +180,7 @@ export function removeChip(f: Filters, id: string): Filters {
     case 'unverified':
       return { ...f, unverified: false }
     case 'cycle':
-      return { ...f, cycles: f.cycles.filter((x) => x !== v) }
+      return { ...f, cycle: '' }
     case 'sem':
       return { ...f, semesters: f.semesters.filter((x) => String(x) !== v) }
     case 'stack':
