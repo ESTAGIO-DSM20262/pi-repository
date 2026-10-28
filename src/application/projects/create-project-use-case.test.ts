@@ -72,4 +72,94 @@ describe('CreateProjectUseCase', () => {
     if (result.isLeft()) expect(result.value.status).toBe(400)
     expect(repository.projects.size).toBe(0)
   })
+
+  describe('professores orientadores', () => {
+    const satellite = {
+      email: 'satelite@fatec.sp.gov.br',
+      name: 'Professor Satélite',
+      githubUrl: null,
+      linkedinUrl: null,
+    }
+    const admin = {
+      id: 'adm-1',
+      email: 'admin@fatec.sp.gov.br',
+      name: 'Administração',
+      role: 'admin' as const,
+    }
+
+    it('grava os orientadores adicionais escolhidos pelo professor, que continua sendo o principal', async () => {
+      const repository = new InMemoryProjectCommandRepository()
+      const users = new InMemoryProjectUserDirectory([professor], [professor, satellite], [student])
+      const result = await new CreateProjectUseCase(repository, users).execute({
+        sessionUserId: professor.id,
+        body: { ...validBody, advisorEmail: professor.email, coAdvisorEmails: [satellite.email] },
+      })
+
+      expect(result.isRight()).toBe(true)
+      if (result.isRight()) {
+        const stored = repository.projects.get(result.value.id)
+        expect(stored?.advisorEmail).toBe(professor.email)
+        expect(stored?.coAdvisors).toEqual([{ email: satellite.email, name: satellite.name }])
+      }
+    })
+
+    it('permite que o administrador escolha o principal e os adicionais', async () => {
+      const repository = new InMemoryProjectCommandRepository()
+      const users = new InMemoryProjectUserDirectory([admin], [professor, satellite], [student])
+      const result = await new CreateProjectUseCase(repository, users).execute({
+        sessionUserId: admin.id,
+        body: { ...validBody, advisorEmail: satellite.email, coAdvisorEmails: [professor.email] },
+      })
+
+      expect(result.isRight()).toBe(true)
+      if (result.isRight()) {
+        const stored = repository.projects.get(result.value.id)
+        expect(stored?.advisorEmail).toBe(satellite.email)
+        expect(stored?.coAdvisors.map((advisor) => advisor.email)).toEqual([professor.email])
+      }
+    })
+
+    it('rejeita orientador adicional inexistente ou inativo e não grava nada', async () => {
+      const repository = new InMemoryProjectCommandRepository()
+      const users = new InMemoryProjectUserDirectory([professor], [professor], [student])
+      const result = await new CreateProjectUseCase(repository, users).execute({
+        sessionUserId: professor.id,
+        body: { ...validBody, coAdvisorEmails: [satellite.email] },
+      })
+
+      expect(result.isLeft()).toBe(true)
+      if (result.isLeft()) expect(result.value.status).toBe(400)
+      expect(repository.projects.size).toBe(0)
+    })
+  })
+
+  it('padroniza as tecnologias e grava links e imagens com orientação', async () => {
+    const repository = new InMemoryProjectCommandRepository()
+    const users = new InMemoryProjectUserDirectory([professor], [professor], [student])
+    const result = await new CreateProjectUseCase(repository, users).execute({
+      sessionUserId: professor.id,
+      body: {
+        ...validBody,
+        languages: ['ts'],
+        stack: ['nextjs'],
+        links: [{ title: 'Site no ar', url: 'https://site.com', icon: 'fi-rr-globe' }],
+        images: [
+          { title: 'Home', url: 'https://cdn.exemplo.com/h.png', orientation: 'horizontal' },
+        ],
+      },
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      const stored = repository.projects.get(result.value.id)
+      expect(stored?.languages).toEqual(['TypeScript'])
+      expect(stored?.stack).toEqual(['Next.js'])
+      expect(stored?.publicDetails.externalLinks).toEqual([
+        { label: 'Site no ar', url: 'https://site.com', icon: 'fi-rr-globe' },
+      ])
+      expect(stored?.publicDetails.images).toEqual([
+        { title: 'Home', url: 'https://cdn.exemplo.com/h.png', orientation: 'horizontal' },
+      ])
+    }
+  })
 })

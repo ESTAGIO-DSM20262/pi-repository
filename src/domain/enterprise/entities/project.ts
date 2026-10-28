@@ -21,22 +21,25 @@ export interface ProjectTechnologyGroup {
   items: string[]
 }
 
-export interface ProjectAttachment {
-  title: string
-  fileType: string
-  sizeLabel: string
-  description: string
-  url?: string
-}
-
 export interface ProjectExternalLink {
   label: string
   url?: string
+  icon?: string
 }
+
+export type ProjectImageOrientation = 'horizontal' | 'vertical'
 
 export interface ProjectImage {
   title: string
   url: string
+  orientation: ProjectImageOrientation
+}
+
+export interface ProjectAdvisor {
+  email: string
+  name: string
+  githubUrl?: string
+  linkedinUrl?: string
 }
 
 export interface ProjectPublicDetails {
@@ -44,7 +47,6 @@ export interface ProjectPublicDetails {
   overview?: string
   team?: ProjectTeamMember[]
   technologyGroups?: ProjectTechnologyGroup[]
-  attachments?: ProjectAttachment[]
   images?: ProjectImage[]
   externalLinks?: ProjectExternalLink[]
 }
@@ -55,7 +57,8 @@ export interface Project {
   summary: string
   cycle: string
   semester: number
-  advisor: { email: string; name: string; githubUrl?: string; linkedinUrl?: string }
+  advisor: ProjectAdvisor
+  coAdvisors?: ProjectAdvisor[]
   memberEmails: string[]
   teamMembers?: ProjectTeamMember[]
   languages: string[]
@@ -63,6 +66,7 @@ export interface Project {
   theme: string
   status: ProjectStatus
   verified: boolean
+  active?: boolean
   accessCount?: number
   cover: { icon: string; label: string; tone: 'red' | 'blue' | 'slate' }
   publicDetails?: ProjectPublicDetails

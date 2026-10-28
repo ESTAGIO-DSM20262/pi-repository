@@ -18,7 +18,8 @@
     "db:studio": "drizzle-kit studio",
     "db:check": "drizzle-kit check",
     "prepare": "husky",
-    "email:dev": "email dev --dir src/infrastructure/email/templates --port 3001"
+    "email:dev": "email dev --dir src/infrastructure/email/templates --port 3001",
+    "db:migrate:repair": "drizzle-kit migrate --config=drizzle-repair.config.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css}": "biome check --write --no-errors-on-unmatched"

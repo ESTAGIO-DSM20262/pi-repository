@@ -99,4 +99,33 @@ describe('ListProjectsUseCase', () => {
 
     expect(projects.find((p) => p.id === 'do-joao')?.related).toBe(true)
   })
+
+  it('professor co-orientador enxerga e recebe como relacionado o projeto em andamento', async () => {
+    const coAdvisorRepository = new InMemoryProjectRepository([
+      makeProject('coordenado', {
+        status: 'em_andamento',
+        coAdvisors: [{ email: ana.email, name: 'Profa. Ana L.' }],
+      }),
+    ])
+    const { projects } = await new ListProjectsUseCase(coAdvisorRepository).execute({ viewer: ana })
+
+    expect(projects).toHaveLength(1)
+    expect(projects[0].related).toBe(true)
+  })
+
+  it('projeto desativado só aparece para o administrador', async () => {
+    const deactivatedRepository = new InMemoryProjectRepository([
+      makeProject('desativado', { active: false }),
+      makeProject('ativo'),
+    ])
+    const list = new ListProjectsUseCase(deactivatedRepository)
+
+    const forAdmin = await list.execute({ viewer: admin })
+    const forAdvisor = await list.execute({ viewer: carlos })
+    const forVisitor = await list.execute({ viewer: null })
+
+    expect(ids(forAdmin.projects)).toEqual(['ativo', 'desativado'])
+    expect(ids(forAdvisor.projects)).toEqual(['ativo'])
+    expect(ids(forVisitor.projects)).toEqual(['ativo'])
+  })
 })

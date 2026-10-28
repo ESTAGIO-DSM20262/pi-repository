@@ -15,10 +15,9 @@ export class InMemoryProjectUserDirectory implements ProjectUserDirectory {
     return this.accounts.find((account) => account.id === id) ?? null
   }
 
-  async findActiveAdvisorByEmail(email: string) {
-    return (
-      this.advisors.find((advisor) => advisor.email.toLowerCase() === email.toLowerCase()) ?? null
-    )
+  async findActiveAdvisorsByEmails(emails: string[]) {
+    const requested = new Set(emails.map((email) => email.toLowerCase()))
+    return this.advisors.filter((advisor) => requested.has(advisor.email.toLowerCase()))
   }
 
   async findActiveStudentsByEmails(emails: string[]) {

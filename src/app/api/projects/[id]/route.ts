@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
+import { DeleteProjectUseCase } from '@/application/projects/delete-project-use-case'
 import { UpdateProjectUseCase } from '@/application/projects/update-project-use-case'
-import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
 import { DbProjectCommandRepository } from '@/infrastructure/projects/db-project-command-repository'
+import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
+import { DbProjectVerificationRepository } from '@/infrastructure/projects/db-project-verification-repository'
 import { auth } from '@/libs/auth'
 import { resolveProjectEditAccess } from '@/libs/project-edit-access'
+import { resolveProjectViewer } from '@/libs/project-viewer'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -29,17 +32,14 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       return jsonError('Envie os dados do projeto em formato JSON.', 400)
     }
 
-    const currentProject = {
-      id: access.project.id,
-      memberEmails: access.project.memberEmails,
-      publicDetails: access.project.publicDetails as ProjectPublicDetails | null,
-    }
     const useCase = new UpdateProjectUseCase(
       new DbProjectCommandRepository(),
       new DbProjectUserDirectory(),
+      new DbProjectVerificationRepository(),
     )
     const result = await useCase.execute({
-      project: currentProject,
+      project: access.project,
+      viewer: access.user,
       scope: access.scope,
       body,
     })
@@ -49,5 +49,25 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   } catch (error) {
     console.error('[PATCH /api/projects/[id]]', error)
     return jsonError('Não foi possível salvar as alterações do projeto. Tente novamente.', 500)
+  }
+}
+
+export async function DELETE(request: Request, { params }: RouteContext) {
+  try {
+    const { id } = await params
+    const viewer = await resolveProjectViewer(request)
+    if (!viewer) return jsonError('É necessário entrar no sistema.', 401)
+
+    const useCase = new DeleteProjectUseCase(
+      new DbProjectRepository(),
+      new DbProjectCommandRepository(),
+    )
+    const result = await useCase.execute({ viewer, projectId: id })
+    if (result.isLeft()) return jsonError(result.value.message, result.value.status)
+
+    return NextResponse.json(result.value, { headers: { 'Cache-Control': 'no-store' } })
+  } catch (error) {
+    console.error('[DELETE /api/projects/[id]]', error)
+    return jsonError('Não foi possível excluir o projeto. Tente novamente.', 500)
   }
 }

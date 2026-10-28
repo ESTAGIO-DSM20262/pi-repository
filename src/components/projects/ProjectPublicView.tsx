@@ -1,13 +1,22 @@
 import Link from 'next/link'
+import { ProjectAdminControls } from '@/components/projects/ProjectAdminControls'
 import { ProjectFavoriteAction } from '@/components/projects/ProjectFavoriteAction'
+import { ProjectImageGallery } from '@/components/projects/ProjectImageGallery'
+import {
+  ProjectVerificationButton,
+  ProjectVerificationPanel,
+} from '@/components/projects/ProjectVerificationPanel'
 import { ProjectProgressSection } from '@/components/projects/progress/ProjectProgressSection'
 import { BackButton } from '@/components/ui/BackButton'
 import type {
   Project,
-  ProjectAttachment,
+  ProjectAdvisor,
   ProjectTeamMember,
   ProjectTechnologyGroup,
 } from '@/domain/enterprise/entities/project'
+import { getProjectAdvisors, isProjectActive } from '@/domain/enterprise/entities/project-advisors'
+import { resolveProjectLinkIcon } from '@/domain/enterprise/entities/project-details'
+import type { ProjectVerificationSummary } from '@/domain/enterprise/entities/project-verification'
 import { comparePersonNames, formatPersonName, getNameInitials } from '@/libs/initials'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
@@ -17,6 +26,10 @@ interface ProjectPublicViewProps {
   canManageProgress: boolean
   showProjectProgress: boolean
   canEditProject?: boolean
+  canVerify?: boolean
+  canManageActivation?: boolean
+  verification?: ProjectVerificationSummary | null
+  viewerEmail?: string | null
 }
 
 function GithubIcon() {
@@ -215,44 +228,84 @@ function TechnologyGroupCard({ group }: { group: ProjectTechnologyGroup }) {
   )
 }
 
-function AttachmentRow({ attachment }: { attachment: ProjectAttachment }) {
-  const isPdf = attachment.fileType.toLowerCase() === 'pdf'
+function AdvisorLinks({
+  advisor,
+  stacked = false,
+}: {
+  advisor: ProjectAdvisor
+  stacked?: boolean
+}) {
+  const githubUrl = getSafeSocialProfileUrl(advisor.githubUrl, 'github')
+  const linkedinUrl = getSafeSocialProfileUrl(advisor.linkedinUrl, 'linkedin')
+  const separator = (
+    <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
+      /
+    </span>
+  )
+
+  const links = (
+    <>
+      {githubUrl && (
+        <>
+          {!stacked && separator}
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Abrir GitHub de ${advisor.name}`}
+            aria-label={`GitHub de ${advisor.name}`}
+            className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-primary focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <GithubIcon />
+            <span className={stacked ? '' : 'hidden sm:inline'}>GitHub</span>
+          </a>
+        </>
+      )}
+      {linkedinUrl && (
+        <>
+          {!stacked && separator}
+          <a
+            href={linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Abrir LinkedIn de ${advisor.name}`}
+            aria-label={`LinkedIn de ${advisor.name}`}
+            className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-[#0a66c2] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <LinkedInIcon />
+            <span className={stacked ? '' : 'hidden sm:inline'}>LinkedIn</span>
+          </a>
+        </>
+      )}
+    </>
+  )
+
+  if (stacked) {
+    return (
+      <div className="flex min-w-0 items-start gap-2.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+          {getNameInitials(advisor.name)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-xs font-bold leading-snug text-slate-900 md:text-[13px]">
+            {formatPersonName(advisor.name)}
+          </p>
+          {(githubUrl || linkedinUrl) && (
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] md:text-xs">
+              {links}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex min-w-0 items-center gap-2.5 rounded-lg border border-slate-300 bg-slate-50 p-2.5 sm:gap-3 sm:p-3">
-      <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded text-[9px] font-extrabold ${isPdf ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-slate-600'}`}
-      >
-        {attachment.fileType.toUpperCase()}
+    <div className="flex min-w-0 items-center gap-1 text-[11px] leading-snug sm:gap-1.5 sm:text-xs md:text-[13px]">
+      <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
+        {formatPersonName(advisor.name)}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[12px] font-bold text-slate-900 sm:text-[13px]">
-          {attachment.title}
-        </p>
-        <p className="mt-0.5 text-[10px] text-[#6f514b] sm:text-[11px]">
-          {attachment.sizeLabel} <span aria-hidden="true">•</span> {attachment.description}
-        </p>
-      </div>
-      {attachment.url ? (
-        <a
-          href={attachment.url}
-          download
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-slate-300 bg-white text-slate-800 transition hover:border-primary hover:text-primary"
-        >
-          <i className="fi fi-rr-download flex" aria-hidden="true" />
-          <span className="sr-only">Baixar {attachment.title}</span>
-        </a>
-      ) : (
-        <button
-          type="button"
-          disabled
-          title="O arquivo ainda não foi anexado ao projeto"
-          aria-label={`${attachment.title}: arquivo ainda não disponível`}
-          className="flex h-9 w-9 shrink-0 cursor-not-allowed items-center justify-center rounded border border-slate-300 bg-white text-slate-500 opacity-80"
-        >
-          <i className="fi fi-rr-download flex" aria-hidden="true" />
-        </button>
-      )}
+      {links}
     </div>
   )
 }
@@ -270,26 +323,20 @@ function getTeamMemberKey(member: ProjectTeamMember) {
   ].join('::')
 }
 
-function externalProjectLinkIcon(label: string) {
-  const normalizedLabel = label.trim().toLocaleLowerCase('pt-BR')
-
-  if (normalizedLabel === 'repositório') return 'fi-rr-code-branch'
-  if (normalizedLabel === 'site no ar') return 'fi-rr-server'
-  if (normalizedLabel === 'protótipo') return 'fi-rr-pencil'
-  return 'fi-rr-link'
-}
-
-function ExternalProjectLink({ label, url }: { label: string; url?: string }) {
+function ExternalProjectLink({ label, url, icon }: { label: string; url?: string; icon?: string }) {
   const className =
     'flex min-h-10 w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 sm:text-[13px]'
-  const icon = (
-    <i className={`fi ${externalProjectLinkIcon(label)} flex text-xs`} aria-hidden="true" />
+  const iconElement = (
+    <i
+      className={`fi ${resolveProjectLinkIcon({ label, icon })} flex text-xs`}
+      aria-hidden="true"
+    />
   )
 
   if (url) {
     return (
       <a href={url} target="_blank" rel="noreferrer" className={className}>
-        {icon} {label} <span aria-hidden="true">↗</span>
+        {iconElement} {label} <span aria-hidden="true">↗</span>
       </a>
     )
   }
@@ -299,7 +346,7 @@ function ExternalProjectLink({ label, url }: { label: string; url?: string }) {
       title="Link externo ainda não cadastrado"
       className={`${className} cursor-not-allowed opacity-80`}
     >
-      {icon} {label} <span aria-hidden="true">↗</span>
+      {iconElement} {label} <span aria-hidden="true">↗</span>
       <span className="sr-only">, endereço não cadastrado</span>
     </span>
   )
@@ -311,6 +358,10 @@ export function ProjectPublicView({
   canManageProgress,
   showProjectProgress,
   canEditProject = false,
+  canVerify = false,
+  canManageActivation = false,
+  verification = null,
+  viewerEmail = null,
 }: ProjectPublicViewProps) {
   const details = project.publicDetails
   const team = project.teamMembers?.length ? project.teamMembers : (details?.team ?? [])
@@ -326,12 +377,12 @@ export function ProjectPublicView({
           ),
         },
       ]
-  const attachments = details?.attachments ?? []
+  const images = details?.images ?? []
+  const advisors = getProjectAdvisors(project)
+  const active = isProjectActive(project)
   const externalLinks = details?.externalLinks ?? []
   const courseLabel = details?.courseLabel ?? `DSM — ${project.semester}º Semestre`
   const summary = project.summary
-  const advisorGithubUrl = getSafeSocialProfileUrl(project.advisor.githubUrl, 'github')
-  const advisorLinkedinUrl = getSafeSocialProfileUrl(project.advisor.linkedinUrl, 'linkedin')
   const progressMembers = project.memberEmails
     .map((email) => {
       const normalizedEmail = email.trim().toLowerCase()
@@ -362,25 +413,43 @@ export function ProjectPublicView({
           />
           <span className="truncate font-semibold text-slate-800">{project.title}</span>
         </nav>
-        {canEditProject && (
-          <Link
-            href={`/projetos/${encodeURIComponent(project.id)}/editar`}
-            className="ml-auto inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-          >
-            <i className="fi fi-rr-pencil flex" aria-hidden="true" /> Editar projeto
-          </Link>
+        {(canEditProject || canVerify || canManageActivation) && (
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+            {canManageActivation && <ProjectAdminControls projectId={project.id} active={active} />}
+            {canVerify && verification && (
+              <ProjectVerificationButton
+                projectId={project.id}
+                summary={verification}
+                viewerEmail={viewerEmail}
+              />
+            )}
+            {canEditProject && (
+              <Link
+                href={`/projetos/${encodeURIComponent(project.id)}/editar`}
+                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+              >
+                <i className="fi fi-rr-pencil flex" aria-hidden="true" /> Editar projeto
+              </Link>
+            )}
+          </div>
         )}
       </div>
 
+      {!active && (
+        <p
+          role="status"
+          className="mb-4 flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-800"
+        >
+          <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" />
+          Projeto desativado: ele fica oculto para todos, exceto administradores.
+        </p>
+      )}
+
       <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-6 lg:p-7">
         <div className="flex flex-wrap items-center gap-1.5">
-          {project.verified ? (
+          {project.verified && (
             <span className="inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-1 text-[10px] font-bold text-emerald-900 sm:text-[11px]">
-              <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Verificado
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded bg-slate-200 px-2 py-1 text-[10px] font-bold text-slate-700 sm:text-[11px]">
-              <i className="fi fi-rr-info flex" aria-hidden="true" /> Não verificado
+              <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Indicado
             </span>
           )}
           <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">
@@ -405,58 +474,44 @@ export function ProjectPublicView({
         </div>
         <p className="mt-2 text-[12px] leading-relaxed text-slate-600 sm:hidden">{summary}</p>
 
-        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:items-center md:gap-5 md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2">
-          <div className="flex min-h-[62px] min-w-0 items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:flex-1 md:gap-2.5 md:border-0 md:bg-transparent md:p-0">
-            <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white md:flex">
-              {getNameInitials(project.advisor.name)}
-            </span>
-            <div className="min-w-0 flex-1">
+        <div
+          className={`mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:gap-5 ${advisors.length > 1 ? 'md:items-start' : 'md:items-center'} md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2`}
+        >
+          {advisors.length > 1 ? (
+            <div className="col-span-2 min-w-0 rounded-lg border border-slate-300 bg-slate-50 p-2.5 md:flex-1 md:border-0 md:bg-transparent md:p-0">
               <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
-                Orientador
+                Orientadores
               </p>
-              <div className="mt-0.5 flex min-w-0 items-center gap-1 text-[11px] leading-snug sm:gap-1.5 sm:text-xs md:text-[13px]">
-                <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
-                  {formatPersonName(project.advisor.name)}
-                </span>
-                {advisorGithubUrl && (
-                  <>
-                    <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
-                      /
-                    </span>
-                    <a
-                      href={advisorGithubUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`Abrir GitHub de ${project.advisor.name}`}
-                      aria-label={`GitHub de ${project.advisor.name}`}
-                      className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-primary focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                    >
-                      <GithubIcon />
-                      <span className="hidden sm:inline">GitHub</span>
-                    </a>
-                  </>
-                )}
-                {advisorLinkedinUrl && (
-                  <>
-                    <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
-                      /
-                    </span>
-                    <a
-                      href={advisorLinkedinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={`Abrir LinkedIn de ${project.advisor.name}`}
-                      aria-label={`LinkedIn de ${project.advisor.name}`}
-                      className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-[#0a66c2] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                    >
-                      <LinkedInIcon />
-                      <span className="hidden sm:inline">LinkedIn</span>
-                    </a>
-                  </>
-                )}
+              <ul className="mt-1.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {advisors.map((advisor) => (
+                  <li
+                    key={advisor.email}
+                    className="min-w-0 rounded-lg border border-slate-200 bg-white p-2.5"
+                  >
+                    <AdvisorLinks advisor={advisor} stacked />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <div className="flex min-h-[62px] min-w-0 items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:flex-1 md:gap-2.5 md:border-0 md:bg-transparent md:p-0">
+              <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white md:flex">
+                {getNameInitials(project.advisor.name)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+                  Orientador
+                </p>
+                <ul className="mt-0.5 space-y-0.5">
+                  {advisors.map((advisor) => (
+                    <li key={advisor.email} className="min-w-0">
+                      <AdvisorLinks advisor={advisor} />
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-          </div>
+          )}
           <div className="flex min-h-[62px] items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:min-w-[190px] md:gap-2.5 md:border-l md:border-y-0 md:border-r-0 md:rounded-none md:bg-transparent md:py-0 md:pl-5 md:pr-0">
             <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-primary md:flex">
               <i className="fi fi-rr-calendar flex" aria-hidden="true" />
@@ -473,14 +528,25 @@ export function ProjectPublicView({
         </div>
       </section>
 
+      {verification && (
+        <div className="mt-5">
+          <ProjectVerificationPanel
+            summary={verification}
+            showProgress={canVerify || canEditProject}
+          />
+        </div>
+      )}
+
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
         <section className="hidden rounded-xl border border-white bg-white p-5 shadow-sm lg:block lg:p-6">
           <SectionTitle icon="fi-rr-align-left">Visão Geral</SectionTitle>
-          <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
+          <div
+            className={`mt-3 grid grid-cols-1 gap-3 ${images.length === 0 ? 'xl:grid-cols-2' : ''}`}
+          >
             <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[13px] leading-relaxed text-[#6f514b]">
               {details?.overview ?? summary}
             </p>
-            <DashboardPreview />
+            {images.length === 0 && <DashboardPreview />}
           </div>
         </section>
 
@@ -515,6 +581,15 @@ export function ProjectPublicView({
         />
       )}
 
+      {images.length > 0 && (
+        <section className="mt-5 rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5 lg:p-6">
+          <SectionTitle icon="fi-rr-picture">Imagens do Projeto</SectionTitle>
+          <div className="mt-3">
+            <ProjectImageGallery images={images} />
+          </div>
+        </section>
+      )}
+
       <section className="mt-5 rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5 lg:p-6">
         <SectionTitle icon="fi-rr-layers">Tecnologias Utilizadas</SectionTitle>
         <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2 sm:gap-y-4">
@@ -524,43 +599,19 @@ export function ProjectPublicView({
         </div>
       </section>
 
-      {(attachments.length > 0 || externalLinks.length > 0) && (
+      {externalLinks.length > 0 && (
         <section className="mt-5 rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5 lg:p-6">
           <SectionTitle icon="fi-rr-folder-open">Artefatos do Projeto</SectionTitle>
-          <div className="mt-3 grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
-            <div>
-              <h3 className="mb-2.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-800 sm:text-xs">
-                Arquivos anexados
-              </h3>
-              {attachments.length > 0 ? (
-                <ul className="space-y-2.5">
-                  {attachments.map((attachment) => (
-                    <li key={attachment.title}>
-                      <AttachmentRow attachment={attachment} />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-slate-500">Nenhum arquivo anexado.</p>
-              )}
-            </div>
-            <div>
-              <h3 className="mb-2.5 text-[11px] font-extrabold uppercase tracking-wider text-slate-800 sm:text-xs">
-                Links externos
-              </h3>
-              {externalLinks.length > 0 ? (
-                <ul className="space-y-2.5">
-                  {externalLinks.map((link) => (
-                    <li key={`${link.label}-${link.url ?? ''}`}>
-                      <ExternalProjectLink label={link.label} url={link.url} />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-slate-500">Nenhum link externo cadastrado.</p>
-              )}
-            </div>
-          </div>
+          <h3 className="mb-2.5 mt-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-800 sm:text-xs">
+            Links externos
+          </h3>
+          <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {externalLinks.map((link) => (
+              <li key={`${link.label}-${link.url ?? ''}`}>
+                <ExternalProjectLink label={link.label} url={link.url} icon={link.icon} />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>
