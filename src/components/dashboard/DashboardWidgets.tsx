@@ -100,7 +100,9 @@ export function Panel({
   className?: string
 }) {
   return (
-    <section className={`min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5 ${className}`}>
+    <section
+      className={`min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5 ${className}`}
+    >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <h3 className="flex items-center gap-2 text-sm font-bold tracking-tight text-slate-900 sm:text-base">
@@ -177,7 +179,12 @@ export function DonutChart({
   return (
     <div className="flex flex-wrap items-center gap-5">
       <div className="relative h-32 w-32 shrink-0">
-        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" role="img" aria-label={ariaLabel}>
+        <svg
+          viewBox="0 0 100 100"
+          className="h-full w-full -rotate-90"
+          role="img"
+          aria-label={ariaLabel}
+        >
           <circle
             cx="50"
             cy="50"
@@ -214,7 +221,13 @@ export function DonutChart({
   )
 }
 
-export function StackedBar({ segments, ariaLabel }: { segments: ChartSegment[]; ariaLabel: string }) {
+export function StackedBar({
+  segments,
+  ariaLabel,
+}: {
+  segments: ChartSegment[]
+  ariaLabel: string
+}) {
   const total = segments.reduce((sum, segment) => sum + segment.value, 0)
 
   return (
@@ -264,7 +277,10 @@ export function ColumnChart({
         {columns.map((column, index) => {
           const total = totals[index] ?? 0
           return (
-            <div key={column.label} className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1">
+            <div
+              key={column.label}
+              className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1"
+            >
               <span className="text-center text-[11px] font-semibold tabular-nums text-slate-700">
                 {total > 0 ? total : ''}
               </span>
@@ -333,7 +349,10 @@ export function ProgressBar({
       aria-valuemax={100}
       aria-valuenow={value}
     >
-      <div className={`h-full rounded-full ${TONE_STYLES[tone].bar}`} style={{ width: `${value}%` }} />
+      <div
+        className={`h-full rounded-full ${TONE_STYLES[tone].bar}`}
+        style={{ width: `${value}%` }}
+      />
     </div>
   )
 }

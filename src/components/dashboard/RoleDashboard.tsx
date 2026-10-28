@@ -55,8 +55,12 @@ function AdminOverviewCards({
   const deactivatedProjects = projects.length - activeProjects.length
   const totalProjects = activeProjects.length
   const verifiedProjects = activeProjects.filter((project) => project.verified).length
-  const ongoingProjects = activeProjects.filter((project) => project.status === 'em_andamento').length
-  const completedProjects = activeProjects.filter((project) => project.status === 'publicado').length
+  const ongoingProjects = activeProjects.filter(
+    (project) => project.status === 'em_andamento',
+  ).length
+  const completedProjects = activeProjects.filter(
+    (project) => project.status === 'publicado',
+  ).length
   const totalUsers = userMetrics?.total ?? 0
 
   const cards = [
@@ -645,7 +649,9 @@ export function RoleDashboard({
           />
         )}
         {role === 'admin' && <AdminUsersSection currentUserId={currentUserId} />}
-        {role === 'professor' && professorMetrics && <ProfessorOverview metrics={professorMetrics} />}
+        {role === 'professor' && professorMetrics && (
+          <ProfessorOverview metrics={professorMetrics} />
+        )}
 
         <ProjectsSection
           title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}

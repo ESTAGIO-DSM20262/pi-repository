@@ -309,7 +309,9 @@ function buildDeadlines(
         task.dueDate !== null &&
         daysFromToday(task.dueDate, today) <= UPCOMING_WINDOW_DAYS,
     )
-    .sort((a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? '') || a.title.localeCompare(b.title))
+    .sort(
+      (a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? '') || a.title.localeCompare(b.title),
+    )
     .slice(0, limit)
     .map((task) => ({
       taskId: task.id,
@@ -353,8 +355,7 @@ function buildStudentWorkload(
   }
   return [...rows.values()]
     .sort(
-      (a, b) =>
-        b.overdue - a.overdue || b.open - a.open || a.name.localeCompare(b.name, 'pt-BR'),
+      (a, b) => b.overdue - a.overdue || b.open - a.open || a.name.localeCompare(b.name, 'pt-BR'),
     )
     .slice(0, limit)
 }

@@ -3,14 +3,14 @@ import type { ProfessorDashboardMetrics } from '@/application/dashboard/dashboar
 import {
   Badge,
   ColumnChart,
-  describeDueDate,
   DonutChart,
+  describeDueDate,
   EmptyPanelState,
   formatMetric,
   formatShortDate,
   Panel,
-  percentOf,
   ProgressBar,
+  percentOf,
   StackedBar,
   StatCard,
 } from './DashboardWidgets'
@@ -137,9 +137,7 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
             </p>
             <div className="flex shrink-0 items-center gap-1.5">
               {row.overdue > 0 && <Badge tone="red">{row.overdue} atrasada(s)</Badge>}
-              <span className="text-[11px] tabular-nums text-[#765e58]">
-                {row.open} em aberto
-              </span>
+              <span className="text-[11px] tabular-nums text-[#765e58]">{row.open} em aberto</span>
             </div>
           </div>
           <div className="mt-1.5">
@@ -158,7 +156,11 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
   )
 }
 
-function AwaitingIndicationList({ rows }: { rows: ProfessorDashboardMetrics['awaitingIndication'] }) {
+function AwaitingIndicationList({
+  rows,
+}: {
+  rows: ProfessorDashboardMetrics['awaitingIndication']
+}) {
   if (rows.length === 0) {
     return (
       <EmptyPanelState
@@ -312,7 +314,11 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
       </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-3">
-        <Panel title="Tarefas por situação" subtitle="Todas as tarefas dos seus projetos" icon="fi-rr-chart-pie-alt">
+        <Panel
+          title="Tarefas por situação"
+          subtitle="Todas as tarefas dos seus projetos"
+          icon="fi-rr-chart-pie-alt"
+        >
           {tasks.total > 0 ? (
             <DonutChart
               ariaLabel={`${tasks.completed} concluídas, ${tasks.inProgress} em andamento e ${tasks.pending} pendentes`}
@@ -328,7 +334,11 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
             <EmptyPanelState icon="fi-rr-list-check" text="Nenhuma tarefa cadastrada ainda." />
           )}
         </Panel>
-        <Panel title="Projetos por semestre" subtitle="Distribuição entre andamento e concluídos" icon="fi-rr-layers">
+        <Panel
+          title="Projetos por semestre"
+          subtitle="Distribuição entre andamento e concluídos"
+          icon="fi-rr-layers"
+        >
           {projects.total > 0 ? (
             <ColumnChart
               ariaLabel="Projetos por semestre"
@@ -348,7 +358,11 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
             <EmptyPanelState icon="fi-rr-folder-open" text="Nenhum projeto vinculado ainda." />
           )}
         </Panel>
-        <Panel title="Situação dos projetos" subtitle="Andamento e indicação" icon="fi-rr-badge-check">
+        <Panel
+          title="Situação dos projetos"
+          subtitle="Andamento e indicação"
+          icon="fi-rr-badge-check"
+        >
           {projects.total > 0 ? (
             <StackedBar
               ariaLabel="Situação dos projetos"

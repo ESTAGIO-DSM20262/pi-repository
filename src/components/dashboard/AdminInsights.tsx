@@ -43,9 +43,7 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
             </div>
             <div className="flex flex-wrap items-center justify-end gap-1.5">
               {row.overdue > 0 && <Badge tone="red">{row.overdue} atrasada(s)</Badge>}
-              {row.stalled && (
-                <Badge tone="amber">Parado há {row.lastActivityDays} dias</Badge>
-              )}
+              {row.stalled && <Badge tone="amber">Parado há {row.lastActivityDays} dias</Badge>}
               {row.withoutTasks && <Badge tone="slate">Sem tarefas</Badge>}
             </div>
           </div>
@@ -161,7 +159,11 @@ export function AdminInsights({
               centerLabel="projetos"
               segments={[
                 { label: 'Em andamento', value: projects.ongoing, tone: 'amber' },
-                { label: 'Concluídos sem indicação', value: projects.awaitingIndication, tone: 'slate' },
+                {
+                  label: 'Concluídos sem indicação',
+                  value: projects.awaitingIndication,
+                  tone: 'slate',
+                },
                 { label: 'Concluídos e indicados', value: projects.indicated, tone: 'green' },
               ]}
             />
@@ -169,11 +171,7 @@ export function AdminInsights({
             <EmptyPanelState icon="fi-rr-folder-open" text="Nenhum projeto ativo." />
           )}
         </Panel>
-        <Panel
-          title="Projetos por semestre"
-          subtitle="Andamento e concluídos"
-          icon="fi-rr-layers"
-        >
+        <Panel title="Projetos por semestre" subtitle="Andamento e concluídos" icon="fi-rr-layers">
           {projects.total > 0 ? (
             <ColumnChart
               ariaLabel="Projetos por semestre"
