@@ -429,8 +429,8 @@ documente aqui.
 - **Validação:** `application/projects/create-project.ts` (`parseCreateProjectInput`) valida e
   normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. O formulário usa
   React Hook Form + Zod (`presentation/projects/validation.ts`, `mode: 'onTouched'`) e também valida
-  no servidor. Exige título, resumo, ciclo `AAAA/1|2`, semestre 1–6, tema, orientador e ao menos um
-  aluno. As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
+  no servidor. Exige título, resumo, ciclo `AAAA/1|2`, semestre 1–6, tema, orientador principal e ao menos um
+  aluno. Orientadores adicionais são opcionais (veja a seção 18). As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
 - **Aplicação e persistência:** `CreateProjectUseCase` (`application/projects/create-project-use-case.ts`)
   valida o papel do usuário, revalida orientador e alunos ativos e monta as tarefas iniciais.
   `ProjectRepository` é a porta de escrita; `DbProjectCommandRepository` grava projeto, tarefas
@@ -441,44 +441,119 @@ documente aqui.
   `components/projects/ProjectFormPage.tsx` (`mode="create" | "edit"`), restrito a professor e
   administrador. O botão "Novo Projeto" do painel aponta para a criação.
 - **Filtros do painel:** a seção de projetos de administrador e professor tem busca (título,
-  orientador, tema, aluno), filtro de situação, filtro de semestre (1º ao 6º) e filtro de ciclo
-  (`AAAA/1|2`, montado a partir dos ciclos existentes na lista). A lista de usuários do
+  orientador, tema, aluno), filtro de situação, filtro de semestre (1º ao 6º), filtro de orientador
+  (inclui co-orientadores) e filtro de semestre letivo (`AAAA/1|2`), este último um
+  `SelectDropdown` de seleção única montado a partir dos semestres letivos existentes na lista,
+  com a contagem de projetos em cada opção (`Filters.cycle`, `presentation/projects/project-filters.ts`). A lista de usuários do
   administrador ganhou o filtro de status (ativo/inativo), ao lado do filtro de perfil.
 - **Dropdowns:** todo seletor usa `components/ui/SelectDropdown`. Dentro de modais, use
   `layer="modal"` para o menu ficar acima do diálogo.
 
 ## 17. Edição de projetos e artefatos
 
-- **Quem edita:** `libs/project-edit-access.ts` (`resolveProjectEditAccess`) é a única fonte da regra.
-  O professor **orientador** do projeto tem escopo `full` (todos os dados, equipe, tecnologias e
-  artefatos). O administrador tem escopo `artifacts` em qualquer projeto (somente links; imagens e arquivos ainda não são editáveis). Aluno nunca edita. Projetos demonstrativos (`mock-projects.ts`)
-  não existem na tabela `projects` e por isso não são editáveis.
+- **Quem edita:** `application/projects/project-permissions.ts` (`resolveProjectEditScope`) é a
+  única fonte da regra, usada por `libs/project-edit-access.ts` (`resolveProjectEditAccess`) e pela
+  página do projeto. **Qualquer** professor orientador do projeto (principal ou adicional) tem escopo
+  `full` (todos os dados, equipe, tecnologias, orientadores adicionais e artefatos). O administrador
+  tem escopo `admin` em qualquer projeto: edita os professores orientadores, os links e as imagens;
+  funções/liderança da equipe e os demais campos do corpo são ignorados. Aluno nunca edita. Projetos
+  demonstrativos (`mock-projects.ts`) não existem na tabela `projects` e por isso não são editáveis.
+  Projeto desativado só pode ser editado por administrador.
 - **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
   `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
-  mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro. O orientador não
-  pode ser trocado na edição.
-- **Aplicação e API:** `POST /api/projects` e `PATCH /api/projects/[id]` delegam a orquestração a casos de uso (`CreateProjectUseCase` e `UpdateProjectUseCase`) e dependem das portas `ProjectRepository` e `ProjectUserDirectory`. Os testes usam implementações in-memory. `PATCH /api/projects/[id]` verifica acesso em `resolveProjectEditAccess` e
-  delega a atualização a `UpdateProjectUseCase` (`application/projects/update-project-use-case.ts`).
-  No escopo `artifacts`, somente links são atualizados; funções/liderança e os demais campos do corpo
-  são ignorados. No escopo `full`, a equipe é recalculada a partir dos alunos ativos. Remover um aluno
-  com tarefa individual atribuída devolve 409. `publicDetails` é mesclado para preservar `attachments`
-  e `images`.
+  mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro.
+- **Aplicação e API:** `POST /api/projects` e `PATCH /api/projects/[id]` delegam a orquestração a
+  `CreateProjectUseCase` e `UpdateProjectUseCase` (`application/projects/`), que dependem das
+  portas `ProjectRepository`, `ProjectUserDirectory` e `ProjectVerificationRepository`. Os testes
+  usam implementações in-memory. No escopo `full`, a equipe é recalculada a partir dos alunos ativos
+  e remover um aluno com tarefa individual atribuída devolve 409. `publicDetails` é mesclado para
+  preservar o que o corpo não envia (por exemplo, `images` quando a lista não é enviada).
 - **Tarefas:** não são editadas nesta tela. Na criação, as tarefas iniciais continuam opcionais; na
   edição, a tela aponta para a seção de progresso da página do projeto.
-- **Links dos artefatos:** ficam em `publicDetails.externalLinks`, sem migração. Rótulos fixos em
-  `PROJECT_LINK_LABELS` (`domain/enterprise/entities/project-details.ts`): `Repositório`,
-  `Site no ar` e `Protótipo`. Qualquer outro rótulo é um link adicional (título + endereço, até 10).
-  Todos precisam ser HTTPS. `splitProjectLinks` e `buildProjectLinks` convertem entre a lista
-  persistida e os campos do formulário.
-- **Imagens e arquivos (ainda não funcionais):** o formulário já traz os campos
-  (`UploadSlot`, desabilitados por padrão, com `onFiles` e `disabled` prontos para a implementação).
-  O modelo já prevê `publicDetails.images` (`ProjectImage`) e `publicDetails.attachments`
-  (`ProjectAttachment`). Para ativar: implemente o armazenamento e o endpoint de upload, passe
-  `disabled={false}` e `onFiles` ao `UploadSlot` correspondente e inclua as listas no
-  `PATCH` (hoje elas são preservadas, não editadas).
 - **Botão de voltar:** `components/ui/BackButton.tsx` é o único botão de voltar das páginas
   internas. Com `href` navega para o destino; sem `href` volta no histórico (ou para `/`). O link
   "Voltar para o login" dentro dos cartões de autenticação é um link de texto e não faz parte do
   padrão.
-
 - **Migrações de restrições:** `src/db/migrations/20261022_project_constraints.sql` garante que os índices e checks do schema existam também em bancos Neon que receberam migrações manuais parciais. O script usa `IF NOT EXISTS`/consultas a `pg_constraint` para poder ser repetido sem recriar restrições já corretas. Os índices de usuários também estão em `20261014_admin_user_registration.sql`; os checks de progresso, em `20261014_project_progress.sql`; e os checks de semestre/status, em `20261021_projects.sql`. Os arquivos desta pasta são SQL manual: execute-os em ordem cronológica no SQL Editor do Neon. `npm run db:migrate` usa o diretório `drizzle/` e não aplica automaticamente estes arquivos manuais.
+
+## 18. Orientadores, desativação e exclusão
+
+- **Vários orientadores:** o projeto tem um orientador principal (`projects.advisor_email/name`) e
+  orientadores adicionais (`projects.co_advisors`, jsonb de `{ email, name }`), até 5 no total
+  (`MAX_PROJECT_ADVISORS`). Todos têm exatamente as mesmas permissões: editar o projeto, criar
+  tarefas, verificar e ver o projeto em andamento. Use sempre `getProjectAdvisors`,
+  `isProjectAdvisor` (`domain/enterprise/entities/project-advisors.ts`) e `isAdvisorOf`
+  (`project-permissions.ts`); não compare com `project.advisor` diretamente.
+- **Quem altera a lista:** o professor adiciona e remove orientadores adicionais, mas não pode se
+  remover (devolve 400) nem trocar o principal. O administrador também troca o principal (o antigo
+  sai da lista, a menos que seja mantido como adicional). Orientadores novos são revalidados como
+  professores ativos; os já existentes mantêm o nome gravado.
+- **Desativar:** somente o administrador (`SetProjectActivationUseCase`,
+  `PATCH /api/projects/[id]/activation` com `{ active: boolean }`). `projects.active` e
+  `deactivated_at`. Projeto desativado fica oculto para todos, inclusive orientadores e alunos; só o
+  administrador o vê, com selo "Desativado" no card e aviso na página (`canViewProject`). Também não
+  pode ser favoritado.
+- **Excluir:** somente o administrador e somente com o projeto desativado
+  (`DeleteProjectUseCase`, `DELETE /api/projects/[id]`, 409 se ativo). A exclusão apaga, em um único
+  lote, revisões, tarefas, favoritos e o projeto; as verificações saem por `ON DELETE CASCADE`.
+  Projetos demonstrativos não podem ser desativados nem excluídos.
+- **Tarefas por autor:** `GET /api/projects/[id]/progress` devolve `createdByName`,
+  `lastEditedByName`, `lastEditedAt` e `canEdit` por tarefa, e `changedByName` nas revisões. O
+  professor só edita as tarefas que ele mesmo criou (`canEditProgressTask`, 403 no `PATCH` caso
+  contrário); o administrador edita qualquer uma. Tarefas criadas por um administrador (por exemplo,
+  as iniciais de um projeto criado por ele) só o administrador edita. A criação continua liberada a
+  todos os orientadores.
+
+## 19. Verificação de projetos
+
+- **Quando existe:** somente para projetos concluídos (`status = 'publicado'`) e ativos. Professores
+  orientadores e administradores veem o botão "Verificar projeto" ao lado de "Editar projeto";
+  em andamento, ele não aparece.
+- **Fluxo:** o botão abre um modal com os critérios em checkbox (`VERIFICATION_CRITERIA` em
+  `domain/enterprise/entities/project-verification.ts`: código-fonte, documentação, resultado final,
+  arquitetura, testes e qualidade, interface e usabilidade, processo de desenvolvimento). É preciso
+  marcar ao menos um. `POST /api/projects/[id]/verification` chama `VerifyProjectUseCase`; o
+  orientador pode atualizar a própria verificação.
+- **Quando o projeto é verificado:** quando **todos** os orientadores atuais verificaram
+  (`buildVerificationSummary`). Então `projects.verified` vira `true`, o selo aparece e a página
+  mostra "Este projeto é verificado em: …" com os critérios marcados por pelo menos um orientador
+  (os que não foram unânimes indicam "N de M orientadores"). Orientadores e administradores veem
+  também a barra de progresso e quem já verificou ou falta.
+- **Administrador:** pode registrar a própria verificação, mas ela é listada à parte e **não conta**
+  para completar o projeto; apenas orientadores completam.
+- **Consistência:** adicionar um orientador a um projeto verificado volta o projeto para não
+  verificado; remover um orientador apaga a verificação dele e recalcula; voltar o projeto para
+  "em andamento" apaga todas as verificações. A tabela é `project_verifications`
+  (`20261027_project_advisors_verification.sql`), uma linha por projeto e verificador.
+
+## 20. Tecnologias, links e imagens
+
+- **Tecnologias:** o campo continua aberto. `TechnologyPicker` sugere itens do catálogo
+  (`domain/enterprise/entities/technology-catalog.ts`) enquanto a pessoa digita e mostra os mais
+  usados. A padronização acontece no servidor (`normalizeTechnologyList`): o nome digitado ou um
+  apelido conhecido vira o nome oficial ("nodejs" → "Node.js") e duplicadas são removidas, mesmo
+  escritas de formas diferentes. Nomes fora do catálogo são mantidos como digitados. Para incluir uma
+  tecnologia no catálogo, adicione uma entrada em `TECHNOLOGY_CATALOG` (o teste impede apelidos
+  ambíguos entre tecnologias).
+- **Links:** lista totalmente personalizável em `publicDetails.externalLinks`
+  (`{ label, url, icon }`, até 12, HTTPS). A pessoa adiciona modelos (`PROJECT_LINK_PRESETS`:
+  repositório, site no ar, protótipo, documentação, vídeo etc.) ou um link personalizado com título,
+  endereço e ícone. O ícone vem do catálogo `PROJECT_LINK_ICONS` (classes `fi-rr-*` que existem no
+  CSS carregado); um ícone fora do catálogo é trocado por `fi-rr-link` no servidor. Links antigos sem
+  ícone usam o ícone do título conhecido. Não há migração.
+- **Documentos anexados:** a opção foi removida do cadastro, da edição, do modelo
+  (`ProjectAttachment`) e da página do projeto.
+- **Imagens (envio ainda não funcional):** o campo, as regras e a exibição estão prontos.
+  Limites em `PROJECT_IMAGE_LIMITS` (`domain/enterprise/entities/project-images.ts`): PNG, JPG ou
+  WEBP, até 5 MB, até 8 imagens, lado entre 320 px e 6000 px; `validateProjectImage` é pura e
+  testada. Depois de enviar, a pessoa escolhe a orientação de cada imagem (horizontal ou vertical;
+  `suggestImageOrientation` já sugere pela proporção). `ProjectImageGallery` exibe as horizontais em
+  16:9 e as verticais em moldura de celular 9:16. As imagens ficam em `publicDetails.images`
+  (`{ title, url, orientation }`) e o `PATCH` já valida e grava a lista quando ela é enviada. **Para
+  ativar o upload (backend):** (1) crie o armazenamento e o endpoint que receba o arquivo, repita
+  `validateProjectImage` no servidor e devolva a URL HTTPS pública; (2) implemente
+  `uploadProjectImage` em `presentation/projects/project-image-upload.ts`; (3) troque
+  `PROJECT_IMAGE_UPLOAD_ENABLED` para `true` no mesmo arquivo. Se o domínio das imagens for fixo,
+  configure `images.remotePatterns` e remova `unoptimized` dos componentes `Image`.
+- **Ícones:** `fi-rr-code`, `fi-rr-server` e `fi-rr-folder-check` não existem no CSS instalado. O
+  código novo usa apenas ícones verificados no catálogo `rounded.css`.
