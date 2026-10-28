@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import type { ProjectImage } from '@/domain/enterprise/entities/project'
 
 export function ProjectImageGallery({ images }: { images: ProjectImage[] }) {
@@ -13,13 +14,14 @@ export function ProjectImageGallery({ images }: { images: ProjectImage[] }) {
           {horizontal.map((image) => (
             <li key={image.url}>
               <figure>
-                <div className="aspect-video overflow-hidden rounded-xl border border-border bg-surface-secondary">
-                  {/* biome-ignore lint/performance/noImgElement: imagens externas do armazenamento do projeto */}
-                  <img
+                <div className="relative aspect-video overflow-hidden rounded-xl border border-border bg-surface-secondary">
+                  <Image
                     src={image.url}
                     alt={image.title || 'Imagem do projeto'}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
+                    fill
+                    unoptimized
+                    sizes="(min-width: 640px) 50vw, 100vw"
+                    className="object-cover"
                   />
                 </div>
                 {image.title && (
@@ -38,13 +40,14 @@ export function ProjectImageGallery({ images }: { images: ProjectImage[] }) {
           {vertical.map((image) => (
             <li key={image.url} className="w-36 sm:w-44">
               <figure>
-                <div className="aspect-[9/16] overflow-hidden rounded-2xl border-4 border-slate-800 bg-surface-secondary shadow-md">
-                  {/* biome-ignore lint/performance/noImgElement: imagens externas do armazenamento do projeto */}
-                  <img
+                <div className="relative aspect-[9/16] overflow-hidden rounded-2xl border-4 border-slate-800 bg-surface-secondary shadow-md">
+                  <Image
                     src={image.url}
                     alt={image.title || 'Tela do aplicativo'}
-                    loading="lazy"
-                    className="h-full w-full object-cover"
+                    fill
+                    unoptimized
+                    sizes="176px"
+                    className="object-cover"
                   />
                 </div>
                 {image.title && (

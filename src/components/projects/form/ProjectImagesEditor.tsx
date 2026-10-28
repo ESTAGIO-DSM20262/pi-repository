@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { type ChangeEvent, useId, useState } from 'react'
 import { hintClass, labelClass } from '@/components/projects/form/ProjectFormPrimitives'
 import type { ProjectImage, ProjectImageOrientation } from '@/domain/enterprise/entities/project'
@@ -27,7 +28,7 @@ interface ProjectImagesEditorProps {
 function readDimensions(file: File): Promise<{ width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
-    const image = new Image()
+    const image = new window.Image()
     image.onload = () => {
       URL.revokeObjectURL(url)
       resolve({ width: image.naturalWidth, height: image.naturalHeight })
@@ -141,17 +142,19 @@ export function ProjectImagesEditor({ images, onChange }: ProjectImagesEditorPro
           {images.map((image, index) => (
             <li key={image.key} className="rounded-xl border border-border bg-white p-3">
               <div
-                className={`mx-auto flex items-center justify-center overflow-hidden rounded-lg bg-surface-secondary ${
+                className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-lg bg-surface-secondary ${
                   image.orientation === 'vertical'
                     ? 'aspect-[9/16] h-48'
                     : 'aspect-video w-full max-w-xs'
                 }`}
               >
-                {/* biome-ignore lint/performance/noImgElement: imagens externas do armazenamento do projeto */}
-                <img
+                <Image
                   src={image.url}
                   alt={image.title || `Imagem ${index + 1} do projeto`}
-                  className="h-full w-full object-cover"
+                  fill
+                  unoptimized
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  className="object-cover"
                 />
               </div>
 
