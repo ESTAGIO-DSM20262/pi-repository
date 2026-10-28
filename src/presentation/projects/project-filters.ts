@@ -165,11 +165,11 @@ export function getChips(f: Filters, advisors: Facets['advisors']): Chip[] {
   }
 
   if (f.verified) {
-    chips.push({ id: 'verified', label: 'PI Verificado', verified: true })
+    chips.push({ id: 'verified', label: 'PI Indicado', verified: true })
   }
 
   if (f.unverified) {
-    chips.push({ id: 'unverified', label: 'Não verificados' })
+    chips.push({ id: 'unverified', label: 'Não indicados' })
   }
 
   return chips

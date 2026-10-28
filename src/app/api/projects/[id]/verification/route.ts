@@ -22,7 +22,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     try {
       body = await request.json()
     } catch {
-      return jsonError('Envie os critérios da verificação em formato JSON.', 400)
+      return jsonError('Envie os critérios da indicação em formato JSON.', 400)
     }
 
     const useCase = new VerifyProjectUseCase(
@@ -35,6 +35,6 @@ export async function POST(request: Request, { params }: RouteContext) {
     return NextResponse.json(result.value, { headers: { 'Cache-Control': 'no-store' } })
   } catch (error) {
     console.error('[POST /api/projects/[id]/verification]', error)
-    return jsonError('Não foi possível registrar a verificação. Tente novamente.', 500)
+    return jsonError('Não foi possível registrar a indicação. Tente novamente.', 500)
   }
 }

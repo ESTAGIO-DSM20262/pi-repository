@@ -55,7 +55,7 @@ export function ProjectCard({
           </span>
         ) : p.verified ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
-            <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> PI Verificado
+            <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> PI Indicado
           </span>
         ) : p.status === 'em_andamento' ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">

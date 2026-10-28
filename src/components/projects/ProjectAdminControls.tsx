@@ -90,7 +90,7 @@ export function ProjectAdminControls({ projectId, active }: ProjectAdminControls
       <ConfirmationDialog
         open={confirming === 'delete'}
         title="Excluir este projeto definitivamente?"
-        description="Serão apagados o projeto, as tarefas e o histórico de revisões, as verificações e os favoritos. Essa ação não pode ser desfeita."
+        description="Serão apagados o projeto, as tarefas e o histórico de revisões, as indicações e os favoritos. Essa ação não pode ser desfeita."
         confirmLabel="Excluir definitivamente"
         icon="fi-rr-trash"
         tone="danger"

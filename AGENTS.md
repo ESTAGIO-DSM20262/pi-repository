@@ -504,27 +504,37 @@ documente aqui.
   as iniciais de um projeto criado por ele) só o administrador edita. A criação continua liberada a
   todos os orientadores.
 
-## 19. Verificação de projetos
+## 19. Indicação de projetos
+
+Na interface o termo é **"indicado"** (antes "verificado"): o professor orientador _indica_ o
+projeto como referência. O código e o banco mantêm os nomes `verified`, `verification` e
+`project_verifications`; só os textos exibidos mudaram.
 
 - **Quando existe:** somente para projetos concluídos (`status = 'publicado'`) e ativos. Professores
-  orientadores e administradores veem o botão "Verificar projeto" ao lado de "Editar projeto";
+  orientadores e administradores veem o botão "Indicar projeto" ao lado de "Editar projeto";
   em andamento, ele não aparece.
 - **Fluxo:** o botão abre um modal com os critérios em checkbox (`VERIFICATION_CRITERIA` em
   `domain/enterprise/entities/project-verification.ts`: código-fonte, documentação, resultado final,
   arquitetura, testes e qualidade, interface e usabilidade, processo de desenvolvimento). É preciso
   marcar ao menos um. `POST /api/projects/[id]/verification` chama `VerifyProjectUseCase`; o
-  orientador pode atualizar a própria verificação.
-- **Quando o projeto é verificado:** quando **todos** os orientadores atuais verificaram
-  (`buildVerificationSummary`). Então `projects.verified` vira `true`, o selo aparece e a página
-  mostra "Este projeto é verificado em: …" com os critérios marcados por pelo menos um orientador
-  (os que não foram unânimes indicam "N de M orientadores"). Orientadores e administradores veem
-  também a barra de progresso e quem já verificou ou falta.
-- **Administrador:** pode registrar a própria verificação, mas ela é listada à parte e **não conta**
+  orientador pode atualizar a própria indicação.
+- **Quando o projeto é indicado:** quando **todos** os orientadores atuais indicaram
+  (`buildVerificationSummary`). Então `projects.verified` vira `true`, o selo "Indicado" aparece e a
+  página mostra "Este projeto é indicado em: …" com os critérios marcados por pelo menos um
+  orientador, como tags clicáveis (os que não foram unânimes mostram "N/M").
+- **Detalhe do critério (qualquer visitante):** clicar na tag abre um cartão com a descrição do
+  critério (`statement`, o mesmo texto do modal de indicação) e os nomes dos orientadores que o
+  indicaram. Fecha com a própria tag, o botão de fechar ou `Esc`. Não depende de banco: a descrição
+  vem de `VERIFICATION_CRITERIA` e os nomes de `summary.advisors[].criteria`.
+- **Orientadores e administradores** veem também a barra de progresso e quem já indicou ou falta.
+- **Administrador:** pode registrar a própria indicação, mas ela é listada à parte e **não conta**
   para completar o projeto; apenas orientadores completam.
-- **Consistência:** adicionar um orientador a um projeto verificado volta o projeto para não
-  verificado; remover um orientador apaga a verificação dele e recalcula; voltar o projeto para
-  "em andamento" apaga todas as verificações. A tabela é `project_verifications`
+- **Consistência:** adicionar um orientador a um projeto indicado volta o projeto para não
+  indicado; remover um orientador apaga a indicação dele e recalcula; voltar o projeto para
+  "em andamento" apaga todas as indicações. A tabela é `project_verifications`
   (`20261027_project_advisors_verification.sql`), uma linha por projeto e verificador.
+- **Vários orientadores na página do projeto:** com mais de um, aparecem como cartões em grade
+  (nome completo, GitHub e LinkedIn); com um só, mantém a linha compacta.
 
 ## 20. Tecnologias, links e imagens
 

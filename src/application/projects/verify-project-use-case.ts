@@ -42,20 +42,20 @@ export class VerifyProjectUseCase
     if (!project || (project.active === false && viewer.role !== 'admin')) {
       return left(
         new ProjectOperationError(
-          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser verificados.',
+          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser indicados.',
           404,
         ),
       )
     }
     if (project.status !== 'publicado') {
       return left(
-        new ProjectOperationError('Somente projetos concluídos podem ser verificados.', 409),
+        new ProjectOperationError('Somente projetos concluídos podem ser indicados.', 409),
       )
     }
     if (!canVerifyProject(project, viewer)) {
       return left(
         new ProjectOperationError(
-          'Somente os professores orientadores ou um administrador podem verificar este projeto.',
+          'Somente os professores orientadores ou um administrador podem indicar este projeto.',
           403,
         ),
       )
@@ -65,7 +65,7 @@ export class VerifyProjectUseCase
     const criteria = normalizeVerificationCriteria(data.criteria)
     if (criteria.length === 0) {
       return left(
-        new ProjectOperationError('Marque ao menos um critério para verificar o projeto.', 400),
+        new ProjectOperationError('Marque ao menos um critério para indicar o projeto.', 400),
       )
     }
 

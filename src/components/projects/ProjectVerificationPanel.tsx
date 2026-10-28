@@ -69,7 +69,7 @@ function VerificationDialog({
 
   async function submit() {
     if (selected.length === 0) {
-      setError('Marque ao menos um critério para verificar o projeto.')
+      setError('Marque ao menos um critério para indicar o projeto.')
       return
     }
     setSaving(true)
@@ -84,11 +84,11 @@ function VerificationDialog({
       })
       const result = (await response.json().catch(() => null)) as { error?: string } | null
       if (!response.ok) {
-        throw new Error(result?.error ?? 'Não foi possível registrar a verificação.')
+        throw new Error(result?.error ?? 'Não foi possível registrar a indicação.')
       }
       onSaved()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Ocorreu um erro ao verificar o projeto.')
+      setError(caught instanceof Error ? caught.message : 'Ocorreu um erro ao indicar o projeto.')
       setSaving(false)
     }
   }
@@ -116,16 +116,16 @@ function VerificationDialog({
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">
-              Sistema de verificação
+              Sistema de indicação
             </p>
             <h2
               id={titleId}
               className="mt-1 text-lg font-bold leading-tight text-slate-900 sm:text-xl"
             >
-              {alreadyVerified ? 'Atualizar minha verificação' : 'Verificar este projeto'}
+              {alreadyVerified ? 'Atualizar minha indicação' : 'Indicar este projeto'}
             </h2>
             <p className="mt-1 text-xs leading-relaxed text-slate-600">
-              Ao verificar, você declara estar ciente de que recomenda este projeto como base de
+              Ao indicar, você declara estar ciente de que recomenda este projeto como base de
               informações para projetos de alunos futuros.
             </p>
           </div>
@@ -207,16 +207,109 @@ function VerificationDialog({
               className={`fi ${saving ? 'fi-rr-spinner animate-spin' : 'fi-rr-shield-check'} flex`}
               aria-hidden="true"
             />
-            {saving
-              ? 'Registrando…'
-              : alreadyVerified
-                ? 'Atualizar verificação'
-                : 'Verificar projeto'}
+            {saving ? 'Registrando…' : alreadyVerified ? 'Atualizar indicação' : 'Indicar projeto'}
           </button>
         </footer>
       </section>
     </div>,
     document.body,
+  )
+}
+
+function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
+  const cardId = useId()
+  const [openId, setOpenId] = useState<VerificationCriterionId | null>(null)
+
+  useEffect(() => {
+    if (!openId) return
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpenId(null)
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [openId])
+
+  const openCriterion = summary.criteria.find((criterion) => criterion.id === openId)
+  const definition = VERIFICATION_CRITERIA.find((criterion) => criterion.id === openId)
+  const endorsers = summary.advisors.filter((advisor) =>
+    openId ? advisor.criteria.includes(openId) : false,
+  )
+
+  return (
+    <div className="mt-1">
+      <p className="text-sm leading-relaxed text-emerald-900">
+        Este projeto é indicado em:{' '}
+        <span className="text-xs">(toque em um item para ver os detalhes)</span>
+      </p>
+      <ul className="mt-2 flex flex-wrap gap-1.5">
+        {summary.criteria.map((criterion) => {
+          const selected = criterion.id === openId
+          return (
+            <li key={criterion.id}>
+              <button
+                type="button"
+                aria-expanded={selected}
+                aria-controls={selected ? cardId : undefined}
+                onClick={() => setOpenId(selected ? null : criterion.id)}
+                className={`cursor-pointer inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 ${
+                  selected
+                    ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : 'border-emerald-300 bg-white text-emerald-900 hover:border-emerald-500 hover:bg-emerald-100'
+                }`}
+              >
+                {criterion.label}
+                {!criterion.unanimous && (
+                  <span className="font-semibold opacity-80">
+                    ({criterion.endorsedBy}/{summary.requiredCount})
+                  </span>
+                )}
+                <i
+                  className={`fi ${selected ? 'fi-rr-angle-small-up' : 'fi-rr-angle-small-down'} flex text-sm`}
+                  aria-hidden="true"
+                />
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+
+      {openCriterion && definition && (
+        <section
+          id={cardId}
+          aria-label={`Detalhes da indicação: ${definition.label}`}
+          className="mt-3 max-w-xl rounded-xl border border-emerald-300 bg-white p-3.5 shadow-sm"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm font-bold text-slate-900">{definition.label}</p>
+            <button
+              type="button"
+              onClick={() => setOpenId(null)}
+              aria-label="Fechar detalhes"
+              className="cursor-pointer -mt-1 -mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100"
+            >
+              <i className="fi fi-rr-cross-small flex text-lg" aria-hidden="true" />
+            </button>
+          </div>
+          <p className="mt-1 text-xs leading-relaxed text-slate-700">{definition.statement}</p>
+          <p className="mt-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            {endorsers.length > 1 ? 'Indicado pelos orientadores' : 'Indicado pelo orientador'}
+          </p>
+          <ul className="mt-1 space-y-0.5">
+            {endorsers.map((advisor) => (
+              <li key={advisor.email} className="text-xs font-semibold text-slate-900">
+                {advisor.name}
+              </li>
+            ))}
+          </ul>
+          {!openCriterion.unanimous && (
+            <p className="mt-2 text-[11px] text-slate-600">
+              {openCriterion.endorsedBy} de {summary.requiredCount} orientadores indicaram este
+              critério.
+            </p>
+          )}
+        </section>
+      )}
+    </div>
   )
 }
 
@@ -241,7 +334,7 @@ export function ProjectVerificationButton({
         className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-4 text-sm font-bold text-emerald-800 shadow-sm transition hover:bg-emerald-100"
       >
         <i className="fi fi-rr-shield-check flex" aria-hidden="true" />
-        {alreadyVerified ? 'Atualizar verificação' : 'Verificar projeto'}
+        {alreadyVerified ? 'Atualizar indicação' : 'Indicar projeto'}
       </button>
       {open && (
         <VerificationDialog
@@ -271,7 +364,7 @@ export function ProjectVerificationPanel({
 
   return (
     <section
-      aria-label="Verificação do projeto"
+      aria-label="Indicação do projeto"
       className={`rounded-xl border p-4 sm:p-5 ${
         summary.complete ? 'border-emerald-300 bg-emerald-50' : 'border-border bg-white'
       }`}
@@ -289,28 +382,12 @@ export function ProjectVerificationPanel({
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-bold text-slate-900">
-            {summary.complete ? 'Projeto verificado' : 'Verificação do projeto'}
+            {summary.complete ? 'Projeto indicado' : 'Indicação do projeto'}
           </h2>
-          {summary.complete && summary.criteria.length > 0 && (
-            <p className="mt-1 text-sm leading-relaxed text-emerald-900">
-              Este projeto é verificado em:{' '}
-              {summary.criteria.map((criterion, index) => (
-                <span key={criterion.id}>
-                  <strong>{criterion.label}</strong>
-                  {!criterion.unanimous && (
-                    <span className="text-xs text-emerald-800">
-                      {' '}
-                      ({criterion.endorsedBy} de {summary.requiredCount} orientadores)
-                    </span>
-                  )}
-                  {index < summary.criteria.length - 1 ? ', ' : '.'}
-                </span>
-              ))}
-            </p>
-          )}
+          {summary.complete && summary.criteria.length > 0 && <CriteriaTags summary={summary} />}
           {!summary.complete && (
             <p className="mt-1 text-xs leading-relaxed text-slate-600">
-              O projeto só é verificado quando todos os professores orientadores verificam.
+              O projeto só é indicado quando todos os professores orientadores indicam.
             </p>
           )}
         </div>
@@ -320,13 +397,13 @@ export function ProjectVerificationPanel({
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
             <span>
-              {summary.verifiedCount} de {summary.requiredCount} orientadores verificaram
+              {summary.verifiedCount} de {summary.requiredCount} orientadores indicaram
             </span>
             <span>{percent}%</span>
           </div>
           <div
             role="progressbar"
-            aria-label="Progresso da verificação"
+            aria-label="Progresso da indicação"
             aria-valuemin={0}
             aria-valuemax={summary.requiredCount}
             aria-valuenow={summary.verifiedCount}
@@ -352,8 +429,8 @@ export function ProjectVerificationPanel({
                   <p className="truncate text-xs font-semibold text-slate-900">{advisor.name}</p>
                   <p className="text-[11px] text-text-secondary">
                     {advisor.verified && advisor.verifiedAt
-                      ? `Verificou em ${formatDate(advisor.verifiedAt)}`
-                      : 'Aguardando verificação'}
+                      ? `Indicou em ${formatDate(advisor.verifiedAt)}`
+                      : 'Aguardando indicação'}
                   </p>
                 </div>
               </li>
@@ -362,7 +439,7 @@ export function ProjectVerificationPanel({
 
           {summary.administrators.length > 0 && (
             <p className="mt-3 text-[11px] text-text-secondary">
-              Também endossado pela administração:{' '}
+              Também indicado pela administração:{' '}
               {summary.administrators.map((admin) => admin.name).join(', ')}.
             </p>
           )}

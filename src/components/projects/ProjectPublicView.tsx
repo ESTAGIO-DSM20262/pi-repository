@@ -228,20 +228,26 @@ function TechnologyGroupCard({ group }: { group: ProjectTechnologyGroup }) {
   )
 }
 
-function AdvisorLinks({ advisor }: { advisor: ProjectAdvisor }) {
+function AdvisorLinks({
+  advisor,
+  stacked = false,
+}: {
+  advisor: ProjectAdvisor
+  stacked?: boolean
+}) {
   const githubUrl = getSafeSocialProfileUrl(advisor.githubUrl, 'github')
   const linkedinUrl = getSafeSocialProfileUrl(advisor.linkedinUrl, 'linkedin')
+  const separator = (
+    <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
+      /
+    </span>
+  )
 
-  return (
-    <div className="flex min-w-0 items-center gap-1 text-[11px] leading-snug sm:gap-1.5 sm:text-xs md:text-[13px]">
-      <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
-        {formatPersonName(advisor.name)}
-      </span>
+  const links = (
+    <>
       {githubUrl && (
         <>
-          <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
-            /
-          </span>
+          {!stacked && separator}
           <a
             href={githubUrl}
             target="_blank"
@@ -251,15 +257,13 @@ function AdvisorLinks({ advisor }: { advisor: ProjectAdvisor }) {
             className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-primary focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <GithubIcon />
-            <span className="hidden sm:inline">GitHub</span>
+            <span className={stacked ? '' : 'hidden sm:inline'}>GitHub</span>
           </a>
         </>
       )}
       {linkedinUrl && (
         <>
-          <span className="hidden shrink-0 text-slate-400 sm:inline" aria-hidden="true">
-            /
-          </span>
+          {!stacked && separator}
           <a
             href={linkedinUrl}
             target="_blank"
@@ -269,10 +273,39 @@ function AdvisorLinks({ advisor }: { advisor: ProjectAdvisor }) {
             className="inline-flex shrink-0 items-center gap-1 text-slate-600 transition hover:text-[#0a66c2] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <LinkedInIcon />
-            <span className="hidden sm:inline">LinkedIn</span>
+            <span className={stacked ? '' : 'hidden sm:inline'}>LinkedIn</span>
           </a>
         </>
       )}
+    </>
+  )
+
+  if (stacked) {
+    return (
+      <div className="flex min-w-0 items-start gap-2.5">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+          {getNameInitials(advisor.name)}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="break-words text-xs font-bold leading-snug text-slate-900 md:text-[13px]">
+            {formatPersonName(advisor.name)}
+          </p>
+          {(githubUrl || linkedinUrl) && (
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] md:text-xs">
+              {links}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex min-w-0 items-center gap-1 text-[11px] leading-snug sm:gap-1.5 sm:text-xs md:text-[13px]">
+      <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
+        {formatPersonName(advisor.name)}
+      </span>
+      {links}
     </div>
   )
 }
@@ -416,11 +449,11 @@ export function ProjectPublicView({
         <div className="flex flex-wrap items-center gap-1.5">
           {project.verified ? (
             <span className="inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-1 text-[10px] font-bold text-emerald-900 sm:text-[11px]">
-              <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Verificado
+              <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Indicado
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded bg-slate-200 px-2 py-1 text-[10px] font-bold text-slate-700 sm:text-[11px]">
-              <i className="fi fi-rr-info flex" aria-hidden="true" /> Não verificado
+              <i className="fi fi-rr-info flex" aria-hidden="true" /> Não indicado
             </span>
           )}
           <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">
@@ -445,28 +478,44 @@ export function ProjectPublicView({
         </div>
         <p className="mt-2 text-[12px] leading-relaxed text-slate-600 sm:hidden">{summary}</p>
 
-        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:items-center md:gap-5 md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2">
-          <div className="flex min-h-[62px] min-w-0 items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:flex-1 md:gap-2.5 md:border-0 md:bg-transparent md:p-0">
-            <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white md:flex">
-              {advisors.length > 1 ? (
-                <i className="fi fi-rr-chalkboard-user flex" aria-hidden="true" />
-              ) : (
-                getNameInitials(project.advisor.name)
-              )}
-            </span>
-            <div className="min-w-0 flex-1">
+        <div
+          className={`mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:gap-5 ${advisors.length > 1 ? 'md:items-start' : 'md:items-center'} md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2`}
+        >
+          {advisors.length > 1 ? (
+            <div className="col-span-2 min-w-0 rounded-lg border border-slate-300 bg-slate-50 p-2.5 md:flex-1 md:border-0 md:bg-transparent md:p-0">
               <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
-                {advisors.length > 1 ? 'Orientadores' : 'Orientador'}
+                Orientadores
               </p>
-              <ul className="mt-0.5 space-y-0.5">
+              <ul className="mt-1.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {advisors.map((advisor) => (
-                  <li key={advisor.email} className="min-w-0">
-                    <AdvisorLinks advisor={advisor} />
+                  <li
+                    key={advisor.email}
+                    className="min-w-0 rounded-lg border border-slate-200 bg-white p-2.5"
+                  >
+                    <AdvisorLinks advisor={advisor} stacked />
                   </li>
                 ))}
               </ul>
             </div>
-          </div>
+          ) : (
+            <div className="flex min-h-[62px] min-w-0 items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:flex-1 md:gap-2.5 md:border-0 md:bg-transparent md:p-0">
+              <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white md:flex">
+                {getNameInitials(project.advisor.name)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+                  Orientador
+                </p>
+                <ul className="mt-0.5 space-y-0.5">
+                  {advisors.map((advisor) => (
+                    <li key={advisor.email} className="min-w-0">
+                      <AdvisorLinks advisor={advisor} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
           <div className="flex min-h-[62px] items-center rounded-lg border border-slate-300 bg-slate-50 p-2 md:flex md:min-w-[190px] md:gap-2.5 md:border-l md:border-y-0 md:border-r-0 md:rounded-none md:bg-transparent md:py-0 md:pl-5 md:pr-0">
             <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white text-primary md:flex">
               <i className="fi fi-rr-calendar flex" aria-hidden="true" />
