@@ -447,13 +447,9 @@ export function ProjectPublicView({
 
       <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-6 lg:p-7">
         <div className="flex flex-wrap items-center gap-1.5">
-          {project.verified ? (
+          {project.verified && (
             <span className="inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-1 text-[10px] font-bold text-emerald-900 sm:text-[11px]">
               <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Indicado
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded bg-slate-200 px-2 py-1 text-[10px] font-bold text-slate-700 sm:text-[11px]">
-              <i className="fi fi-rr-info flex" aria-hidden="true" /> Não indicado
             </span>
           )}
           <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">

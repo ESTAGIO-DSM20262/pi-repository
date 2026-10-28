@@ -518,6 +518,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   arquitetura, testes e qualidade, interface e usabilidade, processo de desenvolvimento). É preciso
   marcar ao menos um. `POST /api/projects/[id]/verification` chama `VerifyProjectUseCase`; o
   orientador pode atualizar a própria indicação.
+- **Sem tag para projeto não indicado:** o selo verde "Indicado" só aparece quando o projeto é
+  indicado; projetos não indicados simplesmente não exibem nenhum selo de indicação na página.
 - **Quando o projeto é indicado:** quando **todos** os orientadores atuais indicaram
   (`buildVerificationSummary`). Então `projects.verified` vira `true`, o selo "Indicado" aparece e a
   página mostra "Este projeto é indicado em: …" com os critérios marcados por pelo menos um
