@@ -12,67 +12,107 @@ const fields = {
   studentEmails: ['A@aluno.cps.sp.gov.br'],
   languages: ['TypeScript'],
   stack: ['React'],
-  liveUrl: 'https://projeto.vercel.app',
+  links: [{ title: 'Site no ar', url: 'https://projeto.vercel.app', icon: 'fi-rr-globe' }],
 }
 
 describe('parseUpdateProjectInput', () => {
-  it('aceita a edição completa feita pelo orientador', () => {
+  it('aceita a edição completa feita por um orientador', () => {
     const result = parseUpdateProjectInput(fields, 'full')
     expect(result.isRight()).toBe(true)
     if (result.isRight() && result.value.scope === 'full') {
       expect(result.value.fields.status).toBe('publicado')
       expect(result.value.fields.studentEmails).toEqual(['a@aluno.cps.sp.gov.br'])
-      expect(result.value.fields.liveUrl).toBe('https://projeto.vercel.app')
+      expect(result.value.fields.links).toEqual(fields.links)
     }
   })
 
-  it('não exige o orientador na edição', () => {
-    expect(parseUpdateProjectInput(fields, 'full').isRight()).toBe(true)
+  it('não exige o orientador principal na edição completa', () => {
+    const result = parseUpdateProjectInput(fields, 'full')
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) expect(result.value.advisors.advisorEmail).toBeNull()
+  })
+
+  it('diferencia lista de co-orientadores ausente (manter) de lista vazia (remover todos)', () => {
+    const kept = parseUpdateProjectInput(fields, 'full')
+    const cleared = parseUpdateProjectInput({ ...fields, coAdvisorEmails: [] }, 'full')
+
+    expect(kept.isRight() && kept.value.advisors.coAdvisorEmails).toBeUndefined()
+    expect(cleared.isRight() && cleared.value.advisors.coAdvisorEmails).toEqual([])
   })
 
   it('exige ao menos um aluno na edição completa', () => {
     expect(parseUpdateProjectInput({ ...fields, studentEmails: [] }, 'full').isLeft()).toBe(true)
   })
 
-  it('na edição de artefatos valida apenas os links e ignora os demais campos', () => {
-    const result = parseUpdateProjectInput(
-      { title: 'x', liveUrl: 'https://a.com', prototypeUrl: 'https://figma.com/x' },
-      'artifacts',
-    )
-    expect(result.isRight()).toBe(true)
-    if (result.isRight() && result.value.scope === 'artifacts') {
-      expect(result.value.links.liveUrl).toBe('https://a.com')
-      expect(result.value.links.repositoryUrl).toBeNull()
-    }
-  })
-
-  it('ignora atribuições de equipe na edição de artefatos', () => {
+  it('na edição do administrador valida orientadores, links e imagens e ignora o resto', () => {
     const result = parseUpdateProjectInput(
       {
-        repositoryUrl: 'https://github.com/org/projeto',
-        teamAssignments: [
-          {
-            studentEmail: 'a@aluno.cps.sp.gov.br',
-            roleTitle: 'Desenvolvimento Front-end',
-            isLeader: true,
-          },
+        title: 'x',
+        status: 'publicado',
+        advisorEmail: 'Novo@cps.sp.gov.br',
+        coAdvisorEmails: ['satelite@cps.sp.gov.br'],
+        links: [
+          { title: 'Repositório', url: 'https://github.com/org/p', icon: 'fi-rr-code-branch' },
         ],
+        images: [{ title: '', url: 'https://cdn.exemplo.com/a.png', orientation: 'vertical' }],
       },
-      'artifacts',
+      'admin',
     )
 
     expect(result.isRight()).toBe(true)
-    if (result.isRight() && result.value.scope === 'artifacts') {
-      expect(result.value.links.repositoryUrl).toBe('https://github.com/org/projeto')
-      expect('teamAssignments' in result.value).toBe(false)
+    if (result.isRight() && result.value.scope === 'admin') {
+      expect(result.value.advisors).toEqual({
+        advisorEmail: 'novo@cps.sp.gov.br',
+        coAdvisorEmails: ['satelite@cps.sp.gov.br'],
+      })
+      expect(result.value.links).toHaveLength(1)
+      expect(result.value.images).toHaveLength(1)
+      expect('fields' in result.value).toBe(false)
     }
   })
 
-  it('rejeita link inválido na edição de artefatos', () => {
-    expect(parseUpdateProjectInput({ liveUrl: 'http://a.com' }, 'artifacts').isLeft()).toBe(true)
+  it('ignora atribuições de equipe na edição do administrador', () => {
+    const result = parseUpdateProjectInput(
+      {
+        links: [],
+        teamAssignments: [{ studentEmail: 'a@aluno.cps.sp.gov.br', isLeader: true }],
+      },
+      'admin',
+    )
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) expect('teamAssignments' in result.value).toBe(false)
+  })
+
+  it('rejeita link inválido na edição do administrador', () => {
+    const result = parseUpdateProjectInput(
+      { links: [{ title: 'Site', url: 'http://a.com', icon: 'fi-rr-globe' }] },
+      'admin',
+    )
+    expect(result.isLeft()).toBe(true)
   })
 
   it('rejeita corpo vazio', () => {
     expect(parseUpdateProjectInput(null, 'full').isLeft()).toBe(true)
+  })
+})
+
+describe('advisorEmail no escopo completo', () => {
+  it('ignora o orientador principal enviado no corpo e não o usa para filtrar os co-orientadores', () => {
+    const result = parseUpdateProjectInput(
+      {
+        ...fields,
+        advisorEmail: 'terceiro@cps.sp.gov.br',
+        coAdvisorEmails: ['terceiro@cps.sp.gov.br'],
+      },
+      'full',
+    )
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      expect(result.value.advisors).toEqual({
+        advisorEmail: null,
+        coAdvisorEmails: ['terceiro@cps.sp.gov.br'],
+      })
+    }
   })
 })

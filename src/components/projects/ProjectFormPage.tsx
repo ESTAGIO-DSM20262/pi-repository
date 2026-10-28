@@ -5,10 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type KeyboardEvent, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import {
-  type DraftProjectLink,
-  ProjectArtifactsSection,
-} from '@/components/projects/form/ProjectArtifactsSection'
+import { ProjectAdvisorsSection } from '@/components/projects/form/ProjectAdvisorsSection'
+import { ProjectArtifactsSection } from '@/components/projects/form/ProjectArtifactsSection'
 import {
   Badge,
   FieldError,
@@ -19,13 +17,23 @@ import {
   Required,
   sectionClass,
 } from '@/components/projects/form/ProjectFormPrimitives'
+import type { DraftProjectImage } from '@/components/projects/form/ProjectImagesEditor'
+import type { DraftProjectLink } from '@/components/projects/form/ProjectLinksEditor'
 import { ProjectTeamSection } from '@/components/projects/form/ProjectTeamSection'
+import { TechnologyPicker } from '@/components/projects/form/TechnologyPicker'
 import { BackButton } from '@/components/ui/BackButton'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
-import type { ProjectStatus, ProjectTeamMember } from '@/domain/enterprise/entities/project'
-import type { ProjectExtraLink } from '@/domain/enterprise/entities/project-details'
+import type {
+  ProjectImage,
+  ProjectStatus,
+  ProjectTeamMember,
+} from '@/domain/enterprise/entities/project'
+import {
+  DEFAULT_PROJECT_LINK_ICON,
+  type ProjectLinkInput,
+} from '@/domain/enterprise/entities/project-details'
 import type { Role } from '@/domain/enterprise/entities/role'
-import { comparePersonNames, getNameInitials } from '@/libs/initials'
+import { comparePersonNames } from '@/libs/initials'
 import type { ProjectPersonOption } from '@/presentation/projects/project-person'
 import { type ProjectFormValues, projectFormSchema } from '@/presentation/projects/validation'
 
@@ -38,19 +46,18 @@ export interface ProjectFormInitialValues {
   theme: string
   status: ProjectStatus
   advisorEmail: string
+  coAdvisorEmails: string[]
   languages: string[]
   stack: string[]
   studentEmails: string[]
   teamMembers?: ProjectTeamMember[]
-  repositoryUrl: string
-  liveUrl: string
-  prototypeUrl: string
-  extraLinks: ProjectExtraLink[]
+  links: ProjectLinkInput[]
+  images: ProjectImage[]
 }
 
 interface ProjectFormPageProps {
   mode: 'create' | 'edit'
-  scope?: 'full' | 'artifacts'
+  scope?: 'full' | 'admin'
   role: Role
   currentUserEmail: string
   students: ProjectPersonOption[]
@@ -90,8 +97,6 @@ const STATUS_OPTIONS = [
 ]
 
 const textareaClass = `${fieldClass} h-auto min-h-28 resize-y py-2.5 leading-relaxed`
-const softButtonClass =
-  'cursor-pointer inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-border bg-surface-secondary px-3.5 text-xs font-semibold text-slate-800 transition hover:border-primary/40 hover:text-primary'
 const textActionClass =
   'cursor-pointer inline-flex items-center gap-1.5 text-xs font-semibold text-primary transition hover:text-primary-hover'
 
@@ -106,88 +111,6 @@ function newKey(prefix: string) {
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase('pt-BR')
-}
-
-function TagField({
-  id,
-  label,
-  placeholder,
-  values,
-  onChange,
-}: {
-  id: string
-  label: string
-  placeholder: string
-  values: string[]
-  onChange: (values: string[]) => void
-}) {
-  const [draft, setDraft] = useState('')
-
-  function commit() {
-    const parts = draft
-      .split(',')
-      .map((part) => part.trim())
-      .filter(Boolean)
-    if (parts.length === 0) return
-    const next = [...values]
-    for (const part of parts) {
-      if (!next.some((item) => normalize(item) === normalize(part))) next.push(part.slice(0, 60))
-    }
-    onChange(next.slice(0, 20))
-    setDraft('')
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter' || event.key === ',') {
-      event.preventDefault()
-      commit()
-    } else if (event.key === 'Backspace' && !draft && values.length > 0) {
-      onChange(values.slice(0, -1))
-    }
-  }
-
-  return (
-    <div>
-      <label className={labelClass} htmlFor={id}>
-        {label}
-      </label>
-      {values.length > 0 && (
-        <ul className="mb-2.5 flex flex-wrap gap-1.5" aria-label={label}>
-          {values.map((value) => (
-            <li
-              key={value}
-              className="inline-flex items-center gap-1 rounded-md bg-surface-secondary py-1 pr-1 pl-2.5 text-xs font-semibold text-slate-800 ring-1 ring-border"
-            >
-              {value}
-              <button
-                type="button"
-                onClick={() => onChange(values.filter((item) => item !== value))}
-                aria-label={`Remover ${value}`}
-                className="cursor-pointer flex h-5 w-5 items-center justify-center rounded text-slate-500 transition hover:bg-primary/10 hover:text-primary"
-              >
-                <i className="fi fi-rr-cross-small flex text-sm" aria-hidden="true" />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="flex gap-2">
-        <input
-          id={id}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={commit}
-          placeholder={placeholder}
-          className={fieldClass}
-        />
-        <button type="button" onClick={commit} className={softButtonClass}>
-          <i className="fi fi-rr-plus flex" aria-hidden="true" /> Adicionar
-        </button>
-      </div>
-      <p className={hintClass}>Pressione Enter ou vírgula para adicionar.</p>
-    </div>
-  )
 }
 
 export function ProjectFormPage({
@@ -238,6 +161,9 @@ export function ProjectFormPage({
   const theme = watch('theme')
   const status = watch('status')
   const advisorEmail = watch('advisorEmail')
+  const [coAdvisorEmails, setCoAdvisorEmails] = useState<string[]>(
+    initialValues?.coAdvisorEmails ?? [],
+  )
   const [languages, setLanguages] = useState<string[]>(initialValues?.languages ?? [])
   const [stack, setStack] = useState<string[]>(initialValues?.stack ?? [])
   const [selectedEmails, setSelectedEmails] = useState<string[]>(initialValues?.studentEmails ?? [])
@@ -256,13 +182,13 @@ export function ProjectFormPage({
   const [studentQuery, setStudentQuery] = useState('')
   const [studentNotice, setStudentNotice] = useState('')
   const [tasks, setTasks] = useState<DraftTask[]>([])
-  const [repositoryUrl, setRepositoryUrl] = useState(initialValues?.repositoryUrl ?? '')
-  const [liveUrl, setLiveUrl] = useState(initialValues?.liveUrl ?? '')
-  const [prototypeUrl, setPrototypeUrl] = useState(initialValues?.prototypeUrl ?? '')
-  const [extraLinks, setExtraLinks] = useState<DraftProjectLink[]>(
-    (initialValues?.extraLinks ?? []).map((link, index) => ({
-      key: `initial-link-${index}`,
-      ...link,
+  const [links, setLinks] = useState<DraftProjectLink[]>(
+    (initialValues?.links ?? []).map((link, index) => ({ key: `initial-link-${index}`, ...link })),
+  )
+  const [images, setImages] = useState<DraftProjectImage[]>(
+    (initialValues?.images ?? []).map((image, index) => ({
+      key: `initial-image-${index}`,
+      ...image,
     })),
   )
 
@@ -290,12 +216,14 @@ export function ProjectFormPage({
       .slice(0, 6)
   }, [students, selectedEmails, studentQuery])
 
-  const advisor = professors.find((professor) => professor.email === advisorEmail)
-  const advisorName = advisor?.name ?? (advisorEmail || currentUserEmail)
-  const advisorOptions = professors.map((professor) => ({
-    value: professor.email,
-    label: professor.name,
-  }))
+  const canChangePrincipal = role === 'admin'
+  const lockedAdvisorEmail = role === 'professor' ? currentUserEmail.trim().toLowerCase() : null
+
+  function changePrincipal(email: string) {
+    setValue('advisorEmail', email, { shouldDirty: true, shouldValidate: true })
+    setCoAdvisorEmails((current) => current.filter((item) => item !== email))
+  }
+
   const responsibleOptions = [
     { value: '', label: 'Todo o grupo' },
     ...selectedStudents.map((student) => ({ value: student.email, label: student.name })),
@@ -371,18 +299,26 @@ export function ProjectFormPage({
     setTasks((current) => current.filter((task) => task.key !== key))
   }
 
-  function addExtraLink() {
-    setExtraLinks((current) => [...current, { key: newKey('link'), title: '', url: '' }])
+  function addLink(preset?: { title: string; icon: string }) {
+    setLinks((current) => [
+      ...current,
+      {
+        key: newKey('link'),
+        title: preset?.title ?? '',
+        url: '',
+        icon: preset?.icon ?? DEFAULT_PROJECT_LINK_ICON,
+      },
+    ])
   }
 
-  function updateExtraLink(key: string, changes: Partial<DraftProjectLink>) {
-    setExtraLinks((current) =>
+  function updateLink(key: string, changes: Partial<ProjectLinkInput>) {
+    setLinks((current) =>
       current.map((link) => (link.key === key ? { ...link, ...changes } : link)),
     )
   }
 
-  function removeExtraLink(key: string) {
-    setExtraLinks((current) => current.filter((link) => link.key !== key))
+  function removeLink(key: string) {
+    setLinks((current) => current.filter((link) => link.key !== key))
   }
 
   async function submit() {
@@ -405,13 +341,11 @@ export function ProjectFormPage({
       }
     }
 
-    const links = {
-      repositoryUrl,
-      liveUrl,
-      prototypeUrl,
-      extraLinks: extraLinks
+    const artifacts = {
+      links: links
         .filter((link) => link.title.trim() || link.url.trim())
-        .map((link) => ({ title: link.title, url: link.url })),
+        .map(({ title, url, icon }) => ({ title, url, icon })),
+      images: images.map(({ title, url, orientation }) => ({ title, url, orientation })),
     }
 
     const details = canEditDetails
@@ -440,10 +374,14 @@ export function ProjectFormPage({
         })
       : undefined
 
+    const advisorsPayload = {
+      coAdvisorEmails,
+      ...(!isEdit || canChangePrincipal ? { advisorEmail } : {}),
+    }
+
     const creation = isEdit
       ? {}
       : {
-          advisorEmail,
           tasks: tasks.map((task) => ({
             title: task.title,
             description: task.description,
@@ -462,7 +400,8 @@ export function ProjectFormPage({
           signal: AbortSignal.timeout(30_000),
           body: JSON.stringify({
             ...details,
-            ...links,
+            ...artifacts,
+            ...advisorsPayload,
             ...(teamAssignments ? { teamAssignments } : {}),
             ...creation,
           }),
@@ -497,12 +436,30 @@ export function ProjectFormPage({
     }
   }
 
+  const advisorsSection = (
+    <ProjectAdvisorsSection
+      professors={professors}
+      principalEmail={advisorEmail}
+      coAdvisorEmails={coAdvisorEmails}
+      canChangePrincipal={canChangePrincipal}
+      lockedEmail={lockedAdvisorEmail}
+      principalError={errors.advisorEmail?.message}
+      onPrincipalChange={changePrincipal}
+      onAddCoAdvisor={(email) =>
+        setCoAdvisorEmails((current) => (current.includes(email) ? current : [...current, email]))
+      }
+      onRemoveCoAdvisor={(email) =>
+        setCoAdvisorEmails((current) => current.filter((item) => item !== email))
+      }
+    />
+  )
+
   const pageTitle = isEdit ? 'Editar Projeto Integrador' : 'Cadastro de Projeto Integrador'
   const pageDescription = !isEdit
     ? 'Preencha as informações, atribua os alunos e, se quiser, já defina as primeiras tarefas.'
     : canEditDetails
       ? 'Atualize as informações do projeto, a equipe, as tecnologias e os artefatos.'
-      : 'Como administrador, você pode atualizar os links dos artefatos do projeto.'
+      : 'Como administrador, você pode atualizar os professores orientadores, os links e as imagens do projeto.'
 
   return (
     <div className="w-full bg-background px-3 py-4 sm:px-6 sm:py-9 lg:px-8">
@@ -650,59 +607,10 @@ export function ProjectFormPage({
                           />
                         </div>
                       </div>
-
-                      <div>
-                        <span className={labelClass}>
-                          Professor(a) orientador(a) do PI <Required />
-                        </span>
-                        {!isEdit && role === 'admin' ? (
-                          professors.length === 0 ? (
-                            <p className="rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-6 text-center text-sm text-text-secondary">
-                              Nenhum professor ativo cadastrado. Cadastre um professor antes de
-                              criar o projeto.
-                            </p>
-                          ) : (
-                            <SelectDropdown
-                              value={advisorEmail}
-                              ariaLabel="Professor orientador"
-                              width="full"
-                              tone="muted"
-                              options={advisorOptions}
-                              onChange={(value) =>
-                                setValue('advisorEmail', value, {
-                                  shouldDirty: true,
-                                  shouldValidate: true,
-                                })
-                              }
-                            />
-                          )
-                        ) : (
-                          <div className="flex items-center gap-3 rounded-lg border border-border bg-surface-secondary px-3.5 py-3">
-                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-light text-xs font-bold text-primary">
-                              {getNameInitials(advisorName)}
-                            </span>
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-900">
-                                {advisorName}
-                              </p>
-                              <p className="truncate text-xs text-text-secondary">
-                                {advisor?.email ?? advisorEmail}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        <FieldError message={errors.advisorEmail?.message} />
-                        {!isEdit && role === 'professor' && (
-                          <p className={hintClass}>Você será o orientador deste projeto.</p>
-                        )}
-                        {isEdit && (
-                          <p className={hintClass}>
-                            O orientador do projeto não pode ser alterado.
-                          </p>
-                        )}
-                      </div>
                     </div>
                   </FormSection>
+
+                  {advisorsSection}
 
                   <FormSection
                     icon="fi-rr-document"
@@ -756,6 +664,8 @@ export function ProjectFormPage({
                 </>
               )}
 
+              {!canEditDetails && advisorsSection}
+
               <ProjectTeamSection
                 canEditDetails={canEditDetails}
                 canEditTeam={canEditTeam}
@@ -790,17 +700,19 @@ export function ProjectFormPage({
                     subtitle="Linguagens e ferramentas utilizadas no desenvolvimento"
                   >
                     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                      <TagField
+                      <TechnologyPicker
                         id="project-languages"
                         label="Linguagens"
                         placeholder="Ex.: TypeScript, Python"
+                        kind="language"
                         values={languages}
                         onChange={setLanguages}
                       />
-                      <TagField
+                      <TechnologyPicker
                         id="project-stack"
                         label="Stack e ferramentas"
                         placeholder="Ex.: React, Node.js, PostgreSQL"
+                        kind="tool"
                         values={stack}
                         onChange={setStack}
                       />
@@ -964,22 +876,20 @@ export function ProjectFormPage({
                 {initialValues?.title}
               </h2>
               <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
-                Orientador: {advisorName}
+                Orientador:{' '}
+                {professors.find((professor) => professor.email === advisorEmail)?.name ??
+                  advisorEmail}
               </p>
             </section>
           )}
 
           <ProjectArtifactsSection
-            repositoryUrl={repositoryUrl}
-            onRepositoryUrlChange={setRepositoryUrl}
-            liveUrl={liveUrl}
-            onLiveUrlChange={setLiveUrl}
-            prototypeUrl={prototypeUrl}
-            onPrototypeUrlChange={setPrototypeUrl}
-            extraLinks={extraLinks}
-            onAddExtraLink={addExtraLink}
-            onUpdateExtraLink={updateExtraLink}
-            onRemoveExtraLink={removeExtraLink}
+            links={links}
+            onAddLink={addLink}
+            onUpdateLink={updateLink}
+            onRemoveLink={removeLink}
+            images={images}
+            onImagesChange={setImages}
           />
 
           {errors.root?.server?.message && (

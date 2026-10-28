@@ -1,5 +1,5 @@
-import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
 import type {
+  ProjectAdministrationUpdateRecord,
   ProjectCreateRecord,
   ProjectFullUpdateRecord,
   ProjectRepository,
@@ -11,6 +11,8 @@ export class InMemoryProjectCommandRepository implements ProjectRepository {
   readonly projects = new Map<string, ProjectCreateRecord>()
   readonly tasks: ProjectTaskCreateRecord[] = []
   readonly revisions: ProjectRevisionCreateRecord[] = []
+  readonly activation = new Map<string, { active: boolean; changedAt: Date }>()
+  readonly deletedIds: string[] = []
 
   async create(
     project: ProjectCreateRecord,
@@ -27,9 +29,19 @@ export class InMemoryProjectCommandRepository implements ProjectRepository {
     if (current) this.projects.set(id, { ...current, ...record })
   }
 
-  async updateArtifacts(id: string, publicDetails: ProjectPublicDetails) {
+  async updateAsAdministrator(id: string, record: ProjectAdministrationUpdateRecord) {
     const current = this.projects.get(id)
-    if (current) this.projects.set(id, { ...current, publicDetails })
+    if (current) this.projects.set(id, { ...current, ...record })
+  }
+
+  async setActive(id: string, active: boolean, changedAt: Date) {
+    this.activation.set(id, { active, changedAt })
+  }
+
+  async delete(id: string) {
+    this.projects.delete(id)
+    this.deletedIds.push(id)
+    this.tasks.splice(0, this.tasks.length, ...this.tasks.filter((task) => task.projectId !== id))
   }
 
   async hasTasksAssignedToMembers(projectId: string, memberEmails: string[]) {

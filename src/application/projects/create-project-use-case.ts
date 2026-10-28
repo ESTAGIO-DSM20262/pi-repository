@@ -58,10 +58,30 @@ export class CreateProjectUseCase
 
     const advisorEmail =
       account.role === 'professor' ? account.email.toLowerCase() : input.advisorEmail
-    const advisor = await this.users.findActiveAdvisorByEmail(advisorEmail)
+    const coAdvisorEmails = input.coAdvisorEmails.filter((email) => email !== advisorEmail)
+    const advisorPeople = await this.users.findActiveAdvisorsByEmails([
+      advisorEmail,
+      ...coAdvisorEmails,
+    ])
+    const advisorByEmail = new Map(
+      advisorPeople.map((person) => [person.email.toLowerCase(), person]),
+    )
+    const advisor = advisorByEmail.get(advisorEmail)
     if (!advisor) {
       return left(
         new ProjectOperationError('O professor orientador selecionado não é válido.', 400),
+      )
+    }
+    const coAdvisors = coAdvisorEmails.flatMap((email) => {
+      const person = advisorByEmail.get(email)
+      return person ? [{ email, name: person.name }] : []
+    })
+    if (coAdvisors.length !== coAdvisorEmails.length) {
+      return left(
+        new ProjectOperationError(
+          'Um ou mais professores orientadores selecionados não são válidos ou estão inativos.',
+          400,
+        ),
       )
     }
 
@@ -93,7 +113,7 @@ export class CreateProjectUseCase
 
     const id = globalThis.crypto.randomUUID()
     const now = new Date()
-    const externalLinks = buildProjectLinks(input)
+    const externalLinks = buildProjectLinks(input.links)
     const project: ProjectCreateRecord = {
       id,
       title: input.title,
@@ -102,6 +122,7 @@ export class CreateProjectUseCase
       semester: input.semester,
       advisorEmail: advisor.email.toLowerCase(),
       advisorName: advisor.name,
+      coAdvisors,
       memberEmails: teamMembers.map((member) => member.studentEmail),
       teamMembers,
       languages: input.languages,
@@ -112,6 +133,7 @@ export class CreateProjectUseCase
       publicDetails: {
         overview: input.overview || undefined,
         externalLinks,
+        ...(input.images ? { images: input.images } : {}),
         technologyGroups: buildTechnologyGroups(input.languages, input.stack),
       },
       createdByUserId: account.id,

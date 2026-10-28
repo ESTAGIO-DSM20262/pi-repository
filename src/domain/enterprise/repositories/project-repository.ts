@@ -1,4 +1,5 @@
 import type {
+  ProjectAdvisor,
   ProjectPublicDetails,
   ProjectStatus,
   ProjectTeamMember,
@@ -16,6 +17,7 @@ export interface ProjectCreateRecord {
   semester: number
   advisorEmail: string
   advisorName: string
+  coAdvisors: ProjectAdvisor[]
   memberEmails: string[]
   teamMembers: ProjectTeamMember[]
   languages: string[]
@@ -69,9 +71,19 @@ export interface ProjectFullUpdateRecord {
   status: ProjectStatus
   languages: string[]
   stack: string[]
+  coAdvisors: ProjectAdvisor[]
   memberEmails: string[]
   teamMembers: ProjectTeamMember[]
   publicDetails: ProjectPublicDetails
+  verified: boolean
+}
+
+export interface ProjectAdministrationUpdateRecord {
+  advisorEmail: string
+  advisorName: string
+  coAdvisors: ProjectAdvisor[]
+  publicDetails: ProjectPublicDetails
+  verified: boolean
 }
 
 export interface ProjectRepository {
@@ -81,6 +93,8 @@ export interface ProjectRepository {
     revisions: ProjectRevisionCreateRecord[],
   ): Promise<void>
   update(id: string, record: ProjectFullUpdateRecord): Promise<void>
-  updateArtifacts(id: string, publicDetails: ProjectPublicDetails): Promise<void>
+  updateAsAdministrator(id: string, record: ProjectAdministrationUpdateRecord): Promise<void>
+  setActive(id: string, active: boolean, changedAt: Date): Promise<void>
+  delete(id: string): Promise<void>
   hasTasksAssignedToMembers(projectId: string, memberEmails: string[]): Promise<boolean>
 }

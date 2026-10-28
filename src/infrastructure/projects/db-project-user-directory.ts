@@ -18,8 +18,11 @@ export class DbProjectUserDirectory implements ProjectUserDirectory {
     return account ?? null
   }
 
-  async findActiveAdvisorByEmail(email: string): Promise<ProjectDirectoryPerson | null> {
-    const [advisor] = await db
+  async findActiveAdvisorsByEmails(emails: string[]): Promise<ProjectDirectoryPerson[]> {
+    const normalizedEmails = [...new Set(emails.map((email) => email.trim().toLowerCase()))]
+    if (normalizedEmails.length === 0) return []
+
+    return db
       .select({
         email: users.email,
         name: users.name,
@@ -29,14 +32,11 @@ export class DbProjectUserDirectory implements ProjectUserDirectory {
       .from(users)
       .where(
         and(
-          eq(sql<string>`lower(${users.email})`, email.trim().toLowerCase()),
+          inArray(sql<string>`lower(${users.email})`, normalizedEmails),
           eq(users.role, 'professor'),
           eq(users.active, true),
         ),
       )
-      .limit(1)
-
-    return advisor ?? null
   }
 
   async findActiveStudentsByEmails(emails: string[]): Promise<ProjectDirectoryPerson[]> {

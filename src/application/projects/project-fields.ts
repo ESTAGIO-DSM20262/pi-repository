@@ -1,9 +1,33 @@
 import { type Either, left, right } from '@/core/either'
-import type { ProjectStatus, ProjectTeamAssignment } from '@/domain/enterprise/entities/project'
-import type { ProjectExtraLink, ProjectLinkSet } from '@/domain/enterprise/entities/project-details'
+import type {
+  ProjectImage,
+  ProjectStatus,
+  ProjectTeamAssignment,
+} from '@/domain/enterprise/entities/project'
+import { MAX_PROJECT_ADVISORS } from '@/domain/enterprise/entities/project-advisors'
+import {
+  DEFAULT_PROJECT_LINK_ICON,
+  isProjectLinkIcon,
+  MAX_LINK_TITLE_LENGTH,
+  MAX_LINK_URL_LENGTH,
+  MAX_PROJECT_LINKS,
+  type ProjectLinkInput,
+} from '@/domain/enterprise/entities/project-details'
+import {
+  isProjectImageOrientation,
+  PROJECT_IMAGE_LIMITS,
+} from '@/domain/enterprise/entities/project-images'
+import { normalizeTechnologyList } from '@/domain/enterprise/entities/technology-catalog'
 import { InvalidProjectError } from '@/domain/enterprise/errors/invalid-project-error'
 
-export interface ProjectFieldsInput extends ProjectLinkSet {
+export interface ProjectAdvisorsInput {
+  advisorEmail: string | null
+  coAdvisorEmails: string[] | undefined
+}
+
+export interface ProjectFieldsInput {
+  links: ProjectLinkInput[]
+  images: ProjectImage[] | undefined
   title: string
   summary: string
   overview: string
@@ -18,7 +42,6 @@ export interface ProjectFieldsInput extends ProjectLinkSet {
 }
 
 export const MAX_TAGS = 20
-export const MAX_EXTRA_LINKS = 10
 const CYCLE_PATTERN = /^\d{4}\/[12]$/
 
 export function text(value: unknown): string {
@@ -27,16 +50,10 @@ export function text(value: unknown): string {
 
 function tags(value: unknown): string[] {
   if (!Array.isArray(value)) return []
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const item of value) {
-    const tag = text(item)
-    const key = tag.toLocaleLowerCase('pt-BR')
-    if (!tag || tag.length > 60 || seen.has(key)) continue
-    seen.add(key)
-    result.push(tag)
-  }
-  return result
+  return normalizeTechnologyList(
+    value.map((item) => text(item)),
+    MAX_TAGS + 1,
+  )
 }
 
 export function emails(value: unknown): string[] {
@@ -54,46 +71,82 @@ function isHttpsUrl(value: string) {
 
 export function parseProjectLinks(
   data: Record<string, unknown>,
-): Either<InvalidProjectError, ProjectLinkSet> {
+): Either<InvalidProjectError, ProjectLinkInput[]> {
   const fail = (message: string) =>
-    left<InvalidProjectError, ProjectLinkSet>(new InvalidProjectError(message))
+    left<InvalidProjectError, ProjectLinkInput[]>(new InvalidProjectError(message))
 
-  const single = [
-    { value: text(data.repositoryUrl), label: 'o repositório' },
-    { value: text(data.liveUrl), label: 'o site no ar' },
-    { value: text(data.prototypeUrl), label: 'o protótipo' },
-  ]
-  for (const item of single) {
-    if (item.value && (item.value.length > 300 || !isHttpsUrl(item.value))) {
-      return fail(`Informe um link HTTPS válido para ${item.label}.`)
-    }
-  }
-
-  const rawExtras = Array.isArray(data.extraLinks) ? data.extraLinks : []
-  const extraLinks: ProjectExtraLink[] = []
-  for (const raw of rawExtras) {
-    const entry = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  const raw = Array.isArray(data.links) ? data.links : []
+  const links: ProjectLinkInput[] = []
+  for (const item of raw) {
+    const entry = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
     const title = text(entry.title)
     const url = text(entry.url)
     if (!title && !url) continue
-    if (title.length < 2 || title.length > 60) {
-      return fail('O título de cada link adicional deve ter entre 2 e 60 caracteres.')
+    if (title.length < 2 || title.length > MAX_LINK_TITLE_LENGTH) {
+      return fail(`O título de cada link deve ter entre 2 e ${MAX_LINK_TITLE_LENGTH} caracteres.`)
     }
-    if (url.length > 300 || !isHttpsUrl(url)) {
+    if (url.length > MAX_LINK_URL_LENGTH || !isHttpsUrl(url)) {
       return fail(`Informe um endereço HTTPS válido para o link “${title}”.`)
     }
-    extraLinks.push({ title, url })
+    const icon = isProjectLinkIcon(entry.icon) ? entry.icon : DEFAULT_PROJECT_LINK_ICON
+    links.push({ title, url, icon })
   }
-  if (extraLinks.length > MAX_EXTRA_LINKS) {
-    return fail(`Cadastre no máximo ${MAX_EXTRA_LINKS} links adicionais.`)
+  if (links.length > MAX_PROJECT_LINKS) {
+    return fail(`Cadastre no máximo ${MAX_PROJECT_LINKS} links.`)
   }
 
-  return right({
-    repositoryUrl: single[0].value || null,
-    liveUrl: single[1].value || null,
-    prototypeUrl: single[2].value || null,
-    extraLinks,
-  })
+  return right(links)
+}
+
+export function parseProjectImages(
+  data: Record<string, unknown>,
+): Either<InvalidProjectError, ProjectImage[] | undefined> {
+  const fail = (message: string) =>
+    left<InvalidProjectError, ProjectImage[] | undefined>(new InvalidProjectError(message))
+
+  if (data.images === undefined) return right(undefined)
+  if (!Array.isArray(data.images)) return fail('Informe a lista de imagens do projeto.')
+  if (data.images.length > PROJECT_IMAGE_LIMITS.maxFiles) {
+    return fail(`Cadastre no máximo ${PROJECT_IMAGE_LIMITS.maxFiles} imagens.`)
+  }
+
+  const images: ProjectImage[] = []
+  for (const item of data.images) {
+    const entry = (item && typeof item === 'object' ? item : {}) as Record<string, unknown>
+    const title = text(entry.title)
+    const url = text(entry.url)
+    if (title.length > PROJECT_IMAGE_LIMITS.maxTitleLength) {
+      return fail(
+        `O título da imagem deve ter no máximo ${PROJECT_IMAGE_LIMITS.maxTitleLength} caracteres.`,
+      )
+    }
+    if (url.length > MAX_LINK_URL_LENGTH || !isHttpsUrl(url)) {
+      return fail('Cada imagem precisa de um endereço HTTPS válido.')
+    }
+    if (!isProjectImageOrientation(entry.orientation)) {
+      return fail('Informe se cada imagem é horizontal ou vertical.')
+    }
+    images.push({ title, url, orientation: entry.orientation })
+  }
+  return right(images)
+}
+
+export function parseProjectAdvisors(
+  data: Record<string, unknown>,
+): Either<InvalidProjectError, ProjectAdvisorsInput> {
+  const advisorEmail = text(data.advisorEmail).toLowerCase() || null
+  const coAdvisorEmails =
+    data.coAdvisorEmails === undefined
+      ? undefined
+      : emails(data.coAdvisorEmails).filter((email) => email !== advisorEmail)
+  if (coAdvisorEmails && coAdvisorEmails.length > MAX_PROJECT_ADVISORS - 1) {
+    return left(
+      new InvalidProjectError(
+        `Cadastre no máximo ${MAX_PROJECT_ADVISORS} professores orientadores.`,
+      ),
+    )
+  }
+  return right({ advisorEmail, coAdvisorEmails })
 }
 
 export function parseProjectTeamAssignments(
@@ -176,6 +229,8 @@ export function parseProjectFields(
 
   const links = parseProjectLinks(data)
   if (links.isLeft()) return left(links.value)
+  const images = parseProjectImages(data)
+  if (images.isLeft()) return left(images.value)
 
   return right({
     title,
@@ -189,6 +244,7 @@ export function parseProjectFields(
     stack,
     studentEmails,
     teamAssignments,
-    ...links.value,
+    links: links.value,
+    images: images.value,
   })
 }

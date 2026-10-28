@@ -1,4 +1,5 @@
 import type { ListedProject } from '@/application/projects/list-projects'
+import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
 
 export interface Filters {
   query: string
@@ -46,7 +47,8 @@ export function applyFilters(list: ListedProject[], f: Filters): ListedProject[]
   const q = normalize(f.query.trim())
   return list.filter((p) => {
     if (q) {
-      const text = [p.title, p.summary, p.advisor.name, p.theme, ...p.languages, ...p.stack].join(
+      const advisorNames = getProjectAdvisors(p).map((advisor) => advisor.name)
+      const text = [p.title, p.summary, ...advisorNames, p.theme, ...p.languages, ...p.stack].join(
         ' ',
       )
       if (!normalize(text).includes(q)) return false
@@ -58,7 +60,9 @@ export function applyFilters(list: ListedProject[], f: Filters): ListedProject[]
     if (f.stack.length && !f.stack.some((s) => p.stack.includes(s))) return false
     if (f.languages.length && !f.languages.some((l) => p.languages.includes(l))) return false
     if (f.themes.length && !f.themes.includes(p.theme)) return false
-    if (f.advisor && p.advisor.email !== f.advisor) return false
+    if (f.advisor && !getProjectAdvisors(p).some((advisor) => advisor.email === f.advisor)) {
+      return false
+    }
     return true
   })
 }
@@ -102,11 +106,13 @@ const byCount = (a: Option<string>, b: Option<string>) =>
 export function getFacets(list: ListedProject[]): Facets {
   const advisors = new Map<string, { value: string; label: string; count: number }>()
   list.forEach((p) => {
-    const cur = advisors.get(p.advisor.email)
-    advisors.set(p.advisor.email, {
-      value: p.advisor.email,
-      label: p.advisor.name,
-      count: (cur?.count ?? 0) + 1,
+    getProjectAdvisors(p).forEach((advisor) => {
+      const cur = advisors.get(advisor.email)
+      advisors.set(advisor.email, {
+        value: advisor.email,
+        label: advisor.name,
+        count: (cur?.count ?? 0) + 1,
+      })
     })
   })
   return {

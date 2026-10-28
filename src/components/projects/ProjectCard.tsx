@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ListedProject } from '@/application/projects/list-projects'
+import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
 import { FavoriteButton } from './FavoriteButton'
 
 const TONE = {
@@ -21,7 +22,16 @@ export function ProjectCard({
   isFavorite = false,
   onToggleFavorite,
 }: ProjectCardProps) {
-  const advisorLabel = p.advisor.name.startsWith('Profa') ? 'Orientadora' : 'Orientador'
+  const advisors = getProjectAdvisors(p)
+  const advisorLabel =
+    advisors.length > 1
+      ? 'Orientadores'
+      : p.advisor.name.startsWith('Profa')
+        ? 'Orientadora'
+        : 'Orientador'
+  const advisorText =
+    advisors.length > 1 ? `${p.advisor.name} +${advisors.length - 1}` : p.advisor.name
+  const inactive = p.active === false
   const chips = [...new Set([...p.languages, ...p.stack])].slice(0, 4)
   const showFavorite = isAuthenticated && p.status === 'publicado' && Boolean(onToggleFavorite)
 
@@ -29,7 +39,7 @@ export function ProjectCard({
     <article
       className={`flex h-full flex-col overflow-hidden rounded-xl border bg-surface shadow-sm transition hover:shadow-md ${
         p.related ? 'border-primary/30' : 'border-border'
-      }`}
+      } ${inactive ? 'opacity-70' : ''}`}
     >
       <div
         className={`relative flex h-[150px] flex-col items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]}`}
@@ -39,7 +49,11 @@ export function ProjectCard({
           {p.cover.label}
         </span>
 
-        {p.verified ? (
+        {inactive ? (
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[11px] font-semibold text-white">
+            <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
+          </span>
+        ) : p.verified ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
             <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> PI Verificado
           </span>
@@ -58,7 +72,7 @@ export function ProjectCard({
         <div className="flex items-center justify-between gap-2 text-[11px] font-medium text-slate-600">
           <span>Ciclo {p.cycle}</span>
           <span className="text-right">
-            {advisorLabel}: {p.advisor.name}
+            {advisorLabel}: {advisorText}
           </span>
         </div>
         <h3 className="mt-2 line-clamp-3 text-lg font-semibold leading-snug text-slate-900">

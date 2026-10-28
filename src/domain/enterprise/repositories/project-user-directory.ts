@@ -16,6 +16,6 @@ export interface ProjectDirectoryPerson {
 
 export interface ProjectUserDirectory {
   findActiveAccountById(id: string): Promise<ProjectDirectoryAccount | null>
-  findActiveAdvisorByEmail(email: string): Promise<ProjectDirectoryPerson | null>
+  findActiveAdvisorsByEmails(emails: string[]): Promise<ProjectDirectoryPerson[]>
   findActiveStudentsByEmails(emails: string[]): Promise<ProjectDirectoryPerson[]>
 }
