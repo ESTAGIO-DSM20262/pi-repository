@@ -597,3 +597,12 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
   `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
   cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.
+
+## 22. Dropdowns dentro de modais
+
+- `SelectDropdown` renderiza o menu em um portal no `body`. O `z-index` é aplicado por estilo
+  inline: 100 por padrão e `2147483647` com `layer="modal"`, acima dos modais (`2147483646`, como
+  `ProgressTaskDialog` e `ProjectVerificationPanel`). A classe Tailwind arbitrária com variável CSS
+  (`z-[var(--z-modal-dropdown)]`) foi removida porque o menu ficava atrás do modal e as opções (por
+  exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Todo dropdown usado
+  dentro de um modal deve passar `layer="modal"`.
