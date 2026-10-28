@@ -567,3 +567,33 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   configure `images.remotePatterns` e remova `unoptimized` dos componentes `Image`.
 - **Ícones:** `fi-rr-code`, `fi-rr-server` e `fi-rr-folder-check` não existem no CSS instalado. O
   código novo usa apenas ícones verificados no catálogo `rounded.css`.
+
+## 21. Dashboards de professor e administrador
+
+- **Onde ficam:** o cálculo é puro e testado em `application/dashboard/dashboard-metrics.ts`
+  (`buildProfessorDashboardMetrics`, `buildAdminDashboardMetrics`, `summarizeTasks`); as consultas
+  ao banco estão em `infrastructure/dashboard/dashboard-queries.ts` (tarefas de progresso,
+  indicações do professor, pessoas ativas e cadastros por mês). `DashboardPage` junta as duas
+  partes e entrega as métricas ao `RoleDashboard`; se a consulta falhar, o erro vai para o log e o
+  bloco extra simplesmente não aparece. Os gráficos são SVG/CSS em `DashboardWidgets.tsx`, sem
+  biblioteca externa.
+- **Regras de tarefas:** uma tarefa está _atrasada_ quando não está concluída e o prazo
+  (`due_date`) é anterior a hoje (data em `America/Sao_Paulo`); _vence em 7 dias_ quando o prazo é
+  hoje ou nos 7 dias seguintes. A taxa de conclusão é concluídas ÷ total. Um projeto em andamento
+  está _parado_ quando tem tarefas abertas e nenhuma foi alterada há 14 dias (`STALLED_AFTER_DAYS`),
+  _sem tarefas_ quando não tem nenhuma, e _pronto para concluir_ quando todas estão concluídas.
+- **Professor** (`ProfessorOverview`): cartões (projetos acompanhados, em andamento, concluídos,
+  taxa de conclusão, tarefas em aberto, atrasadas, vencendo em 7 dias, projetos parados); lista de
+  atrasadas e próximos prazos (14 dias); progresso por projeto em andamento, ordenado por
+  urgência; gráficos de tarefas por situação, projetos por semestre e situação/indicação; carga por
+  aluno (tarefas atribuídas a cada um); projetos concluídos que o professor ainda não indicou. Só
+  entram projetos ativos em que ele é orientador ou coorientador (`related`).
+- **Administrador:** os cartões agora contam apenas projetos **ativos** (desativados aparecem na
+  nota do primeiro cartão e em "Pendências"); "Projetos Indicados" é proporcional aos concluídos.
+  `AdminInsights` adiciona projetos por situação e por semestre, tarefas do sistema, projetos que
+  precisam de atenção (atrasados, parados ou sem tarefas), pendências (concluídos sem indicação,
+  em andamento sem tarefas, alunos e professores sem projeto, desativados), carga dos orientadores
+  e usuários por perfil com novos cadastros dos últimos 6 meses.
+- **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
+  `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
+  cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.
