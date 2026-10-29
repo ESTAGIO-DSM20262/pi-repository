@@ -88,8 +88,8 @@ function AdvisorLoadList({ rows }: { rows: AdminDashboardMetrics['advisorLoad'] 
           <p className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-900">{row.name}</p>
           <div className="flex shrink-0 items-center gap-1.5">
             {row.overdue > 0 && <Badge tone="alert">{row.overdue} atrasada(s)</Badge>}
-            <Badge tone="ongoing">{row.ongoing} em andamento</Badge>
-            <Badge tone="done">{row.completed} concluídos</Badge>
+            <Badge tone={row.ongoing > 0 ? 'warning' : 'pending'}>{row.ongoing} em andamento</Badge>
+            <Badge tone={row.completed > 0 ? 'done' : 'pending'}>{row.completed} concluídos</Badge>
           </div>
         </li>
       ))}

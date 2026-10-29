@@ -214,16 +214,13 @@ function About({ role }: { role: Role | null }) {
         <SectionTitle eyebrow="Passo a passo" title="Como usar" />
         <ol className="grid gap-4 md:grid-cols-3">
           {STEPS.map((step, index) => (
-            <li
-              key={step.title}
-              className="relative rounded-xl border border-border bg-white p-5 pt-7 shadow-sm"
-            >
-              <span className="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-white shadow-sm">
-                {index + 1}
-              </span>
-              <div className="flex items-center gap-2.5">
+            <li key={step.title} className="rounded-xl border border-border bg-white p-5 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold leading-none text-white">
+                  {index + 1}
+                </span>
+                <h3 className="min-w-0 flex-1 text-base font-bold text-slate-900">{step.title}</h3>
                 <i className={`fi ${step.icon} flex text-lg text-secondary`} aria-hidden="true" />
-                <h3 className="text-base font-bold text-slate-900">{step.title}</h3>
               </div>
               <p className="mt-2 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
                 {step.text}

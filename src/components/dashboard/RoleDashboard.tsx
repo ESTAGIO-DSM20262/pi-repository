@@ -102,7 +102,7 @@ function AdminOverviewCards({
       value: formatMetric(totalProjects),
       note: `${formatMetric(ongoingProjects)} em andamento · ${formatMetric(completedProjects)} concluídos${deactivatedProjects > 0 ? ` · ${formatMetric(deactivatedProjects)} desativados` : ''}`,
       icon: 'fi-rr-duplicate',
-      tone: 'info',
+      tone: 'neutral',
       ratio: 100,
     },
     {
@@ -145,7 +145,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.active),
       note: `${formatMetric(userMetrics?.students)} alunos · ${formatMetric(userMetrics?.professors)} professores`,
       icon: 'fi-rr-user-check',
-      tone: 'info',
+      tone: 'professor',
       ratio: totalUsers ? ((userMetrics?.active ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -153,7 +153,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.inactive),
       note: 'Sem permissão para acessar o sistema',
       icon: 'fi-rr-user-lock',
-      tone: 'pending',
+      tone: 'warning',
       ratio: totalUsers ? ((userMetrics?.inactive ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -161,7 +161,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.verifiedEmails),
       note: `${formatMetric(userMetrics?.admins)} contas administrativas`,
       icon: 'fi-rr-shield-check',
-      tone: 'info',
+      tone: 'neutral',
       ratio: totalUsers ? ((userMetrics?.verifiedEmails ?? 0) / totalUsers) * 100 : 0,
     },
   ] as const

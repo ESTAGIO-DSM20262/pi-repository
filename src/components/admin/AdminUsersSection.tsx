@@ -322,7 +322,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   <td className="px-4 py-3">
                     <div className="flex min-w-[170px] items-center gap-2.5">
                       <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${user.role === 'student' ? 'bg-accent-light text-secondary-hover' : user.role === 'professor' ? 'bg-violet-100 text-violet-800' : 'bg-slate-200 text-slate-800'}`}
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${user.role === 'student' ? 'bg-accent-light text-secondary-hover' : user.role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-slate-200 text-slate-800'}`}
                       >
                         {getNameInitials(user.name)}
                       </span>
