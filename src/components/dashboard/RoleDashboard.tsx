@@ -2,10 +2,18 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import type {
-  AdminDashboardMetrics,
-  MonthlyRegistration,
-  ProfessorDashboardMetrics,
+import {
+  EMPTY_DASHBOARD_FILTERS,
+  filterDashboardProjects,
+  listAdvisorOptions,
+  listProjectOptions,
+  listSemesterOptions,
+} from '@/application/dashboard/dashboard-filters'
+import {
+  buildAdminDashboardMetrics,
+  buildProfessorDashboardMetrics,
+  type DashboardTask,
+  type MonthlyRegistration,
 } from '@/application/dashboard/dashboard-metrics'
 import type { ListedProject } from '@/application/projects/list-projects'
 import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
@@ -16,6 +24,7 @@ import { formatPersonName } from '@/libs/initials'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 import { AdminInsights } from './AdminInsights'
+import { DashboardFiltersBar } from './DashboardFiltersBar'
 import { formatMetric, StatCard } from './DashboardWidgets'
 import { ProfessorOverview } from './ProfessorOverview'
 
@@ -30,6 +39,21 @@ export interface AdminUserMetrics {
   admins: number
 }
 
+export interface AdminDashboardData {
+  tasks: DashboardTask[]
+  activeStudentEmails: string[]
+  activeProfessorEmails: string[]
+  today: string
+  nowIso: string
+}
+
+export interface ProfessorDashboardData {
+  tasks: DashboardTask[]
+  indicatedProjectIds: string[]
+  today: string
+  nowIso: string
+}
+
 interface RoleDashboardProps {
   currentUserId: string
   name: string
@@ -37,9 +61,9 @@ interface RoleDashboardProps {
   role: Role
   projects: ListedProject[]
   adminUserMetrics?: AdminUserMetrics
-  adminMetrics?: AdminDashboardMetrics
+  adminData?: AdminDashboardData
   registrations?: MonthlyRegistration[]
-  professorMetrics?: ProfessorDashboardMetrics
+  professorData?: ProfessorDashboardData
 }
 
 function AdminOverviewCards({
@@ -69,7 +93,7 @@ function AdminOverviewCards({
       value: formatMetric(totalProjects),
       note: `${formatMetric(ongoingProjects)} em andamento · ${formatMetric(completedProjects)} concluídos${deactivatedProjects > 0 ? ` · ${formatMetric(deactivatedProjects)} desativados` : ''}`,
       icon: 'fi-rr-duplicate',
-      tone: 'red',
+      tone: 'info',
       ratio: 100,
     },
     {
@@ -77,7 +101,7 @@ function AdminOverviewCards({
       value: formatMetric(verifiedProjects),
       note: `${formatMetric(verifiedProjects)} de ${formatMetric(completedProjects)} projetos concluídos`,
       icon: 'fi-rr-badge-check',
-      tone: 'green',
+      tone: 'indicated',
       ratio: completedProjects ? (verifiedProjects / completedProjects) * 100 : 0,
     },
     {
@@ -88,15 +112,15 @@ function AdminOverviewCards({
           ? `${formatMetric(ongoingWithTasks)} com tarefas cadastradas`
           : 'Projetos ainda em desenvolvimento',
       icon: 'fi-rr-time-fast',
-      tone: 'slate',
+      tone: 'ongoing',
       ratio: totalProjects ? (ongoingProjects / totalProjects) * 100 : 0,
     },
     {
       title: 'Projetos Concluídos',
       value: formatMetric(completedProjects),
       note: 'Disponíveis no acervo público',
-      icon: 'fi-rr-folder-check',
-      tone: 'green',
+      icon: 'fi-rr-flag-checkered',
+      tone: 'done',
       ratio: totalProjects ? (completedProjects / totalProjects) * 100 : 0,
     },
     {
@@ -104,7 +128,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.total),
       note: `${formatMetric(userMetrics?.newThisMonth)} novos cadastros neste mês`,
       icon: 'fi-rr-users',
-      tone: 'slate',
+      tone: 'info',
       ratio: 100,
     },
     {
@@ -112,7 +136,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.active),
       note: `${formatMetric(userMetrics?.students)} alunos · ${formatMetric(userMetrics?.professors)} professores`,
       icon: 'fi-rr-user-check',
-      tone: 'green',
+      tone: 'info',
       ratio: totalUsers ? ((userMetrics?.active ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -120,7 +144,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.inactive),
       note: 'Sem permissão para acessar o sistema',
       icon: 'fi-rr-user-lock',
-      tone: 'red',
+      tone: 'alert',
       ratio: totalUsers ? ((userMetrics?.inactive ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -128,7 +152,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.verifiedEmails),
       note: `${formatMetric(userMetrics?.admins)} contas administrativas`,
       icon: 'fi-rr-shield-check',
-      tone: 'green',
+      tone: 'info',
       ratio: totalUsers ? ((userMetrics?.verifiedEmails ?? 0) / totalUsers) * 100 : 0,
     },
   ] as const
@@ -157,7 +181,6 @@ function AdminOverviewCards({
             icon={card.icon}
             tone={card.tone}
             ratio={card.ratio}
-            valueTone={card.title === 'Contas Inativas' ? 'slate' : undefined}
           />
         ))}
       </div>
@@ -563,9 +586,9 @@ export function RoleDashboard({
   role,
   projects,
   adminUserMetrics,
-  adminMetrics,
+  adminData,
   registrations,
-  professorMetrics,
+  professorData,
 }: RoleDashboardProps) {
   const publishedProjects = useMemo(
     () => projects.filter((project) => project.status === 'publicado'),
@@ -573,6 +596,53 @@ export function RoleDashboard({
   )
   const relatedProjects = useMemo(() => projects.filter((project) => project.related), [projects])
   const displayedProjects = role === 'admin' ? projects : relatedProjects
+  const [filters, setFilters] = useState(EMPTY_DASHBOARD_FILTERS)
+  const filterBase = displayedProjects
+  const filteredProjects = useMemo(
+    () => filterDashboardProjects(filterBase, filters),
+    [filterBase, filters],
+  )
+  const semesterOptions = useMemo(() => listSemesterOptions(filterBase), [filterBase])
+  const projectOptions = useMemo(
+    () => listProjectOptions(filterDashboardProjects(filterBase, filters, ['projectId'])),
+    [filterBase, filters],
+  )
+  const advisorOptions = useMemo(
+    () => (role === 'admin' ? listAdvisorOptions(filterBase) : undefined),
+    [filterBase, role],
+  )
+  const adminMetrics = useMemo(() => {
+    if (role !== 'admin' || !adminData) return undefined
+    const metrics = buildAdminDashboardMetrics({
+      projects: filteredProjects,
+      tasks: adminData.tasks,
+      activeStudentEmails: adminData.activeStudentEmails,
+      activeProfessorEmails: adminData.activeProfessorEmails,
+      today: adminData.today,
+      now: new Date(adminData.nowIso),
+    })
+    const overall = buildAdminDashboardMetrics({
+      projects,
+      tasks: adminData.tasks,
+      activeStudentEmails: adminData.activeStudentEmails,
+      activeProfessorEmails: adminData.activeProfessorEmails,
+      today: adminData.today,
+      now: new Date(adminData.nowIso),
+    })
+    return { ...metrics, people: overall.people }
+  }, [role, adminData, filteredProjects, projects])
+  const professorMetrics = useMemo(() => {
+    if (role !== 'professor' || !professorData) return undefined
+    return buildProfessorDashboardMetrics({
+      projects: filteredProjects,
+      tasks: professorData.tasks,
+      indicatedProjectIds: professorData.indicatedProjectIds,
+      today: professorData.today,
+      now: new Date(professorData.nowIso),
+    })
+  }, [role, professorData, filteredProjects])
+  const showFilters =
+    (role === 'admin' && Boolean(adminData)) || (role === 'professor' && Boolean(professorData))
   const firstName =
     formatPersonName(name)
       .split(/\s+/)
@@ -619,7 +689,7 @@ export function RoleDashboard({
                   Painel institucional
                 </p>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-secondary text-white' : role === 'professor' ? 'bg-primary-light text-primary' : 'bg-accent-light text-secondary-hover'}`}
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-violet-100 text-violet-800' : 'bg-accent-light text-secondary-hover'}`}
                 >
                   {ROLE_LABEL[role]}
                 </span>
@@ -634,9 +704,26 @@ export function RoleDashboard({
       </section>
 
       <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
+        {showFilters && (
+          <DashboardFiltersBar
+            filters={filters}
+            onChange={setFilters}
+            onClear={() => setFilters(EMPTY_DASHBOARD_FILTERS)}
+            semesterOptions={semesterOptions}
+            projectOptions={projectOptions}
+            advisorOptions={advisorOptions}
+            shown={filteredProjects.length}
+            total={filterBase.length}
+            scopeNote={
+              role === 'admin'
+                ? 'Vale para os indicadores de projetos e tarefas e para os gráficos. Dados de usuários e de pessoas sem projeto consideram todo o sistema.'
+                : 'Vale para os indicadores, prazos, gráficos e listas de acompanhamento abaixo.'
+            }
+          />
+        )}
         {role === 'admin' && (
           <AdminOverviewCards
-            projects={projects}
+            projects={filteredProjects}
             userMetrics={adminUserMetrics}
             ongoingWithTasks={adminMetrics?.projects.ongoingWithTasks}
           />

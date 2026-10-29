@@ -12,6 +12,7 @@ import {
   Panel,
   ProgressBar,
   StackedBar,
+  ToneLegend,
 } from './DashboardWidgets'
 
 function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
@@ -25,45 +26,53 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
   }
 
   return (
-    <ul className="space-y-2">
-      {rows.map((row) => (
-        <li key={row.projectId} className="rounded-lg border border-border bg-white p-3">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <Link
-                href={`/projetos/${row.projectId}`}
-                className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors hover:text-primary"
-                title={row.title}
-              >
-                {row.title}
-              </Link>
-              <p className="mt-0.5 truncate text-[10px] text-text-secondary sm:text-[11px]">
-                Orientador: {row.advisorName} · {row.semester}º semestre
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center justify-end gap-1.5">
-              {row.overdue > 0 && <Badge tone="red">{row.overdue} atrasada(s)</Badge>}
-              {row.stalled && <Badge tone="amber">Parado há {row.lastActivityDays} dias</Badge>}
-              {row.withoutTasks && <Badge tone="slate">Sem tarefas</Badge>}
-            </div>
-          </div>
-          {row.total > 0 && (
-            <div className="mt-2 flex items-center gap-3">
+    <>
+      <ul className="space-y-2">
+        {rows.map((row) => (
+          <li key={row.projectId} className="rounded-lg border border-border bg-white p-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <ProgressBar
-                  percent={row.percent}
-                  tone={row.overdue > 0 ? 'red' : 'amber'}
-                  label={`Progresso de ${row.title}`}
-                />
+                <Link
+                  href={`/projetos/${row.projectId}`}
+                  className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors hover:text-primary"
+                  title={row.title}
+                >
+                  {row.title}
+                </Link>
+                <p className="mt-0.5 truncate text-[10px] text-text-secondary sm:text-[11px]">
+                  Orientador: {row.advisorName} · {row.semester}º semestre
+                </p>
               </div>
-              <span className="shrink-0 text-[11px] font-semibold tabular-nums text-slate-700">
-                {row.completed}/{row.total}
-              </span>
+              <div className="flex flex-wrap items-center justify-end gap-1.5">
+                {row.overdue > 0 && <Badge tone="alert">{row.overdue} atrasada(s)</Badge>}
+                {row.stalled && <Badge tone="warning">Parado há {row.lastActivityDays} dias</Badge>}
+                {row.withoutTasks && <Badge tone="pending">Sem tarefas</Badge>}
+              </div>
             </div>
-          )}
-        </li>
-      ))}
-    </ul>
+            {row.total > 0 && (
+              <div className="mt-2 flex items-center gap-3">
+                <div className="min-w-0 flex-1">
+                  <ProgressBar
+                    percent={row.percent}
+                    tone={row.overdue > 0 ? 'alert' : 'ongoing'}
+                    label={`Progresso de ${row.title}`}
+                  />
+                </div>
+                <span className="shrink-0 text-[11px] font-semibold tabular-nums text-slate-700">
+                  {row.completed}/{row.total}
+                </span>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+      <ToneLegend
+        items={[
+          { tone: 'ongoing', label: 'Barra: em andamento' },
+          { tone: 'alert', label: 'Barra: com tarefas atrasadas' },
+        ]}
+      />
+    </>
   )
 }
 
@@ -78,9 +87,9 @@ function AdvisorLoadList({ rows }: { rows: AdminDashboardMetrics['advisorLoad'] 
         <li key={row.email} className="flex items-center justify-between gap-3">
           <p className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-900">{row.name}</p>
           <div className="flex shrink-0 items-center gap-1.5">
-            {row.overdue > 0 && <Badge tone="red">{row.overdue} atrasada(s)</Badge>}
-            <Badge tone="amber">{row.ongoing} em andamento</Badge>
-            <Badge tone="green">{row.completed} concluídos</Badge>
+            {row.overdue > 0 && <Badge tone="alert">{row.overdue} atrasada(s)</Badge>}
+            <Badge tone="ongoing">{row.ongoing} em andamento</Badge>
+            <Badge tone="done">{row.completed} concluídos</Badge>
           </div>
         </li>
       ))}
@@ -104,7 +113,7 @@ function PendingItem({
   return (
     <li className="flex items-center gap-3 rounded-lg border border-border bg-white p-3">
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-primary-light text-primary' : 'bg-accent-light text-secondary'}`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}`}
       >
         <i className={`fi ${icon} flex`} aria-hidden="true" />
       </span>
@@ -113,7 +122,7 @@ function PendingItem({
         <p className="text-[10px] text-text-secondary sm:text-[11px]">{hint}</p>
       </div>
       <span
-        className={`text-xl font-bold tabular-nums ${alert ? 'text-primary' : 'text-secondary'}`}
+        className={`text-xl font-bold tabular-nums ${alert ? 'text-slate-900' : 'text-slate-500'}`}
       >
         {formatMetric(value)}
       </span>
@@ -158,13 +167,13 @@ export function AdminInsights({
               centerValue={formatMetric(projects.total)}
               centerLabel="projetos"
               segments={[
-                { label: 'Em andamento', value: projects.ongoing, tone: 'amber' },
+                { label: 'Em andamento', value: projects.ongoing, tone: 'ongoing' },
                 {
                   label: 'Concluídos sem indicação',
                   value: projects.awaitingIndication,
-                  tone: 'slate',
+                  tone: 'awaiting',
                 },
-                { label: 'Concluídos e indicados', value: projects.indicated, tone: 'green' },
+                { label: 'Concluídos e indicados', value: projects.indicated, tone: 'indicated' },
               ]}
             />
           ) : (
@@ -178,13 +187,13 @@ export function AdminInsights({
               columns={metrics.semesters.map((item) => ({
                 label: `${item.semester}º`,
                 segments: [
-                  { value: item.completed, tone: 'green' },
-                  { value: item.ongoing, tone: 'amber' },
+                  { value: item.completed, tone: 'done' },
+                  { value: item.ongoing, tone: 'ongoing' },
                 ],
               }))}
               legend={[
-                { label: 'Concluídos', value: projects.completed, tone: 'green' },
-                { label: 'Em andamento', value: projects.ongoing, tone: 'amber' },
+                { label: 'Concluídos', value: projects.completed, tone: 'done' },
+                { label: 'Em andamento', value: projects.ongoing, tone: 'ongoing' },
               ]}
             />
           ) : (
@@ -201,23 +210,23 @@ export function AdminInsights({
               <StackedBar
                 ariaLabel="Tarefas por situação"
                 segments={[
-                  { label: 'Concluídas', value: tasks.completed, tone: 'green' },
-                  { label: 'Em andamento', value: tasks.inProgress, tone: 'amber' },
-                  { label: 'Pendentes', value: tasks.pending, tone: 'slate' },
+                  { label: 'Concluídas', value: tasks.completed, tone: 'done' },
+                  { label: 'Em andamento', value: tasks.inProgress, tone: 'ongoing' },
+                  { label: 'Pendentes', value: tasks.pending, tone: 'pending' },
                 ]}
               />
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-primary-light p-2.5">
-                  <p className="text-lg font-bold tabular-nums text-primary">
+                <div className="rounded-lg bg-slate-800 p-2.5">
+                  <p className="text-lg font-bold tabular-nums text-white">
                     {formatMetric(tasks.overdue)}
                   </p>
-                  <p className="text-[10px] text-primary-hover">Atrasadas</p>
+                  <p className="text-[10px] text-slate-200">Atrasadas</p>
                 </div>
-                <div className="rounded-lg bg-accent-light p-2.5">
-                  <p className="text-lg font-bold tabular-nums text-secondary">
+                <div className="rounded-lg bg-primary-light p-2.5">
+                  <p className="text-lg font-bold tabular-nums text-primary">
                     {tasks.completionRate}%
                   </p>
-                  <p className="text-[10px] text-secondary-hover">Taxa de conclusão</p>
+                  <p className="text-[10px] text-primary-hover">Taxa de conclusão</p>
                 </div>
               </div>
             </div>
@@ -299,9 +308,9 @@ export function AdminInsights({
               <StackedBar
                 ariaLabel="Usuários por perfil"
                 segments={[
-                  { label: 'Alunos', value: userMetrics.students, tone: 'green' },
-                  { label: 'Professores', value: userMetrics.professors, tone: 'red' },
-                  { label: 'Administradores', value: userMetrics.admins, tone: 'slate' },
+                  { label: 'Alunos', value: userMetrics.students, tone: 'info' },
+                  { label: 'Professores', value: userMetrics.professors, tone: 'violet' },
+                  { label: 'Administradores', value: userMetrics.admins, tone: 'neutral' },
                 ]}
               />
               {registrations && registrations.length > 0 && (
@@ -309,9 +318,9 @@ export function AdminInsights({
                   ariaLabel="Novos cadastros por mês"
                   columns={registrations.map((item) => ({
                     label: item.label,
-                    segments: [{ value: item.count, tone: 'green' }],
+                    segments: [{ value: item.count, tone: 'info' }],
                   }))}
-                  legend={[{ label: 'Novos cadastros por mês', value: 0, tone: 'green' }]}
+                  legend={[{ label: 'Novos cadastros por mês', value: 0, tone: 'info' }]}
                 />
               )}
             </div>

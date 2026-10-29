@@ -1,42 +1,111 @@
 import type { ReactNode } from 'react'
 
-export type WidgetTone = 'red' | 'green' | 'amber' | 'slate'
+export type WidgetTone =
+  | 'ongoing'
+  | 'warning'
+  | 'done'
+  | 'indicated'
+  | 'awaiting'
+  | 'pending'
+  | 'alert'
+  | 'info'
+  | 'violet'
+  | 'neutral'
 
-const TONE_STYLES: Record<
-  WidgetTone,
-  { icon: string; chip: string; bar: string; stroke: string; dot: string; value: string }
-> = {
-  red: {
+interface ToneStyle {
+  icon: string
+  chip: string
+  bar: string
+  stroke: string
+  dot: string
+  value: string
+  badge: string
+}
+
+const AMBER_STYLE: ToneStyle = {
+  icon: 'text-amber-700',
+  chip: 'bg-amber-100',
+  bar: 'bg-amber-400',
+  stroke: 'stroke-amber-400',
+  dot: 'bg-amber-400',
+  value: 'text-amber-700',
+  badge: 'bg-amber-100 text-amber-800',
+}
+
+const TONE_STYLES: Record<WidgetTone, ToneStyle> = {
+  done: {
     icon: 'text-primary',
     chip: 'bg-primary-light',
     bar: 'bg-primary',
     stroke: 'stroke-primary',
     dot: 'bg-primary',
     value: 'text-primary',
+    badge: 'bg-primary-light text-primary',
   },
-  green: {
+  ongoing: AMBER_STYLE,
+  warning: AMBER_STYLE,
+  indicated: {
     icon: 'text-secondary',
     chip: 'bg-accent-light',
     bar: 'bg-secondary',
     stroke: 'stroke-secondary',
     dot: 'bg-secondary',
     value: 'text-secondary',
+    badge: 'bg-accent-light text-secondary-hover',
   },
-  amber: {
-    icon: 'text-amber-700',
-    chip: 'bg-amber-100',
-    bar: 'bg-amber-400',
-    stroke: 'stroke-amber-400',
-    dot: 'bg-amber-400',
-    value: 'text-amber-700',
+  awaiting: {
+    icon: 'text-rose-600',
+    chip: 'bg-rose-100',
+    bar: 'bg-rose-300',
+    stroke: 'stroke-rose-300',
+    dot: 'bg-rose-300',
+    value: 'text-rose-700',
+    badge: 'bg-rose-100 text-rose-800',
   },
-  slate: {
+  pending: {
+    icon: 'text-slate-600',
+    chip: 'bg-slate-100',
+    bar: 'bg-slate-400',
+    stroke: 'stroke-slate-400',
+    dot: 'bg-slate-400',
+    value: 'text-slate-900',
+    badge: 'bg-slate-100 text-slate-700',
+  },
+  alert: {
+    icon: 'text-white',
+    chip: 'bg-slate-800',
+    bar: 'bg-slate-800',
+    stroke: 'stroke-slate-800',
+    dot: 'bg-slate-800',
+    value: 'text-slate-900',
+    badge: 'bg-slate-800 text-white',
+  },
+  info: {
     icon: 'text-secondary-hover',
-    chip: 'bg-surface-secondary',
+    chip: 'bg-accent-light',
     bar: 'bg-accent',
     stroke: 'stroke-accent',
     dot: 'bg-accent',
     value: 'text-slate-900',
+    badge: 'bg-accent-light text-secondary-hover',
+  },
+  violet: {
+    icon: 'text-violet-700',
+    chip: 'bg-violet-100',
+    bar: 'bg-violet-500',
+    stroke: 'stroke-violet-500',
+    dot: 'bg-violet-500',
+    value: 'text-violet-800',
+    badge: 'bg-violet-100 text-violet-800',
+  },
+  neutral: {
+    icon: 'text-slate-600',
+    chip: 'bg-slate-200',
+    bar: 'bg-slate-500',
+    stroke: 'stroke-slate-500',
+    dot: 'bg-slate-500',
+    value: 'text-slate-900',
+    badge: 'bg-slate-200 text-slate-800',
   },
 }
 
@@ -66,7 +135,7 @@ export function StatCard({
   valueTone?: WidgetTone
 }) {
   const styles = TONE_STYLES[tone]
-  const valueStyles = TONE_STYLES[valueTone ?? (tone === 'green' ? 'green' : 'slate')]
+  const valueStyles = TONE_STYLES[valueTone ?? tone]
 
   return (
     <article className="min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
@@ -341,7 +410,7 @@ export function ColumnChart({
 
 export function ProgressBar({
   percent,
-  tone = 'green',
+  tone = 'done',
   label,
 }: {
   percent: number
@@ -367,17 +436,26 @@ export function ProgressBar({
   )
 }
 
-export function Badge({ tone, children }: { tone: WidgetTone; children: ReactNode }) {
-  const styles: Record<WidgetTone, string> = {
-    red: 'bg-primary-light text-primary',
-    green: 'bg-accent-light text-secondary-hover',
-    amber: 'bg-amber-100 text-amber-800',
-    slate: 'bg-surface-secondary text-slate-700',
-  }
+export function ToneLegend({ items }: { items: Array<{ tone: WidgetTone; label: string }> }) {
+  return (
+    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-light pt-2.5">
+      {items.map((item) => (
+        <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+          <span
+            className={`h-2 w-2 shrink-0 rounded-full ${TONE_STYLES[item.tone].dot}`}
+            aria-hidden="true"
+          />
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  )
+}
 
+export function Badge({ tone, children }: { tone: WidgetTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-semibold ${styles[tone]}`}
+      className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-semibold ${TONE_STYLES[tone].badge}`}
     >
       {children}
     </span>
@@ -392,9 +470,9 @@ export function formatShortDate(date: string) {
 export function describeDueDate(daysUntilDue: number): { label: string; tone: WidgetTone } {
   if (daysUntilDue < 0) {
     const days = Math.abs(daysUntilDue)
-    return { label: `Atrasada há ${days} ${days === 1 ? 'dia' : 'dias'}`, tone: 'red' }
+    return { label: `Atrasada há ${days} ${days === 1 ? 'dia' : 'dias'}`, tone: 'alert' }
   }
-  if (daysUntilDue === 0) return { label: 'Vence hoje', tone: 'amber' }
-  if (daysUntilDue === 1) return { label: 'Vence amanhã', tone: 'amber' }
-  return { label: `Vence em ${daysUntilDue} dias`, tone: daysUntilDue <= 7 ? 'amber' : 'slate' }
+  if (daysUntilDue === 0) return { label: 'Vence hoje', tone: 'warning' }
+  if (daysUntilDue === 1) return { label: 'Vence amanhã', tone: 'warning' }
+  return { label: `Vence em ${daysUntilDue} dias`, tone: daysUntilDue <= 7 ? 'warning' : 'pending' }
 }
