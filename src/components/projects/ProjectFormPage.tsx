@@ -623,7 +623,7 @@ export function ProjectFormPage({
                           <label className={labelClass} htmlFor="project-summary">
                             Resumo <Required />
                           </label>
-                          <span className="mb-1.5 text-[11px] font-semibold text-[#765e58]">
+                          <span className="mb-1.5 text-[11px] font-semibold text-[#666666]">
                             {summary.length} / 600 caracteres
                           </span>
                         </div>
@@ -645,7 +645,7 @@ export function ProjectFormPage({
                             Descrição detalhada{' '}
                             <span className="font-normal text-slate-500">(opcional)</span>
                           </label>
-                          <span className="mb-1.5 text-[11px] font-semibold text-[#765e58]">
+                          <span className="mb-1.5 text-[11px] font-semibold text-[#666666]">
                             {overview.length} / 5000 caracteres
                           </span>
                         </div>
@@ -868,14 +868,14 @@ export function ProjectFormPage({
             <section className={sectionClass}>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="slate">Somente leitura</Badge>
-                <span className="text-xs text-[#765e58]">
+                <span className="text-xs text-[#666666]">
                   {initialValues?.semester}º semestre · ciclo {initialValues?.cycle}
                 </span>
               </div>
               <h2 className="mt-3 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 {initialValues?.title}
               </h2>
-              <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
+              <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
                 Orientador:{' '}
                 {professors.find((professor) => professor.email === advisorEmail)?.name ??
                   advisorEmail}

@@ -1,4 +1,5 @@
-import { cardClass, descriptionClass, eyebrowClass, pageClass, titleClass } from '../../libs/styles'
+import Image from 'next/image'
+import { cardClass, descriptionClass, pageClass, titleClass } from '../../libs/styles'
 
 export function AuthCard({
   children,
@@ -18,8 +19,14 @@ export function AuthCard({
 export function AuthCardHeader({ title, description }: { title: string; description: string }) {
   return (
     <div className="text-center">
-      <p className={eyebrowClass}>Fatec Itaquera</p>
-      <h1 className={`mt-1 ${titleClass}`}>{title}</h1>
+      <Image
+        src="/brand/fatec-itaquera-cor.png"
+        alt="Fatec Itaquera — Prof. Miguel Reale"
+        width={841}
+        height={450}
+        className="mx-auto h-14 w-auto"
+      />
+      <h1 className={`mt-4 ${titleClass}`}>{title}</h1>
       <p className={`mx-auto mt-1 max-w-[300px] sm:max-w-[340px] ${descriptionClass}`}>
         {description}
       </p>

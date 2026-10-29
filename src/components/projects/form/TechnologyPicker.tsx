@@ -165,7 +165,7 @@ export function TechnologyPicker({
       </div>
       {popular.length > 0 && values.length < MAX_ITEMS && (
         <div className="mt-2.5">
-          <p className="mb-1.5 text-[11px] font-semibold text-[#765e58]">Mais usadas</p>
+          <p className="mb-1.5 text-[11px] font-semibold text-[#666666]">Mais usadas</p>
           <ul className="flex flex-wrap gap-1.5">
             {popular.map((entry) => (
               <li key={entry.name}>

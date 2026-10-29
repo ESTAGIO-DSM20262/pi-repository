@@ -37,7 +37,7 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
               >
                 {row.title}
               </Link>
-              <p className="mt-0.5 truncate text-[10px] text-[#765e58] sm:text-[11px]">
+              <p className="mt-0.5 truncate text-[10px] text-[#666666] sm:text-[11px]">
                 Orientador: {row.advisorName} · {row.semester}º semestre
               </p>
             </div>
@@ -110,7 +110,7 @@ function PendingItem({
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold text-slate-900">{label}</p>
-        <p className="text-[10px] text-[#765e58] sm:text-[11px]">{hint}</p>
+        <p className="text-[10px] text-[#666666] sm:text-[11px]">{hint}</p>
       </div>
       <span
         className={`text-xl font-bold tabular-nums ${alert ? 'text-primary' : 'text-emerald-800'}`}
@@ -141,7 +141,7 @@ export function AdminInsights({
         >
           Painéis de acompanhamento
         </h2>
-        <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
+        <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
           Projetos ativos, andamento das tarefas e pendências que dependem da administração.
         </p>
       </div>

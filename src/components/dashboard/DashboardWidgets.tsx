@@ -67,13 +67,13 @@ export function StatCard({
   return (
     <article className="min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium leading-5 text-[#765e58] sm:text-[13px]">{title}</p>
+        <p className="text-xs font-medium leading-5 text-[#666666] sm:text-[13px]">{title}</p>
         <i className={`fi ${icon} flex shrink-0 text-lg ${styles.icon}`} aria-hidden="true" />
       </div>
       <p className={`mt-3 text-3xl font-bold tracking-tight tabular-nums ${valueStyles.value}`}>
         {value}
       </p>
-      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-[#765e58]">{note}</p>
+      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-[#666666]">{note}</p>
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
         <div
           className={`h-full rounded-full transition-all ${styles.bar}`}
@@ -109,7 +109,7 @@ export function Panel({
             <i className={`fi ${icon} flex text-sm text-primary`} aria-hidden="true" />
             {title}
           </h3>
-          {subtitle && <p className="mt-0.5 text-[11px] text-[#765e58] sm:text-xs">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-[11px] text-[#666666] sm:text-xs">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -209,7 +209,7 @@ export function DonutChart({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tabular-nums text-slate-900">{centerValue}</span>
-          <span className="text-[10px] font-medium uppercase tracking-wide text-[#765e58]">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-[#666666]">
             {centerLabel}
           </span>
         </div>
@@ -306,7 +306,7 @@ export function ColumnChart({
         {columns.map((column) => (
           <span
             key={column.label}
-            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-[#765e58]"
+            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-[#666666]"
           >
             {column.label}
           </span>

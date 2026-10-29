@@ -142,7 +142,7 @@ function AdminOverviewCards({
         >
           Visão geral do sistema
         </h2>
-        <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
+        <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
           Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
           banco. Projetos desativados ficam fora das contagens do acervo.
         </p>
@@ -205,7 +205,7 @@ function SectionHeading({
             <i className={`fi ${icon} flex text-base text-primary`} aria-hidden="true" />
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-[#765e58] sm:text-[13px]">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-[#666666] sm:text-[13px]">{subtitle}</p>
         </div>
       </div>
 
@@ -276,7 +276,7 @@ function DashboardProjectCard({
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[10px] font-medium text-[#765e58] sm:text-[11px]">
+          <span className="truncate text-[10px] font-medium text-[#666666] sm:text-[11px]">
             DSM • {project.semester}º Sem
           </span>
           <span
@@ -294,7 +294,7 @@ function DashboardProjectCard({
         >
           {project.title}
         </Link>
-        <p className="line-clamp-1 text-[10px] text-[#765e58] sm:text-[11px]">
+        <p className="line-clamp-1 text-[10px] text-[#666666] sm:text-[11px]">
           Orientador: {project.advisor.name} <span aria-hidden="true">•</span> {memberCount}{' '}
           {memberCount === 1 ? 'estudante' : 'estudantes'}
         </p>
@@ -369,7 +369,7 @@ function ProjectFilters({
       <label className="relative min-w-0 flex-1 lg:max-w-[340px]">
         <span className="sr-only">Buscar projeto por título, orientador, tema ou aluno</span>
         <i
-          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#765e58]"
+          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#666666]"
           aria-hidden="true"
         />
         <input
@@ -421,7 +421,7 @@ function ProjectFilters({
         onClick={onClear}
         title="Limpar filtros dos projetos"
         aria-label="Limpar filtros dos projetos"
-        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-[#f2f3f4] text-[#765e58] transition hover:bg-primary-light hover:text-primary lg:self-auto"
+        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-[#f2f3f4] text-[#666666] transition hover:bg-primary-light hover:text-primary lg:self-auto"
       >
         <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
       </button>
@@ -516,7 +516,7 @@ function ProjectsSection({
             cycleOptions={cycleOptions}
             onClear={clearFilters}
           />
-          <p className="mb-3 text-[11px] text-[#765e58]" role="status">
+          <p className="mb-3 text-[11px] text-[#666666]" role="status">
             Exibindo {filteredProjects.length} de {projects.length}{' '}
             {projects.length === 1 ? 'projeto' : 'projetos'}.
           </p>

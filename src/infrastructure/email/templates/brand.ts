@@ -4,8 +4,7 @@ export const emailBrand = {
   name: 'Acervo Acadêmico',
   institution: 'Fatec Itaquera • Prof. Miguel Reale',
   mark: 'F',
-  fontStylesheet:
-    'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap',
+  fontStylesheet: 'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
 } as const
 
 export const emailTailwindConfig: TailwindConfig = {
@@ -13,17 +12,17 @@ export const emailTailwindConfig: TailwindConfig = {
   theme: {
     extend: {
       colors: {
-        primary: '#8d0000',
-        'primary-hover': '#750000',
-        'primary-light': '#f5e5e5',
-        background: '#ede8e8',
+        primary: '#b20000',
+        'primary-hover': '#7e0000',
+        'primary-light': '#fdeceb',
+        background: '#f8f8f8',
         surface: '#ffffff',
-        'surface-secondary': '#f8f6f6',
-        foreground: '#1f1f1f',
+        'surface-secondary': '#f2f2f2',
+        foreground: '#333333',
         'text-secondary': '#666666',
-        'text-muted': '#888888',
-        border: '#e6e2e2',
-        'border-light': '#eeeeee',
+        'text-muted': '#767676',
+        border: '#dadada',
+        'border-light': '#e6e6e6',
       },
       borderRadius: {
         sm: '4px',
@@ -31,7 +30,7 @@ export const emailTailwindConfig: TailwindConfig = {
         lg: '8px',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Arial', 'Helvetica', 'sans-serif'],
+        sans: ['Roboto', 'Arial', 'Helvetica', 'sans-serif'],
       },
     },
   },

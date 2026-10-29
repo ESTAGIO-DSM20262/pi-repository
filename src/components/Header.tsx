@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -9,7 +10,7 @@ import { useAuth } from '@/presentation/auth/auth-context'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
 const linkClass =
-  'group relative py-1 text-sm text-gray-600 transition-colors duration-300 hover:text-primary focus-visible:text-primary ' +
+  'group relative py-1 text-sm text-text-secondary transition-colors duration-300 hover:text-primary focus-visible:text-primary ' +
   'after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:rounded-full after:bg-primary ' +
   'after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 focus-visible:after:scale-x-100'
 
@@ -133,38 +134,58 @@ export function Header() {
   )
 
   return (
-    <header className="relative z-30 border-b border-gray-200 bg-white">
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-base font-bold text-white">
-            F
-          </div>
-          <div className="leading-none">
-            <p className="text-sm font-semibold text-gray-900">Acervo Acadêmico</p>
-            <p className="mt-1 text-[11px] text-gray-500">
-              <span className="hidden sm:inline">Fatec Itaquera • Prof. Miguel Reale</span>
-              <span className="sm:hidden">Fatec Itaquera • CPS</span>
-            </p>
-          </div>
+    <header className="relative z-30 border-b border-border bg-white">
+      <div className="flex h-1.5" aria-hidden="true">
+        <span className="flex-1 bg-primary" />
+        <span className="w-1/4 bg-secondary sm:w-1/5" />
+      </div>
+      <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
+        <Link href="/" className="flex items-center gap-4" aria-label="Acervo Acadêmico — início">
+          <Image
+            src="/brand/fatec-itaquera-cor.png"
+            alt="Fatec Itaquera — Prof. Miguel Reale"
+            width={841}
+            height={450}
+            className="h-12 w-auto"
+          />
+          <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
+          <span className="hidden leading-none md:block">
+            <span className="block font-slab text-base font-medium text-secondary-hover">
+              Acervo Acadêmico
+            </span>
+            <span className="mt-1 block text-[11px] text-text-secondary">
+              Projetos Integradores
+            </span>
+          </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 sm:flex">
-          <Link href="/" className={linkClass}>
-            Início
-          </Link>
-          <Link href="/como-funciona" className={linkClass}>
-            Como Funciona
-          </Link>
-          {user && (
-            <Link href={PROFILE_ROUTE[user.role]} className={linkClass}>
-              Painel
+        <div className="flex items-center gap-6">
+          <nav className="hidden items-center gap-6 sm:flex">
+            <Link href="/" className={linkClass}>
+              Início
             </Link>
-          )}
-          {authItem}
-        </nav>
+            <Link href="/como-funciona" className={linkClass}>
+              Como Funciona
+            </Link>
+            {user && (
+              <Link href={PROFILE_ROUTE[user.role]} className={linkClass}>
+                Painel
+              </Link>
+            )}
+            {authItem}
+          </nav>
+          <span className="hidden h-10 w-px bg-border sm:block" aria-hidden="true" />
+          <Image
+            src="/brand/cps-cor.png"
+            alt="Centro Paula Souza"
+            width={254}
+            height={167}
+            className="h-12 w-auto"
+          />
+        </div>
       </div>
 
-      <nav className="flex min-h-10 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-gray-100 px-3 py-2 sm:hidden">
+      <nav className="flex min-h-10 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-border-light px-3 py-2 sm:hidden">
         <Link href="/" className={linkClass}>
           Início
         </Link>

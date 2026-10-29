@@ -59,7 +59,7 @@ export function ProjectTeamSection({
             <label className="relative block min-w-0 flex-1">
               <span className="sr-only">Buscar aluno por RA, nome ou e-mail</span>
               <i
-                className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#765e58]"
+                className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#666666]"
                 aria-hidden="true"
               />
               <input

@@ -608,3 +608,28 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   (`z-[var(--z-modal-dropdown)]`) foi removida porque o menu ficava atrás do modal e as opções (por
   exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Todo dropdown usado
   dentro de um modal deve passar `layer="modal"`.
+
+## 23. Identidade visual (Centro Paula Souza / Fatec)
+
+A interface segue o Manual de Identidade Visual do CPS (jan/2026) e o Guia de Estilo do site CPS.
+Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/app/globals.css`.
+
+- **Cores:** `--primary` `#b20000` (vermelho CPS) e `--primary-hover` `#7e0000`; `--secondary`
+  `#005c6d` (azul), `--secondary-hover` `#004854` e `--accent` `#00c1cf`. Neutros do guia:
+  `#333333` (texto), `#666666` (texto secundário), `#dadada`/`#e6e6e6` (bordas) e `#f8f8f8`
+  (fundo). As paletas `emerald`, `amber` e `rose` do Tailwind foram redefinidas em `@theme` com as
+  cores de feedback do guia (concluído, andamento, cancelado), então as classes de status
+  existentes seguem o padrão sem alteração.
+- **Tipografia:** Roboto (corpo, via `font-sans`) e Roboto Slab (títulos `h1`–`h3` e `font-slab`),
+  carregadas com `next/font/google` em `src/app/layout.tsx`.
+- **Sombras:** `shadow-sm`/`shadow-md` usam `box-shadow-1` do guia e `shadow-lg` usa `box-shadow-2`.
+- **Logos:** ficam em `public/brand/` (`fatec-itaquera-*`, `cps-*`; `cor` para fundo claro, `br`
+  para fundo escuro) e já estão recortadas sem margem transparente. Usar sempre com `h-auto`/`w-auto`
+  proporcional (nunca distorcer, sem sombra, contorno ou transparência) e altura mínima de 44px
+  para o CPS. A Fatec fica à esquerda e o CPS à direita, como na régua de logotipos do manual.
+- **Onde aparecem:** `Header` (faixa vermelha/azul, Fatec e CPS), `Footer` (fundo `#004854`, logos
+  brancas), página `/login` (painel azul com logo branca e padrão `formas-contorno.svg`),
+  `AuthCardHeader` e o `Hero` da home.
+- **Uso:** o manual restringe os logos CPS/Fatec a servidores e unidades de ensino; alunos e
+  terceiros precisam de autorização prévia da unidade.
+- **E-mail:** `src/infrastructure/email/templates/brand.ts` espelha os mesmos tokens.

@@ -178,7 +178,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
               <i className="fi fi-rr-users flex text-base text-primary" aria-hidden="true" />
               Base de Usuários e Permissões
             </h2>
-            <p className="mt-0.5 text-xs text-[#765e58] sm:text-[13px]">
+            <p className="mt-0.5 text-xs text-[#666666] sm:text-[13px]">
               Usuários cadastrados no banco do Acervo Acadêmico.
             </p>
           </div>
@@ -227,7 +227,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
         <label className="relative min-w-0 flex-1 sm:max-w-[320px]">
           <span className="sr-only">Buscar por nome, RA ou e-mail</span>
           <i
-            className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#765e58]"
+            className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#666666]"
             aria-hidden="true"
           />
           <input
@@ -287,7 +287,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           }}
           title="Limpar filtros da listagem"
           aria-label="Limpar filtros da listagem"
-          className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f3f4] text-[#765e58] transition hover:bg-primary-light hover:text-primary"
+          className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f3f4] text-[#666666] transition hover:bg-primary-light hover:text-primary"
         >
           <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
         </button>
@@ -332,7 +332,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                     {user.registrationNumber || '—'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[#765e58]">{user.email}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[#666666]">{user.email}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`rounded px-2 py-1 text-[10px] font-bold ${PROFILE_STYLES[user.role]}`}
@@ -351,7 +351,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 text-[#765e58]">
+                    <div className="flex items-center gap-1.5 text-[#666666]">
                       <button
                         type="button"
                         onClick={() => openEdit(user)}

@@ -25,21 +25,25 @@ const GRID = 'grid gap-5 sm:grid-cols-2 xl:grid-cols-3'
 
 function Hero({ total, verified }: { total: number; verified: number }) {
   return (
-    <section className="flex flex-col gap-6 rounded-xl border border-border bg-surface p-6 shadow-sm sm:p-8 md:flex-row md:items-center md:justify-between">
+    <section className="relative isolate flex flex-col gap-6 overflow-hidden rounded-xl bg-secondary p-6 text-white shadow-sm sm:p-8 md:flex-row md:items-center md:justify-between">
+      <div
+        className="pointer-events-none absolute -right-16 -top-24 -z-10 h-[583px] w-[400px] bg-[url('/brand/formas-contorno.svg')] bg-contain bg-no-repeat opacity-25"
+        aria-hidden="true"
+      />
       <div className="max-w-2xl">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-accent sm:text-xs">
           Fatec Itaquera – Repositório oficial
         </p>
-        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
           Projetos Integradores
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-text-secondary sm:text-base">
+        <p className="mt-3 text-sm leading-relaxed text-white/90 sm:text-base">
           Explore projetos desenvolvidos pelos alunos ao longo dos semestres e descubra referências
           técnicas e acadêmicas curadas por professores.
         </p>
       </div>
 
-      <dl className="flex shrink-0 divide-x divide-border self-start rounded-lg border border-border bg-surface-secondary md:self-center">
+      <dl className="flex shrink-0 divide-x divide-border self-start rounded-lg border border-border bg-surface md:self-center">
         <div className="px-6 py-3 text-center">
           <dd className="text-2xl font-bold text-slate-900">{total}</dd>
           <dt className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-slate-600">

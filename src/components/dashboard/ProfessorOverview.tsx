@@ -40,7 +40,7 @@ function ProjectProgressList({ rows }: { rows: ProfessorDashboardMetrics['progre
                 >
                   {row.title}
                 </Link>
-                <p className="mt-0.5 text-[10px] text-[#765e58] sm:text-[11px]">
+                <p className="mt-0.5 text-[10px] text-[#666666] sm:text-[11px]">
                   {row.semester}º semestre
                   {row.nextDueDate ? ` · próximo prazo ${formatShortDate(row.nextDueDate)}` : ''}
                 </p>
@@ -95,11 +95,11 @@ function DeadlinesList({ rows }: { rows: ProfessorDashboardMetrics['deadlines'] 
           <li key={row.taskId} className="rounded-lg border border-slate-100 p-3">
             <div className="flex items-start justify-between gap-2">
               <p className="min-w-0 flex-1 text-xs font-semibold leading-snug text-slate-900">
-                {row.title} <span className="font-normal text-[#765e58]">{row.version}</span>
+                {row.title} <span className="font-normal text-[#666666]">{row.version}</span>
               </p>
               <Badge tone={due.tone}>{due.label}</Badge>
             </div>
-            <p className="mt-1 text-[11px] text-[#765e58]">
+            <p className="mt-1 text-[11px] text-[#666666]">
               <Link
                 href={`/projetos/${row.projectId}`}
                 className="font-medium text-primary hover:underline"
@@ -137,7 +137,7 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
             </p>
             <div className="flex shrink-0 items-center gap-1.5">
               {row.overdue > 0 && <Badge tone="red">{row.overdue} atrasada(s)</Badge>}
-              <span className="text-[11px] tabular-nums text-[#765e58]">{row.open} em aberto</span>
+              <span className="text-[11px] tabular-nums text-[#666666]">{row.open} em aberto</span>
             </div>
           </div>
           <div className="mt-1.5">
@@ -147,7 +147,7 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
               label={`Tarefas concluídas por ${row.name}`}
             />
           </div>
-          <p className="mt-0.5 text-[10px] text-[#765e58]">
+          <p className="mt-0.5 text-[10px] text-[#666666]">
             {row.completed} de {row.total} concluídas
           </p>
         </li>
@@ -179,7 +179,7 @@ function AwaitingIndicationList({
         >
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold text-slate-900">{row.title}</p>
-            <p className="text-[10px] text-[#765e58]">{row.semester}º semestre · concluído</p>
+            <p className="text-[10px] text-[#666666]">{row.semester}º semestre · concluído</p>
           </div>
           <Link
             href={`/projetos/${row.projectId}`}
@@ -275,7 +275,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
         >
           Acompanhamento dos seus projetos
         </h2>
-        <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
+        <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
           Resumo dos projetos e das tarefas em que você é orientador, com o que precisa de atenção
           primeiro.
         </p>
