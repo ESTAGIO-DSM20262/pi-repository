@@ -17,6 +17,14 @@ export class InMemoryProjectVerificationRepository implements ProjectVerificatio
     this.verifiedFlags.set(projectId, verified)
   }
 
+  async removeByUser(projectId: string, verifierUserId: string, verified: boolean) {
+    this.records.set(
+      projectId,
+      (this.records.get(projectId) ?? []).filter((item) => item.verifierUserId !== verifierUserId),
+    )
+    this.verifiedFlags.set(projectId, verified)
+  }
+
   async removeByEmails(projectId: string, emails: string[]) {
     const removed = new Set(emails.map((email) => email.toLowerCase()))
     this.records.set(

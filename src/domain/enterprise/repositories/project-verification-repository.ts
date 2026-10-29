@@ -3,6 +3,7 @@ import type { ProjectVerificationRecord } from '@/domain/enterprise/entities/pro
 export interface ProjectVerificationRepository {
   findByProject(projectId: string): Promise<ProjectVerificationRecord[]>
   save(projectId: string, record: ProjectVerificationRecord, verified: boolean): Promise<void>
+  removeByUser(projectId: string, verifierUserId: string, verified: boolean): Promise<void>
   removeByEmails(projectId: string, emails: string[]): Promise<void>
   clear(projectId: string): Promise<void>
 }

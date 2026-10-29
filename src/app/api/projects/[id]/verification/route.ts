@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { RemoveProjectVerificationUseCase } from '@/application/projects/remove-project-verification-use-case'
 import { VerifyProjectUseCase } from '@/application/projects/verify-project-use-case'
 import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
 import { DbProjectVerificationRepository } from '@/infrastructure/projects/db-project-verification-repository'
@@ -36,5 +37,25 @@ export async function POST(request: Request, { params }: RouteContext) {
   } catch (error) {
     console.error('[POST /api/projects/[id]/verification]', error)
     return jsonError('Não foi possível registrar a indicação. Tente novamente.', 500)
+  }
+}
+
+export async function DELETE(request: Request, { params }: RouteContext) {
+  try {
+    const { id } = await params
+    const viewer = await resolveProjectViewer(request)
+    if (!viewer) return jsonError('É necessário entrar no sistema.', 401)
+
+    const useCase = new RemoveProjectVerificationUseCase(
+      new DbProjectRepository(),
+      new DbProjectVerificationRepository(),
+    )
+    const result = await useCase.execute({ viewer, projectId: id })
+    if (result.isLeft()) return jsonError(result.value.message, result.value.status)
+
+    return NextResponse.json(result.value, { headers: { 'Cache-Control': 'no-store' } })
+  } catch (error) {
+    console.error('[DELETE /api/projects/[id]/verification]', error)
+    return jsonError('Não foi possível remover a indicação. Tente novamente.', 500)
   }
 }

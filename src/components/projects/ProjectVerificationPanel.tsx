@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import {
   type ProjectVerificationSummary,
   VERIFICATION_CRITERIA,
@@ -324,11 +325,38 @@ export function ProjectVerificationButton({
 }: Pick<ProjectVerificationPanelProps, 'projectId' | 'summary' | 'viewerEmail'>) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [confirmingRemoval, setConfirmingRemoval] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  const [removalError, setRemovalError] = useState('')
   const email = viewerEmail?.toLowerCase() ?? ''
   const mine =
     summary.advisors.find((advisor) => advisor.email === email) ??
     summary.administrators.find((admin) => admin.email === email)
   const alreadyVerified = mine ? ('verified' in mine ? mine.verified : true) : false
+
+  async function removeMine() {
+    setRemoving(true)
+    setRemovalError('')
+    try {
+      const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/verification`, {
+        method: 'DELETE',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(30_000),
+      })
+      const result = (await response.json().catch(() => null)) as { error?: string } | null
+      if (!response.ok) {
+        throw new Error(result?.error ?? 'Não foi possível remover a indicação.')
+      }
+      setConfirmingRemoval(false)
+      router.refresh()
+    } catch (caught) {
+      setRemovalError(
+        caught instanceof Error ? caught.message : 'Ocorreu um erro ao remover a indicação.',
+      )
+    } finally {
+      setRemoving(false)
+    }
+  }
 
   return (
     <>
@@ -340,6 +368,19 @@ export function ProjectVerificationButton({
         <i className="fi fi-rr-shield-check flex text-primary" aria-hidden="true" />
         {alreadyVerified ? 'Atualizar indicação' : 'Indicar projeto'}
       </button>
+      {alreadyVerified && (
+        <button
+          type="button"
+          onClick={() => {
+            setRemovalError('')
+            setConfirmingRemoval(true)
+          }}
+          className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 text-sm font-semibold text-primary shadow-sm transition hover:border-primary/40 hover:bg-primary-light"
+        >
+          <i className="fi fi-rr-cross-circle flex" aria-hidden="true" />
+          Remover minha indicação
+        </button>
+      )}
       {open && (
         <VerificationDialog
           projectId={projectId}
@@ -352,6 +393,20 @@ export function ProjectVerificationButton({
           }}
         />
       )}
+      <ConfirmationDialog
+        open={confirmingRemoval}
+        title="Remover a sua indicação?"
+        description={
+          removalError ||
+          'A sua indicação e os critérios que você marcou serão apagados. Se o projeto estiver indicado, ele deixa de ser indicado até que todos os orientadores indiquem de novo. Você poderá indicar outra vez depois.'
+        }
+        confirmLabel="Remover indicação"
+        icon="fi-rr-cross-circle"
+        tone="danger"
+        pending={removing}
+        onConfirm={removeMine}
+        onCancel={() => setConfirmingRemoval(false)}
+      />
     </>
   )
 }
