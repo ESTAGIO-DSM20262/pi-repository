@@ -111,11 +111,11 @@ function VerificationDialog({
         className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[640px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
       >
         <header className="flex items-start gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 sm:px-6 sm:py-5">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-primary">
             <i className="fi fi-rr-shield-check flex text-xl" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary-hover">
               Sistema de indicação
             </p>
             <h2
@@ -153,15 +153,15 @@ function VerificationDialog({
                     <label
                       className={`flex cursor-pointer items-start gap-3 rounded-xl border px-3.5 py-3 transition ${
                         checked
-                          ? 'border-emerald-400 bg-emerald-50'
-                          : 'border-border bg-white hover:border-emerald-300'
+                          ? 'border-accent bg-accent-light'
+                          : 'border-border bg-white hover:border-accent'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggle(criterion.id)}
-                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-emerald-600"
+                        className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
                       />
                       <span>
                         <span className="block text-sm font-semibold text-slate-900">
@@ -201,7 +201,7 @@ function VerificationDialog({
             type="button"
             onClick={submit}
             disabled={saving}
-            className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-wait disabled:opacity-65"
+            className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-wait disabled:opacity-65"
           >
             <i
               className={`fi ${saving ? 'fi-rr-spinner animate-spin' : 'fi-rr-shield-check'} flex`}
@@ -236,12 +236,12 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
   )
 
   return (
-    <div className="mt-1">
-      <p className="text-sm leading-relaxed text-emerald-900">
+    <div>
+      <p className="text-sm leading-relaxed text-slate-800">
         Este projeto é indicado em:{' '}
-        <span className="text-xs">(toque em um item para ver os detalhes)</span>
+        <span className="text-xs text-text-secondary">(toque em um item para ver os detalhes)</span>
       </p>
-      <ul className="mt-2 flex flex-wrap gap-1.5">
+      <ul className="mt-3 flex flex-wrap gap-2">
         {summary.criteria.map((criterion) => {
           const selected = criterion.id === openId
           return (
@@ -251,15 +251,19 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
                 aria-expanded={selected}
                 aria-controls={selected ? cardId : undefined}
                 onClick={() => setOpenId(selected ? null : criterion.id)}
-                className={`cursor-pointer inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 ${
+                className={`cursor-pointer inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 ${
                   selected
-                    ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : 'border-emerald-300 bg-white text-emerald-900 hover:border-emerald-500 hover:bg-emerald-100'
+                    ? 'border-secondary bg-secondary text-white'
+                    : 'border-accent/40 bg-accent-light text-secondary-hover hover:border-accent hover:bg-accent/20'
                 }`}
               >
+                <i
+                  className={`fi fi-rr-check flex text-[11px] ${selected ? 'text-white' : 'text-primary'}`}
+                  aria-hidden="true"
+                />
                 {criterion.label}
                 {!criterion.unanimous && (
-                  <span className="font-semibold opacity-80">
+                  <span className="font-medium opacity-80">
                     ({criterion.endorsedBy}/{summary.requiredCount})
                   </span>
                 )}
@@ -277,7 +281,7 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
         <section
           id={cardId}
           aria-label={`Detalhes da indicação: ${definition.label}`}
-          className="mt-3 max-w-xl rounded-xl border border-emerald-300 bg-white p-3.5 shadow-sm"
+          className="mt-3 max-w-xl rounded-lg border border-border border-l-4 border-l-primary bg-surface-secondary p-3.5"
         >
           <div className="flex items-start justify-between gap-3">
             <p className="text-sm font-bold text-slate-900">{definition.label}</p>
@@ -285,7 +289,7 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
               type="button"
               onClick={() => setOpenId(null)}
               aria-label="Fechar detalhes"
-              className="cursor-pointer -mt-1 -mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100"
+              className="cursor-pointer -mt-1 -mr-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-200"
             >
               <i className="fi fi-rr-cross-small flex text-lg" aria-hidden="true" />
             </button>
@@ -331,9 +335,9 @@ export function ProjectVerificationButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-4 text-sm font-bold text-emerald-800 shadow-sm transition hover:bg-emerald-100"
+        className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-accent/40 bg-accent-light px-4 text-sm font-bold text-secondary-hover shadow-sm transition hover:bg-accent/20"
       >
-        <i className="fi fi-rr-shield-check flex" aria-hidden="true" />
+        <i className="fi fi-rr-shield-check flex text-primary" aria-hidden="true" />
         {alreadyVerified ? 'Atualizar indicação' : 'Indicar projeto'}
       </button>
       {open && (
@@ -362,86 +366,99 @@ export function ProjectVerificationPanel({
       : 0
   if (!summary.complete && !showProgress) return null
 
+  const hasCriteria = summary.complete && summary.criteria.length > 0
+  const hasBody = hasCriteria || showProgress
+
   return (
     <section
       aria-label="Indicação do projeto"
-      className={`rounded-xl border p-4 sm:p-5 ${
-        summary.complete ? 'border-emerald-300 bg-emerald-50' : 'border-border bg-white'
-      }`}
+      className="overflow-hidden rounded-xl border border-border bg-white shadow-sm"
     >
-      <div className="flex items-start gap-3">
-        <span
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-            summary.complete ? 'bg-emerald-200 text-emerald-800' : 'bg-slate-100 text-slate-600'
-          }`}
-        >
+      <header
+        className={`flex items-start gap-3 px-4 py-3.5 sm:px-5 ${hasBody ? 'border-b border-accent/30' : ''} bg-accent-light`}
+      >
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-white text-primary">
           <i
             className={`fi ${summary.complete ? 'fi-rr-badge-check' : 'fi-rr-shield-check'} flex text-lg`}
             aria-hidden="true"
           />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold text-slate-900">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary-hover">
+            Sistema de indicação
+          </p>
+          <h2 className="mt-0.5 text-base font-bold leading-tight text-slate-900">
             {summary.complete ? 'Projeto indicado' : 'Indicação do projeto'}
           </h2>
-          {summary.complete && summary.criteria.length > 0 && <CriteriaTags summary={summary} />}
           {!summary.complete && (
-            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+            <p className="mt-1 text-xs leading-relaxed text-slate-700">
               O projeto só é indicado quando todos os professores orientadores indicam.
             </p>
           )}
         </div>
-      </div>
+      </header>
 
-      {showProgress && (
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-            <span>
-              {summary.verifiedCount} de {summary.requiredCount} orientadores indicaram
-            </span>
-            <span>{percent}%</span>
-          </div>
-          <div
-            role="progressbar"
-            aria-label="Progresso da indicação"
-            aria-valuemin={0}
-            aria-valuemax={summary.requiredCount}
-            aria-valuenow={summary.verifiedCount}
-            className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-slate-200"
-          >
-            <div
-              className="h-full rounded-full bg-emerald-500 transition-all"
-              style={{ width: `${percent}%` }}
-            />
-          </div>
+      {hasBody && (
+        <div className="space-y-5 px-4 py-4 sm:px-5">
+          {hasCriteria && <CriteriaTags summary={summary} />}
 
-          <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {summary.advisors.map((advisor) => (
-              <li
-                key={advisor.email}
-                className="flex items-center gap-2.5 rounded-lg border border-border bg-white px-3 py-2"
+          {showProgress && (
+            <div>
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                <span>
+                  {summary.verifiedCount} de {summary.requiredCount} orientadores indicaram
+                </span>
+                <span>{percent}%</span>
+              </div>
+              <div
+                role="progressbar"
+                aria-label="Progresso da indicação"
+                aria-valuemin={0}
+                aria-valuemax={summary.requiredCount}
+                aria-valuenow={summary.verifiedCount}
+                className="mt-1.5 h-2.5 overflow-hidden rounded-sm bg-slate-200"
               >
-                <i
-                  className={`fi ${advisor.verified ? 'fi-rr-check-circle text-emerald-600' : 'fi-rr-clock text-amber-600'} flex text-base`}
-                  aria-hidden="true"
+                <div
+                  className="h-full rounded-sm bg-secondary transition-all"
+                  style={{ width: `${percent}%` }}
                 />
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-semibold text-slate-900">{advisor.name}</p>
-                  <p className="text-[11px] text-text-secondary">
-                    {advisor.verified && advisor.verifiedAt
-                      ? `Indicou em ${formatDate(advisor.verifiedAt)}`
-                      : 'Aguardando indicação'}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+              </div>
 
-          {summary.administrators.length > 0 && (
-            <p className="mt-3 text-[11px] text-text-secondary">
-              Também indicado pela administração:{' '}
-              {summary.administrators.map((admin) => admin.name).join(', ')}.
-            </p>
+              <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {summary.advisors.map((advisor) => (
+                  <li
+                    key={advisor.email}
+                    className={`flex items-center gap-2.5 rounded-md border px-3 py-2 ${
+                      advisor.verified
+                        ? 'border-accent/40 bg-accent-light'
+                        : 'border-border bg-white'
+                    }`}
+                  >
+                    <i
+                      className={`fi ${advisor.verified ? 'fi-rr-check-circle text-primary' : 'fi-rr-clock text-amber-600'} flex text-base`}
+                      aria-hidden="true"
+                    />
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-semibold text-slate-900">
+                        {advisor.name}
+                      </p>
+                      <p className="text-[11px] text-text-secondary">
+                        {advisor.verified && advisor.verifiedAt
+                          ? `Indicou em ${formatDate(advisor.verifiedAt)}`
+                          : 'Aguardando indicação'}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+
+              {summary.administrators.length > 0 && (
+                <p className="mt-3 text-[11px] text-text-secondary">
+                  Também indicado pela administração:{' '}
+                  {summary.administrators.map((admin) => admin.name).join(', ')}.
+                </p>
+              )}
+            </div>
           )}
         </div>
       )}

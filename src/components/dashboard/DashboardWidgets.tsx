@@ -4,34 +4,38 @@ export type WidgetTone = 'red' | 'green' | 'amber' | 'slate'
 
 const TONE_STYLES: Record<
   WidgetTone,
-  { icon: string; bar: string; stroke: string; dot: string; value: string }
+  { icon: string; chip: string; bar: string; stroke: string; dot: string; value: string }
 > = {
   red: {
     icon: 'text-primary',
+    chip: 'bg-primary-light',
     bar: 'bg-primary',
     stroke: 'stroke-primary',
     dot: 'bg-primary',
     value: 'text-primary',
   },
   green: {
-    icon: 'text-emerald-800',
-    bar: 'bg-emerald-700',
-    stroke: 'stroke-emerald-700',
-    dot: 'bg-emerald-700',
-    value: 'text-emerald-800',
+    icon: 'text-secondary',
+    chip: 'bg-accent-light',
+    bar: 'bg-secondary',
+    stroke: 'stroke-secondary',
+    dot: 'bg-secondary',
+    value: 'text-secondary',
   },
   amber: {
     icon: 'text-amber-700',
-    bar: 'bg-amber-500',
-    stroke: 'stroke-amber-500',
-    dot: 'bg-amber-500',
+    chip: 'bg-amber-100',
+    bar: 'bg-amber-400',
+    stroke: 'stroke-amber-400',
+    dot: 'bg-amber-400',
     value: 'text-amber-700',
   },
   slate: {
-    icon: 'text-slate-600',
-    bar: 'bg-slate-500',
-    stroke: 'stroke-slate-400',
-    dot: 'bg-slate-400',
+    icon: 'text-secondary-hover',
+    chip: 'bg-surface-secondary',
+    bar: 'bg-accent',
+    stroke: 'stroke-accent',
+    dot: 'bg-accent',
     value: 'text-slate-900',
   },
 }
@@ -65,16 +69,20 @@ export function StatCard({
   const valueStyles = TONE_STYLES[valueTone ?? (tone === 'green' ? 'green' : 'slate')]
 
   return (
-    <article className="min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
+    <article className="min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium leading-5 text-[#666666] sm:text-[13px]">{title}</p>
-        <i className={`fi ${icon} flex shrink-0 text-lg ${styles.icon}`} aria-hidden="true" />
+        <p className="text-xs font-medium leading-5 text-text-secondary sm:text-[13px]">{title}</p>
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${styles.chip}`}
+        >
+          <i className={`fi ${icon} flex text-base ${styles.icon}`} aria-hidden="true" />
+        </span>
       </div>
       <p className={`mt-3 text-3xl font-bold tracking-tight tabular-nums ${valueStyles.value}`}>
         {value}
       </p>
-      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-[#666666]">{note}</p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
+      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-text-secondary">{note}</p>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-border-light" aria-hidden="true">
         <div
           className={`h-full rounded-full transition-all ${styles.bar}`}
           style={{ width: `${Math.max(0, Math.min(100, ratio))}%` }}
@@ -101,7 +109,7 @@ export function Panel({
 }) {
   return (
     <section
-      className={`min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5 ${className}`}
+      className={`min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5 ${className}`}
     >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
@@ -109,7 +117,9 @@ export function Panel({
             <i className={`fi ${icon} flex text-sm text-primary`} aria-hidden="true" />
             {title}
           </h3>
-          {subtitle && <p className="mt-0.5 text-[11px] text-[#666666] sm:text-xs">{subtitle}</p>}
+          {subtitle && (
+            <p className="mt-0.5 text-[11px] text-text-secondary sm:text-xs">{subtitle}</p>
+          )}
         </div>
         {action}
       </div>
@@ -191,7 +201,7 @@ export function DonutChart({
             r={DONUT_RADIUS}
             fill="none"
             strokeWidth="12"
-            className="stroke-slate-100"
+            className="stroke-border-light"
           />
           {arcs.map((arc) => (
             <circle
@@ -209,7 +219,7 @@ export function DonutChart({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tabular-nums text-slate-900">{centerValue}</span>
-          <span className="text-[10px] font-medium uppercase tracking-wide text-[#666666]">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-text-secondary">
             {centerLabel}
           </span>
         </div>
@@ -233,7 +243,7 @@ export function StackedBar({
   return (
     <div className="space-y-3">
       <div
-        className="flex h-3 overflow-hidden rounded-full bg-slate-100"
+        className="flex h-3 overflow-hidden rounded-full bg-border-light"
         role="img"
         aria-label={ariaLabel}
       >
@@ -285,7 +295,7 @@ export function ColumnChart({
                 {total > 0 ? total : ''}
               </span>
               <div
-                className="flex w-full flex-col-reverse overflow-hidden rounded-t-md bg-slate-100"
+                className="flex w-full flex-col-reverse overflow-hidden rounded-t-md bg-border-light"
                 style={{ height: total > 0 ? `${(total / max) * 100}%` : '2px' }}
               >
                 {column.segments
@@ -306,7 +316,7 @@ export function ColumnChart({
         {columns.map((column) => (
           <span
             key={column.label}
-            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-[#666666]"
+            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-text-secondary"
           >
             {column.label}
           </span>
@@ -342,7 +352,7 @@ export function ProgressBar({
 
   return (
     <div
-      className="h-2 overflow-hidden rounded-full bg-slate-200"
+      className="h-2 overflow-hidden rounded-full bg-border-light"
       role="progressbar"
       aria-label={label}
       aria-valuemin={0}
@@ -359,10 +369,10 @@ export function ProgressBar({
 
 export function Badge({ tone, children }: { tone: WidgetTone; children: ReactNode }) {
   const styles: Record<WidgetTone, string> = {
-    red: 'bg-rose-100 text-rose-900',
-    green: 'bg-emerald-100 text-emerald-900',
-    amber: 'bg-amber-100 text-amber-900',
-    slate: 'bg-slate-100 text-slate-700',
+    red: 'bg-primary-light text-primary',
+    green: 'bg-accent-light text-secondary-hover',
+    amber: 'bg-amber-100 text-amber-800',
+    slate: 'bg-surface-secondary text-slate-700',
   }
 
   return (

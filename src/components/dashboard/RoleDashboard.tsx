@@ -142,7 +142,7 @@ function AdminOverviewCards({
         >
           Visão geral do sistema
         </h2>
-        <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
           Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
           banco. Projetos desativados ficam fora das contagens do acervo.
         </p>
@@ -196,7 +196,7 @@ function SectionHeading({
       <div className="flex items-start gap-3">
         <span
           className={`mt-1 h-6 w-2 shrink-0 rounded-full ${
-            accent === 'green' ? 'bg-emerald-800' : 'bg-slate-600'
+            accent === 'green' ? 'bg-secondary' : 'bg-primary'
           }`}
           aria-hidden="true"
         />
@@ -205,7 +205,7 @@ function SectionHeading({
             <i className={`fi ${icon} flex text-base text-primary`} aria-hidden="true" />
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-[#666666] sm:text-[13px]">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-text-secondary sm:text-[13px]">{subtitle}</p>
         </div>
       </div>
 
@@ -276,12 +276,12 @@ function DashboardProjectCard({
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[10px] font-medium text-[#666666] sm:text-[11px]">
+          <span className="truncate text-[10px] font-medium text-text-secondary sm:text-[11px]">
             DSM • {project.semester}º Sem
           </span>
           <span
             className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold ${
-              isPublished ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-100 text-amber-900'
+              isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
             }`}
           >
             {isPublished ? 'Concluído' : 'Em andamento'}
@@ -294,7 +294,7 @@ function DashboardProjectCard({
         >
           {project.title}
         </Link>
-        <p className="line-clamp-1 text-[10px] text-[#666666] sm:text-[11px]">
+        <p className="line-clamp-1 text-[10px] text-text-secondary sm:text-[11px]">
           Orientador: {project.advisor.name} <span aria-hidden="true">•</span> {memberCount}{' '}
           {memberCount === 1 ? 'estudante' : 'estudantes'}
         </p>
@@ -369,7 +369,7 @@ function ProjectFilters({
       <label className="relative min-w-0 flex-1 lg:max-w-[340px]">
         <span className="sr-only">Buscar projeto por título, orientador, tema ou aluno</span>
         <i
-          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#666666]"
+          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-secondary"
           aria-hidden="true"
         />
         <input
@@ -421,7 +421,7 @@ function ProjectFilters({
         onClick={onClear}
         title="Limpar filtros dos projetos"
         aria-label="Limpar filtros dos projetos"
-        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-[#f2f3f4] text-[#666666] transition hover:bg-primary-light hover:text-primary lg:self-auto"
+        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-surface-secondary text-text-secondary transition hover:bg-primary-light hover:text-primary lg:self-auto"
       >
         <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
       </button>
@@ -516,7 +516,7 @@ function ProjectsSection({
             cycleOptions={cycleOptions}
             onClear={clearFilters}
           />
-          <p className="mb-3 text-[11px] text-[#666666]" role="status">
+          <p className="mb-3 text-[11px] text-text-secondary" role="status">
             Exibindo {filteredProjects.length} de {projects.length}{' '}
             {projects.length === 1 ? 'projeto' : 'projetos'}.
           </p>
@@ -619,7 +619,7 @@ export function RoleDashboard({
                   Painel institucional
                 </p>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-800 text-white' : role === 'professor' ? 'bg-rose-100 text-rose-900' : 'bg-slate-100 text-slate-700'}`}
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-secondary text-white' : role === 'professor' ? 'bg-primary-light text-primary' : 'bg-accent-light text-secondary-hover'}`}
                 >
                   {ROLE_LABEL[role]}
                 </span>

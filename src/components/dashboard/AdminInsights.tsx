@@ -27,7 +27,7 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
   return (
     <ul className="space-y-2">
       {rows.map((row) => (
-        <li key={row.projectId} className="rounded-lg border border-slate-100 p-3">
+        <li key={row.projectId} className="rounded-lg border border-border bg-white p-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <Link
@@ -37,7 +37,7 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
               >
                 {row.title}
               </Link>
-              <p className="mt-0.5 truncate text-[10px] text-[#666666] sm:text-[11px]">
+              <p className="mt-0.5 truncate text-[10px] text-text-secondary sm:text-[11px]">
                 Orientador: {row.advisorName} · {row.semester}º semestre
               </p>
             </div>
@@ -102,18 +102,18 @@ function PendingItem({
   alert: boolean
 }) {
   return (
-    <li className="flex items-center gap-3 rounded-lg border border-slate-100 p-3">
+    <li className="flex items-center gap-3 rounded-lg border border-border bg-white p-3">
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-rose-50 text-primary' : 'bg-emerald-50 text-emerald-800'}`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-primary-light text-primary' : 'bg-accent-light text-secondary'}`}
       >
         <i className={`fi ${icon} flex`} aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold text-slate-900">{label}</p>
-        <p className="text-[10px] text-[#666666] sm:text-[11px]">{hint}</p>
+        <p className="text-[10px] text-text-secondary sm:text-[11px]">{hint}</p>
       </div>
       <span
-        className={`text-xl font-bold tabular-nums ${alert ? 'text-primary' : 'text-emerald-800'}`}
+        className={`text-xl font-bold tabular-nums ${alert ? 'text-primary' : 'text-secondary'}`}
       >
         {formatMetric(value)}
       </span>
@@ -141,7 +141,7 @@ export function AdminInsights({
         >
           Painéis de acompanhamento
         </h2>
-        <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
           Projetos ativos, andamento das tarefas e pendências que dependem da administração.
         </p>
       </div>
@@ -207,17 +207,17 @@ export function AdminInsights({
                 ]}
               />
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-rose-50 p-2.5">
+                <div className="rounded-lg bg-primary-light p-2.5">
                   <p className="text-lg font-bold tabular-nums text-primary">
                     {formatMetric(tasks.overdue)}
                   </p>
-                  <p className="text-[10px] text-rose-900">Atrasadas</p>
+                  <p className="text-[10px] text-primary-hover">Atrasadas</p>
                 </div>
-                <div className="rounded-lg bg-emerald-50 p-2.5">
-                  <p className="text-lg font-bold tabular-nums text-emerald-800">
+                <div className="rounded-lg bg-accent-light p-2.5">
+                  <p className="text-lg font-bold tabular-nums text-secondary">
                     {tasks.completionRate}%
                   </p>
-                  <p className="text-[10px] text-emerald-900">Taxa de conclusão</p>
+                  <p className="text-[10px] text-secondary-hover">Taxa de conclusão</p>
                 </div>
               </div>
             </div>

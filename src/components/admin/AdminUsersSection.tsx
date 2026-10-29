@@ -29,9 +29,9 @@ interface EditForm {
 }
 
 const PROFILE_STYLES: Record<Role, string> = {
-  student: 'bg-slate-100 text-slate-700',
-  professor: 'bg-rose-100 text-rose-900',
-  admin: 'bg-slate-800 text-white',
+  student: 'bg-accent-light text-secondary-hover',
+  professor: 'bg-primary-light text-primary',
+  admin: 'bg-secondary text-white',
 }
 const PAGE_SIZE = 5
 const inputClass =
@@ -178,14 +178,14 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
               <i className="fi fi-rr-users flex text-base text-primary" aria-hidden="true" />
               Base de Usuários e Permissões
             </h2>
-            <p className="mt-0.5 text-xs text-[#666666] sm:text-[13px]">
+            <p className="mt-0.5 text-xs text-text-secondary sm:text-[13px]">
               Usuários cadastrados no banco do Acervo Acadêmico.
             </p>
           </div>
         </div>
         <Link
           href="/admin/usuarios/novo"
-          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-[#303234] px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <i className="fi fi-rr-user-add flex text-sm" aria-hidden="true" /> Cadastrar Usuários
         </Link>
@@ -227,7 +227,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
         <label className="relative min-w-0 flex-1 sm:max-w-[320px]">
           <span className="sr-only">Buscar por nome, RA ou e-mail</span>
           <i
-            className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#666666]"
+            className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-secondary"
             aria-hidden="true"
           />
           <input
@@ -287,7 +287,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           }}
           title="Limpar filtros da listagem"
           aria-label="Limpar filtros da listagem"
-          className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#f2f3f4] text-[#666666] transition hover:bg-primary-light hover:text-primary"
+          className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-text-secondary transition hover:bg-primary-light hover:text-primary"
         >
           <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
         </button>
@@ -295,7 +295,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
 
       <div className="overflow-x-auto rounded-lg border border-border-light">
         <table className="w-full min-w-[900px] border-collapse text-left text-xs">
-          <thead className="bg-[#f1f2f3] text-[10px] font-bold uppercase tracking-wide text-slate-800">
+          <thead className="bg-surface-secondary text-[10px] font-bold uppercase tracking-wide text-slate-800">
             <tr>
               <th className="px-4 py-3.5">Usuário / Nome</th>
               <th className="px-4 py-3.5">R.A. / Registro acadêmico</th>
@@ -322,7 +322,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   <td className="px-4 py-3">
                     <div className="flex min-w-[170px] items-center gap-2.5">
                       <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${user.role === 'student' ? 'bg-rose-100 text-primary' : user.role === 'professor' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200 text-slate-800'}`}
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${user.role === 'student' ? 'bg-accent-light text-secondary-hover' : user.role === 'professor' ? 'bg-primary-light text-primary' : 'bg-secondary text-white'}`}
                       >
                         {getNameInitials(user.name)}
                       </span>
@@ -332,7 +332,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                     {user.registrationNumber || '—'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-[#666666]">{user.email}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-text-secondary">{user.email}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`rounded px-2 py-1 text-[10px] font-bold ${PROFILE_STYLES[user.role]}`}
@@ -342,16 +342,16 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${user.active ? 'text-emerald-800' : 'text-slate-500'}`}
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${user.active ? 'text-secondary' : 'text-slate-500'}`}
                     >
                       <span
-                        className={`h-1.5 w-1.5 rounded-full ${user.active ? 'bg-emerald-700' : 'bg-slate-400'}`}
+                        className={`h-1.5 w-1.5 rounded-full ${user.active ? 'bg-secondary' : 'bg-slate-400'}`}
                       />
                       {user.active ? 'Ativo' : 'Inativo'}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-1.5 text-[#666666]">
+                    <div className="flex items-center gap-1.5 text-text-secondary">
                       <button
                         type="button"
                         onClick={() => openEdit(user)}

@@ -447,9 +447,14 @@ export function ProjectPublicView({
 
       <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-6 lg:p-7">
         <div className="flex flex-wrap items-center gap-1.5">
+          {project.status === 'publicado' && (
+            <span className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold text-white sm:text-[11px]">
+              <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
+            </span>
+          )}
           {project.verified && (
-            <span className="inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-1 text-[10px] font-bold text-emerald-900 sm:text-[11px]">
-              <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Indicado
+            <span className="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-1 text-[10px] font-bold text-secondary-hover sm:text-[11px]">
+              <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> Indicado
             </span>
           )}
           <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">

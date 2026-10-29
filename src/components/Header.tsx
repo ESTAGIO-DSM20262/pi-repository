@@ -135,9 +135,10 @@ export function Header() {
 
   return (
     <header className="relative z-30 border-b border-border bg-white">
-      <div className="flex h-1.5" aria-hidden="true">
+      <div className="flex h-1" aria-hidden="true">
         <span className="flex-1 bg-primary" />
         <span className="w-1/4 bg-secondary sm:w-1/5" />
+        <span className="w-1/6 bg-accent sm:w-1/5" />
       </div>
       <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-4" aria-label="Acervo Acadêmico — início">
@@ -150,12 +151,10 @@ export function Header() {
           />
           <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
           <span className="hidden leading-none md:block">
-            <span className="block font-slab text-base font-medium text-secondary-hover">
+            <span className="block font-slab text-base font-medium text-foreground">
               Acervo Acadêmico
             </span>
-            <span className="mt-1 block text-[11px] text-text-secondary">
-              Projetos Integradores
-            </span>
+            <span className="mt-1 block text-[11px] text-foreground">Projetos Integradores</span>
           </span>
         </Link>
 

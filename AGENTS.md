@@ -633,3 +633,20 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Uso:** o manual restringe os logos CPS/Fatec a servidores e unidades de ensino; alunos e
   terceiros precisam de autorização prévia da unidade.
 - **E-mail:** `src/infrastructure/email/templates/brand.ts` espelha os mesmos tokens.
+
+### Ajustes de cor e rolagem
+
+- **Indicado:** o selo "Indicado" (cartão, página do projeto, contador da home, chips de filtro) usa
+  fundo azul claro (`bg-accent-light`, token `--accent-light` `#d9f6f9`) com texto `secondary-hover`
+  e ícone vermelho (`text-primary`). O painel "Projeto indicado" da página do projeto segue o mesmo
+  esquema: cabeçalho azul claro com ícone vermelho em quadrado, critérios como tags retangulares e
+  cartão de detalhe com borda esquerda vermelha.
+- **Concluído:** projetos com `status = 'publicado'` que ainda não são indicados exibem a tag
+  "Concluído" em vermelho (`bg-primary`, texto branco) no cartão e na página do projeto. Projetos
+  indicados mostram o selo "Indicado" no cartão.
+- **Rolagem:** `html` usa `scrollbar-gutter: auto`, então a faixa lateral só ocupa espaço quando a
+  página realmente rola (inclusive no login).
+- **Dashboards (admin e professor):** os tons de `DashboardWidgets` usam a paleta do site: `green`
+  = azul `secondary`, `slate` = ciano `accent`, `amber` = dourado e `red` = vermelho `primary`.
+  Selos de perfil: aluno azul claro, professor vermelho claro, administrador azul. As escalas
+  `emerald` (claros mais azulados) e `amber` (dourado) foram ajustadas em `globals.css`.

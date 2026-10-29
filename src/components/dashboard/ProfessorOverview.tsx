@@ -30,7 +30,7 @@ function ProjectProgressList({ rows }: { rows: ProfessorDashboardMetrics['progre
       {rows.map((row) => {
         const barTone = row.overdue > 0 ? 'red' : row.readyToConclude ? 'green' : 'amber'
         return (
-          <li key={row.projectId} className="rounded-lg border border-slate-100 p-3">
+          <li key={row.projectId} className="rounded-lg border border-border p-3">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <Link
@@ -40,7 +40,7 @@ function ProjectProgressList({ rows }: { rows: ProfessorDashboardMetrics['progre
                 >
                   {row.title}
                 </Link>
-                <p className="mt-0.5 text-[10px] text-[#666666] sm:text-[11px]">
+                <p className="mt-0.5 text-[10px] text-text-secondary sm:text-[11px]">
                   {row.semester}º semestre
                   {row.nextDueDate ? ` · próximo prazo ${formatShortDate(row.nextDueDate)}` : ''}
                 </p>
@@ -92,14 +92,14 @@ function DeadlinesList({ rows }: { rows: ProfessorDashboardMetrics['deadlines'] 
       {rows.map((row) => {
         const due = describeDueDate(row.daysUntilDue)
         return (
-          <li key={row.taskId} className="rounded-lg border border-slate-100 p-3">
+          <li key={row.taskId} className="rounded-lg border border-border p-3">
             <div className="flex items-start justify-between gap-2">
               <p className="min-w-0 flex-1 text-xs font-semibold leading-snug text-slate-900">
-                {row.title} <span className="font-normal text-[#666666]">{row.version}</span>
+                {row.title} <span className="font-normal text-text-secondary">{row.version}</span>
               </p>
               <Badge tone={due.tone}>{due.label}</Badge>
             </div>
-            <p className="mt-1 text-[11px] text-[#666666]">
+            <p className="mt-1 text-[11px] text-text-secondary">
               <Link
                 href={`/projetos/${row.projectId}`}
                 className="font-medium text-primary hover:underline"
@@ -137,7 +137,9 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
             </p>
             <div className="flex shrink-0 items-center gap-1.5">
               {row.overdue > 0 && <Badge tone="red">{row.overdue} atrasada(s)</Badge>}
-              <span className="text-[11px] tabular-nums text-[#666666]">{row.open} em aberto</span>
+              <span className="text-[11px] tabular-nums text-text-secondary">
+                {row.open} em aberto
+              </span>
             </div>
           </div>
           <div className="mt-1.5">
@@ -147,7 +149,7 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
               label={`Tarefas concluídas por ${row.name}`}
             />
           </div>
-          <p className="mt-0.5 text-[10px] text-[#666666]">
+          <p className="mt-0.5 text-[10px] text-text-secondary">
             {row.completed} de {row.total} concluídas
           </p>
         </li>
@@ -175,11 +177,11 @@ function AwaitingIndicationList({
       {rows.map((row) => (
         <li
           key={row.projectId}
-          className="flex items-center justify-between gap-3 rounded-lg border border-slate-100 p-3"
+          className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
         >
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold text-slate-900">{row.title}</p>
-            <p className="text-[10px] text-[#666666]">{row.semester}º semestre · concluído</p>
+            <p className="text-[10px] text-text-secondary">{row.semester}º semestre · concluído</p>
           </div>
           <Link
             href={`/projetos/${row.projectId}`}
@@ -275,7 +277,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
         >
           Acompanhamento dos seus projetos
         </h2>
-        <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
           Resumo dos projetos e das tarefas em que você é orientador, com o que precisa de atenção
           primeiro.
         </p>

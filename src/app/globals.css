@@ -9,6 +9,7 @@
   --secondary-hover: #004854;
   --accent: #00c1cf;
   --accent-hover: #00d8e8;
+  --accent-light: #d9f6f9;
 
   --background: #f8f8f8;
   --surface: #ffffff;
@@ -42,6 +43,7 @@
   --color-secondary-hover: var(--secondary-hover);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
 
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -63,25 +65,27 @@
 }
 
 @theme {
-  --color-emerald-50: #e8fbe4;
-  --color-emerald-100: #d4f6cd;
-  --color-emerald-200: #b3efa7;
-  --color-emerald-300: #80e96d;
-  --color-emerald-400: #5bdc43;
-  --color-emerald-500: #3acf1f;
-  --color-emerald-600: #2fa818;
-  --color-emerald-700: #237f12;
-  --color-emerald-800: #1b610e;
+  --color-emerald-50: #eaf8fa;
+  --color-emerald-100: #d9f6f9;
+  --color-emerald-200: #b4ebf0;
+  --color-emerald-300: #6fd3dc;
+  --color-emerald-400: #25b4c4;
+  --color-emerald-500: #00748a;
+  --color-emerald-600: #005c6d;
+  --color-emerald-700: #004854;
+  --color-emerald-800: #003a44;
+  --color-emerald-900: #002d35;
+  --color-emerald-950: #001f25;
 
-  --color-amber-50: #fff5ea;
-  --color-amber-100: #fdebd1;
-  --color-amber-200: #f4d9a8;
-  --color-amber-300: #dfb77b;
-  --color-amber-400: #c99a45;
-  --color-amber-500: #b78718;
-  --color-amber-600: #9a7013;
-  --color-amber-700: #7d5a0f;
-  --color-amber-800: #61450c;
+  --color-amber-50: #fff8e6;
+  --color-amber-100: #ffefc2;
+  --color-amber-200: #ffe08a;
+  --color-amber-300: #ffcd4d;
+  --color-amber-400: #f5b50f;
+  --color-amber-500: #e9a100;
+  --color-amber-600: #c58500;
+  --color-amber-700: #8f5f00;
+  --color-amber-800: #6e4900;
 
   --color-rose-50: #fff1ef;
   --color-rose-100: #fdd5d1;
@@ -104,7 +108,7 @@
 
 html {
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
 }
 
 body {
@@ -289,11 +293,11 @@ select:disabled {
 }
 
 .scrollbar-success {
-  scrollbar-color: #80e96d #e8fbe4;
+  scrollbar-color: #6fd3dc #eaf8fa;
 }
 
 .scrollbar-warning {
-  scrollbar-color: #dfb77b #fff5ea;
+  scrollbar-color: #ffcd4d #fff8e6;
 }
 
 .scrollbar-danger {
@@ -308,12 +312,12 @@ select:disabled {
 }
 
 .scrollbar-success::-webkit-scrollbar-track {
-  background: #e8fbe4;
+  background: #eaf8fa;
   border-radius: 9999px;
 }
 
 .scrollbar-warning::-webkit-scrollbar-track {
-  background: #fff5ea;
+  background: #fff8e6;
   border-radius: 9999px;
 }
 
@@ -323,12 +327,12 @@ select:disabled {
 }
 
 .scrollbar-success::-webkit-scrollbar-thumb {
-  background: #80e96d;
+  background: #6fd3dc;
   border-radius: 9999px;
 }
 
 .scrollbar-warning::-webkit-scrollbar-thumb {
-  background: #dfb77b;
+  background: #ffcd4d;
   border-radius: 9999px;
 }
 
@@ -338,11 +342,11 @@ select:disabled {
 }
 
 .scrollbar-success::-webkit-scrollbar-thumb:hover {
-  background: #3acf1f;
+  background: #005c6d;
 }
 
 .scrollbar-warning::-webkit-scrollbar-thumb:hover {
-  background: #b78718;
+  background: #e9a100;
 }
 
 .scrollbar-danger::-webkit-scrollbar-thumb:hover {
