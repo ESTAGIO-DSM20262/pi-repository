@@ -12,6 +12,7 @@ import {
 import {
   buildAdminDashboardMetrics,
   buildProfessorDashboardMetrics,
+  buildStudentDashboardMetrics,
   type DashboardTask,
   type MonthlyRegistration,
 } from '@/application/dashboard/dashboard-metrics'
@@ -27,6 +28,7 @@ import { AdminInsights } from './AdminInsights'
 import { DashboardFiltersBar } from './DashboardFiltersBar'
 import { formatMetric, StatCard } from './DashboardWidgets'
 import { ProfessorOverview } from './ProfessorOverview'
+import { StudentOverview } from './StudentOverview'
 
 export interface AdminUserMetrics {
   total: number
@@ -54,6 +56,12 @@ export interface ProfessorDashboardData {
   nowIso: string
 }
 
+export interface StudentDashboardData {
+  tasks: DashboardTask[]
+  today: string
+  nowIso: string
+}
+
 interface RoleDashboardProps {
   currentUserId: string
   name: string
@@ -64,6 +72,7 @@ interface RoleDashboardProps {
   adminData?: AdminDashboardData
   registrations?: MonthlyRegistration[]
   professorData?: ProfessorDashboardData
+  studentData?: StudentDashboardData
 }
 
 function AdminOverviewCards({
@@ -144,7 +153,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.inactive),
       note: 'Sem permissão para acessar o sistema',
       icon: 'fi-rr-user-lock',
-      tone: 'alert',
+      tone: 'pending',
       ratio: totalUsers ? ((userMetrics?.inactive ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -253,23 +262,23 @@ function DashboardThumbnail({ label }: { label: string }) {
         <div className="grid h-[calc(100%_-_12px)] grid-cols-[0.7fr_1.3fr] gap-1">
           <div className="grid grid-cols-2 gap-1">
             <span className="rounded-[2px] bg-emerald-200" />
-            <span className="rounded-[2px] bg-rose-200" />
+            <span className="rounded-[2px] bg-primary/25" />
             <span className="rounded-[2px] bg-slate-100" />
             <span className="rounded-[2px] bg-emerald-100" />
-            <span className="rounded-[2px] bg-rose-100" />
+            <span className="rounded-[2px] bg-primary-light" />
             <span className="rounded-[2px] bg-slate-100" />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-1 items-end gap-1 rounded-[2px] bg-slate-50 px-1 pt-1">
               <span className="h-[40%] flex-1 rounded-t-[1px] bg-emerald-300" />
               <span className="h-[75%] flex-1 rounded-t-[1px] bg-primary/70" />
-              <span className="h-[55%] flex-1 rounded-t-[1px] bg-rose-300" />
+              <span className="h-[55%] flex-1 rounded-t-[1px] bg-primary/45" />
               <span className="h-[90%] flex-1 rounded-t-[1px] bg-emerald-500/70" />
               <span className="h-[65%] flex-1 rounded-t-[1px] bg-slate-400" />
             </div>
             <div className="flex h-2 gap-1">
               <span className="flex-1 rounded-[1px] bg-slate-200" />
-              <span className="flex-1 rounded-[1px] bg-rose-100" />
+              <span className="flex-1 rounded-[1px] bg-primary-light" />
               <span className="flex-1 rounded-[1px] bg-emerald-100" />
             </div>
           </div>
@@ -589,6 +598,7 @@ export function RoleDashboard({
   adminData,
   registrations,
   professorData,
+  studentData,
 }: RoleDashboardProps) {
   const publishedProjects = useMemo(
     () => projects.filter((project) => project.status === 'publicado'),
@@ -641,6 +651,16 @@ export function RoleDashboard({
       now: new Date(professorData.nowIso),
     })
   }, [role, professorData, filteredProjects])
+  const studentMetrics = useMemo(() => {
+    if (role !== 'student' || !studentData) return undefined
+    return buildStudentDashboardMetrics({
+      projects: relatedProjects,
+      tasks: studentData.tasks,
+      email,
+      today: studentData.today,
+      now: new Date(studentData.nowIso),
+    })
+  }, [role, studentData, relatedProjects, email])
   const showFilters =
     (role === 'admin' && Boolean(adminData)) || (role === 'professor' && Boolean(professorData))
   const firstName =
@@ -689,7 +709,7 @@ export function RoleDashboard({
                   Painel institucional
                 </p>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-violet-100 text-violet-800' : 'bg-accent-light text-secondary-hover'}`}
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-accent-light text-secondary-hover'}`}
                 >
                   {ROLE_LABEL[role]}
                 </span>
@@ -739,6 +759,7 @@ export function RoleDashboard({
         {role === 'professor' && professorMetrics && (
           <ProfessorOverview metrics={professorMetrics} />
         )}
+        {role === 'student' && studentMetrics && <StudentOverview metrics={studentMetrics} />}
 
         <ProjectsSection
           title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}

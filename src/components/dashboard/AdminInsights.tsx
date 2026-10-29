@@ -113,7 +113,7 @@ function PendingItem({
   return (
     <li className="flex items-center gap-3 rounded-lg border border-border bg-white p-3">
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600'}`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-tone-warning-soft text-tone-warning-ink' : 'bg-tone-pending-soft text-tone-pending-ink'}`}
       >
         <i className={`fi ${icon} flex`} aria-hidden="true" />
       </span>
@@ -122,7 +122,7 @@ function PendingItem({
         <p className="text-[10px] text-text-secondary sm:text-[11px]">{hint}</p>
       </div>
       <span
-        className={`text-xl font-bold tabular-nums ${alert ? 'text-slate-900' : 'text-slate-500'}`}
+        className={`text-xl font-bold tabular-nums ${alert ? 'text-slate-900' : 'text-tone-pending-ink'}`}
       >
         {formatMetric(value)}
       </span>
@@ -216,17 +216,25 @@ export function AdminInsights({
                 ]}
               />
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-slate-800 p-2.5">
-                  <p className="text-lg font-bold tabular-nums text-white">
+                <div
+                  className={`rounded-lg p-2.5 ${tasks.overdue > 0 ? 'bg-tone-alert-soft' : 'bg-tone-pending-soft'}`}
+                >
+                  <p
+                    className={`text-lg font-bold tabular-nums ${tasks.overdue > 0 ? 'text-tone-alert-ink' : 'text-tone-pending-ink'}`}
+                  >
                     {formatMetric(tasks.overdue)}
                   </p>
-                  <p className="text-[10px] text-slate-200">Atrasadas</p>
+                  <p
+                    className={`text-[10px] ${tasks.overdue > 0 ? 'text-tone-alert-ink' : 'text-tone-pending-ink'}`}
+                  >
+                    Atrasadas
+                  </p>
                 </div>
-                <div className="rounded-lg bg-primary-light p-2.5">
-                  <p className="text-lg font-bold tabular-nums text-primary">
+                <div className="rounded-lg bg-tone-done-soft p-2.5">
+                  <p className="text-lg font-bold tabular-nums text-tone-done-ink">
                     {tasks.completionRate}%
                   </p>
-                  <p className="text-[10px] text-primary-hover">Taxa de conclusão</p>
+                  <p className="text-[10px] text-tone-done-ink">Taxa de conclusão</p>
                 </div>
               </div>
             </div>
@@ -309,7 +317,7 @@ export function AdminInsights({
                 ariaLabel="Usuários por perfil"
                 segments={[
                   { label: 'Alunos', value: userMetrics.students, tone: 'info' },
-                  { label: 'Professores', value: userMetrics.professors, tone: 'violet' },
+                  { label: 'Professores', value: userMetrics.professors, tone: 'professor' },
                   { label: 'Administradores', value: userMetrics.admins, tone: 'neutral' },
                 ]}
               />

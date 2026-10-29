@@ -281,7 +281,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
       value: formatMetric(projects.stalled + projects.withoutTasks),
       note: `${formatMetric(projects.stalled)} sem movimentação há 14 dias · ${formatMetric(projects.withoutTasks)} sem tarefas`,
       icon: 'fi-rr-hourglass-start',
-      tone: projects.stalled + projects.withoutTasks > 0 ? 'alert' : 'pending',
+      tone: projects.stalled + projects.withoutTasks > 0 ? 'warning' : 'pending',
       ratio: percentOf(projects.stalled + projects.withoutTasks, projects.ongoing),
     },
   ] as const

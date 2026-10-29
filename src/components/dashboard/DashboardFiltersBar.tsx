@@ -8,6 +8,7 @@ import {
   hasActiveDashboardFilters,
   STATUS_FILTER_LABELS,
 } from '@/application/dashboard/dashboard-filters'
+import { SearchSelect } from '@/components/ui/SearchSelect'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import { labelClass } from '@/libs/styles'
 
@@ -102,20 +103,33 @@ export function DashboardFiltersBar({
         {advisorOptions && (
           <div>
             <span className={labelClass}>Orientador</span>
-            <SelectDropdown
-              ariaLabel="Filtrar por orientador"
+            <SearchSelect
+              ariaLabel="Buscar orientador"
               value={filters.advisor}
-              options={[{ value: ALL_OPTION, label: 'Todos os orientadores' }, ...advisorOptions]}
+              options={advisorOptions.map((option) => ({
+                value: option.value,
+                label: option.label,
+                hint:
+                  option.count === undefined
+                    ? undefined
+                    : `${option.count} ${option.count === 1 ? 'projeto' : 'projetos'}`,
+              }))}
+              allValue={ALL_OPTION}
+              allLabel="Todos os orientadores"
+              placeholder="Buscar orientador pelo nome"
+              noun="orientador"
               onChange={(advisor) => onChange({ ...filters, advisor, projectId: ALL_OPTION })}
             />
           </div>
         )}
         <div>
           <span className={labelClass}>Projeto</span>
-          <SelectDropdown
-            ariaLabel="Filtrar por projeto"
+          <SearchSelect
+            ariaLabel="Buscar projeto"
             value={filters.projectId}
-            options={[{ value: ALL_OPTION, label: 'Todos os projetos' }, ...projectOptions]}
+            options={projectOptions}
+            allValue={ALL_OPTION}
+            allLabel="Todos os projetos"
             onChange={(projectId) => onChange({ ...filters, projectId })}
           />
         </div>

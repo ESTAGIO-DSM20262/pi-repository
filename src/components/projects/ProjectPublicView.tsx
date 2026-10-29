@@ -336,7 +336,7 @@ function ExternalProjectLink({ label, url, icon }: { label: string; url?: string
   if (url) {
     return (
       <a href={url} target="_blank" rel="noreferrer" className={className}>
-        {iconElement} {label} <span aria-hidden="true">↗</span>
+        {iconElement} {label}
       </a>
     )
   }
@@ -346,7 +346,7 @@ function ExternalProjectLink({ label, url, icon }: { label: string; url?: string
       title="Link externo ainda não cadastrado"
       className={`${className} cursor-not-allowed opacity-80`}
     >
-      {iconElement} {label} <span aria-hidden="true">↗</span>
+      {iconElement} {label}
       <span className="sr-only">, endereço não cadastrado</span>
     </span>
   )

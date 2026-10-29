@@ -20,6 +20,7 @@ import {
   type AdminUserMetrics,
   type ProfessorDashboardData,
   RoleDashboard,
+  type StudentDashboardData,
 } from './RoleDashboard'
 
 function todayInSaoPaulo(now: Date) {
@@ -111,6 +112,17 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
     }
   }
 
+  let studentData: StudentDashboardData | undefined
+  if (user.role === 'student') {
+    try {
+      const followed = projects.filter((project) => project.related)
+      const tasks = await loadProgressTasks(followed.map((project) => project.id))
+      studentData = { tasks, today, nowIso: now.toISOString() }
+    } catch (error) {
+      console.error('[Student dashboard metrics]', error)
+    }
+  }
+
   return (
     <RoleDashboard
       currentUserId={String(session.user.id)}
@@ -122,6 +134,7 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
       adminData={adminData}
       registrations={registrations}
       professorData={professorData}
+      studentData={studentData}
     />
   )
 }

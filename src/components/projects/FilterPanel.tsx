@@ -66,7 +66,7 @@ const RAIL = [
   {
     icon: 'fi-rr-shield-check',
     title: 'Indicação',
-    active: (f: Filters) => f.verified || f.unverified,
+    active: (f: Filters) => f.verified,
     on: 'bg-emerald-50 text-emerald-700',
   },
   {
@@ -120,16 +120,6 @@ function FilterFields({
               Revisados e aprovados como referência técnica.
             </span>
           </span>
-        </label>
-
-        <label className="flex cursor-pointer items-start gap-2.5 text-[13px] text-slate-700">
-          <input
-            type="checkbox"
-            checked={filters.unverified}
-            onChange={(e) => onChange({ unverified: e.target.checked })}
-            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
-          />
-          <span>Não indicados / Em andamento</span>
         </label>
       </div>
 

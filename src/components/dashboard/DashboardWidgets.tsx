@@ -9,7 +9,7 @@ export type WidgetTone =
   | 'pending'
   | 'alert'
   | 'info'
-  | 'violet'
+  | 'professor'
   | 'neutral'
 
 interface ToneStyle {
@@ -22,90 +22,96 @@ interface ToneStyle {
   badge: string
 }
 
-const AMBER_STYLE: ToneStyle = {
-  icon: 'text-amber-700',
-  chip: 'bg-amber-100',
-  bar: 'bg-amber-400',
-  stroke: 'stroke-amber-400',
-  dot: 'bg-amber-400',
-  value: 'text-amber-700',
-  badge: 'bg-amber-100 text-amber-800',
-}
-
 const TONE_STYLES: Record<WidgetTone, ToneStyle> = {
   done: {
-    icon: 'text-primary',
-    chip: 'bg-primary-light',
-    bar: 'bg-primary',
-    stroke: 'stroke-primary',
-    dot: 'bg-primary',
-    value: 'text-primary',
-    badge: 'bg-primary-light text-primary',
+    icon: 'text-tone-done-ink',
+    chip: 'bg-tone-done-soft',
+    bar: 'bg-tone-done',
+    stroke: 'stroke-tone-done',
+    dot: 'bg-tone-done',
+    value: 'text-slate-900',
+    badge: 'bg-tone-done-soft text-tone-done-ink',
   },
-  ongoing: AMBER_STYLE,
-  warning: AMBER_STYLE,
+  ongoing: {
+    icon: 'text-tone-ongoing-ink',
+    chip: 'bg-tone-ongoing-soft',
+    bar: 'bg-tone-ongoing',
+    stroke: 'stroke-tone-ongoing',
+    dot: 'bg-tone-ongoing',
+    value: 'text-slate-900',
+    badge: 'bg-tone-ongoing-soft text-tone-ongoing-ink',
+  },
   indicated: {
-    icon: 'text-secondary',
-    chip: 'bg-accent-light',
-    bar: 'bg-secondary',
-    stroke: 'stroke-secondary',
-    dot: 'bg-secondary',
-    value: 'text-secondary',
-    badge: 'bg-accent-light text-secondary-hover',
+    icon: 'text-tone-indicated-ink',
+    chip: 'bg-tone-indicated-soft',
+    bar: 'bg-tone-indicated',
+    stroke: 'stroke-tone-indicated',
+    dot: 'bg-tone-indicated',
+    value: 'text-slate-900',
+    badge: 'bg-tone-indicated-soft text-tone-indicated-ink',
   },
   awaiting: {
-    icon: 'text-rose-600',
-    chip: 'bg-rose-100',
-    bar: 'bg-rose-300',
-    stroke: 'stroke-rose-300',
-    dot: 'bg-rose-300',
-    value: 'text-rose-700',
-    badge: 'bg-rose-100 text-rose-800',
+    icon: 'text-tone-awaiting-ink',
+    chip: 'bg-tone-awaiting-soft',
+    bar: 'bg-tone-awaiting',
+    stroke: 'stroke-tone-awaiting',
+    dot: 'bg-tone-awaiting',
+    value: 'text-slate-900',
+    badge: 'bg-tone-awaiting-soft text-tone-awaiting-ink',
   },
   pending: {
-    icon: 'text-slate-600',
-    chip: 'bg-slate-100',
-    bar: 'bg-slate-400',
-    stroke: 'stroke-slate-400',
-    dot: 'bg-slate-400',
+    icon: 'text-tone-pending-ink',
+    chip: 'bg-tone-pending-soft',
+    bar: 'bg-tone-pending',
+    stroke: 'stroke-tone-pending',
+    dot: 'bg-tone-pending',
     value: 'text-slate-900',
-    badge: 'bg-slate-100 text-slate-700',
-  },
-  alert: {
-    icon: 'text-white',
-    chip: 'bg-slate-800',
-    bar: 'bg-slate-800',
-    stroke: 'stroke-slate-800',
-    dot: 'bg-slate-800',
-    value: 'text-slate-900',
-    badge: 'bg-slate-800 text-white',
+    badge: 'bg-tone-pending-soft text-tone-pending-ink',
   },
   info: {
-    icon: 'text-secondary-hover',
-    chip: 'bg-accent-light',
-    bar: 'bg-accent',
-    stroke: 'stroke-accent',
-    dot: 'bg-accent',
+    icon: 'text-tone-info-ink',
+    chip: 'bg-tone-info-soft',
+    bar: 'bg-tone-info',
+    stroke: 'stroke-tone-info',
+    dot: 'bg-tone-info',
     value: 'text-slate-900',
-    badge: 'bg-accent-light text-secondary-hover',
+    badge: 'bg-tone-info-soft text-tone-info-ink',
   },
-  violet: {
-    icon: 'text-violet-700',
-    chip: 'bg-violet-100',
-    bar: 'bg-violet-500',
-    stroke: 'stroke-violet-500',
-    dot: 'bg-violet-500',
-    value: 'text-violet-800',
-    badge: 'bg-violet-100 text-violet-800',
+  professor: {
+    icon: 'text-tone-professor-ink',
+    chip: 'bg-tone-professor-soft',
+    bar: 'bg-tone-professor',
+    stroke: 'stroke-tone-professor',
+    dot: 'bg-tone-professor',
+    value: 'text-slate-900',
+    badge: 'bg-tone-professor-soft text-tone-professor-ink',
   },
   neutral: {
-    icon: 'text-slate-600',
-    chip: 'bg-slate-200',
-    bar: 'bg-slate-500',
-    stroke: 'stroke-slate-500',
-    dot: 'bg-slate-500',
+    icon: 'text-tone-neutral-ink',
+    chip: 'bg-tone-neutral-soft',
+    bar: 'bg-tone-neutral',
+    stroke: 'stroke-tone-neutral',
+    dot: 'bg-tone-neutral',
     value: 'text-slate-900',
-    badge: 'bg-slate-200 text-slate-800',
+    badge: 'bg-tone-neutral-soft text-tone-neutral-ink',
+  },
+  warning: {
+    icon: 'text-tone-warning-ink',
+    chip: 'bg-tone-warning-soft',
+    bar: 'bg-tone-warning',
+    stroke: 'stroke-tone-warning',
+    dot: 'bg-tone-warning',
+    value: 'text-tone-warning-ink',
+    badge: 'bg-tone-warning-soft text-tone-warning-ink',
+  },
+  alert: {
+    icon: 'text-tone-alert-ink',
+    chip: 'bg-tone-alert-soft',
+    bar: 'bg-tone-alert',
+    stroke: 'stroke-tone-alert',
+    dot: 'bg-tone-alert',
+    value: 'text-tone-alert-ink',
+    badge: 'bg-tone-alert-soft text-tone-alert-ink',
   },
 }
 
@@ -474,5 +480,5 @@ export function describeDueDate(daysUntilDue: number): { label: string; tone: Wi
   }
   if (daysUntilDue === 0) return { label: 'Vence hoje', tone: 'warning' }
   if (daysUntilDue === 1) return { label: 'Vence amanhã', tone: 'warning' }
-  return { label: `Vence em ${daysUntilDue} dias`, tone: daysUntilDue <= 7 ? 'warning' : 'pending' }
+  return { label: `Vence em ${daysUntilDue} dias`, tone: daysUntilDue <= 7 ? 'ongoing' : 'pending' }
 }

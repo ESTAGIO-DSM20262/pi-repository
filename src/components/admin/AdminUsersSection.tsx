@@ -30,7 +30,7 @@ interface EditForm {
 
 const PROFILE_STYLES: Record<Role, string> = {
   student: 'bg-accent-light text-secondary-hover',
-  professor: 'bg-violet-100 text-violet-800',
+  professor: 'bg-primary-light text-primary-hover',
   admin: 'bg-slate-200 text-slate-800',
 }
 const PAGE_SIZE = 5

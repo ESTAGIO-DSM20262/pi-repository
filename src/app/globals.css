@@ -98,6 +98,50 @@
   --color-rose-800: #76130b;
 }
 
+@theme {
+  /* Paleta dos dashboards: família verde-azulada da Fatec, em tons mais suaves.
+     Vermelho só aparece para atraso/alerta e âmbar apenas para atenção moderada. */
+  --color-tone-done: #4a8b97;
+  --color-tone-done-soft: #e4f0f2;
+  --color-tone-done-ink: #2f6670;
+
+  --color-tone-ongoing: #6db2bd;
+  --color-tone-ongoing-soft: #e8f4f6;
+  --color-tone-ongoing-ink: #33727e;
+
+  --color-tone-indicated: #2b6b7a;
+  --color-tone-indicated-soft: #dcebee;
+  --color-tone-indicated-ink: #1f4f5b;
+
+  --color-tone-awaiting: #b4d3d9;
+  --color-tone-awaiting-soft: #eef5f6;
+  --color-tone-awaiting-ink: #48676e;
+
+  --color-tone-pending: #c4cacd;
+  --color-tone-pending-soft: #f1f3f4;
+  --color-tone-pending-ink: #596267;
+
+  --color-tone-info: #7fa5af;
+  --color-tone-info-soft: #edf3f5;
+  --color-tone-info-ink: #3f5f68;
+
+  --color-tone-professor: #35727f;
+  --color-tone-professor-soft: #e0eef1;
+  --color-tone-professor-ink: #25505c;
+
+  --color-tone-neutral: #b9c0c4;
+  --color-tone-neutral-soft: #f1f3f4;
+  --color-tone-neutral-ink: #4d555a;
+
+  --color-tone-warning: #d9a84e;
+  --color-tone-warning-soft: #fbf2de;
+  --color-tone-warning-ink: #7a5712;
+
+  --color-tone-alert: #c0594f;
+  --color-tone-alert-soft: #fae8e5;
+  --color-tone-alert-ink: #8a3028;
+}
+
 @layer base {
   h1,
   h2,

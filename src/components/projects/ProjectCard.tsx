@@ -50,7 +50,7 @@ export function ProjectCard({
         </span>
 
         {p.verified && (
-          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-[11px] font-semibold text-secondary-hover">
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-[11px] font-semibold text-secondary-hover border border-accent">
             <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> PI Indicado
           </span>
         )}
