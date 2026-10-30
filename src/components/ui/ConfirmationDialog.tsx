@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useRestoreFocus } from '@/libs/useRestoreFocus'
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -29,6 +30,7 @@ export function ConfirmationDialog({
   onCancel,
 }: ConfirmationDialogProps) {
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
+  useRestoreFocus(open)
   const dialogRef = useRef<HTMLDivElement>(null)
   const onCancelRef = useRef(onCancel)
   const pendingRef = useRef(pending)

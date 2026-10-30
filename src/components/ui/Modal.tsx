@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { primaryButtonClass } from '../../libs/styles'
+import { useRestoreFocus } from '../../libs/useRestoreFocus'
 
 export type ModalVariant = 'success' | 'error' | 'warning'
 
@@ -46,6 +47,8 @@ export function Modal({
   showClose = true,
 }: ModalProps) {
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useRestoreFocus(open)
   const onCloseRef = useRef(onClose)
   const [shown, setShown] = useState(false)
   useEffect(() => {
@@ -75,6 +78,18 @@ export function Modal({
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCloseRef.current()
+      if (event.key !== 'Tab') return
+      const buttons = dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')
+      if (!buttons?.length) return
+      const first = buttons[0]
+      const last = buttons[buttons.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKey)
     buttonRef.current?.focus()
@@ -107,9 +122,11 @@ export function Modal({
         }}
       />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
+        aria-describedby="modal-description"
         className={`relative z-10 w-full max-w-[460px] rounded-2xl border border-border bg-surface px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-10 sm:pb-8 sm:pt-9 ${shown ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
         {showClose && (
@@ -136,7 +153,9 @@ export function Modal({
         <h2 id="modal-title" className="mt-5 text-xl font-semibold text-slate-900 sm:text-2xl">
           {title}
         </h2>
-        <p className="mx-auto mt-2 max-w-[360px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:text-[0.9375rem]">
+        <p
+          id="modal-description"
+          className="mx-auto mt-2 max-w-[360px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:text-[0.9375rem]">
           {description}
         </p>
 

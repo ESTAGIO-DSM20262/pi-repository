@@ -9,6 +9,7 @@ import {
   VERIFICATION_CRITERIA,
   type VerificationCriterionId,
 } from '@/domain/enterprise/entities/project-verification'
+import { useRestoreFocus } from '@/libs/useRestoreFocus'
 
 interface ProjectVerificationPanelProps {
   projectId: string
@@ -41,6 +42,7 @@ function VerificationDialog({
   const [error, setError] = useState('')
   const savingRef = useRef(false)
   const onCloseRef = useRef(onClose)
+  useRestoreFocus(true)
 
   useEffect(() => {
     onCloseRef.current = onClose

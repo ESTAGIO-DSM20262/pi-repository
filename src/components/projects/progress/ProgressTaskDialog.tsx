@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
 import { formatPersonName } from '@/libs/initials'
+import { useRestoreFocus } from '@/libs/useRestoreFocus'
 
 export interface ProgressTask {
   id: string
@@ -87,6 +88,7 @@ export function ProgressTaskDialog({
   const [error, setError] = useState('')
   const onCloseRef = useRef(onClose)
   const savingRef = useRef(saving)
+  useRestoreFocus(open)
 
   useEffect(() => {
     onCloseRef.current = onClose
