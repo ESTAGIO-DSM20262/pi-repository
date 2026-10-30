@@ -136,7 +136,7 @@ export function Modal({
         <h2 id="modal-title" className="mt-5 text-xl font-semibold text-slate-900 sm:text-2xl">
           {title}
         </h2>
-        <p className="mx-auto mt-2 max-w-[360px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:text-[15px]">
+        <p className="mx-auto mt-2 max-w-[360px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:text-[0.9375rem]">
           {description}
         </p>
 

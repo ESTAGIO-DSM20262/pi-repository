@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 export const fieldClass =
   'block h-10 w-full rounded-lg border border-border bg-surface-secondary px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15 read-only:cursor-not-allowed read-only:text-slate-500'
 export const labelClass = 'mb-1.5 block text-xs font-bold text-slate-800'
-export const hintClass = 'mt-1.5 text-[11px] leading-relaxed text-[#666666]'
+export const hintClass = 'mt-1.5 text-[0.6875rem] leading-relaxed text-[#666666]'
 export const sectionClass = 'rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7'
 
 export function FormSection({
@@ -30,7 +30,7 @@ export function FormSection({
             <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
               {title}
             </h2>
-            <p className="mt-0.5 text-xs text-[#666666] sm:text-[13px]">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-[#666666] sm:text-[0.8125rem]">{subtitle}</p>
           </div>
         </div>
         {badge}
@@ -43,7 +43,7 @@ export function FormSection({
 export function Badge({ tone, children }: { tone: 'slate' | 'green'; children: ReactNode }) {
   return (
     <span
-      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${tone === 'green' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200 text-slate-700'}`}
+      className={`shrink-0 rounded-full px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-wider ${tone === 'green' ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200 text-slate-700'}`}
     >
       {children}
     </span>

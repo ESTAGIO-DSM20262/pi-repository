@@ -8,7 +8,7 @@ export function ProfilePageHeader({ role }: { role: Role }) {
       <div className="flex items-start gap-3">
         <BackButton href={ROLE_DASHBOARD_PATH[role]} label="Voltar ao painel" />
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
             Conta do usuário
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">

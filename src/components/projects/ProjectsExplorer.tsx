@@ -33,7 +33,7 @@ function Hero({ total, verified }: { total: number; verified: number }) {
         aria-hidden="true"
       />
       <div className="max-w-2xl">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+        <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
           Fatec Itaquera – Repositório oficial
         </p>
         <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -53,7 +53,7 @@ function Hero({ total, verified }: { total: number; verified: number }) {
       <dl className="flex shrink-0 divide-x divide-border self-start rounded-lg border border-border bg-surface-secondary md:self-center">
         <div className="px-6 py-3 text-center">
           <dd className="text-2xl font-bold text-slate-900">{total}</dd>
-          <dt className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
+          <dt className="mt-0.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-600">
             PIs no acervo
           </dt>
         </div>
@@ -62,7 +62,7 @@ function Hero({ total, verified }: { total: number; verified: number }) {
             {verified}{' '}
             <i className="fi fi-rr-check-circle flex text-base text-primary" aria-hidden="true" />
           </dd>
-          <dt className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-secondary-hover">
+          <dt className="mt-0.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-secondary-hover">
             Indicados
           </dt>
         </div>
@@ -297,7 +297,7 @@ export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: Proj
               <p className="text-sm font-bold text-slate-900">
                 Está desenvolvendo o seu Projeto Integrador?
               </p>
-              <p className="mt-0.5 text-[13px] leading-relaxed text-text-secondary">
+              <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-text-secondary">
                 Utilize os projetos indicados como padrão de documentação de requisitos funcionais,
                 modelagem C4 e arquitetura de banco de dados.
               </p>

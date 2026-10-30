@@ -66,7 +66,7 @@ const LIFECYCLE = [
 function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+      <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
         {eyebrow}
       </p>
       <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{title}</h2>
@@ -89,7 +89,7 @@ function Hero({ role }: { role: Role | null }) {
         aria-hidden="true"
       />
       <div className="max-w-2xl">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+        <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
           Fatec Itaquera – Guia do acervo
         </p>
         <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
@@ -202,7 +202,7 @@ function About({ role }: { role: Role | null }) {
                 <i className={`fi ${item.icon} flex text-base`} aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900">{item.title}</h3>
-              <p className="mt-1 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
                 {item.text}
               </p>
             </article>
@@ -222,7 +222,7 @@ function About({ role }: { role: Role | null }) {
                 <h3 className="min-w-0 flex-1 text-base font-bold text-slate-900">{step.title}</h3>
                 <i className={`fi ${step.icon} flex text-lg text-secondary`} aria-hidden="true" />
               </div>
-              <p className="mt-2 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-2 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
                 {step.text}
               </p>
             </li>
@@ -244,13 +244,13 @@ function About({ role }: { role: Role | null }) {
                 <i className={`fi ${stage.icon} flex`} aria-hidden="true" />
                 {stage.label}
               </span>
-              <p className="mt-3 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-3 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
                 {stage.text}
               </p>
             </article>
           ))}
         </div>
-        <p className="text-xs text-text-secondary sm:text-[13px]">
+        <p className="text-xs text-text-secondary sm:text-[0.8125rem]">
           Todos os projetos ativos — em andamento ou concluídos — ficam visíveis no acervo, com ou
           sem login.
         </p>
@@ -270,7 +270,7 @@ function About({ role }: { role: Role | null }) {
                 <i className={`fi ${item.icon} flex text-base`} aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900">{item.title}</h3>
-              <p className="mt-1 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
                 {item.text}
               </p>
             </article>
@@ -317,7 +317,7 @@ function VisitorOffer() {
       <span className="absolute inset-y-0 left-0 w-1.5 bg-secondary" aria-hidden="true" />
       <div className="grid gap-6 md:grid-cols-[1.2fr_1fr] md:items-center">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
             Para quem está só visitando
           </p>
           <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
@@ -327,7 +327,7 @@ function VisitorOffer() {
             {offers.map((offer) => (
               <li
                 key={offer}
-                className="flex items-start gap-2.5 text-[13px] text-slate-700 sm:text-sm"
+                className="flex items-start gap-2.5 text-[0.8125rem] text-slate-700 sm:text-sm"
               >
                 <i
                   className="fi fi-rr-check-circle mt-0.5 flex shrink-0 text-secondary"
@@ -340,7 +340,7 @@ function VisitorOffer() {
         </div>
         <div className="rounded-lg bg-surface-secondary p-5">
           <p className="text-sm font-bold text-slate-900">É aluno, professor ou da coordenação?</p>
-          <p className="mt-1 text-[13px] leading-relaxed text-text-secondary">
+          <p className="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary">
             Entre com a sua conta institucional para favoritar projetos, acompanhar PIs e acessar o
             seu painel. Ao entrar, esta página passa a mostrar o que o seu perfil pode fazer.
           </p>
@@ -370,7 +370,7 @@ function RoleView({
   return (
     <div className="space-y-8">
       {!isOwnView && (
-        <p className="flex items-start gap-2.5 rounded-xl border border-accent/40 bg-accent-light px-4 py-3 text-[13px] text-secondary-hover">
+        <p className="flex items-start gap-2.5 rounded-xl border border-accent/40 bg-accent-light px-4 py-3 text-[0.8125rem] text-secondary-hover">
           <i className="fi fi-rr-eye mt-0.5 flex shrink-0" aria-hidden="true" />
           <span>
             Você está vendo como esta tela aparece para o perfil de{' '}
@@ -384,14 +384,14 @@ function RoleView({
         <span className="absolute inset-y-0 left-0 w-1.5 bg-primary" aria-hidden="true" />
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
               Perfil: {guide.label}
               {isOwnView ? ' (o seu)' : ''}
             </p>
             <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
               {guide.headline}
             </h2>
-            <p className="mt-2 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
+            <p className="mt-2 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
               {guide.intro}
             </p>
           </div>
@@ -420,11 +420,11 @@ function RoleView({
               </span>
               <div className="min-w-0">
                 <h3 className="text-base font-bold text-slate-900">{ability.title}</h3>
-                <p className="mt-1 text-[13px] leading-relaxed text-text-secondary sm:text-sm">
+                <p className="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
                   {ability.text}
                 </p>
                 {ability.where && (
-                  <p className="mt-2 inline-flex items-center gap-1.5 rounded bg-surface-secondary px-2 py-1 text-[11px] font-medium text-slate-700">
+                  <p className="mt-2 inline-flex items-center gap-1.5 rounded bg-surface-secondary px-2 py-1 text-[0.6875rem] font-medium text-slate-700">
                     <i className="fi fi-rr-link flex" aria-hidden="true" /> {ability.where}
                   </p>
                 )}
@@ -445,7 +445,7 @@ function RoleView({
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                 {index + 1}
               </span>
-              <p className="pt-0.5 text-[13px] leading-relaxed text-slate-700 sm:text-sm">{step}</p>
+              <p className="pt-0.5 text-[0.8125rem] leading-relaxed text-slate-700 sm:text-sm">{step}</p>
             </li>
           ))}
         </ol>
@@ -459,7 +459,7 @@ function RoleView({
           </h3>
           <ul className="mt-3 space-y-2">
             {guide.limits.map((limit) => (
-              <li key={limit} className="flex items-start gap-2.5 text-[13px] text-slate-700">
+              <li key={limit} className="flex items-start gap-2.5 text-[0.8125rem] text-slate-700">
                 <i
                   className="fi fi-rr-lock mt-0.5 flex shrink-0 text-text-muted"
                   aria-hidden="true"

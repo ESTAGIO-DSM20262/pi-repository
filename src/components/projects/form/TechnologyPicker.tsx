@@ -157,7 +157,7 @@ export function TechnologyPicker({
                 }`}
               >
                 <span className="font-semibold">{entry.name}</span>
-                <span className="text-[11px] text-text-secondary">{entry.group}</span>
+                <span className="text-[0.6875rem] text-text-secondary">{entry.group}</span>
               </div>
             ))}
           </div>
@@ -165,16 +165,16 @@ export function TechnologyPicker({
       </div>
       {popular.length > 0 && values.length < MAX_ITEMS && (
         <div className="mt-2.5">
-          <p className="mb-1.5 text-[11px] font-semibold text-[#666666]">Mais usadas</p>
+          <p className="mb-1.5 text-[0.6875rem] font-semibold text-[#666666]">Mais usadas</p>
           <ul className="flex flex-wrap gap-1.5">
             {popular.map((entry) => (
               <li key={entry.name}>
                 <button
                   type="button"
                   onClick={() => add([entry.name])}
-                  className="cursor-pointer inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
+                  className="cursor-pointer inline-flex items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 text-[0.6875rem] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
                 >
-                  <i className="fi fi-rr-plus flex text-[10px]" aria-hidden="true" />
+                  <i className="fi fi-rr-plus flex text-[0.625rem]" aria-hidden="true" />
                   {entry.name}
                 </button>
               </li>

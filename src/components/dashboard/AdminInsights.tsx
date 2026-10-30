@@ -39,7 +39,7 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
                 >
                   {row.title}
                 </Link>
-                <p className="mt-0.5 truncate text-[10px] text-text-secondary sm:text-[11px]">
+                <p className="mt-0.5 truncate text-[0.625rem] text-text-secondary sm:text-[0.6875rem]">
                   Orientador: {row.advisorName} · {row.semester}º semestre
                 </p>
               </div>
@@ -58,7 +58,7 @@ function AttentionList({ rows }: { rows: AdminDashboardMetrics['attention'] }) {
                     label={`Progresso de ${row.title}`}
                   />
                 </div>
-                <span className="shrink-0 text-[11px] font-semibold tabular-nums text-slate-700">
+                <span className="shrink-0 text-[0.6875rem] font-semibold tabular-nums text-slate-700">
                   {row.completed}/{row.total}
                 </span>
               </div>
@@ -119,7 +119,7 @@ function PendingItem({
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-xs font-semibold text-slate-900">{label}</p>
-        <p className="text-[10px] text-text-secondary sm:text-[11px]">{hint}</p>
+        <p className="text-[0.625rem] text-text-secondary sm:text-[0.6875rem]">{hint}</p>
       </div>
       <span
         className={`text-xl font-bold tabular-nums ${alert ? 'text-slate-900' : 'text-tone-pending-ink'}`}
@@ -150,7 +150,7 @@ export function AdminInsights({
         >
           Painéis de acompanhamento
         </h2>
-        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
           Projetos ativos, andamento das tarefas e pendências que dependem da administração.
         </p>
       </div>
@@ -225,7 +225,7 @@ export function AdminInsights({
                     {formatMetric(tasks.overdue)}
                   </p>
                   <p
-                    className={`text-[10px] ${tasks.overdue > 0 ? 'text-tone-alert-ink' : 'text-tone-pending-ink'}`}
+                    className={`text-[0.625rem] ${tasks.overdue > 0 ? 'text-tone-alert-ink' : 'text-tone-pending-ink'}`}
                   >
                     Atrasadas
                   </p>
@@ -234,7 +234,7 @@ export function AdminInsights({
                   <p className="text-lg font-bold tabular-nums text-tone-done-ink">
                     {tasks.completionRate}%
                   </p>
-                  <p className="text-[10px] text-tone-done-ink">Taxa de conclusão</p>
+                  <p className="text-[0.625rem] text-tone-done-ink">Taxa de conclusão</p>
                 </div>
               </div>
             </div>

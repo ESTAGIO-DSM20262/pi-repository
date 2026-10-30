@@ -46,7 +46,7 @@ function AdvisorCard({
         <p className="truncate text-xs text-text-secondary">{email}</p>
       </div>
       {badge && (
-        <span className="shrink-0 rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+        <span className="shrink-0 rounded-full bg-slate-200 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-slate-700">
           {badge}
         </span>
       )}

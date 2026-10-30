@@ -32,12 +32,12 @@ function ProgressList({ rows }: { rows: StudentDashboardMetrics['progress'] }) {
               <div className="min-w-0 flex-1">
                 <Link
                   href={`/projetos/${row.projectId}`}
-                  className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors hover:text-primary sm:text-[13px]"
+                  className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors hover:text-primary sm:text-[0.8125rem]"
                   title={row.title}
                 >
                   {row.title}
                 </Link>
-                <p className="mt-0.5 truncate text-[10px] text-text-secondary sm:text-[11px]">
+                <p className="mt-0.5 truncate text-[0.625rem] text-text-secondary sm:text-[0.6875rem]">
                   Orientador: {row.advisorName} · {row.semester}º semestre
                 </p>
               </div>
@@ -53,17 +53,17 @@ function ProgressList({ rows }: { rows: StudentDashboardMetrics['progress'] }) {
                       label={`Progresso de ${row.title}`}
                     />
                   </div>
-                  <span className="shrink-0 text-[11px] font-semibold tabular-nums text-slate-700">
+                  <span className="shrink-0 text-[0.6875rem] font-semibold tabular-nums text-slate-700">
                     {row.completed}/{row.total}
                   </span>
                 </div>
-                <p className="mt-1 text-[10px] text-text-secondary">
+                <p className="mt-1 text-[0.625rem] text-text-secondary">
                   {row.percent}% das tarefas da equipe concluídas
                   {row.nextDueDate ? ` · próximo prazo em ${formatShortDate(row.nextDueDate)}` : ''}
                 </p>
               </>
             ) : (
-              <p className="mt-2 text-[11px] text-text-secondary">
+              <p className="mt-2 text-[0.6875rem] text-text-secondary">
                 O professor ainda não cadastrou tarefas para este projeto.
               </p>
             )}
@@ -97,7 +97,7 @@ function DeadlinesList({ rows }: { rows: StudentDashboardMetrics['deadlines'] })
               </p>
               <Badge tone={due.tone}>{due.label}</Badge>
             </div>
-            <p className="mt-1 text-[11px] text-text-secondary">
+            <p className="mt-1 text-[0.6875rem] text-text-secondary">
               <Link
                 href={`/projetos/${row.projectId}`}
                 className="font-medium text-primary hover:underline"
@@ -162,7 +162,7 @@ export function StudentOverview({ metrics }: { metrics: StudentDashboardMetrics 
         >
           Acompanhamento do seu PI
         </h2>
-        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
           Suas tarefas e as da equipe toda, com o que vence primeiro. As tarefas são cadastradas
           pelo professor orientador.
         </p>

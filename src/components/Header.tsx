@@ -72,7 +72,7 @@ function AccountMenu({
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
                 <p className="truncate text-xs text-text-secondary">{email}</p>
-                <p className="mt-0.5 text-[11px] font-semibold text-primary">{ROLE_LABEL[role]}</p>
+                <p className="mt-0.5 text-[0.6875rem] font-semibold text-primary">{ROLE_LABEL[role]}</p>
               </div>
             </div>
             <Link
@@ -154,7 +154,7 @@ export function Header() {
             <span className="block font-slab text-base font-medium text-foreground">
               Acervo Acadêmico
             </span>
-            <span className="mt-1 block text-[11px] text-foreground">Projetos Integradores</span>
+            <span className="mt-1 block text-[0.6875rem] text-foreground">Projetos Integradores</span>
           </span>
         </Link>
 

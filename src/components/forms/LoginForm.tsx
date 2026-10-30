@@ -122,7 +122,7 @@ export function LoginForm() {
             </p>
           )}
           <div className="mt-1.5 text-right">
-            <Link href="/esqueci-senha" className={`text-xs sm:text-[13px] ${linkClass}`}>
+            <Link href="/esqueci-senha" className={`text-xs sm:text-[0.8125rem] ${linkClass}`}>
               Esqueci minha senha
             </Link>
           </div>
@@ -135,7 +135,7 @@ export function LoginForm() {
 
           <div className="flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-border" />
-            <span className="text-[11px] text-text-muted sm:text-xs">ou</span>
+            <span className="text-[0.6875rem] text-text-muted sm:text-xs">ou</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 

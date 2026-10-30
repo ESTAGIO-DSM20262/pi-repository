@@ -37,12 +37,12 @@ function ProjectProgressList({ rows }: { rows: ProfessorDashboardMetrics['progre
                 <div className="min-w-0 flex-1">
                   <Link
                     href={`/projetos/${row.projectId}`}
-                    className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors hover:text-primary sm:text-[13px]"
+                    className="line-clamp-1 text-xs font-bold text-slate-900 transition-colors hover:text-primary sm:text-[0.8125rem]"
                     title={row.title}
                   >
                     {row.title}
                   </Link>
-                  <p className="mt-0.5 text-[10px] text-text-secondary sm:text-[11px]">
+                  <p className="mt-0.5 text-[0.625rem] text-text-secondary sm:text-[0.6875rem]">
                     {row.semester}º semestre
                     {row.nextDueDate ? ` · próximo prazo ${formatShortDate(row.nextDueDate)}` : ''}
                   </p>
@@ -68,7 +68,7 @@ function ProjectProgressList({ rows }: { rows: ProfessorDashboardMetrics['progre
                     label={`Progresso de ${row.title}`}
                   />
                 </div>
-                <span className="shrink-0 text-[11px] font-semibold tabular-nums text-slate-700">
+                <span className="shrink-0 text-[0.6875rem] font-semibold tabular-nums text-slate-700">
                   {row.completed}/{row.total} · {row.percent}%
                 </span>
               </div>
@@ -109,7 +109,7 @@ function DeadlinesList({ rows }: { rows: ProfessorDashboardMetrics['deadlines'] 
               </p>
               <Badge tone={due.tone}>{due.label}</Badge>
             </div>
-            <p className="mt-1 text-[11px] text-text-secondary">
+            <p className="mt-1 text-[0.6875rem] text-text-secondary">
               <Link
                 href={`/projetos/${row.projectId}`}
                 className="font-medium text-primary hover:underline"
@@ -148,7 +148,7 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
               </p>
               <div className="flex shrink-0 items-center gap-1.5">
                 {row.overdue > 0 && <Badge tone="alert">{row.overdue} atrasada(s)</Badge>}
-                <span className="text-[11px] tabular-nums text-text-secondary">
+                <span className="text-[0.6875rem] tabular-nums text-text-secondary">
                   {row.open} em aberto
                 </span>
               </div>
@@ -160,7 +160,7 @@ function StudentWorkloadList({ rows }: { rows: ProfessorDashboardMetrics['studen
                 label={`Tarefas concluídas por ${row.name}`}
               />
             </div>
-            <p className="mt-0.5 text-[10px] text-text-secondary">
+            <p className="mt-0.5 text-[0.625rem] text-text-secondary">
               {row.completed} de {row.total} concluídas
             </p>
           </li>
@@ -199,11 +199,11 @@ function AwaitingIndicationList({
         >
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold text-slate-900">{row.title}</p>
-            <p className="text-[10px] text-text-secondary">{row.semester}º semestre · concluído</p>
+            <p className="text-[0.625rem] text-text-secondary">{row.semester}º semestre · concluído</p>
           </div>
           <Link
             href={`/projetos/${row.projectId}`}
-            className="inline-flex shrink-0 items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary-hover"
+            className="inline-flex shrink-0 items-center gap-1 text-[0.6875rem] font-semibold text-primary hover:text-primary-hover"
           >
             Indicar <i className="fi fi-rr-arrow-right flex" aria-hidden="true" />
           </Link>
@@ -295,7 +295,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
         >
           Acompanhamento dos seus projetos
         </h2>
-        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
           Resumo dos projetos e das tarefas em que você é orientador, com o que precisa de atenção
           primeiro.
         </p>

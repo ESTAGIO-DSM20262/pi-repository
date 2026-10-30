@@ -472,13 +472,13 @@ export function ProjectFormPage({
               label={isEdit ? 'Voltar ao projeto' : 'Voltar ao painel'}
             />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
                 Projeto Integrador
               </p>
               <h1 className="mt-1 text-xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
                 {pageTitle}
               </h1>
-              <p className="mt-1.5 max-w-2xl text-[11px] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-1.5 max-w-2xl text-[0.6875rem] leading-relaxed text-text-secondary sm:text-sm">
                 {pageDescription}
               </p>
             </div>
@@ -623,7 +623,7 @@ export function ProjectFormPage({
                           <label className={labelClass} htmlFor="project-summary">
                             Resumo <Required />
                           </label>
-                          <span className="mb-1.5 text-[11px] font-semibold text-[#666666]">
+                          <span className="mb-1.5 text-[0.6875rem] font-semibold text-[#666666]">
                             {summary.length} / 600 caracteres
                           </span>
                         </div>
@@ -645,7 +645,7 @@ export function ProjectFormPage({
                             Descrição detalhada{' '}
                             <span className="font-normal text-slate-500">(opcional)</span>
                           </label>
-                          <span className="mb-1.5 text-[11px] font-semibold text-[#666666]">
+                          <span className="mb-1.5 text-[0.6875rem] font-semibold text-[#666666]">
                             {overview.length} / 5000 caracteres
                           </span>
                         </div>
@@ -766,7 +766,7 @@ export function ProjectFormPage({
                             >
                               <div className="mb-4 flex items-center justify-between gap-2">
                                 <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-900">
-                                  <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                  <span className="rounded bg-primary px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
                                     v{index + 1}.0
                                   </span>
                                   Tarefa {index + 1}
@@ -875,7 +875,7 @@ export function ProjectFormPage({
               <h2 className="mt-3 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 {initialValues?.title}
               </h2>
-              <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
+              <p className="mt-1 text-xs text-[#666666] sm:text-[0.8125rem]">
                 Orientador:{' '}
                 {professors.find((professor) => professor.email === advisorEmail)?.name ??
                   advisorEmail}

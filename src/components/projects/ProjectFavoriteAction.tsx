@@ -21,13 +21,13 @@ export function ProjectFavoriteAction({
   if (loadError) {
     return (
       <div className="flex max-w-[150px] shrink-0 flex-col items-end gap-1 text-right">
-        <span role="status" className="text-[10px] leading-snug text-text-secondary">
+        <span role="status" className="text-[0.625rem] leading-snug text-text-secondary">
           Não foi possível carregar seus favoritos.
         </span>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="cursor-pointer text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
+          className="cursor-pointer text-[0.6875rem] font-semibold text-primary underline-offset-2 hover:underline"
         >
           Tentar novamente
         </button>

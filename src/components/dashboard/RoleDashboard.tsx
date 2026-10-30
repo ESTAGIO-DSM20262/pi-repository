@@ -175,7 +175,7 @@ function AdminOverviewCards({
         >
           Visão geral do sistema
         </h2>
-        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
           Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
           banco. Projetos desativados ficam fora das contagens do acervo.
         </p>
@@ -237,7 +237,7 @@ function SectionHeading({
             <i className={`fi ${icon} flex text-base text-primary`} aria-hidden="true" />
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-text-secondary sm:text-[13px]">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-text-secondary sm:text-[0.8125rem]">{subtitle}</p>
         </div>
       </div>
 
@@ -308,11 +308,11 @@ function DashboardProjectCard({
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[10px] font-medium text-text-secondary sm:text-[11px]">
+          <span className="truncate text-[0.625rem] font-medium text-text-secondary sm:text-[0.6875rem]">
             DSM • {project.semester}º Sem
           </span>
           <span
-            className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold ${
+            className={`shrink-0 rounded px-2 py-0.5 text-[0.625rem] font-semibold ${
               isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
             }`}
           >
@@ -321,12 +321,12 @@ function DashboardProjectCard({
         </div>
         <Link
           href={`/projetos/${project.id}`}
-          className="line-clamp-1 text-xs font-bold leading-snug text-slate-900 transition-colors hover:text-primary sm:text-[13px]"
+          className="line-clamp-1 text-xs font-bold leading-snug text-slate-900 transition-colors hover:text-primary sm:text-[0.8125rem]"
           title={project.title}
         >
           {project.title}
         </Link>
-        <p className="line-clamp-1 text-[10px] text-text-secondary sm:text-[11px]">
+        <p className="line-clamp-1 text-[0.625rem] text-text-secondary sm:text-[0.6875rem]">
           Orientador: {project.advisor.name} <span aria-hidden="true">•</span> {memberCount}{' '}
           {memberCount === 1 ? 'estudante' : 'estudantes'}
         </p>
@@ -342,7 +342,7 @@ function DashboardProjectCard({
           )}
           <Link
             href={`/projetos/${project.id}`}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary transition hover:text-primary-hover sm:text-xs"
+            className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold text-primary transition hover:text-primary-hover sm:text-xs"
           >
             Acessar Projeto <i className="fi fi-rr-arrow-right flex" aria-hidden="true" />
           </Link>
@@ -548,7 +548,7 @@ function ProjectsSection({
             cycleOptions={cycleOptions}
             onClear={clearFilters}
           />
-          <p className="mb-3 text-[11px] text-text-secondary" role="status">
+          <p className="mb-3 text-[0.6875rem] text-text-secondary" role="status">
             Exibindo {filteredProjects.length} de {projects.length}{' '}
             {projects.length === 1 ? 'projeto' : 'projetos'}.
           </p>
@@ -705,11 +705,11 @@ export function RoleDashboard({
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary sm:text-[11px]">
+                <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-primary sm:text-[0.6875rem]">
                   Painel institucional
                 </p>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-accent-light text-secondary-hover'}`}
+                  className={`rounded-full px-2.5 py-1 text-[0.625rem] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-accent-light text-secondary-hover'}`}
                 >
                   {ROLE_LABEL[role]}
                 </span>
@@ -800,7 +800,7 @@ export function RoleDashboard({
         />
 
         {role === 'admin' && (
-          <p className="rounded-xl border border-border bg-white px-4 py-3 text-center text-[10px] text-text-muted shadow-sm">
+          <p className="rounded-xl border border-border bg-white px-4 py-3 text-center text-[0.625rem] text-text-muted shadow-sm">
             Usuários, permissões e projetos cadastrados são gerenciados no banco. Os projetos
             demonstrativos do acervo continuam sendo exibidos junto com os novos cadastros.
           </p>

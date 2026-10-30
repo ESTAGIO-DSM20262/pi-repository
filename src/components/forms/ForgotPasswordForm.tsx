@@ -98,7 +98,7 @@ export function ForgotPasswordForm() {
         </button>
       </form>
 
-      <p className="mt-5 text-center text-[13px] text-text-secondary sm:text-sm">
+      <p className="mt-5 text-center text-[0.8125rem] text-text-secondary sm:text-sm">
         Lembrou da senha?{' '}
         <Link href="/login" className={linkClass}>
           Entrar

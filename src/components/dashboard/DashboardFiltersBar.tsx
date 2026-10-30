@@ -56,7 +56,7 @@ export function DashboardFiltersBar({
             <h2 className="text-sm font-bold tracking-tight text-slate-900 sm:text-base">
               Filtrar painel
             </h2>
-            <p className="mt-0.5 text-[11px] text-text-secondary sm:text-xs">{scopeNote}</p>
+            <p className="mt-0.5 text-[0.6875rem] text-text-secondary sm:text-xs">{scopeNote}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">

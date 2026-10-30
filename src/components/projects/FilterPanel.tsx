@@ -29,7 +29,7 @@ interface FilterPanelProps {
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6 min-w-0 overflow-visible">
-      <h3 className="mb-3 text-[13px] font-bold uppercase tracking-wide text-slate-900">{title}</h3>
+      <h3 className="mb-3 text-[0.8125rem] font-bold uppercase tracking-wide text-slate-900">{title}</h3>
       <div className="space-y-2 overflow-visible">{children}</div>
     </section>
   )
@@ -47,7 +47,7 @@ function CheckRow({
   count?: number
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-[13px] text-slate-700">
+    <label className="flex cursor-pointer items-center gap-2.5 text-[0.8125rem] text-slate-700">
       <input
         type="checkbox"
         checked={checked}
@@ -168,7 +168,7 @@ function FilterFields({
                 }`}
               >
                 {o.value}
-                {active && <i className="fi fi-rr-check flex text-[10px]" aria-hidden="true" />}
+                {active && <i className="fi fi-rr-check flex text-[0.625rem]" aria-hidden="true" />}
               </button>
             )
           })}
@@ -260,7 +260,7 @@ export function FilterPanel({
   }, [open])
 
   const badge = activeCount > 0 && (
-    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+    <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] font-bold text-white">
       {activeCount}
     </span>
   )
@@ -375,7 +375,7 @@ export function FilterPanel({
               </button>
             ))}
 
-            <span className="mt-3 rotate-180 text-[11px] font-semibold uppercase tracking-widest text-text-muted [writing-mode:vertical-rl]">
+            <span className="mt-3 rotate-180 text-[0.6875rem] font-semibold uppercase tracking-widest text-text-muted [writing-mode:vertical-rl]">
               Filtros ocultos
             </span>
           </div>
@@ -473,7 +473,7 @@ export function FilterPanel({
                         aria-pressed={selected}
                         onClick={() => onSort(option.value)}
                         tabIndex={open ? 0 : -1}
-                        className={`flex min-h-10 cursor-pointer items-center justify-center rounded-md border-2 px-2 py-2 text-center text-[13px] font-medium transition-colors duration-150 ${
+                        className={`flex min-h-10 cursor-pointer items-center justify-center rounded-md border-2 px-2 py-2 text-center text-[0.8125rem] font-medium transition-colors duration-150 ${
                           selected
                             ? 'border-primary bg-surface text-slate-900'
                             : 'border-slate-300 bg-surface-secondary text-slate-800 hover:border-primary/60'

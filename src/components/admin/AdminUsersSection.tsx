@@ -178,7 +178,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
               <i className="fi fi-rr-users flex text-base text-primary" aria-hidden="true" />
               Base de Usuários e Permissões
             </h2>
-            <p className="mt-0.5 text-xs text-text-secondary sm:text-[13px]">
+            <p className="mt-0.5 text-xs text-text-secondary sm:text-[0.8125rem]">
               Usuários cadastrados no banco do Acervo Acadêmico.
             </p>
           </div>
@@ -295,7 +295,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
 
       <div className="overflow-x-auto rounded-lg border border-border-light">
         <table className="w-full min-w-[900px] border-collapse text-left text-xs">
-          <thead className="bg-surface-secondary text-[10px] font-bold uppercase tracking-wide text-slate-800">
+          <thead className="bg-surface-secondary text-[0.625rem] font-bold uppercase tracking-wide text-slate-800">
             <tr>
               <th className="px-4 py-3.5">Usuário / Nome</th>
               <th className="px-4 py-3.5">R.A. / Registro acadêmico</th>
@@ -322,7 +322,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   <td className="px-4 py-3">
                     <div className="flex min-w-[170px] items-center gap-2.5">
                       <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${user.role === 'student' ? 'bg-accent-light text-secondary-hover' : user.role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-slate-200 text-slate-800'}`}
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[0.625rem] font-bold ${user.role === 'student' ? 'bg-accent-light text-secondary-hover' : user.role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-slate-200 text-slate-800'}`}
                       >
                         {getNameInitials(user.name)}
                       </span>
@@ -335,14 +335,14 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   <td className="whitespace-nowrap px-4 py-3 text-text-secondary">{user.email}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`rounded px-2 py-1 text-[10px] font-bold ${PROFILE_STYLES[user.role]}`}
+                      className={`rounded px-2 py-1 text-[0.625rem] font-bold ${PROFILE_STYLES[user.role]}`}
                     >
                       {ROLE_LABEL[user.role]}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium ${user.active ? 'text-secondary' : 'text-slate-500'}`}
+                      className={`inline-flex items-center gap-1.5 text-[0.6875rem] font-medium ${user.active ? 'text-secondary' : 'text-slate-500'}`}
                     >
                       <span
                         className={`h-1.5 w-1.5 rounded-full ${user.active ? 'bg-secondary' : 'bg-slate-400'}`}
@@ -439,7 +439,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           >
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary">
+                <p className="text-[0.625rem] font-bold uppercase tracking-widest text-primary">
                   Gestão de usuários
                 </p>
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">Editar usuário</h3>
@@ -481,7 +481,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
                 />
                 {editing.id === currentUserId && (
-                  <span className="mt-1 block text-[10px] font-normal text-text-muted">
+                  <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
                     Por segurança, altere seu e-mail por outro administrador.
                   </span>
                 )}
@@ -535,7 +535,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                   />
                 )}
                 {editing.id === currentUserId && (
-                  <span className="mt-1 block text-[10px] font-normal text-text-muted">
+                  <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
                     Seu próprio perfil não pode ser alterado aqui.
                   </span>
                 )}

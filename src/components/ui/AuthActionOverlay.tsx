@@ -55,7 +55,7 @@ export function AuthActionOverlay({ message }: AuthActionOverlayProps) {
         </span>
         <h2 className="mt-5 text-lg font-bold text-slate-900">Aguarde um instante</h2>
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">{message}</p>
-        <p className="mt-4 text-[11px] text-slate-500">Não feche esta página durante o processo.</p>
+        <p className="mt-4 text-[0.6875rem] text-slate-500">Não feche esta página durante o processo.</p>
       </div>
     </div>,
     document.body,

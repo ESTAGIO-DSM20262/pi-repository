@@ -257,7 +257,7 @@ export function UserRegistrationPage() {
           <div className="flex items-start gap-3">
             <BackButton href="/admin" label="Voltar ao painel administrativo" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
                 Painel administrativo
               </p>
               <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -277,14 +277,14 @@ export function UserRegistrationPage() {
               <div className="max-w-xl">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <i className="fi fi-rr-user-add flex text-lg" aria-hidden="true" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
+                  <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
                     Novo registro
                   </span>
                 </div>
                 <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                   Cadastro individual de usuário
                 </h2>
-                <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[13px]">
+                <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[0.8125rem]">
                   Crie uma conta para estudante, docente ou administrador.
                 </p>
               </div>
@@ -398,7 +398,7 @@ export function UserRegistrationPage() {
                   </div>
                   <div className="flex flex-col gap-2 rounded-lg border border-emerald-200/80 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                      <p className="text-[0.625rem] font-bold uppercase tracking-wide text-text-secondary">
                         Senha temporária
                       </p>
                       <code className="mt-1 block break-all text-sm font-semibold text-slate-900">
@@ -434,7 +434,7 @@ export function UserRegistrationPage() {
                       )}
                     </div>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-emerald-900">
+                  <p className="text-[0.6875rem] leading-relaxed text-emerald-900">
                     Copie e entregue a senha ao usuário por um canal seguro. O sistema ainda não tem
                     envio de e-mail configurado e esta senha não será exibida novamente após sair
                     desta tela.
@@ -443,7 +443,7 @@ export function UserRegistrationPage() {
               )}
 
               <div className="flex flex-col-reverse gap-3 border-t border-border-light pt-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="max-w-sm text-[11px] leading-relaxed text-text-secondary">
+                <p className="max-w-sm text-[0.6875rem] leading-relaxed text-text-secondary">
                   A senha temporária é gerada automaticamente e armazenada apenas em formato hash.
                 </p>
                 <button
@@ -465,14 +465,14 @@ export function UserRegistrationPage() {
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2 text-emerald-800">
                 <i className="fi fi-rr-file-spreadsheet flex text-lg" aria-hidden="true" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
+                <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
                   Importação em lote
                 </span>
               </div>
               <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 Importar planilha do SIGA
               </h2>
-              <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[13px]">
+              <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[0.8125rem]">
                 A importação reconhece automaticamente as abas <strong>Alunos</strong> e{' '}
                 <strong>Professores</strong> do modelo enviado.
               </p>
@@ -545,12 +545,12 @@ export function UserRegistrationPage() {
               <div className="rounded-xl bg-surface-secondary p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-slate-900">Colunas reconhecidas</p>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800">
+                  <span className="inline-flex items-center gap-1 text-[0.625rem] font-semibold text-emerald-800">
                     <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Modelo DSM
                     compatível
                   </span>
                 </div>
-                <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-text-secondary">
+                <div className="mt-3 space-y-2 text-[0.6875rem] leading-relaxed text-text-secondary">
                   <p>
                     <strong className="text-slate-800">Aba Alunos:</strong> Curso · RA · Nome Aluno
                     · E-mail
@@ -573,7 +573,7 @@ export function UserRegistrationPage() {
                 <div className="space-y-3 rounded-xl border border-border bg-white p-4">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Importação finalizada</p>
-                    <p className="mt-1 text-[11px] text-text-secondary">
+                    <p className="mt-1 text-[0.6875rem] text-text-secondary">
                       Abas: {batchResult.summary.sheets.join(', ') || '—'} · Linhas lidas:{' '}
                       {batchResult.summary.read}
                     </p>
@@ -583,19 +583,19 @@ export function UserRegistrationPage() {
                       <p className="text-lg font-bold text-emerald-800">
                         {batchResult.summary.created}
                       </p>
-                      <p className="text-[10px] text-emerald-900">Criados</p>
+                      <p className="text-[0.625rem] text-emerald-900">Criados</p>
                     </div>
                     <div className="rounded-lg bg-amber-50 p-2.5">
                       <p className="text-lg font-bold text-amber-800">
                         {batchResult.summary.skipped}
                       </p>
-                      <p className="text-[10px] text-amber-900">Ignorados</p>
+                      <p className="text-[0.625rem] text-amber-900">Ignorados</p>
                     </div>
                     <div className="rounded-lg bg-rose-50 p-2.5">
                       <p className="text-lg font-bold text-rose-800">
                         {batchResult.summary.invalid}
                       </p>
-                      <p className="text-[10px] text-rose-900">Inválidos</p>
+                      <p className="text-[0.625rem] text-rose-900">Inválidos</p>
                     </div>
                   </div>
                   {batchResult.credentials.length > 0 && (
@@ -623,7 +623,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-emerald-900">
                         Ver usuários criados ({batchResult.credentials.length})
                       </summary>
-                      <ul className="scrollbar-success mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[11px] leading-relaxed text-emerald-900">
+                      <ul className="scrollbar-success mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[0.6875rem] leading-relaxed text-emerald-900">
                         {batchResult.credentials.slice(0, 50).map((item) => (
                           <li key={item.email}>
                             <strong>{item.name}</strong> — {item.email} ({ROLE_LABEL[item.role]})
@@ -637,7 +637,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-rose-900">
                         Ver linhas que precisam de correção ({batchResult.errors.length})
                       </summary>
-                      <ul className="scrollbar-danger mt-2 max-h-44 space-y-2 overflow-auto pr-1 text-[11px] leading-relaxed text-rose-900">
+                      <ul className="scrollbar-danger mt-2 max-h-44 space-y-2 overflow-auto pr-1 text-[0.6875rem] leading-relaxed text-rose-900">
                         {batchResult.errors.slice(0, 50).map((item) => (
                           <li key={`${item.sheet}-${item.rowNumber}`}>
                             <strong>
@@ -655,7 +655,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-amber-900">
                         Ver registros ignorados ({batchResult.skipped.length})
                       </summary>
-                      <ul className="scrollbar-warning mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[11px] leading-relaxed text-amber-900">
+                      <ul className="scrollbar-warning mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[0.6875rem] leading-relaxed text-amber-900">
                         {batchResult.skipped.slice(0, 50).map((item) => (
                           <li key={`${item.sheet}-${item.rowNumber}`}>
                             <strong>

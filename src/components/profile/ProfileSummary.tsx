@@ -19,7 +19,7 @@ export function ProfileSummary({ profile }: { profile: ProfileRecord }) {
         <h2 className="truncate text-lg font-bold text-slate-900 sm:text-xl">{profile.name}</h2>
         <p className="mt-0.5 truncate text-sm text-text-secondary">{profile.email}</p>
         <span
-          className={`mt-2 inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold ${ROLE_BADGE_CLASS[profile.role]}`}
+          className={`mt-2 inline-flex rounded-md px-2.5 py-1 text-[0.625rem] font-bold ${ROLE_BADGE_CLASS[profile.role]}`}
         >
           {ROLE_LABEL[profile.role]}
         </span>

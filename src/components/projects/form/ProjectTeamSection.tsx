@@ -90,14 +90,14 @@ export function ProjectTeamSection({
                     onClick={() => onAddStudent(student.email)}
                     className="cursor-pointer flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-surface-secondary"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[10px] font-bold text-primary">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[0.625rem] font-bold text-primary">
                       {getNameInitials(student.name)}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-semibold text-slate-900">
+                      <span className="block truncate text-[0.8125rem] font-semibold text-slate-900">
                         {formatPersonName(student.name)}
                       </span>
-                      <span className="block truncate text-[11px] text-text-secondary">
+                      <span className="block truncate text-[0.6875rem] text-text-secondary">
                         {student.registrationNumber ? `RA ${student.registrationNumber} · ` : ''}
                         {student.email}
                       </span>
@@ -151,13 +151,13 @@ export function ProjectTeamSection({
                     <span className="block truncate text-sm font-bold text-slate-900">
                       {formatPersonName(student.name)}
                     </span>
-                    <span className="block truncate text-[11px] text-text-secondary">
+                    <span className="block truncate text-[0.6875rem] text-text-secondary">
                       {student.registrationNumber
                         ? `RA: ${student.registrationNumber}`
                         : student.email}
                     </span>
                     {isLeader && (
-                      <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-2 py-0.5 text-[10px] font-bold text-primary">
+                      <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-2 py-0.5 text-[0.625rem] font-bold text-primary">
                         <i className="fi fi-rr-crown flex" aria-hidden="true" /> Líder do grupo
                       </span>
                     )}
@@ -176,7 +176,7 @@ export function ProjectTeamSection({
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
                   <div>
                     <label
-                      className="mb-1 block text-[11px] font-semibold text-slate-700"
+                      className="mb-1 block text-[0.6875rem] font-semibold text-slate-700"
                       htmlFor={memberRoleId}
                     >
                       Função no grupo <span className="font-normal text-slate-500">(opcional)</span>

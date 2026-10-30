@@ -116,7 +116,7 @@ export function ProjectImagesEditor({ images, onChange }: ProjectImagesEditorPro
           lado mínimo de {limits.minSidePx}px
         </span>
         {!PROJECT_IMAGE_UPLOAD_ENABLED && (
-          <span className="mt-1 rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+          <span className="mt-1 rounded-full bg-slate-200 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-wider text-slate-700">
             Envio em breve
           </span>
         )}
@@ -159,7 +159,7 @@ export function ProjectImagesEditor({ images, onChange }: ProjectImagesEditorPro
               </div>
 
               <fieldset className="mt-3">
-                <legend className="mb-1.5 text-[11px] font-bold text-slate-800">
+                <legend className="mb-1.5 text-[0.6875rem] font-bold text-slate-800">
                   Orientação da imagem
                 </legend>
                 <div className="grid grid-cols-2 gap-1.5">

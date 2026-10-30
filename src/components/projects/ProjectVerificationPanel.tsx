@@ -116,7 +116,7 @@ function VerificationDialog({
             <i className="fi fi-rr-shield-check flex text-xl" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary-hover">
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-secondary-hover">
               Sistema de indicação
             </p>
             <h2
@@ -259,7 +259,7 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
                 }`}
               >
                 <i
-                  className={`fi fi-rr-check flex text-[11px] ${selected ? 'text-white' : 'text-primary'}`}
+                  className={`fi fi-rr-check flex text-[0.6875rem] ${selected ? 'text-white' : 'text-primary'}`}
                   aria-hidden="true"
                 />
                 {criterion.label}
@@ -296,7 +296,7 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
             </button>
           </div>
           <p className="mt-1 text-xs leading-relaxed text-slate-700">{definition.statement}</p>
-          <p className="mt-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          <p className="mt-2.5 text-[0.625rem] font-bold uppercase tracking-wider text-slate-500">
             {endorsers.length > 1 ? 'Indicado pelos orientadores' : 'Indicado pelo orientador'}
           </p>
           <ul className="mt-1 space-y-0.5">
@@ -307,7 +307,7 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
             ))}
           </ul>
           {!openCriterion.unanimous && (
-            <p className="mt-2 text-[11px] text-slate-600">
+            <p className="mt-2 text-[0.6875rem] text-slate-600">
               {openCriterion.endorsedBy} de {summary.requiredCount} orientadores indicaram este
               critério.
             </p>
@@ -439,7 +439,7 @@ export function ProjectVerificationPanel({
           />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-secondary-hover">
+          <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-secondary-hover">
             Sistema de indicação
           </p>
           <h2 className="mt-0.5 text-base font-bold leading-tight text-slate-900">
@@ -497,7 +497,7 @@ export function ProjectVerificationPanel({
                       <p className="truncate text-xs font-semibold text-slate-900">
                         {advisor.name}
                       </p>
-                      <p className="text-[11px] text-text-secondary">
+                      <p className="text-[0.6875rem] text-text-secondary">
                         {advisor.verified && advisor.verifiedAt
                           ? `Indicou em ${formatDate(advisor.verifiedAt)}`
                           : 'Aguardando indicação'}
@@ -508,7 +508,7 @@ export function ProjectVerificationPanel({
               </ul>
 
               {summary.administrators.length > 0 && (
-                <p className="mt-3 text-[11px] text-text-secondary">
+                <p className="mt-3 text-[0.6875rem] text-text-secondary">
                   Também indicado pela administração:{' '}
                   {summary.administrators.map((admin) => admin.name).join(', ')}.
                 </p>
