@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./accessibility.css";
 
 :root {
   --primary: #b20000;
@@ -17,7 +18,7 @@
 
   --foreground: #333333;
   --text-secondary: #666666;
-  --text-muted: #767676;
+  --text-muted: #6b6b6b;
 
   --border: #dadada;
   --border-light: #e6e6e6;
