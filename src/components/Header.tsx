@@ -2,8 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { useAuth } from '@/presentation/auth/auth-context'
@@ -34,14 +34,23 @@ function AccountMenu({
   const [open, setOpen] = useState(false)
   const initials = getNameInitials(name) || 'U'
 
+  useEffect(() => {
+    if (!open) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open])
+
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        aria-haspopup="menu"
-        aria-label="Abrir menu da conta"
+        aria-controls="account-menu"
+        aria-label="Menu da conta"
         className=" cursor-pointer inline-flex items-center gap-1.5 rounded-full p-1 text-primary transition hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
@@ -57,12 +66,13 @@ function AccountMenu({
         <>
           <button
             type="button"
-            aria-label="Fechar menu da conta"
+            aria-hidden="true"
+            tabIndex={-1}
             className="fixed inset-0 z-40 cursor-default"
             onClick={() => setOpen(false)}
           />
           <div
-            role="menu"
+            id="account-menu"
             className="absolute right-0 top-[calc(100%+10px)] z-50 w-[min(300px,calc(100vw-24px))] overflow-hidden rounded-xl border border-border bg-white shadow-[0_18px_45px_rgba(31,31,31,0.16)] animate-in fade-in slide-in-from-top-1 duration-150"
           >
             <div className="flex items-center gap-3 border-b border-border-light bg-surface-secondary/70 p-4">
@@ -77,7 +87,6 @@ function AccountMenu({
             </div>
             <Link
               href="/perfil"
-              role="menuitem"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2.5 px-4 py-3 text-sm text-slate-700 transition hover:bg-surface-secondary hover:text-primary"
             >
@@ -86,7 +95,6 @@ function AccountMenu({
             </Link>
             <button
               type="button"
-              role="menuitem"
               onClick={() => {
                 setOpen(false)
                 onSignOut()
@@ -103,7 +111,25 @@ function AccountMenu({
   )
 }
 
+function NavLink({
+  href,
+  pathname,
+  children,
+}: {
+  href: string
+  pathname: string
+  children: React.ReactNode
+}) {
+  const current = href === '/' ? pathname === '/' : pathname.startsWith(href)
+  return (
+    <Link href={href} className={linkClass} aria-current={current ? 'page' : undefined}>
+      {children}
+    </Link>
+  )
+}
+
 export function Header() {
+  const pathname = usePathname()
   const router = useRouter()
   const { user, signOut, loading, showAuthAction, clearAuthAction } = useAuth()
 
@@ -159,17 +185,17 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-6">
-          <nav className="hidden items-center gap-6 sm:flex">
-            <Link href="/" className={linkClass}>
+          <nav aria-label="Menu principal" className="hidden items-center gap-6 sm:flex">
+            <NavLink href="/" pathname={pathname}>
               Início
-            </Link>
-            <Link href="/como-funciona" className={linkClass}>
+            </NavLink>
+            <NavLink href="/como-funciona" pathname={pathname}>
               Como Funciona
-            </Link>
+            </NavLink>
             {user && (
-              <Link href={PROFILE_ROUTE[user.role]} className={linkClass}>
+              <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
                 Painel
-              </Link>
+              </NavLink>
             )}
             {authItem}
           </nav>
@@ -184,17 +210,20 @@ export function Header() {
         </div>
       </div>
 
-      <nav className="flex min-h-10 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-border-light px-3 py-2 sm:hidden">
-        <Link href="/" className={linkClass}>
-          Início
-        </Link>
-        <Link href="/como-funciona" className={linkClass}>
-          Como Funciona
-        </Link>
+      <nav
+        aria-label="Menu principal"
+        className="flex min-h-10 flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-border-light px-3 py-2 sm:hidden"
+      >
+        <NavLink href="/" pathname={pathname}>
+              Início
+            </NavLink>
+        <NavLink href="/como-funciona" pathname={pathname}>
+              Como Funciona
+            </NavLink>
         {user && (
-          <Link href={PROFILE_ROUTE[user.role]} className={linkClass}>
-            Painel
-          </Link>
+          <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
+                Painel
+              </NavLink>
         )}
         {authItem}
       </nav>
