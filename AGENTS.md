@@ -671,3 +671,14 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Ícones:** o pacote `@flaticon/flaticon-uicons` (estilo regular rounded) não tem
   `fi-rr-folder-check`; os cards de concluídos usam `fi-rr-flag-checkered`. Antes de usar um ícone
   novo, confira se a classe existe em `rounded.css`.
+
+## Acessibilidade (branch `feat/acessibilidade`)
+
+- **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.
+- **Atributos em `<html>`**: `data-a11y-text` (100–200), `data-a11y-theme` (light|dark), `data-a11y-contrast` (normal|high), `data-a11y-colors` (default|protanopia|deuteranopia|tritanopia), `data-a11y-underline`, `data-a11y-motion`, `data-a11y-focus`.
+- **Estilos**: `src/app/accessibility.css` (texto, sublinhado, foco, movimento, links de atalho) e `src/app/accessibility-tokens.css` (tokens por tema; gerado a partir de rampas de cor, sobrescreve variáveis `--color-slate/emerald/rose/red/amber/tone-*`). O tamanho do texto escala via `font-size` do `<html>`, por isso fontes fixas em px foram convertidas para rem; evite `text-[Npx]`. Não use `text-white` esperando fundo claro: `--color-white` não é sobrescrita, apenas a classe `bg-white` é remapeada para `--surface` nos temas escuro e de alto contraste.
+- **Daltonismo**: paletas trocam as rampas de sucesso (emerald), erro (rose/red) e atenção (amber) e os tons `done`, `alert` e `warning`. Nenhum estado pode depender só de cor; mantenha ícone ou texto junto de badges e indicadores.
+- **Painel**: `components/accessibility/AccessibilityPanel.tsx` (botão flutuante de 48px no canto inferior direito, card no desktop e bottom sheet no celular, Escape fecha e devolve o foco). `SkipLinks.tsx` oferece atalhos para conteúdo, menu e busca (`#busca-projetos`).
+- **VLibras**: `components/accessibility/VLibras.tsx` renderiza a marcação oficial e carrega `https://vlibras.gov.br/app/vlibras-plugin.js` uma vez (`next/script`, guarda `window.__acervoVLibrasStarted`), inicializando com `new window.VLibras.Widget('https://vlibras.gov.br/app')`. É independente do painel.
+- **Diálogos**: usar `useRestoreFocus` (`src/libs/useRestoreFocus.ts`) para devolver o foco ao elemento de origem; manter Escape e prender Tab.
+- **Formulários**: erros de campo usam `id="<campo>-error"` com `aria-describedby`; `Required` anuncia "(obrigatório)".

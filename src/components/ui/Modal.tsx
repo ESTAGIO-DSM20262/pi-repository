@@ -127,7 +127,7 @@ export function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
-        className={`relative z-10 w-full max-w-[460px] rounded-2xl border border-border bg-surface px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-10 sm:pb-8 sm:pt-9 ${shown ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-[460px] overflow-y-auto rounded-2xl border border-border bg-surface px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-10 sm:pb-8 sm:pt-9 ${shown ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
         {showClose && (
           <button

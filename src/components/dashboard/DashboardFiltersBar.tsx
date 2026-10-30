@@ -1,5 +1,6 @@
 'use client'
 
+import { useId, useState } from 'react'
 import {
   ALL_OPTION,
   type DashboardFilterOption,
@@ -41,6 +42,11 @@ export function DashboardFiltersBar({
 }: DashboardFiltersBarProps) {
   const active = hasActiveDashboardFilters(filters)
   const columns = advisorOptions ? 'xl:grid-cols-4' : 'xl:grid-cols-3'
+  const [expanded, setExpanded] = useState(false)
+  const panelId = useId()
+  const activeCount = [filters.semester, filters.status, filters.projectId, filters.advisor].filter(
+    (value) => value !== ALL_OPTION,
+  ).length
 
   return (
     <section
@@ -59,7 +65,7 @@ export function DashboardFiltersBar({
             <p className="mt-0.5 text-[0.6875rem] text-text-secondary sm:text-xs">{scopeNote}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 sm:w-auto sm:justify-end">
           <p role="status" className="text-xs font-semibold text-slate-700">
             {shown} de {total} {total === 1 ? 'projeto' : 'projetos'}
           </p>
@@ -67,7 +73,7 @@ export function DashboardFiltersBar({
             <button
               type="button"
               onClick={onClear}
-              className="cursor-pointer inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-semibold text-primary transition hover:border-primary/40 hover:bg-primary-light"
+              className="cursor-pointer inline-flex h-11 items-center sm:h-8 gap-1.5 rounded-md border border-border px-3 text-xs font-semibold text-primary transition hover:border-primary/40 hover:bg-primary-light"
             >
               <i className="fi fi-rr-cross-small flex" aria-hidden="true" /> Limpar filtros
             </button>
@@ -75,7 +81,33 @@ export function DashboardFiltersBar({
         </div>
       </div>
 
-      <div className={`mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 ${columns}`}>
+      <button
+        type="button"
+        onClick={() => setExpanded((value) => !value)}
+        aria-expanded={expanded}
+        aria-controls={panelId}
+        className="mt-4 flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl border border-border bg-surface px-3.5 text-sm font-semibold text-slate-800 sm:hidden"
+      >
+        <span className="inline-flex items-center gap-2">
+          <i className="fi fi-rr-filter flex" aria-hidden="true" />
+          Filtros
+          {activeCount > 0 && (
+            <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[0.6875rem] font-bold text-white">
+              {activeCount}
+              <span className="sr-only"> {activeCount === 1 ? 'filtro ativo' : 'filtros ativos'}</span>
+            </span>
+          )}
+        </span>
+        <i
+          className={`fi fi-rr-angle-small-down flex text-lg transition-transform ${expanded ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
+
+      <div
+        id={panelId}
+        className={`mt-3 grid-cols-1 gap-3 sm:mt-4 sm:grid sm:grid-cols-2 ${columns} ${expanded ? 'grid' : 'hidden'}`}
+      >
         <div>
           <span className={labelClass}>Semestre</span>
           <SelectDropdown
