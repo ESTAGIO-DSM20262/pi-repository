@@ -98,10 +98,11 @@ export function LoginForm() {
             placeholder="Digite seu e-mail"
             className={inputClass}
             aria-invalid={errors.email ? true : undefined}
+            aria-describedby={errors.email ? 'email-error' : undefined}
             {...register('email')}
           />
           {errors.email && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="email-error" className={fieldErrorClass} role="alert">
               {errors.email.message}
             </p>
           )}
@@ -114,10 +115,11 @@ export function LoginForm() {
             placeholder="Digite sua senha"
             autoComplete="current-password"
             aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? 'password-error' : undefined}
             {...register('password')}
           />
           {errors.password && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="password-error" className={fieldErrorClass} role="alert">
               {errors.password.message}
             </p>
           )}

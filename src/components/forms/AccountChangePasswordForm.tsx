@@ -88,10 +88,11 @@ export function AccountChangePasswordForm() {
             placeholder="Digite sua senha atual"
             autoComplete="current-password"
             aria-invalid={errors.currentPassword ? true : undefined}
+            aria-describedby={errors.currentPassword ? 'currentPassword-error' : undefined}
             {...register('currentPassword')}
           />
           {errors.currentPassword && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="currentPassword-error" className={fieldErrorClass} role="alert">
               {errors.currentPassword.message}
             </p>
           )}
@@ -104,10 +105,11 @@ export function AccountChangePasswordForm() {
             placeholder="Digite sua nova senha"
             autoComplete="new-password"
             aria-invalid={errors.newPassword ? true : undefined}
+            aria-describedby={errors.newPassword ? 'newPassword-error' : undefined}
             {...register('newPassword')}
           />
           {errors.newPassword && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="newPassword-error" className={fieldErrorClass} role="alert">
               {errors.newPassword.message}
             </p>
           )}
@@ -120,10 +122,11 @@ export function AccountChangePasswordForm() {
             placeholder="Confirme sua nova senha"
             autoComplete="new-password"
             aria-invalid={errors.confirm ? true : undefined}
+            aria-describedby={errors.confirm ? 'confirm-error' : undefined}
             {...register('confirm')}
           />
           {errors.confirm && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="confirm-error" className={fieldErrorClass} role="alert">
               {errors.confirm.message}
             </p>
           )}

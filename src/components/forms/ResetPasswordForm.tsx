@@ -100,10 +100,11 @@ function ResetPasswordFields({ token }: { token: string }) {
             placeholder="Digite sua nova senha"
             autoComplete="new-password"
             aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? 'password-error' : undefined}
             {...register('password')}
           />
           {errors.password && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="password-error" className={fieldErrorClass} role="alert">
               {errors.password.message}
             </p>
           )}
@@ -116,10 +117,11 @@ function ResetPasswordFields({ token }: { token: string }) {
             placeholder="Confirme sua nova senha"
             autoComplete="new-password"
             aria-invalid={errors.confirm ? true : undefined}
+            aria-describedby={errors.confirm ? 'confirm-error' : undefined}
             {...register('confirm')}
           />
           {errors.confirm && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="confirm-error" className={fieldErrorClass} role="alert">
               {errors.confirm.message}
             </p>
           )}

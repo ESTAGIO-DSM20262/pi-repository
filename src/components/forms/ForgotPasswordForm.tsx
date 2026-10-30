@@ -84,10 +84,11 @@ export function ForgotPasswordForm() {
             placeholder="Digite seu e-mail"
             className={inputClass}
             aria-invalid={errors.email ? true : undefined}
+            aria-describedby={errors.email ? 'email-error' : undefined}
             {...register('email')}
           />
           {errors.email && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="email-error" className={fieldErrorClass} role="alert">
               {errors.email.message}
             </p>
           )}
