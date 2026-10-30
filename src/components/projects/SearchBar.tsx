@@ -23,12 +23,13 @@ export function SearchBar({ value, onSearch }: SearchBarProps) {
         <i className="fi fi-rr-search flex text-lg text-slate-600" aria-hidden="true" />
 
         <input
+          id="busca-projetos"
           type="search"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="Busque por título, tecnologia ou orientador..."
           aria-label="Buscar projetos"
-          className="h-10 min-w-0 flex-1 bg-transparent px-1 text-sm text-foreground outline-none placeholder:text-text-muted sm:text-[15px]"
+          className="h-10 min-w-0 flex-1 bg-transparent px-1 text-sm text-foreground outline-none placeholder:text-text-muted sm:text-[0.9375rem]"
         />
 
         <button
