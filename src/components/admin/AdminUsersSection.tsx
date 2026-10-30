@@ -293,16 +293,20 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border-light">
+      <section
+        aria-label="Lista de usuários"
+        className="overflow-x-auto rounded-lg border border-border-light"
+      >
         <table className="w-full min-w-[900px] border-collapse text-left text-xs">
+          <caption className="sr-only">Usuários cadastrados no Acervo Acadêmico</caption>
           <thead className="bg-surface-secondary text-[0.625rem] font-bold uppercase tracking-wide text-slate-800">
             <tr>
-              <th className="px-4 py-3.5">Usuário / Nome</th>
-              <th className="px-4 py-3.5">R.A. / Registro acadêmico</th>
-              <th className="px-4 py-3.5">E-mail</th>
-              <th className="px-4 py-3.5">Perfil</th>
-              <th className="px-4 py-3.5">Status</th>
-              <th className="px-4 py-3.5">Ações</th>
+              <th scope="col" className="px-4 py-3.5">Usuário / Nome</th>
+              <th scope="col" className="px-4 py-3.5">R.A. / Registro acadêmico</th>
+              <th scope="col" className="px-4 py-3.5">E-mail</th>
+              <th scope="col" className="px-4 py-3.5">Perfil</th>
+              <th scope="col" className="px-4 py-3.5">Status</th>
+              <th scope="col" className="px-4 py-3.5">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-light">
@@ -408,7 +412,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
             )}
           </tbody>
         </table>
-      </div>
+      </section>
 
       <div className="mt-4">
         <Pagination

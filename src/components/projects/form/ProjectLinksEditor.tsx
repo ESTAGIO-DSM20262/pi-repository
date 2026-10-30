@@ -59,7 +59,7 @@ function IconPicker({
             aria-label="Catálogo de ícones"
             className="absolute left-0 top-full z-40 mt-1.5 w-72 rounded-xl border border-border bg-white p-2.5 shadow-xl"
           >
-            <p className="mb-2 px-1 text-[0.6875rem] font-bold uppercase tracking-wider text-[#666666]">
+            <p className="mb-2 px-1 text-[0.6875rem] font-bold uppercase tracking-wider text-text-secondary">
               Escolha um ícone
             </p>
             <div className="grid grid-cols-5 gap-1.5">

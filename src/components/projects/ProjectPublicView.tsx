@@ -177,7 +177,7 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
           </div>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-3 text-[#666666]">
+      <div className="flex shrink-0 items-center gap-3 text-text-secondary">
         {githubUrl && (
           <a
             href={githubUrl}
@@ -548,7 +548,7 @@ export function ProjectPublicView({
           <div
             className={`mt-3 grid grid-cols-1 gap-3 ${images.length === 0 ? 'xl:grid-cols-2' : ''}`}
           >
-            <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[0.8125rem] leading-relaxed text-[#666666]">
+            <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[0.8125rem] leading-relaxed text-text-secondary">
               {details?.overview ?? summary}
             </p>
             {images.length === 0 && <DashboardPreview />}
@@ -558,7 +558,7 @@ export function ProjectPublicView({
         <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <SectionTitle icon="fi-rr-users">Equipe de Desenvolvimento</SectionTitle>
-            <span className="shrink-0 text-[0.625rem] font-semibold text-[#666666] sm:text-[0.6875rem]">
+            <span className="shrink-0 text-[0.625rem] font-semibold text-text-secondary sm:text-[0.6875rem]">
               {team.length} {team.length === 1 ? 'integrante' : 'integrantes'}
             </span>
           </div>
