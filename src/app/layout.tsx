@@ -4,6 +4,7 @@ import Script from 'next/script'
 import { Suspense } from 'react'
 import { AccessibilityPanel } from '@/components/accessibility/AccessibilityPanel'
 import { SkipLinks } from '@/components/accessibility/SkipLinks'
+import { VLibras } from '@/components/accessibility/VLibras'
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { AccessibilityProvider } from '@/presentation/accessibility/accessibility-context'
@@ -88,7 +89,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </div>
             </div>
             <AccessibilityPanel />
-            </AuthProvider>
+            <VLibras />
+          </AuthProvider>
         </AccessibilityProvider>
       </body>
     </html>
