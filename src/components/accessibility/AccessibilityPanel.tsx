@@ -135,6 +135,15 @@ export function AccessibilityPanel() {
     return () => document.removeEventListener('pointerdown', onPointerDown)
   }, [open])
 
+  useEffect(() => {
+    if (!open || !window.matchMedia('(max-width: 639px)').matches) return
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [open])
+
   function closePanel() {
     setOpen(false)
     buttonRef.current?.focus()
@@ -157,6 +166,15 @@ export function AccessibilityPanel() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex justify-end p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
+      {open && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-hidden="true"
+          onClick={closePanel}
+          className="pointer-events-auto fixed inset-0 cursor-default bg-black/70 sm:hidden"
+        />
+      )}
       {open && (
         <div
           ref={panelRef}
