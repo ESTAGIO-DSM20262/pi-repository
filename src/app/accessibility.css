@@ -184,3 +184,8 @@ html[data-a11y-motion='reduce'] *::after {
 .skip-links a:focus {
   position: static;
 }
+
+html[data-a11y-theme='dark'] .text-secondary-hover,
+html[data-a11y-theme='dark'] .hover\:text-secondary-hover:hover {
+  color: var(--accent);
+}
