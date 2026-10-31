@@ -1,7 +1,7 @@
 import { ACCESSIBILITY_STORAGE_KEY } from './preferences'
 
 export const ACCESSIBILITY_NO_FLASH_SCRIPT = `(function(){try{
-var s=[100,110,125,150,175,200],c=['default','protanopia','deuteranopia','tritanopia'];
+var s=[100,110,125,150,175,200],c=['default','achromatomaly','achromatopsia','deuteranomaly','deuteranopia','protanomaly','protanopia','tritanomaly','tritanopia'];
 var raw=window.localStorage.getItem('${ACCESSIBILITY_STORAGE_KEY}');
 var p=raw?JSON.parse(raw):{};
 if(!p||typeof p!=='object'){p={}}

@@ -1,7 +1,17 @@
 export const TEXT_SIZE_LEVELS = [100, 110, 125, 150, 175, 200] as const
 export type TextSize = (typeof TEXT_SIZE_LEVELS)[number]
 
-export const COLOR_MODES = ['default', 'protanopia', 'deuteranopia', 'tritanopia'] as const
+export const COLOR_MODES = [
+  'default',
+  'achromatomaly',
+  'achromatopsia',
+  'deuteranomaly',
+  'deuteranopia',
+  'protanomaly',
+  'protanopia',
+  'tritanomaly',
+  'tritanopia',
+] as const
 export type ColorMode = (typeof COLOR_MODES)[number]
 
 export const THEMES = ['light', 'dark'] as const

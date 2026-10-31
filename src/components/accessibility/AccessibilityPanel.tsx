@@ -9,11 +9,16 @@ import {
   TEXT_SIZE_LEVELS,
 } from '@/presentation/accessibility/preferences'
 
-const COLOR_MODE_OPTIONS: { value: ColorMode; label: string; hint: string }[] = [
-  { value: 'default', label: 'Padrão', hint: 'Cores institucionais, sem adaptação' },
-  { value: 'protanopia', label: 'Protanopia', hint: 'Dificuldade com o vermelho' },
-  { value: 'deuteranopia', label: 'Deuteranopia', hint: 'Dificuldade com o verde' },
-  { value: 'tritanopia', label: 'Tritanopia', hint: 'Dificuldade com o azul e o amarelo' },
+const COLOR_MODE_OPTIONS: { value: ColorMode; label: string }[] = [
+  { value: 'default', label: 'Cores Padrão' },
+  { value: 'achromatomaly', label: 'Acromatomia' },
+  { value: 'achromatopsia', label: 'Acromatopsia' },
+  { value: 'deuteranomaly', label: 'Deuteranomalia' },
+  { value: 'deuteranopia', label: 'Deuteranopia' },
+  { value: 'protanomaly', label: 'Protanomalia' },
+  { value: 'protanopia', label: 'Protanopia' },
+  { value: 'tritanomaly', label: 'Tritanomalia' },
+  { value: 'tritanopia', label: 'Tritanopia' },
 ]
 
 function AccessibilityIcon({ className }: { className?: string }) {
@@ -102,7 +107,7 @@ export function AccessibilityPanel() {
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const descriptionId = useId()
-  const colorGroupName = useId()
+  const colorSelectId = useId()
   const activeCount = countActivePreferences(preferences)
 
   useEffect(() => {
@@ -232,36 +237,30 @@ export function AccessibilityPanel() {
             </Group>
 
             <Group title="Cores para daltonismo">
-              <fieldset className="pb-1">
-                <legend className="sr-only">Modo de cores para daltonismo</legend>
-                <div className="space-y-1.5 pt-1">
+              <div className="py-2">
+                <label
+                  htmlFor={colorSelectId}
+                  className="mb-1.5 block text-sm font-semibold text-foreground"
+                >
+                  Modo de cores
+                </label>
+                <select
+                  id={colorSelectId}
+                  value={preferences.colorMode}
+                  onChange={(event) => update({ colorMode: event.target.value as ColorMode })}
+                  className="h-11 w-full rounded-xl border-2 border-primary bg-surface px-3 text-sm text-foreground"
+                >
                   {COLOR_MODE_OPTIONS.map((option) => (
-                    <label
-                      key={option.value}
-                      className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 transition has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary ${
-                        preferences.colorMode === option.value
-                          ? 'border-primary bg-primary-light'
-                          : 'border-border bg-surface hover:bg-surface-secondary'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name={colorGroupName}
-                        value={option.value}
-                        checked={preferences.colorMode === option.value}
-                        onChange={() => update({ colorMode: option.value })}
-                        className="h-4 w-4 shrink-0 accent-primary"
-                      />
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold text-foreground">
-                          {option.label}
-                        </span>
-                        <span className="block text-xs text-text-secondary">{option.hint}</span>
-                      </span>
-                    </label>
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
                   ))}
-                </div>
-              </fieldset>
+                </select>
+                <p className="mt-1.5 text-xs leading-snug text-text-secondary">
+                  Troca as cores de status, gráficos e indicadores por paletas adaptadas. Textos e
+                  ícones continuam identificando cada estado.
+                </p>
+              </div>
             </Group>
 
             <Group title="Leitura e navegação">

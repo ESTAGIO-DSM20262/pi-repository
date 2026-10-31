@@ -4,6 +4,7 @@ import {
   ACCESSIBILITY_STORAGE_KEY,
   type AccessibilityPreferences,
   areDefaultPreferences,
+  COLOR_MODES,
   countActivePreferences,
   DEFAULT_ACCESSIBILITY_PREFERENCES,
   parseAccessibilityPreferences,
@@ -55,6 +56,21 @@ describe('parseAccessibilityPreferences', () => {
   it('trata ausência e JSON corrompido como padrão', () => {
     expect(parseAccessibilityPreferences(null)).toEqual(DEFAULT_ACCESSIBILITY_PREFERENCES)
     expect(parseAccessibilityPreferences('{quebrado')).toEqual(DEFAULT_ACCESSIBILITY_PREFERENCES)
+  })
+})
+
+describe('modos de cores', () => {
+  it('aceita todos os modos de daltonismo e rejeita desconhecidos', () => {
+    for (const mode of COLOR_MODES) {
+      expect(sanitizeAccessibilityPreferences({ colorMode: mode }).colorMode).toBe(mode)
+    }
+    expect(sanitizeAccessibilityPreferences({ colorMode: 'sepia' }).colorMode).toBe('default')
+  })
+
+  it('aplica no script o mesmo modo salvo', () => {
+    for (const mode of COLOR_MODES) {
+      expect(runNoFlashScript(JSON.stringify({ colorMode: mode }))['data-a11y-colors']).toBe(mode)
+    }
   })
 })
 
