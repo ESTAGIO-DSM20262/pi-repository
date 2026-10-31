@@ -1,11 +1,13 @@
 @import './accessibility-tokens.css';
 
 :root {
-  --primary-text: var(--primary);
   --focus-color: #005c6d;
-  --focus-halo: rgba(0, 193, 207, 0.35);
+  --focus-halo: #ffffff;
   --color-slate-400: #5f6e82;
   --color-slate-500: #526173;
+  --vlibras-btn-focus-visible-outline: 3px solid #b20000;
+  --vlibras-btn-focus-visible-shadow: 0 0 0 4px #ffffff, 0 0 0 7px #b20000;
+  --vlibras-btn-hover-filter: brightness(1.12);
 }
 
 @layer base {
@@ -15,46 +17,117 @@
   }
 }
 
+html {
+  scroll-padding-top: 1rem;
+}
+
 html[data-a11y-text='110'] { font-size: 110%; }
 html[data-a11y-text='125'] { font-size: 125%; }
 html[data-a11y-text='150'] { font-size: 150%; }
 html[data-a11y-text='175'] { font-size: 175%; }
 html[data-a11y-text='200'] { font-size: 200%; }
 
-html[data-a11y-theme='dark'] { --focus-color: #7fe3ef; --focus-halo: rgba(127, 227, 239, 0.35); }
-html[data-a11y-theme='dark'] .text-primary,
-html[data-a11y-theme='dark'] .hover\:text-primary:hover,
-html[data-a11y-theme='dark'] .focus-visible\:text-primary:focus-visible { color: var(--primary-text); }
-html[data-a11y-theme='dark'] .bg-white,
-html[data-a11y-theme='dark'] .focus\:bg-white:focus,
-html[data-a11y-theme='dark'] .hover\:bg-white:hover { background-color: var(--surface); }
-html[data-a11y-contrast='high'] .text-primary,
-html[data-a11y-contrast='high'] .hover\:text-primary:hover { color: var(--primary-text); }
-html[data-a11y-contrast='high'] { --focus-color: #000000; --focus-halo: #ffe600; }
-html[data-a11y-contrast='high'][data-a11y-theme='dark'] { --focus-color: #ffe600; --focus-halo: #000000; }
-html[data-a11y-contrast='high'] .bg-white,
-html[data-a11y-contrast='high'] .focus\:bg-white:focus,
-html[data-a11y-contrast='high'] .hover\:bg-white:hover { background-color: var(--surface); }
-html[data-a11y-contrast='high'] main a,
-html[data-a11y-contrast='high'] footer a { text-decoration: underline; text-underline-offset: 3px; }
-html[data-a11y-contrast='high'] [class*='border'] { border-color: var(--border); }
-html[data-a11y-contrast='high'] .shadow-sm,
-html[data-a11y-contrast='high'] .shadow-md,
-html[data-a11y-contrast='high'] .shadow-lg,
-html[data-a11y-contrast='high'] .shadow-2xl { box-shadow: var(--shadow-1); }
+html[data-a11y-theme='dark'] {
+  --focus-color: #7dd3fc;
+  --focus-halo: #111820;
+}
 
-html[data-a11y-underline='on'] main a,
-html[data-a11y-underline='on'] header a,
-html[data-a11y-underline='on'] footer a {
+html[data-a11y-theme='dark'] body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html[data-a11y-theme='dark'] ::placeholder {
+  color: var(--text-muted);
+}
+
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) {
+  --focus-color: #000000;
+  --focus-halo: #ffe600;
+}
+
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) .text-primary,
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) .hover\:text-primary:hover {
+  color: var(--primary);
+}
+
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) [class*='border'] {
+  border-color: var(--border);
+}
+
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) main a,
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) footer a {
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
+}
+
+html[data-a11y-contrast='high']:not([data-a11y-theme='dark']) :where(.shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl) {
+  box-shadow: var(--shadow-1);
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] {
+  color-scheme: dark;
+  --primary: #ffdf00;
+  --primary-hover: #fff36a;
+  --primary-light: #242000;
+  --secondary: #00ffff;
+  --secondary-hover: #00ffff;
+  --accent: #00ffff;
+  --accent-hover: #ffffff;
+  --accent-light: #092b2b;
+  --background: #000000;
+  --surface: #000000;
+  --surface-secondary: #111111;
+  --foreground: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #ffffff;
+  --border: #ffffff;
+  --border-light: #ffffff;
+  --focus-color: #ffdf00;
+  --focus-halo: #000000;
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] body,
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] :where([class*='bg-']) {
+  background-color: #000000 !important;
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] :where([class*='text-']),
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] body {
+  color: #ffffff !important;
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] :where(.border, [class*='border-']) {
+  border-color: #ffffff !important;
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] a {
+  color: #00ffff !important;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] :where(button, .bg-primary, .bg-primary-hover) {
+  background-color: #242000 !important;
+  color: #ffdf00 !important;
+  border: 2px solid #ffdf00 !important;
+}
+
+html[data-a11y-contrast='high'][data-a11y-theme='dark'] :where(input, select, textarea) {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+html[data-a11y-underline='on'] :where(main, header, footer, nav) a {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.2em;
 }
 
 html[data-a11y-focus='strong'] :focus-visible {
   outline: 3px solid var(--focus-color) !important;
   outline-offset: 3px !important;
-  box-shadow: 0 0 0 6px var(--focus-halo) !important;
+  box-shadow: 0 0 0 2px var(--focus-halo) !important;
 }
 
 html[data-a11y-motion='reduce'] *,
@@ -77,6 +150,13 @@ html[data-a11y-motion='reduce'] *::after {
   }
 }
 
+@media (forced-colors: active) {
+  :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 3px !important;
+  }
+}
+
 .skip-links {
   position: fixed;
   top: 0;
@@ -91,13 +171,14 @@ html[data-a11y-motion='reduce'] *::after {
 .skip-links a {
   position: absolute;
   left: -9999px;
-  padding: 0.625rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  background: var(--primary);
-  color: #ffffff;
+  background: #ffffff;
+  color: #7e0000;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
   white-space: nowrap;
+  box-shadow: 0 0 0 3px #b20000;
 }
 
 .skip-links a:focus {
