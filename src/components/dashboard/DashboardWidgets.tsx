@@ -144,20 +144,29 @@ export function StatCard({
   const valueStyles = TONE_STYLES[valueTone ?? tone]
 
   return (
-    <article className="min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
+    <article className="min-w-0 rounded-xl border border-border bg-white p-3 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium leading-5 text-text-secondary sm:text-[0.8125rem]">{title}</p>
+        <p className="text-[0.6875rem] font-medium leading-4 text-text-secondary sm:text-[0.8125rem] sm:leading-5">
+          {title}
+        </p>
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${styles.chip}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${styles.chip}`}
         >
           <i className={`fi ${icon} flex text-base ${styles.icon}`} aria-hidden="true" />
         </span>
       </div>
-      <p className={`mt-3 text-3xl font-bold tracking-tight tabular-nums ${valueStyles.value}`}>
+      <p
+        className={`mt-2 text-2xl font-bold tracking-tight tabular-nums sm:mt-3 sm:text-3xl ${valueStyles.value}`}
+      >
         {value}
       </p>
-      <p className="mt-1 min-h-8 text-[0.6875rem] leading-relaxed text-text-secondary">{note}</p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-border-light" aria-hidden="true">
+      <p className="mt-1 text-[0.6875rem] leading-snug text-text-secondary sm:min-h-8 sm:leading-relaxed">
+        {note}
+      </p>
+      <div
+        className="mt-2 h-1.5 overflow-hidden rounded-full bg-border-light sm:mt-3"
+        aria-hidden="true"
+      >
         <div
           className={`h-full rounded-full transition-all ${styles.bar}`}
           style={{ width: `${Math.max(0, Math.min(100, ratio))}%` }}

@@ -42,7 +42,7 @@ export function ProjectCard({
       } ${inactive ? 'opacity-70' : ''}`}
     >
       <div
-        className={`relative flex h-[150px] flex-col items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]}`}
+        className={`relative flex h-28 flex-col sm:h-[150px] items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]}`}
       >
         <i className={`fi ${p.cover.icon} flex text-3xl text-slate-700`} aria-hidden="true" />
         <span className="px-3 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
@@ -81,7 +81,7 @@ export function ProjectCard({
             {advisorLabel}: {advisorText}
           </span>
         </div>
-        <h3 className="mt-2 line-clamp-3 text-lg font-semibold leading-snug text-slate-900">
+        <h3 className="mt-2 line-clamp-3 text-base font-semibold sm:text-lg leading-snug text-slate-900">
           {p.title}
         </h3>
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-text-secondary">

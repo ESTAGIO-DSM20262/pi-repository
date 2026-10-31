@@ -166,14 +166,14 @@ export function Header() {
         <span className="w-1/4 bg-secondary sm:w-1/5" />
         <span className="w-1/6 bg-accent sm:w-1/5" />
       </div>
-      <div className="mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-4 px-4 sm:h-[72px] sm:px-6">
         <Link href="/" className="flex items-center gap-4" aria-label="Acervo Acadêmico — início">
           <Image
             src="/brand/fatec-itaquera-cor.png"
             alt="Fatec Itaquera — Prof. Miguel Reale"
             width={841}
             height={450}
-            className="h-12 w-auto"
+            className="h-10 w-auto sm:h-12"
           />
           <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
           <span className="hidden leading-none md:block">
@@ -205,7 +205,7 @@ export function Header() {
             alt="Centro Paula Souza"
             width={254}
             height={167}
-            className="h-12 w-auto"
+            className="h-10 w-auto sm:h-12"
           />
         </div>
       </div>
