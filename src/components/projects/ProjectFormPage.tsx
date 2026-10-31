@@ -820,6 +820,8 @@ export function ProjectFormPage({
                                     <span className={labelClass}>Responsável pela entrega</span>
                                     <SelectDropdown
                                       value={task.targetStudentEmail}
+                                      searchable
+                                      searchPlaceholder="Pesquisar pelo nome..."
                                       ariaLabel={`Responsável pela tarefa ${index + 1}`}
                                       width="full"
                                       tone="muted"

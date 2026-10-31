@@ -284,6 +284,8 @@ export function ProgressTaskDialog({
                 <span className={labelClass}>Responsável pela entrega</span>
                 <SelectDropdown
                   value={targetStudentEmail}
+                  searchable
+                  searchPlaceholder="Pesquisar pelo nome..."
                   ariaLabel="Responsável pela entrega"
                   width="full"
                   layer="modal"

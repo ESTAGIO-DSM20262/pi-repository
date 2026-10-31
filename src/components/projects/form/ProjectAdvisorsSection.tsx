@@ -104,6 +104,8 @@ export function ProjectAdvisorsSection({
             ) : (
               <SelectDropdown
                 value={principalEmail}
+                searchable
+                searchPlaceholder="Pesquisar pelo nome..."
                 ariaLabel="Professor orientador principal"
                 width="full"
                 tone="muted"
@@ -143,6 +145,8 @@ export function ProjectAdvisorsSection({
           ) : (
             <SelectDropdown
               value=""
+              searchable
+              searchPlaceholder="Pesquisar pelo nome..."
               ariaLabel="Adicionar professor orientador"
               width="full"
               tone="muted"

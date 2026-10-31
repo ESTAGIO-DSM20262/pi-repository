@@ -201,6 +201,8 @@ function FilterFields({
 
       <Group title="Orientação docente">
         <SelectDropdown
+          searchable
+          searchPlaceholder="Pesquisar pelo nome..."
           ariaLabel="Orientação docente"
           value={filters.advisor}
           onChange={(advisor) => onChange({ advisor })}
