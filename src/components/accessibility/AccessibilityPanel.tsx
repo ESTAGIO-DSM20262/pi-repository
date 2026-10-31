@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import { useAccessibility } from '@/presentation/accessibility/accessibility-context'
 import {
   type ColorMode,
@@ -107,7 +108,6 @@ export function AccessibilityPanel() {
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const descriptionId = useId()
-  const colorSelectId = useId()
   const activeCount = countActivePreferences(preferences)
 
   useEffect(() => {
@@ -129,6 +129,7 @@ export function AccessibilityPanel() {
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node
       if (panelRef.current?.contains(target) || buttonRef.current?.contains(target)) return
+      if (target instanceof Element && target.closest('[role="listbox"]')) return
       setOpen(false)
     }
     document.addEventListener('pointerdown', onPointerDown)
@@ -256,27 +257,16 @@ export function AccessibilityPanel() {
 
             <Group title="Cores para daltonismo">
               <div className="py-2">
-                <label
-                  htmlFor={colorSelectId}
-                  className="mb-1.5 block text-sm font-semibold text-foreground"
-                >
-                  Modo de cores
-                </label>
-                <select
-                  id={colorSelectId}
+                <p className="mb-1.5 text-sm font-semibold text-foreground">Modo de cores</p>
+                <SelectDropdown
                   value={preferences.colorMode}
-                  onChange={(event) => update({ colorMode: event.target.value as ColorMode })}
-                  className="h-11 w-full rounded-xl border-2 border-primary bg-surface px-3 text-sm text-foreground"
-                >
-                  {COLOR_MODE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  options={COLOR_MODE_OPTIONS}
+                  onChange={(value) => update({ colorMode: value as ColorMode })}
+                  ariaLabel="Modo de cores para daltonismo"
+                />
                 <p className="mt-1.5 text-xs leading-snug text-text-secondary">
-                  Troca as cores de status, gráficos e indicadores por paletas adaptadas. Textos e
-                  ícones continuam identificando cada estado.
+                  Troca as cores de todo o sistema por paletas adaptadas. Textos e ícones continuam
+                  identificando cada estado.
                 </p>
               </div>
             </Group>
