@@ -409,7 +409,10 @@ export function ColumnChart({
       {legend && (
         <ul className="flex flex-wrap gap-x-4 gap-y-1">
           {legend.map((item) => (
-            <li key={item.label} className="flex items-center gap-1.5 text-[0.6875rem] text-slate-700">
+            <li
+              key={item.label}
+              className="flex items-center gap-1.5 text-[0.6875rem] text-slate-700"
+            >
               <span
                 className={`h-2 w-2 rounded-full ${TONE_STYLES[item.tone].dot}`}
                 aria-hidden="true"

@@ -193,7 +193,9 @@ export function SearchSelect({
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                     {option.hint && (
-                      <span className="shrink-0 text-[0.6875rem] text-text-muted">{option.hint}</span>
+                      <span className="shrink-0 text-[0.6875rem] text-text-muted">
+                        {option.hint}
+                      </span>
                     )}
                     {isSelected && (
                       <i className="fi fi-rr-check flex shrink-0 text-sm" aria-hidden="true" />

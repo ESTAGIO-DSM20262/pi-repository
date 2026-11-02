@@ -464,21 +464,21 @@ export function ProjectFormPage({
   return (
     <div className="w-full bg-background px-3 py-4 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-4 rounded-2xl border border-border bg-white p-3 shadow-sm sm:mb-5 sm:p-6">
-          <div className="flex items-start gap-2.5 sm:gap-3">
+        <div className="mb-4 rounded-2xl border border-border bg-white p-3.5 shadow-sm sm:mb-5 sm:p-6">
+          <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
             <BackButton
               href={backHref}
               replace={isEdit}
               label={isEdit ? 'Voltar ao projeto' : 'Voltar ao painel'}
             />
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
                 Projeto Integrador
               </p>
-              <h1 className="mt-1 text-xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
+              <h1 className="mt-1 break-words text-lg font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
                 {pageTitle}
               </h1>
-              <p className="mt-1.5 max-w-2xl text-[0.6875rem] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
                 {pageDescription}
               </p>
             </div>

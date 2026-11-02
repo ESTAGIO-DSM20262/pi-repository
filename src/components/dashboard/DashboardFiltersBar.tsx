@@ -94,7 +94,10 @@ export function DashboardFiltersBar({
           {activeCount > 0 && (
             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[0.6875rem] font-bold text-white">
               {activeCount}
-              <span className="sr-only"> {activeCount === 1 ? 'filtro ativo' : 'filtros ativos'}</span>
+              <span className="sr-only">
+                {' '}
+                {activeCount === 1 ? 'filtro ativo' : 'filtros ativos'}
+              </span>
             </span>
           )}
         </span>

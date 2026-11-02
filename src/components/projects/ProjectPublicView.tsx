@@ -92,7 +92,9 @@ function DashboardPreview() {
                 <div className="truncate text-[0.375rem] font-semibold text-slate-500 sm:text-[0.4375rem]">
                   {label}
                 </div>
-                <div className="mt-1 text-[0.6875rem] font-bold text-slate-800 sm:text-sm">{value}</div>
+                <div className="mt-1 text-[0.6875rem] font-bold text-slate-800 sm:text-sm">
+                  {value}
+                </div>
               </div>
             ))}
           </div>
@@ -466,7 +468,7 @@ export function ProjectPublicView({
         </div>
 
         <div className="mt-3 flex flex-col items-start gap-3 sm:flex-row sm:justify-between sm:gap-4">
-          <h1 className="w-full text-[1.5625rem] font-bold leading-tight tracking-tight text-[#191d1f] sm:min-w-0 sm:flex-1 sm:w-auto sm:text-3xl lg:max-w-[850px] lg:text-4xl">
+          <h1 className="w-full min-w-0 break-words text-2xl font-bold leading-tight tracking-tight text-[#191d1f] sm:flex-1 sm:w-auto sm:text-3xl lg:max-w-[850px] lg:text-4xl">
             {project.title}
           </h1>
           {isAuthenticated && project.status === 'publicado' && (
@@ -477,7 +479,9 @@ export function ProjectPublicView({
             />
           )}
         </div>
-        <p className="mt-2 text-[0.75rem] leading-relaxed text-slate-600 sm:hidden">{summary}</p>
+        <p className="mt-2 break-words text-xs leading-relaxed text-slate-600 sm:hidden">
+          {summary}
+        </p>
 
         <div
           className={`mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:gap-5 ${advisors.length > 1 ? 'md:items-start' : 'md:items-center'} md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2`}

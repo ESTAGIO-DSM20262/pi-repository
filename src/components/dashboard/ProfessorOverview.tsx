@@ -199,7 +199,9 @@ function AwaitingIndicationList({
         >
           <div className="min-w-0">
             <p className="truncate text-xs font-semibold text-slate-900">{row.title}</p>
-            <p className="text-[0.625rem] text-text-secondary">{row.semester}º semestre · concluído</p>
+            <p className="text-[0.625rem] text-text-secondary">
+              {row.semester}º semestre · concluído
+            </p>
           </div>
           <Link
             href={`/projetos/${row.projectId}`}

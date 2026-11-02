@@ -79,7 +79,8 @@ export function Modal({
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCloseRef.current()
       if (event.key !== 'Tab') return
-      const buttons = dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')
+      const buttons =
+        dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')
       if (!buttons?.length) return
       const first = buttons[0]
       const last = buttons[buttons.length - 1]
@@ -155,7 +156,8 @@ export function Modal({
         </h2>
         <p
           id="modal-description"
-          className="mx-auto mt-2 max-w-[360px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:text-[0.9375rem]">
+          className="mx-auto mt-2 max-w-[360px] text-sm leading-relaxed text-text-secondary sm:mt-3 sm:text-[0.9375rem]"
+        >
           {description}
         </p>
 

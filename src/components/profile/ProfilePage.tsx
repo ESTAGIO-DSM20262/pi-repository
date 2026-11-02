@@ -11,7 +11,7 @@ export function ProfilePage({ initialProfile }: { initialProfile: ProfileRecord 
   const [profile, setProfile] = useState(initialProfile)
 
   return (
-    <div className="w-full bg-background px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
+    <div className="w-full bg-background px-3 py-5 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <ProfilePageHeader role={profile.role} />
 

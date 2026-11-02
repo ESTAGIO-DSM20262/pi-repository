@@ -43,10 +43,10 @@ export function PasswordResetEmail({ name, resetUrl }: PasswordResetEmailProps) 
                   </Text>
                 </Column>
                 <Column>
-                  <Text className="m-0 text-sm font-semibold leading-[1.125rem] text-foreground">
+                  <Text className="m-0 text-sm font-semibold leading-[18px] text-foreground">
                     {emailBrand.name}
                   </Text>
-                  <Text className="m-0 mt-0.5 text-[0.6875rem] leading-4 text-text-secondary">
+                  <Text className="m-0 mt-0.5 text-[11px] leading-4 text-text-secondary">
                     {emailBrand.institution}
                   </Text>
                 </Column>
@@ -54,14 +54,14 @@ export function PasswordResetEmail({ name, resetUrl }: PasswordResetEmailProps) 
             </Section>
 
             <Section className="p-8">
-              <Text className="m-0 mb-1.5 text-[0.6875rem] font-bold uppercase tracking-[1.5px] text-primary">
+              <Text className="m-0 mb-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-primary">
                 Segurança da conta
               </Text>
-              <Heading as="h1" className="m-0 mb-5 text-[1.375rem] font-bold leading-7 text-foreground">
+              <Heading as="h1" className="m-0 mb-5 text-[22px] font-bold leading-7 text-foreground">
                 Redefinição de senha
               </Heading>
-              <Text className="m-0 mb-4 text-sm leading-[1.375rem] text-foreground">{greeting}</Text>
-              <Text className="m-0 mb-4 text-sm leading-[1.375rem] text-foreground">
+              <Text className="m-0 mb-4 text-sm leading-[22px] text-foreground">{greeting}</Text>
+              <Text className="m-0 mb-4 text-sm leading-[22px] text-foreground">
                 Recebemos uma solicitação para redefinir a senha da sua conta no {emailBrand.name}.
                 Clique no botão abaixo para criar uma nova senha. O link é válido por 1 hora e só
                 pode ser usado uma vez.
@@ -77,10 +77,10 @@ export function PasswordResetEmail({ name, resetUrl }: PasswordResetEmailProps) 
               </Section>
 
               <Section className="rounded-md bg-primary-light px-4 py-3.5">
-                <Text className="m-0 mb-1.5 text-xs leading-[1.125rem] text-text-secondary">
+                <Text className="m-0 mb-1.5 text-xs leading-[18px] text-text-secondary">
                   Se o botão não funcionar, copie e cole este endereço no navegador:
                 </Text>
-                <Link href={resetUrl} className="break-all text-xs leading-[1.125rem] text-primary">
+                <Link href={resetUrl} className="break-all text-xs leading-[18px] text-primary">
                   {resetUrl}
                 </Link>
               </Section>
@@ -89,11 +89,11 @@ export function PasswordResetEmail({ name, resetUrl }: PasswordResetEmailProps) 
             <Hr className="m-0 border-border-light" />
 
             <Section className="bg-surface-secondary px-8 pb-7 pt-5">
-              <Text className="m-0 mb-2 text-xs leading-[1.125rem] text-text-muted">
+              <Text className="m-0 mb-2 text-xs leading-[18px] text-text-muted">
                 Se você não fez essa solicitação, ignore este e-mail. Sua senha atual continuará
                 funcionando.
               </Text>
-              <Text className="m-0 text-[0.6875rem] leading-4 text-text-muted">
+              <Text className="m-0 text-[11px] leading-4 text-text-muted">
                 {emailBrand.name} • {emailBrand.institution}
               </Text>
             </Section>

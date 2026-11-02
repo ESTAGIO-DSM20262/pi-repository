@@ -171,10 +171,10 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
   return (
     <section className="rounded-xl border border-border bg-white p-4 shadow-sm sm:p-6 lg:p-8">
       <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-        <div className="flex items-start gap-3">
+        <div className="flex min-w-0 items-start gap-3">
           <span className="mt-1 h-6 w-2 shrink-0 rounded-full bg-slate-600" aria-hidden="true" />
-          <div>
-            <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
+          <div className="min-w-0 flex-1">
+            <h2 className="flex flex-wrap items-center gap-2 break-words text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
               <i className="fi fi-rr-users flex text-base text-primary" aria-hidden="true" />
               Base de Usuários e Permissões
             </h2>
@@ -287,26 +287,144 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           }}
           title="Limpar filtros da listagem"
           aria-label="Limpar filtros da listagem"
-          className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-text-secondary transition hover:bg-primary-light hover:text-primary"
+          className="cursor-pointer inline-flex h-10 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-surface-secondary text-xs font-semibold text-text-secondary transition hover:bg-primary-light hover:text-primary sm:w-10"
         >
           <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
+          <span className="sm:hidden">Limpar filtros</span>
         </button>
       </div>
 
+      <ul aria-label="Lista de usuários" className="space-y-3 sm:hidden">
+        {loading && (
+          <li className="rounded-lg border border-border-light bg-surface-secondary px-4 py-8 text-center text-sm text-text-secondary">
+            <i className="fi fi-rr-spinner mr-2 inline-flex animate-spin" aria-hidden="true" />
+            Carregando usuários do banco…
+          </li>
+        )}
+        {!loading &&
+          !loadError &&
+          visibleUsers.map((user) => (
+            <li
+              key={user.id}
+              className="min-w-0 rounded-xl border border-border-light bg-surface p-4 shadow-sm"
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold ${user.role === 'student' ? 'bg-accent-light text-secondary-hover' : user.role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-slate-200 text-slate-800'}`}
+                >
+                  {getNameInitials(user.name)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-sm font-semibold text-slate-900">{user.name}</p>
+                  <p className="mt-0.5 break-all text-xs leading-relaxed text-text-secondary">
+                    {user.email}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded px-2 py-1 text-[0.625rem] font-bold ${PROFILE_STYLES[user.role]}`}
+                    >
+                      {ROLE_LABEL[user.role]}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1.5 text-[0.6875rem] font-medium ${user.active ? 'text-secondary' : 'text-slate-500'}`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${user.active ? 'bg-secondary' : 'bg-slate-400'}`}
+                      />
+                      {user.active ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <dl className="mt-3 grid grid-cols-1 gap-2 border-t border-border-light pt-3 text-xs">
+                <div>
+                  <dt className="text-[0.625rem] font-semibold uppercase tracking-wide text-text-muted">
+                    R.A. / Registro acadêmico
+                  </dt>
+                  <dd className="mt-0.5 break-words font-medium text-slate-800">
+                    {user.registrationNumber || '—'}
+                  </dd>
+                </div>
+                {user.course && (
+                  <div>
+                    <dt className="text-[0.625rem] font-semibold uppercase tracking-wide text-text-muted">
+                      Curso
+                    </dt>
+                    <dd className="mt-0.5 break-words font-medium text-slate-800">{user.course}</dd>
+                  </div>
+                )}
+              </dl>
+              <div className="mt-3 grid grid-cols-3 gap-2 border-t border-border-light pt-3">
+                <button
+                  type="button"
+                  onClick={() => openEdit(user)}
+                  aria-label={`Editar ${user.name}`}
+                  className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-secondary px-1.5 text-[0.625rem] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
+                >
+                  <i className="fi fi-rr-pencil flex text-base" aria-hidden="true" />
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNotice('O histórico de auditoria ainda não está implementado.')}
+                  aria-label={`Ver histórico de ${user.name}`}
+                  className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-secondary px-1.5 text-[0.625rem] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
+                >
+                  <i className="fi fi-rr-time-past flex text-base" aria-hidden="true" />
+                  Histórico
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (user.active) setPendingDeactivation(user)
+                    else setPendingActivation(user)
+                  }}
+                  disabled={changingStatus || (user.active && user.id === currentUserId)}
+                  aria-label={`${user.active ? 'Desativar' : 'Reativar'} ${user.name}`}
+                  className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-secondary px-1.5 text-[0.625rem] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <i
+                    className={`fi ${user.active ? 'fi-rr-ban' : 'fi-rr-check-circle'} flex text-base`}
+                    aria-hidden="true"
+                  />
+                  {user.active ? 'Desativar' : 'Reativar'}
+                </button>
+              </div>
+            </li>
+          ))}
+        {!loading && !loadError && visibleUsers.length === 0 && (
+          <li className="rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-text-secondary">
+            Nenhum usuário encontrado com esses filtros.
+          </li>
+        )}
+      </ul>
+
       <section
         aria-label="Lista de usuários"
-        className="overflow-x-auto rounded-lg border border-border-light"
+        className="hidden overflow-x-auto rounded-lg border border-border-light sm:block"
       >
         <table className="w-full min-w-[900px] border-collapse text-left text-xs">
           <caption className="sr-only">Usuários cadastrados no Acervo Acadêmico</caption>
           <thead className="bg-surface-secondary text-[0.625rem] font-bold uppercase tracking-wide text-slate-800">
             <tr>
-              <th scope="col" className="px-4 py-3.5">Usuário / Nome</th>
-              <th scope="col" className="px-4 py-3.5">R.A. / Registro acadêmico</th>
-              <th scope="col" className="px-4 py-3.5">E-mail</th>
-              <th scope="col" className="px-4 py-3.5">Perfil</th>
-              <th scope="col" className="px-4 py-3.5">Status</th>
-              <th scope="col" className="px-4 py-3.5">Ações</th>
+              <th scope="col" className="px-4 py-3.5">
+                Usuário / Nome
+              </th>
+              <th scope="col" className="px-4 py-3.5">
+                R.A. / Registro acadêmico
+              </th>
+              <th scope="col" className="px-4 py-3.5">
+                E-mail
+              </th>
+              <th scope="col" className="px-4 py-3.5">
+                Perfil
+              </th>
+              <th scope="col" className="px-4 py-3.5">
+                Status
+              </th>
+              <th scope="col" className="px-4 py-3.5">
+                Ações
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-light">
@@ -553,19 +671,19 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                 {actionError}
               </div>
             )}
-            <div className="mt-5 flex justify-end gap-2">
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
-                className="cursor-pointer rounded-lg border border-border px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                className="cursor-pointer min-h-10 w-full rounded-lg border border-border px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60"
+                className="cursor-pointer min-h-10 w-full rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60 sm:w-auto"
               >
                 {saving ? 'Salvando…' : 'Salvar alterações'}
               </button>

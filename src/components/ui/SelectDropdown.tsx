@@ -130,7 +130,12 @@ export function SelectDropdown({
     }
     setQuery('')
     setFocusSearch(searchable)
-    setActiveIndex(Math.max(0, options.findIndex((option) => option.value === value)))
+    setActiveIndex(
+      Math.max(
+        0,
+        options.findIndex((option) => option.value === value),
+      ),
+    )
     updatePosition()
     setIsMounted(true)
     frameRef.current = window.requestAnimationFrame(() => setIsOpen(true))

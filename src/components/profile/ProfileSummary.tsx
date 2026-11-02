@@ -11,13 +11,13 @@ const ROLE_BADGE_CLASS: Record<Role, string> = {
 
 export function ProfileSummary({ profile }: { profile: ProfileRecord }) {
   return (
-    <div className="flex flex-col gap-4 border-b border-border-light bg-surface-secondary/50 p-5 sm:flex-row sm:items-center sm:p-7">
+    <div className="flex flex-col gap-4 border-b border-border-light bg-surface-secondary/50 p-4 sm:flex-row sm:items-center sm:p-7">
       <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-white shadow-sm">
         {getNameInitials(profile.name)}
       </div>
       <div className="min-w-0 flex-1">
-        <h2 className="truncate text-lg font-bold text-slate-900 sm:text-xl">{profile.name}</h2>
-        <p className="mt-0.5 truncate text-sm text-text-secondary">{profile.email}</p>
+        <h2 className="break-words text-lg font-bold text-slate-900 sm:text-xl">{profile.name}</h2>
+        <p className="mt-0.5 break-all text-sm text-text-secondary">{profile.email}</p>
         <span
           className={`mt-2 inline-flex rounded-md px-2.5 py-1 text-[0.625rem] font-bold ${ROLE_BADGE_CLASS[profile.role]}`}
         >

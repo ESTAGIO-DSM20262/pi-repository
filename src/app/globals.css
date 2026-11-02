@@ -187,7 +187,7 @@ body {
   flex-direction: column;
 }
 
-.acervo-app-main > * {
+:where(.acervo-app-main) > * {
   flex: 1 0 auto;
 }
 

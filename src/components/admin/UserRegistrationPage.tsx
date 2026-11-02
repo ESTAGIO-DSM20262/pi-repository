@@ -42,7 +42,7 @@ const labelClass = 'block text-xs font-semibold text-slate-800'
 
 function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => void }) {
   return (
-    <fieldset className="inline-flex max-w-full flex-wrap rounded-xl bg-[#eceeef] p-1">
+    <fieldset className="inline-flex w-full max-w-full flex-wrap rounded-xl bg-[#eceeef] p-1 sm:w-auto">
       <legend className="sr-only">Perfil do novo usuário</legend>
       {ROLE_OPTIONS.map((option) => (
         <button
@@ -50,7 +50,7 @@ function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => 
           type="button"
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
-          className={`cursor-pointer inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
+          className={`cursor-pointer inline-flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[0.625rem] font-semibold leading-tight transition-colors sm:min-h-0 sm:h-9 sm:flex-row sm:gap-1.5 sm:px-3 sm:py-0 sm:text-xs ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
         >
           <i className={`fi ${option.icon} flex text-sm`} aria-hidden="true" />
           {option.label}
@@ -251,16 +251,16 @@ export function UserRegistrationPage() {
   }
 
   return (
-    <div className="w-full bg-background px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
+    <div className="w-full bg-background px-3 py-5 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-7 rounded-2xl border border-border bg-white p-4 shadow-sm sm:mb-9 sm:p-6">
-          <div className="flex items-start gap-3">
+        <div className="mb-5 rounded-2xl border border-border bg-white p-3.5 shadow-sm sm:mb-9 sm:p-6">
+          <div className="flex min-w-0 items-start gap-3">
             <BackButton href="/admin" label="Voltar ao painel administrativo" />
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
                 Painel administrativo
               </p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Cadastro de Usuários
               </h1>
               <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
@@ -272,7 +272,7 @@ export function UserRegistrationPage() {
         </div>
 
         <div className="grid items-stretch gap-5 xl:grid-cols-[1.35fr_1fr] xl:gap-6">
-          <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-7 lg:p-9">
+          <section className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7 lg:p-9">
             <div className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div className="max-w-xl">
                 <div className="mb-2 flex items-center gap-2 text-primary">
@@ -461,7 +461,7 @@ export function UserRegistrationPage() {
             </form>
           </section>
 
-          <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-7">
+          <section className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7">
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2 text-emerald-800">
                 <i className="fi fi-rr-file-spreadsheet flex text-lg" aria-hidden="true" />

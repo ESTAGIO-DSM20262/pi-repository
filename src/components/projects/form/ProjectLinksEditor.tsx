@@ -57,7 +57,7 @@ function IconPicker({
           <div
             role="listbox"
             aria-label="Catálogo de ícones"
-            className="absolute left-0 top-full z-40 mt-1.5 w-72 rounded-xl border border-border bg-white p-2.5 shadow-xl"
+            className="absolute left-0 top-full z-40 mt-1.5 w-[min(18rem,calc(100vw-2.5rem))] max-w-[calc(100vw-2.5rem)] rounded-xl border border-border bg-white p-2.5 shadow-xl"
           >
             <p className="mb-2 px-1 text-[0.6875rem] font-bold uppercase tracking-wider text-text-secondary">
               Escolha um ícone

@@ -34,7 +34,12 @@ describe('sanitizeAccessibilityPreferences', () => {
     expect(sanitizeAccessibilityPreferences(null)).toEqual(DEFAULT_ACCESSIBILITY_PREFERENCES)
     expect(sanitizeAccessibilityPreferences('texto')).toEqual(DEFAULT_ACCESSIBILITY_PREFERENCES)
     expect(
-      sanitizeAccessibilityPreferences({ textSize: 999, theme: 'x', colorMode: 'y', highContrast: 1 }),
+      sanitizeAccessibilityPreferences({
+        textSize: 999,
+        theme: 'x',
+        colorMode: 'y',
+        highContrast: 1,
+      }),
     ).toEqual(DEFAULT_ACCESSIBILITY_PREFERENCES)
   })
 
@@ -87,7 +92,11 @@ describe('contagem de preferências ativas', () => {
   it('reconhece o estado padrão e conta alterações', () => {
     expect(areDefaultPreferences(DEFAULT_ACCESSIBILITY_PREFERENCES)).toBe(true)
     expect(countActivePreferences(DEFAULT_ACCESSIBILITY_PREFERENCES)).toBe(0)
-    const changed = { ...DEFAULT_ACCESSIBILITY_PREFERENCES, theme: 'dark' as const, textSize: 125 as const }
+    const changed = {
+      ...DEFAULT_ACCESSIBILITY_PREFERENCES,
+      theme: 'dark' as const,
+      textSize: 125 as const,
+    }
     expect(areDefaultPreferences(changed)).toBe(false)
     expect(countActivePreferences(changed)).toBe(2)
   })

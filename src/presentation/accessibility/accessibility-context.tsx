@@ -1,6 +1,13 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from 'react'
 import {
   ACCESSIBILITY_STORAGE_KEY,
   type AccessibilityPreferences,

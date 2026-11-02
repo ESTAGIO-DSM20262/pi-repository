@@ -81,7 +81,7 @@ function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
 
 function Hero({ role }: { role: Role | null }) {
   return (
-    <section className="relative isolate overflow-hidden rounded-xl border border-border bg-surface py-8 pl-8 pr-6 shadow-sm sm:py-10 sm:pl-10 sm:pr-8">
+    <section className="relative isolate overflow-hidden rounded-xl border border-border bg-surface py-6 pl-6 pr-4 shadow-sm sm:py-10 sm:pl-10 sm:pr-8">
       <span className="absolute inset-y-0 left-0 w-2 bg-primary" aria-hidden="true" />
       <span className="absolute inset-y-0 left-2 w-1 bg-secondary" aria-hidden="true" />
       <div
@@ -92,7 +92,7 @@ function Hero({ role }: { role: Role | null }) {
         <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
           Fatec Itaquera – Guia do acervo
         </p>
-        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Como funciona
         </h1>
         <div className="mt-3 flex h-1 w-16 gap-0.5" aria-hidden="true">
@@ -129,6 +129,7 @@ function Hero({ role }: { role: Role | null }) {
 interface TabItem {
   id: Tab
   label: string
+  mobileLabel: string
   icon: string
 }
 
@@ -163,7 +164,8 @@ function Tabs({
             }`}
           >
             <i className={`fi ${item.icon} flex`} aria-hidden="true" />
-            {item.label}
+            <span className="sm:hidden">{item.mobileLabel}</span>
+            <span className="hidden sm:inline">{item.label}</span>
           </button>
         )
       })}
@@ -445,7 +447,9 @@ function RoleView({
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
                 {index + 1}
               </span>
-              <p className="pt-0.5 text-[0.8125rem] leading-relaxed text-slate-700 sm:text-sm">{step}</p>
+              <p className="pt-0.5 text-[0.8125rem] leading-relaxed text-slate-700 sm:text-sm">
+                {step}
+              </p>
             </li>
           ))}
         </ol>
@@ -479,10 +483,11 @@ export function HowItWorksPage({ role }: HowItWorksPageProps) {
 
   const visibleRoles = role ? VISIBLE_ROLES[role] : []
   const tabs: TabItem[] = [
-    { id: 'about', label: 'Sobre o acervo', icon: 'fi-rr-book-alt' },
+    { id: 'about', label: 'Sobre o acervo', mobileLabel: 'Sobre', icon: 'fi-rr-book-alt' },
     ...visibleRoles.map((item) => ({
       id: item as Tab,
       label: `Ver como ${ROLE_GUIDES[item].label.toLowerCase()}${item === role ? ' (você)' : ''}`,
+      mobileLabel: item === 'student' ? 'Aluno' : item === 'professor' ? 'Professor' : 'Admin',
       icon: ROLE_TAB_ICON[item],
     })),
   ]

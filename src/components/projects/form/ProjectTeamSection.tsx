@@ -68,14 +68,14 @@ export function ProjectTeamSection({
                   onStudentQueryChange(event.target.value)
                 }}
                 onKeyDown={onStudentKeyDown}
-                placeholder="Informe o RA, o nome ou o e-mail institucional do aluno..."
+                placeholder="Buscar aluno por RA, nome ou e-mail..."
                 className={`${fieldClass} pl-9`}
               />
             </label>
             <button
               type="button"
               onClick={onAddStudentFromQuery}
-              className="cursor-pointer inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover"
+              className="cursor-pointer inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover sm:h-10 sm:w-auto"
             >
               <i className="fi fi-rr-user-add flex" aria-hidden="true" /> Adicionar discente
             </button>

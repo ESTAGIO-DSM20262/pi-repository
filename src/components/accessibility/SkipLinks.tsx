@@ -3,8 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-function focusTarget(event: React.MouseEvent<HTMLAnchorElement>, resolve: () => HTMLElement | null) {
-  event.preventDefault()
+function focusTarget(resolve: () => HTMLElement | null) {
   const target = resolve()
   if (!target) return
   target.scrollIntoView({ block: 'start' })
@@ -31,22 +30,22 @@ export function SkipLinks() {
 
   return (
     <nav className="skip-links" aria-label="Atalhos de acessibilidade">
-      <a
-        href="#main-content"
-        onClick={(event) => focusTarget(event, () => document.getElementById('main-content'))}
+      <button
+        type="button"
+        onClick={() => focusTarget(() => document.getElementById('main-content'))}
       >
         Ir para o conteúdo principal
-      </a>
-      <a href="#main-navigation" onClick={(event) => focusTarget(event, findVisibleMenuLink)}>
+      </button>
+      <button type="button" onClick={() => focusTarget(findVisibleMenuLink)}>
         Ir para o menu principal
-      </a>
+      </button>
       {hasSearch && (
-        <a
-          href="#busca-projetos"
-          onClick={(event) => focusTarget(event, () => document.getElementById('busca-projetos'))}
+        <button
+          type="button"
+          onClick={() => focusTarget(() => document.getElementById('busca-projetos'))}
         >
           Ir para a busca de projetos
-        </a>
+        </button>
       )}
     </nav>
   )

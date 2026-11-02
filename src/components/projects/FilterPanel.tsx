@@ -29,7 +29,9 @@ interface FilterPanelProps {
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6 min-w-0 overflow-visible">
-      <h3 className="mb-3 text-[0.8125rem] font-bold uppercase tracking-wide text-slate-900">{title}</h3>
+      <h3 className="mb-3 text-[0.8125rem] font-bold uppercase tracking-wide text-slate-900">
+        {title}
+      </h3>
       <div className="space-y-2 overflow-visible">{children}</div>
     </section>
   )
@@ -163,8 +165,8 @@ function FilterFields({
                 onClick={() => onChange({ stack: toggleValue(filters.stack, o.value) })}
                 className={`inline-flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition ${
                   active
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-surface-secondary text-slate-700 hover:bg-primary-light'
+                    ? 'border border-primary bg-primary text-white shadow-sm'
+                    : 'border border-transparent bg-surface-secondary text-slate-700 hover:border-primary/30 hover:bg-primary-light'
                 }`}
               >
                 {o.value}
@@ -420,7 +422,7 @@ export function FilterPanel({
             open ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
         >
-          <div className="shrink-0 px-6 pt-1.5">
+          <div className="shrink-0 px-4 pt-1.5 sm:px-6">
             <button
               type="button"
               aria-label="Arraste para baixo ou toque para fechar os filtros"
@@ -456,7 +458,7 @@ export function FilterPanel({
           </div>
 
           <div className="modal-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-            <div className="px-7 pb-6 pt-1 sm:px-6">
+            <div className="px-4 pb-6 pt-1 sm:px-6">
               <section aria-labelledby="mobile-sort-title">
                 <h2
                   id="mobile-sort-title"
@@ -499,13 +501,13 @@ export function FilterPanel({
             </div>
           </div>
 
-          <footer className="grid shrink-0 grid-cols-[0.9fr_1.1fr] gap-3 border-t border-border bg-surface px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:gap-5 sm:px-6">
+          <footer className="grid shrink-0 grid-cols-[0.9fr_1.1fr] gap-2 border-t border-border bg-surface px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:gap-5 sm:px-6">
             <button
               type="button"
               onClick={onClear}
               disabled={activeCount === 0}
               tabIndex={open ? 0 : -1}
-              className="flex min-h-[52px] cursor-pointer items-center justify-center gap-2 rounded-md border border-slate-400 bg-[#dedede] px-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-[#d2d2d2] disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-border bg-surface-secondary px-2 text-xs font-semibold text-slate-700 transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-[52px] sm:gap-2 sm:text-sm"
             >
               <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
               <span>Limpar Filtros</span>
@@ -515,7 +517,7 @@ export function FilterPanel({
               type="button"
               onClick={onToggle}
               tabIndex={open ? 0 : -1}
-              className="flex min-h-[60px] cursor-pointer flex-col items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-bold leading-tight text-white transition-colors hover:bg-primary-hover"
+              className="flex min-h-11 cursor-pointer flex-col items-center justify-center rounded-md bg-primary px-2 py-2 text-xs font-bold leading-tight text-white transition-colors hover:bg-primary-hover sm:min-h-[60px] sm:px-3 sm:text-sm"
             >
               <span>Mostrar</span>
               <span>
