@@ -62,7 +62,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-Além das migrations geradas na pasta `drizzle/`, confira e aplique no banco Neon de destino os scripts SQL pendentes de `src/db/migrations/`. A tela de perfil e os links sociais dos projetos exigem a migration `20261019_user_social_profiles.sql`, que adiciona as colunas `github_url` e `linkedin_url` à tabela `users`.
+Além das migrations geradas na pasta `drizzle/`, confira e aplique no banco Neon de destino os scripts SQL pendentes de `src/db/migrations/`. A tela de perfil e os links sociais dos projetos exigem a migration `20261019_user_social_profiles.sql`, que adiciona as colunas `github_url` e `linkedin_url` à tabela `users`. Os cursos selecionáveis (e o painel de cursos do administrador) exigem a migration `20261102_courses.sql`, que cria a tabela `courses` e cadastra o curso DSM; ela também pode ser aplicada com `npm run db:migrate:repair`.
 
 Inicie o servidor de desenvolvimento:
 

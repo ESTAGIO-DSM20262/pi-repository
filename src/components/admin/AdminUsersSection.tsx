@@ -2,9 +2,16 @@
 
 import Link from 'next/link'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  buildCourseOptions,
+  formatUserCourse,
+  useAdminCourses,
+  useCoursesChanged,
+} from '@/components/admin/use-admin-courses'
 import { Pagination } from '@/components/projects/Pagination'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
+import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -44,6 +51,7 @@ async function readError(response: Response, fallback: string) {
 
 export function AdminUsersSection({ currentUserId }: { currentUserId: string }) {
   const [users, setUsers] = useState<AdminUserRecord[]>([])
+  const { courses } = useAdminCourses()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [query, setQuery] = useState('')
@@ -84,6 +92,9 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
   useEffect(() => {
     void loadUsers()
   }, [loadUsers])
+
+  const refreshUsers = useCallback(() => void loadUsers(), [loadUsers])
+  useCoursesChanged(refreshUsers)
 
   const filteredUsers = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase('pt-BR')
@@ -350,7 +361,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                     <dt className="text-[0.625rem] font-semibold uppercase tracking-wide text-text-muted">
                       Curso
                     </dt>
-                    <dd className="mt-0.5 break-words font-medium text-slate-800">{user.course}</dd>
+                    <dd className="mt-0.5 break-words font-medium text-slate-800">{formatUserCourse(user.course, courses)}</dd>
                   </div>
                 )}
               </dl>
@@ -612,6 +623,8 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                 <label className="block text-xs font-semibold text-slate-700">
                   R.A. / Matrícula
                   <input
+                    minLength={editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
+                    maxLength={editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
                     value={editForm.registrationNumber}
                     onChange={(event) =>
                       setEditForm((current) => ({
@@ -621,17 +634,29 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                     }
                     className={inputClass}
                   />
+                  {editForm.role === 'student' && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      O RA do aluno tem {STUDENT_REGISTRATION_LENGTH} caracteres.
+                    </span>
+                  )}
                 </label>
-                <label className="block text-xs font-semibold text-slate-700">
-                  Curso
-                  <input
+                <div>
+                  <span className="block text-xs font-semibold text-slate-700">Curso</span>
+                  <SelectDropdown
                     value={editForm.course}
-                    onChange={(event) =>
-                      setEditForm((current) => ({ ...current, course: event.target.value }))
-                    }
-                    className={inputClass}
+                    ariaLabel="Curso do usuário"
+                    width="full"
+                    tone="muted"
+                    layer="modal"
+                    className="mt-1.5"
+                    placeholder="Selecione o curso"
+                    options={buildCourseOptions(courses, {
+                      currentValue: editing.course ?? undefined,
+                      allowEmpty: editForm.role !== 'student',
+                    })}
+                    onChange={(value) => setEditForm((current) => ({ ...current, course: value }))}
                   />
-                </label>
+                </div>
               </div>
               <div>
                 <span className="block text-xs font-semibold text-slate-700">Perfil</span>

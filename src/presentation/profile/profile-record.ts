@@ -7,6 +7,7 @@ export interface ProfileRecord {
   role: Role
   registrationNumber: string | null
   course: string | null
+  courseAbbreviation?: string | null
   githubUrl: string | null
   linkedinUrl: string | null
   active: boolean

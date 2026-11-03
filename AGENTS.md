@@ -672,6 +672,36 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   `fi-rr-folder-check`; os cards de concluídos usam `fi-rr-flag-checkered`. Antes de usar um ícone
   novo, confira se a classe existe em `rounded.css`.
 
+## 24. Cursos gerenciáveis pelo administrador
+
+- A tabela `courses` (`id`, `name`, `abbreviation`, `active`) define os cursos que podem ser
+  escolhidos. `users.course` continua guardando o **nome** do curso (sem chave estrangeira), então
+  renomear um curso atualiza os usuários vinculados na mesma `db.batch`.
+- Migração: `src/db/migrations/20261102_courses.sql` (idempotente, executar no Neon). A mesma SQL
+  está em `drizzle-repair/20261102100000_courses/migration.sql` para `npm run db:migrate:repair`.
+  Ela cria a tabela, semeia **Desenvolvimento de Software Multiplataforma (DSM)**, padroniza
+  variantes antigas como `D.S.M.` e transforma qualquer outro valor existente em `users.course` em
+  curso, para ninguém ficar sem vínculo.
+- Regras puras em `src/application/courses/course-rules.ts` (comparação sem acento/pontuação,
+  unicidade de nome e sigla, `resolveUserCourse`). Só cursos **ativos** podem ser atribuídos; manter
+  o curso atual de um usuário é sempre permitido (curso desativado não bloqueia outras edições).
+- API `GET/POST/PATCH/DELETE /api/admin/courses` (somente admin). Excluir exige zero usuários
+  vinculados; caso contrário, desativar.
+- `POST/PATCH /api/admin/users` e a importação de planilha validam o curso contra a tabela. Na
+  planilha, a coluna **Curso** aceita nome, sigla ou `Nome (SIGLA)`; vazio usa o único curso ativo,
+  se houver só um.
+- UI: `AdminCoursesSection` (painel do admin, âncora `#cursos`) e dropdowns de curso em
+  `UserRegistrationPage` e `AdminUsersSection`, alimentados por `useAdminCourses`. Mudanças na lista
+  disparam o evento `admin-courses-changed` para as outras seções recarregarem.
+- Exibição: o curso aparece como `SIGLA - Nome completo` (ex.: `DSM - Desenvolvimento de Software
+  Multiplataforma`) no perfil, nos dropdowns e na lista de usuários; sem sigla, só o nome. O perfil
+  recebe `courseAbbreviation` de `findCourseAbbreviation` (que não falha se a tabela não existir).
+- RA do aluno: exatamente 13 caracteres (`src/application/users/registration-number.ts`), validado
+  no cadastro, na importação e na edição. Na edição, RA antigo fora do padrão só é exigido se for
+  alterado ou se o usuário passar a ser aluno.
+- Fora do escopo: o campo "Curso superior de graduação" do formulário de projeto continua fixo e
+  somente leitura (projetos não guardam curso).
+
 ## Acessibilidade (branch `feat/acessibilidade`)
 
 - **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.

@@ -1,9 +1,13 @@
 'use client'
 
-import { type DragEvent, type FormEvent, type ReactNode, useRef, useState } from 'react'
+import Link from 'next/link'
+import { type DragEvent, type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { buildCourseOptions, useAdminCourses } from '@/components/admin/use-admin-courses'
 import { BackButton } from '@/components/ui/BackButton'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
+import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
@@ -42,7 +46,7 @@ const labelClass = 'block text-xs font-semibold text-slate-800'
 
 function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => void }) {
   return (
-    <fieldset className="inline-flex w-full max-w-full flex-wrap rounded-xl bg-[#eceeef] p-1 sm:w-auto">
+    <fieldset className="grid w-full min-w-0 grid-cols-3 gap-1 rounded-xl bg-[#eceeef] p-1 sm:inline-flex sm:w-auto sm:max-w-full sm:flex-wrap sm:gap-0">
       <legend className="sr-only">Perfil do novo usuário</legend>
       {ROLE_OPTIONS.map((option) => (
         <button
@@ -50,7 +54,7 @@ function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => 
           type="button"
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
-          className={`cursor-pointer inline-flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[0.625rem] font-semibold leading-tight transition-colors sm:min-h-0 sm:h-9 sm:flex-row sm:gap-1.5 sm:px-3 sm:py-0 sm:text-xs ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
+          className={`cursor-pointer inline-flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[0.625rem] font-semibold leading-tight transition-colors sm:h-9 sm:min-h-0 sm:flex-none sm:flex-row sm:gap-1.5 sm:px-3 sm:py-0 sm:text-xs ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
         >
           <i className={`fi ${option.icon} flex text-sm`} aria-hidden="true" />
           {option.label}
@@ -137,8 +141,11 @@ export function UserRegistrationPage() {
     name: '',
     email: '',
     registrationNumber: '',
-    course: 'D.S.M.',
+    course: '',
   })
+  const { courses, loading: loadingCourses, error: coursesError } = useAdminCourses()
+  const courseOptions = buildCourseOptions(courses)
+  const defaultCourse = courseOptions[0]?.value ?? ''
   const [savingSingle, setSavingSingle] = useState(false)
   const [singleError, setSingleError] = useState('')
   const [singleCredential, setSingleCredential] = useState<Credential | null>(null)
@@ -150,13 +157,20 @@ export function UserRegistrationPage() {
   const [batchConfirmationOpen, setBatchConfirmationOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Pré-seleciona o primeiro curso ativo quando a lista chega ou o perfil volta a ser aluno.
+  useEffect(() => {
+    if (role === 'student' && !form.course && defaultCourse) {
+      setForm((current) => ({ ...current, course: current.course || defaultCourse }))
+    }
+  }, [role, form.course, defaultCourse])
+
   function changeRole(nextRole: Role) {
     setRole(nextRole)
     setSingleError('')
     setSingleCredential(null)
     setForm((current) => ({
       ...current,
-      course: nextRole === 'student' ? current.course || 'D.S.M.' : '',
+      course: nextRole === 'student' ? current.course || defaultCourse : '',
     }))
   }
 
@@ -165,6 +179,11 @@ export function UserRegistrationPage() {
     setSavingSingle(true)
     setSingleError('')
     setSingleCredential(null)
+    if (role === 'student' && !form.course) {
+      setSingleError('Selecione o curso do aluno.')
+      setSavingSingle(false)
+      return
+    }
     try {
       const response = await fetch('/api/admin/users', {
         method: 'POST',
@@ -179,7 +198,7 @@ export function UserRegistrationPage() {
         name: '',
         email: '',
         registrationNumber: '',
-        course: role === 'student' ? 'D.S.M.' : '',
+        course: role === 'student' ? defaultCourse : '',
       })
     } catch (error) {
       setSingleError(
@@ -339,6 +358,8 @@ export function UserRegistrationPage() {
                   {role !== 'admin' && <span className="text-primary">*</span>}
                   <input
                     required={role !== 'admin'}
+                    minLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
+                    maxLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
                     value={form.registrationNumber}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, registrationNumber: event.target.value }))
@@ -352,20 +373,42 @@ export function UserRegistrationPage() {
                           : 'Opcional'
                     }
                   />
+                  {role === 'student' && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      O RA deve ter {STUDENT_REGISTRATION_LENGTH} caracteres.
+                    </span>
+                  )}
                 </label>
                 {role === 'student' ? (
-                  <label className={labelClass}>
-                    Curso tecnológico <span className="text-primary">*</span>
-                    <input
-                      required
+                  <div>
+                    <span className={labelClass}>
+                      Curso tecnológico <span className="text-primary">*</span>
+                    </span>
+                    <SelectDropdown
                       value={form.course}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, course: event.target.value }))
-                      }
-                      className={fieldClass}
-                      placeholder="Ex.: D.S.M."
+                      ariaLabel="Curso tecnológico"
+                      width="full"
+                      tone="muted"
+                      className="mt-1.5"
+                      placeholder={loadingCourses ? 'Carregando cursos…' : 'Selecione o curso'}
+                      options={courseOptions}
+                      onChange={(value) => setForm((current) => ({ ...current, course: value }))}
                     />
-                  </label>
+                    {coursesError && (
+                      <p role="alert" className="mt-1 text-[0.625rem] text-rose-800">
+                        {coursesError}
+                      </p>
+                    )}
+                    {!loadingCourses && !coursesError && courseOptions.length === 0 && (
+                      <p className="mt-1 text-[0.625rem] text-text-secondary">
+                        Nenhum curso ativo.{' '}
+                        <Link href="/admin#cursos" className="font-semibold text-primary underline">
+                          Cadastre um curso
+                        </Link>{' '}
+                        no painel administrativo.
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="flex min-h-[68px] items-center rounded-lg border border-border-light bg-surface-secondary/65 px-3.5 py-3 text-xs leading-relaxed text-text-secondary">
                     <i

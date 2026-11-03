@@ -17,6 +17,7 @@ import {
   type MonthlyRegistration,
 } from '@/application/dashboard/dashboard-metrics'
 import type { ListedProject } from '@/application/projects/list-projects'
+import { AdminCoursesSection } from '@/components/admin/AdminCoursesSection'
 import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
 import { FavoriteButton } from '@/components/projects/FavoriteButton'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
@@ -756,6 +757,7 @@ export function RoleDashboard({
           />
         )}
         {role === 'admin' && <AdminUsersSection currentUserId={currentUserId} />}
+        {role === 'admin' && <AdminCoursesSection />}
         {role === 'professor' && professorMetrics && (
           <ProfessorOverview metrics={professorMetrics} />
         )}

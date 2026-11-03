@@ -11,6 +11,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import type {
   ProjectAdvisor,
@@ -53,6 +54,26 @@ export const users = pgTable(
     index('users_registration_number_idx')
       .on(table.registrationNumber)
       .where(sql`${table.registrationNumber} IS NOT NULL`),
+  ],
+)
+
+export const courses = pgTable(
+  'courses',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    abbreviation: text('abbreviation'),
+    active: boolean('active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('courses_name_unique_idx').on(sql`lower(${table.name})`),
+    index('courses_active_idx').on(table.active),
+    check('courses_name_not_blank', sql`length(btrim(${table.name})) > 0`),
   ],
 )
 
