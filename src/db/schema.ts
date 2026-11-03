@@ -10,8 +10,10 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
 } from 'drizzle-orm/pg-core'
 import type {
+  ProjectAdvisor,
   ProjectPublicDetails,
   ProjectStatus,
   ProjectTeamMember,
@@ -20,6 +22,10 @@ import type {
   ProjectProgressRevisionAction,
   ProjectProgressTaskStatus,
 } from '@/domain/enterprise/entities/project-progress'
+import type {
+  VerificationCriterionId,
+  VerifierRole,
+} from '@/domain/enterprise/entities/project-verification'
 import type { Role } from '@/domain/enterprise/entities/role'
 
 export const users = pgTable(
@@ -206,6 +212,7 @@ export const projects = pgTable(
     semester: integer('semester').notNull(),
     advisorEmail: text('advisor_email').notNull(),
     advisorName: text('advisor_name').notNull(),
+    coAdvisors: jsonb('co_advisors').$type<ProjectAdvisor[]>().notNull().default([]),
     memberEmails: jsonb('member_emails').$type<string[]>().notNull().default([]),
     teamMembers: jsonb('team_members').$type<ProjectTeamMember[]>().notNull().default([]),
     languages: jsonb('languages').$type<string[]>().notNull().default([]),
@@ -213,6 +220,8 @@ export const projects = pgTable(
     theme: text('theme').notNull(),
     status: text('status').$type<ProjectStatus>().notNull().default('em_andamento'),
     verified: boolean('verified').notNull().default(false),
+    active: boolean('active').notNull().default(true),
+    deactivatedAt: timestamp('deactivated_at'),
     publicDetails: jsonb('public_details').$type<ProjectPublicDetails>(),
     createdByUserId: text('created_by_user_id')
       .notNull()
@@ -222,7 +231,36 @@ export const projects = pgTable(
   (table) => [
     index('projects_advisor_email_idx').on(table.advisorEmail),
     index('projects_status_idx').on(table.status),
+    index('projects_active_idx').on(table.active),
+    check('projects_co_advisors_check', sql`jsonb_typeof(${table.coAdvisors}) = 'array'`),
     check('projects_semester_check', sql`${table.semester} BETWEEN 1 AND 6`),
     check('projects_status_check', sql`${table.status} IN ('publicado', 'em_andamento')`),
+  ],
+)
+
+export const projectVerifications = pgTable(
+  'project_verifications',
+  {
+    id: text('id').primaryKey(),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    verifierUserId: text('verifier_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    verifierEmail: text('verifier_email').notNull(),
+    verifierName: text('verifier_name').notNull(),
+    verifierRole: text('verifier_role').$type<VerifierRole>().notNull(),
+    criteria: jsonb('criteria').$type<VerificationCriterionId[]>().notNull().default([]),
+    verifiedAt: timestamp('verified_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('project_verifications_project_id_idx').on(table.projectId),
+    unique('project_verifications_project_user_unique').on(table.projectId, table.verifierUserId),
+    check(
+      'project_verifications_verifier_role_check',
+      sql`${table.verifierRole} IN ('professor', 'admin')`,
+    ),
+    check('project_verifications_criteria_check', sql`jsonb_typeof(${table.criteria}) = 'array'`),
   ],
 )

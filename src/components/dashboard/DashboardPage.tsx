@@ -1,15 +1,29 @@
 import { sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import {
+  buildAdminDashboardMetrics,
+  buildProfessorDashboardMetrics,
+} from '@/application/dashboard/dashboard-metrics'
 import { ListProjectsUseCase } from '@/application/projects/list-projects'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
+import {
+  loadActivePeople,
+  loadIndicatedProjectIds,
+  loadProgressTasks,
+  loadRegistrationsByMonth,
+} from '@/infrastructure/dashboard/dashboard-queries'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
 import { type AdminUserMetrics, RoleDashboard } from './RoleDashboard'
+
+function todayInSaoPaulo(now: Date) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(now)
+}
 
 export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -57,6 +71,52 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
     }
   }
 
+  const now = new Date()
+  const today = todayInSaoPaulo(now)
+
+  let adminMetrics: ReturnType<typeof buildAdminDashboardMetrics> | undefined
+  let registrations: Awaited<ReturnType<typeof loadRegistrationsByMonth>> | undefined
+  if (user.role === 'admin') {
+    try {
+      const [tasks, people, monthly] = await Promise.all([
+        loadProgressTasks(),
+        loadActivePeople(),
+        loadRegistrationsByMonth(),
+      ])
+      adminMetrics = buildAdminDashboardMetrics({
+        projects,
+        tasks,
+        activeStudentEmails: people.students,
+        activeProfessorEmails: people.professors,
+        today,
+        now,
+      })
+      registrations = monthly
+    } catch (error) {
+      console.error('[Admin dashboard insights]', error)
+    }
+  }
+
+  let professorMetrics: ReturnType<typeof buildProfessorDashboardMetrics> | undefined
+  if (user.role === 'professor') {
+    try {
+      const followed = projects.filter((project) => project.related)
+      const [tasks, indicatedProjectIds] = await Promise.all([
+        loadProgressTasks(followed.map((project) => project.id)),
+        loadIndicatedProjectIds(String(session.user.id)),
+      ])
+      professorMetrics = buildProfessorDashboardMetrics({
+        projects: followed,
+        tasks,
+        indicatedProjectIds,
+        today,
+        now,
+      })
+    } catch (error) {
+      console.error('[Professor dashboard metrics]', error)
+    }
+  }
+
   return (
     <RoleDashboard
       currentUserId={String(session.user.id)}
@@ -65,6 +125,9 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
       role={user.role}
       projects={projects}
       adminUserMetrics={adminUserMetrics}
+      adminMetrics={adminMetrics}
+      registrations={registrations}
+      professorMetrics={professorMetrics}
     />
   )
 }

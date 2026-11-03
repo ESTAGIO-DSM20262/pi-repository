@@ -114,7 +114,7 @@ export const MOCK_PROJECTS: Project[] = [
         },
         {
           title: 'Serviços & Backend',
-          icon: 'fi-rr-server',
+          icon: 'fi-rr-globe',
           items: ['Node.js LTS', 'Express.js', 'Prisma ORM', 'JWT / SSO OAuth2', 'Zod Validation'],
         },
         {
@@ -131,20 +131,6 @@ export const MOCK_PROJECTS: Project[] = [
           title: 'Engenharia de Software',
           icon: 'fi-rr-workflow',
           items: ['C4 Model (Níveis 1 a 3)', 'Arquitetura Hexagonal', 'UML 2.5', 'Testes Vitest'],
-        },
-      ],
-      attachments: [
-        {
-          title: 'Manual do Usuário & Instalação',
-          fileType: 'PDF',
-          sizeLabel: '1.8 MB',
-          description: 'Guia de Operação',
-        },
-        {
-          title: 'Snapshot Release v1.4 (Fonte)',
-          fileType: 'ZIP',
-          sizeLabel: '14.2 MB',
-          description: 'Com Dockerfile',
         },
       ],
       externalLinks: [
@@ -256,7 +242,7 @@ export const MOCK_PROJECTS: Project[] = [
     theme: 'Gestão & Processos',
     status: 'em_andamento',
     verified: false,
-    cover: { icon: 'fi-rr-code', label: 'Em desenvolvimento', tone: 'slate' },
+    cover: { icon: 'fi-rr-code-simple', label: 'Em desenvolvimento', tone: 'slate' },
   },
   {
     id: '8',
@@ -325,7 +311,7 @@ export const MOCK_PROJECTS: Project[] = [
     theme: 'Educação Tecnológica',
     status: 'em_andamento',
     verified: false,
-    cover: { icon: 'fi-rr-code', label: 'Em desenvolvimento', tone: 'slate' },
+    cover: { icon: 'fi-rr-code-simple', label: 'Em desenvolvimento', tone: 'slate' },
   },
   {
     id: '12',

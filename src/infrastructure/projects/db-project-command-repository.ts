@@ -1,8 +1,13 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { projectProgressRevisions, projectProgressTasks, projects } from '@/db/schema'
-import type { ProjectPublicDetails } from '@/domain/enterprise/entities/project'
+import {
+  projectFavorites,
+  projectProgressRevisions,
+  projectProgressTasks,
+  projects,
+} from '@/db/schema'
 import type {
+  ProjectAdministrationUpdateRecord,
   ProjectCreateRecord,
   ProjectFullUpdateRecord,
   ProjectRepository,
@@ -33,8 +38,27 @@ export class DbProjectCommandRepository implements ProjectRepository {
     await db.update(projects).set(record).where(eq(projects.id, id))
   }
 
-  async updateArtifacts(id: string, publicDetails: ProjectPublicDetails): Promise<void> {
-    await db.update(projects).set({ publicDetails }).where(eq(projects.id, id))
+  async updateAsAdministrator(
+    id: string,
+    record: ProjectAdministrationUpdateRecord,
+  ): Promise<void> {
+    await db.update(projects).set(record).where(eq(projects.id, id))
+  }
+
+  async setActive(id: string, active: boolean, changedAt: Date): Promise<void> {
+    await db
+      .update(projects)
+      .set({ active, deactivatedAt: active ? null : changedAt })
+      .where(eq(projects.id, id))
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.batch([
+      db.delete(projectProgressRevisions).where(eq(projectProgressRevisions.projectId, id)),
+      db.delete(projectProgressTasks).where(eq(projectProgressTasks.projectId, id)),
+      db.delete(projectFavorites).where(eq(projectFavorites.projectId, id)),
+      db.delete(projects).where(eq(projects.id, id)),
+    ])
   }
 
   async hasTasksAssignedToMembers(projectId: string, memberEmails: string[]): Promise<boolean> {

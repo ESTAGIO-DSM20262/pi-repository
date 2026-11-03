@@ -19,7 +19,6 @@
   --header-height: 48px;
   --footer-height: 32px;
   --content-max-width: 1400px;
-  --z-modal-dropdown: 2147483647;
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -221,4 +220,71 @@ select:disabled {
   .acervo-favorite-toast {
     animation: none;
   }
+}
+
+.scrollbar-success,
+.scrollbar-warning,
+.scrollbar-danger {
+  scrollbar-width: thin;
+}
+
+.scrollbar-success {
+  scrollbar-color: #6ee7b7 #ecfdf5;
+}
+
+.scrollbar-warning {
+  scrollbar-color: #fcd34d #fffbeb;
+}
+
+.scrollbar-danger {
+  scrollbar-color: #fda4af #fff1f2;
+}
+
+.scrollbar-success::-webkit-scrollbar,
+.scrollbar-warning::-webkit-scrollbar,
+.scrollbar-danger::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-success::-webkit-scrollbar-track {
+  background: #ecfdf5;
+  border-radius: 9999px;
+}
+
+.scrollbar-warning::-webkit-scrollbar-track {
+  background: #fffbeb;
+  border-radius: 9999px;
+}
+
+.scrollbar-danger::-webkit-scrollbar-track {
+  background: #fff1f2;
+  border-radius: 9999px;
+}
+
+.scrollbar-success::-webkit-scrollbar-thumb {
+  background: #6ee7b7;
+  border-radius: 9999px;
+}
+
+.scrollbar-warning::-webkit-scrollbar-thumb {
+  background: #fcd34d;
+  border-radius: 9999px;
+}
+
+.scrollbar-danger::-webkit-scrollbar-thumb {
+  background: #fda4af;
+  border-radius: 9999px;
+}
+
+.scrollbar-success::-webkit-scrollbar-thumb:hover {
+  background: #34d399;
+}
+
+.scrollbar-warning::-webkit-scrollbar-thumb:hover {
+  background: #fbbf24;
+}
+
+.scrollbar-danger::-webkit-scrollbar-thumb:hover {
+  background: #fb7185;
 }

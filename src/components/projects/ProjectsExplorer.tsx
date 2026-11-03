@@ -51,7 +51,7 @@ function Hero({ total, verified }: { total: number; verified: number }) {
             {verified} <i className="fi fi-rr-check-circle flex text-base" aria-hidden="true" />
           </dd>
           <dt className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-800">
-            Verificados
+            Indicados
           </dt>
         </div>
       </dl>
@@ -286,8 +286,8 @@ export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: Proj
                 Está desenvolvendo o seu Projeto Integrador?
               </p>
               <p className="mt-0.5 text-[13px] leading-relaxed text-text-secondary">
-                Utilize os projetos verificados como padrão de documentação de requisitos
-                funcionais, modelagem C4 e arquitetura de banco de dados.
+                Utilize os projetos indicados como padrão de documentação de requisitos funcionais,
+                modelagem C4 e arquitetura de banco de dados.
               </p>
             </div>
             <Link

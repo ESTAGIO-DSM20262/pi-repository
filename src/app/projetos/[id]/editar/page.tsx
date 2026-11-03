@@ -4,7 +4,8 @@ import {
   type ProjectFormInitialValues,
   ProjectFormPage,
 } from '@/components/projects/ProjectFormPage'
-import { splitProjectLinks } from '@/domain/enterprise/entities/project-details'
+import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
+import { toProjectLinkInputs } from '@/domain/enterprise/entities/project-details'
 import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'
 import { auth } from '@/libs/auth'
 import { resolveProjectEditAccess } from '@/libs/project-edit-access'
@@ -35,7 +36,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     listActiveProjectPeople('student'),
     listActiveProjectPeople('professor'),
   ])
-  const links = splitProjectLinks(project.publicDetails?.externalLinks)
+  const advisors = getProjectAdvisors(project)
   const sourceTeam = project.teamMembers?.length
     ? project.teamMembers
     : (project.publicDetails?.team ?? [])
@@ -52,31 +53,30 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     semester: project.semester,
     theme: project.theme,
     status: project.status,
-    advisorEmail: project.advisorEmail.toLowerCase(),
+    advisorEmail: project.advisor.email.trim().toLowerCase(),
+    coAdvisorEmails: (project.coAdvisors ?? []).map((advisor) =>
+      advisor.email.trim().toLowerCase(),
+    ),
     languages: project.languages,
     stack: project.stack,
     studentEmails: project.memberEmails.map((email) => email.trim().toLowerCase()),
     teamMembers: editableTeam,
-    repositoryUrl: links.repositoryUrl ?? '',
-    liveUrl: links.liveUrl ?? '',
-    prototypeUrl: links.prototypeUrl ?? '',
-    extraLinks: links.extraLinks,
+    links: toProjectLinkInputs(project.publicDetails?.externalLinks),
+    images: project.publicDetails?.images ?? [],
   }
 
-  const advisorListed = professors.some(
-    (professor) => professor.email === initialValues.advisorEmail,
-  )
-  const knownProfessors = advisorListed
-    ? professors
-    : [
-        ...professors,
-        {
-          email: initialValues.advisorEmail,
-          name: project.advisorName,
-          registrationNumber: null,
-          course: null,
-        },
-      ]
+  const listedProfessors = new Set(professors.map((professor) => professor.email))
+  const knownProfessors: ProjectPersonOption[] = [
+    ...professors,
+    ...advisors
+      .filter((advisor) => !listedProfessors.has(advisor.email.trim().toLowerCase()))
+      .map((advisor) => ({
+        email: advisor.email.trim().toLowerCase(),
+        name: advisor.name,
+        registrationNumber: null,
+        course: null,
+      })),
+  ]
 
   const knownEmails = new Set(activeStudents.map((student) => student.email))
   const formerMembers: ProjectPersonOption[] = editableTeam

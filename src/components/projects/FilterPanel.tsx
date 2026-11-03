@@ -65,14 +65,14 @@ function CheckRow({
 const RAIL = [
   {
     icon: 'fi-rr-shield-check',
-    title: 'Verificação',
+    title: 'Indicação',
     active: (f: Filters) => f.verified || f.unverified,
     on: 'bg-emerald-50 text-emerald-700',
   },
   {
     icon: 'fi-rr-calendar',
     title: 'Semestre letivo',
-    active: (f: Filters) => f.cycles.length > 0,
+    active: (f: Filters) => f.cycle !== '',
     on: 'bg-primary-light text-primary',
   },
   {
@@ -114,7 +114,7 @@ function FilterFields({
           <span className="min-w-0">
             <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
               <i className="fi fi-rr-check-circle flex text-emerald-700" aria-hidden="true" />
-              Apenas PIs Verificados
+              Apenas PIs Indicados
             </span>
             <span className="mt-0.5 block text-xs leading-relaxed text-text-secondary">
               Revisados e aprovados como referência técnica.
@@ -129,20 +129,24 @@ function FilterFields({
             onChange={(e) => onChange({ unverified: e.target.checked })}
             className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
           />
-          <span>Não verificados / Em andamento</span>
+          <span>Não indicados / Em andamento</span>
         </label>
       </div>
 
       <Group title="Semestre letivo">
-        {facets.cycles.map((o) => (
-          <CheckRow
-            key={o.value}
-            label={o.value}
-            count={o.count}
-            checked={filters.cycles.includes(o.value)}
-            onChange={() => onChange({ cycles: toggleValue(filters.cycles, o.value) })}
-          />
-        ))}
+        <SelectDropdown
+          ariaLabel="Semestre letivo"
+          value={filters.cycle}
+          onChange={(cycle) => onChange({ cycle })}
+          options={[
+            { value: '', label: 'Todos os semestres letivos' },
+            ...facets.cycles.map((option) => ({
+              value: option.value,
+              label: option.value,
+              count: option.count,
+            })),
+          ]}
+        />
       </Group>
 
       <Group title="Matriz & semestre DSM">

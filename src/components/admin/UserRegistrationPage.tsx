@@ -618,12 +618,26 @@ export function UserRegistrationPage() {
                       {batchResult.credentials.length} credenciais (.xlsx)
                     </button>
                   )}
+                  {batchResult.credentials.length > 0 && (
+                    <details className="rounded-lg border border-emerald-100 bg-emerald-50/60 p-3">
+                      <summary className="cursor-pointer text-xs font-semibold text-emerald-900">
+                        Ver usuários criados ({batchResult.credentials.length})
+                      </summary>
+                      <ul className="scrollbar-success mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[11px] leading-relaxed text-emerald-900">
+                        {batchResult.credentials.slice(0, 50).map((item) => (
+                          <li key={item.email}>
+                            <strong>{item.name}</strong> — {item.email} ({ROLE_LABEL[item.role]})
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
                   {batchResult.errors.length > 0 && (
                     <details className="rounded-lg border border-rose-100 bg-rose-50/60 p-3">
                       <summary className="cursor-pointer text-xs font-semibold text-rose-900">
                         Ver linhas que precisam de correção ({batchResult.errors.length})
                       </summary>
-                      <ul className="mt-2 max-h-44 space-y-2 overflow-auto text-[11px] leading-relaxed text-rose-900">
+                      <ul className="scrollbar-danger mt-2 max-h-44 space-y-2 overflow-auto pr-1 text-[11px] leading-relaxed text-rose-900">
                         {batchResult.errors.slice(0, 50).map((item) => (
                           <li key={`${item.sheet}-${item.rowNumber}`}>
                             <strong>
@@ -641,7 +655,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-amber-900">
                         Ver registros ignorados ({batchResult.skipped.length})
                       </summary>
-                      <ul className="mt-2 max-h-36 space-y-1.5 overflow-auto text-[11px] leading-relaxed text-amber-900">
+                      <ul className="scrollbar-warning mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[11px] leading-relaxed text-amber-900">
                         {batchResult.skipped.slice(0, 50).map((item) => (
                           <li key={`${item.sheet}-${item.rowNumber}`}>
                             <strong>

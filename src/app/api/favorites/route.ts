@@ -2,6 +2,7 @@ import { and, asc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { projectFavorites } from '@/db/schema'
+import { isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 
@@ -22,7 +23,7 @@ async function getAuthenticatedUserId(request: Request): Promise<string | null> 
 
 async function isFavoriteableProject(projectId: string): Promise<boolean> {
   const project = await new CompositeProjectRepository().findById(projectId)
-  return project?.status === 'publicado'
+  return project?.status === 'publicado' && isProjectActive(project)
 }
 
 export async function GET(request: Request) {

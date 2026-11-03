@@ -17,6 +17,10 @@ export interface ProgressTask {
   targetStudentEmail: string | null
   dueDate: string | null
   createdByUserId: string
+  createdByName: string
+  lastEditedByName: string | null
+  lastEditedAt: string | null
+  canEdit: boolean
   createdAt: string
   updatedAt: string
 }
@@ -35,6 +39,7 @@ export interface ProgressRevision {
   action: 'created' | 'updated'
   changeNote: string | null
   changedByUserId: string
+  changedByName: string
   changedAt: string
 }
 

@@ -14,6 +14,7 @@ export function toDomainProject(row: ProjectRow): Project {
     cycle: row.cycle,
     semester: row.semester,
     advisor: { email: row.advisorEmail, name: row.advisorName },
+    coAdvisors: row.coAdvisors,
     memberEmails: row.memberEmails,
     teamMembers: row.teamMembers,
     languages: row.languages,
@@ -21,6 +22,7 @@ export function toDomainProject(row: ProjectRow): Project {
     theme: row.theme,
     status: row.status,
     verified: row.verified,
+    active: row.active,
     accessCount: 0,
     cover: {
       icon: 'fi-rr-folder-open',

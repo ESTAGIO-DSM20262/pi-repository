@@ -2,6 +2,11 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import type {
+  AdminDashboardMetrics,
+  MonthlyRegistration,
+  ProfessorDashboardMetrics,
+} from '@/application/dashboard/dashboard-metrics'
 import type { ListedProject } from '@/application/projects/list-projects'
 import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
 import { FavoriteButton } from '@/components/projects/FavoriteButton'
@@ -10,6 +15,9 @@ import type { Role } from '@/domain/enterprise/entities/role'
 import { formatPersonName } from '@/libs/initials'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+import { AdminInsights } from './AdminInsights'
+import { formatMetric, StatCard } from './DashboardWidgets'
+import { ProfessorOverview } from './ProfessorOverview'
 
 export interface AdminUserMetrics {
   total: number
@@ -29,46 +37,56 @@ interface RoleDashboardProps {
   role: Role
   projects: ListedProject[]
   adminUserMetrics?: AdminUserMetrics
-}
-
-function formatMetric(value: number | undefined) {
-  return typeof value === 'number' && Number.isFinite(value) ? value.toLocaleString('pt-BR') : '—'
+  adminMetrics?: AdminDashboardMetrics
+  registrations?: MonthlyRegistration[]
+  professorMetrics?: ProfessorDashboardMetrics
 }
 
 function AdminOverviewCards({
   projects,
   userMetrics,
+  ongoingWithTasks,
 }: {
   projects: ListedProject[]
   userMetrics?: AdminUserMetrics
+  ongoingWithTasks?: number
 }) {
-  const totalProjects = projects.length
-  const verifiedProjects = projects.filter((project) => project.verified).length
-  const ongoingProjects = projects.filter((project) => project.status === 'em_andamento').length
-  const completedProjects = projects.filter((project) => project.status === 'publicado').length
+  const activeProjects = projects.filter((project) => project.active !== false)
+  const deactivatedProjects = projects.length - activeProjects.length
+  const totalProjects = activeProjects.length
+  const verifiedProjects = activeProjects.filter((project) => project.verified).length
+  const ongoingProjects = activeProjects.filter(
+    (project) => project.status === 'em_andamento',
+  ).length
+  const completedProjects = activeProjects.filter(
+    (project) => project.status === 'publicado',
+  ).length
   const totalUsers = userMetrics?.total ?? 0
 
   const cards = [
     {
       title: 'Total de Projetos no Acervo',
       value: formatMetric(totalProjects),
-      note: `${formatMetric(ongoingProjects)} em andamento · ${formatMetric(completedProjects)} concluídos`,
+      note: `${formatMetric(ongoingProjects)} em andamento · ${formatMetric(completedProjects)} concluídos${deactivatedProjects > 0 ? ` · ${formatMetric(deactivatedProjects)} desativados` : ''}`,
       icon: 'fi-rr-duplicate',
       tone: 'red',
       ratio: 100,
     },
     {
-      title: 'Projetos Verificados',
+      title: 'Projetos Indicados',
       value: formatMetric(verifiedProjects),
-      note: 'Com verificação institucional',
+      note: `${formatMetric(verifiedProjects)} de ${formatMetric(completedProjects)} projetos concluídos`,
       icon: 'fi-rr-badge-check',
       tone: 'green',
-      ratio: totalProjects ? (verifiedProjects / totalProjects) * 100 : 0,
+      ratio: completedProjects ? (verifiedProjects / completedProjects) * 100 : 0,
     },
     {
       title: 'Projetos em Andamento',
       value: formatMetric(ongoingProjects),
-      note: 'Com acompanhamento de tarefas',
+      note:
+        typeof ongoingWithTasks === 'number'
+          ? `${formatMetric(ongoingWithTasks)} com tarefas cadastradas`
+          : 'Projetos ainda em desenvolvimento',
       icon: 'fi-rr-time-fast',
       tone: 'slate',
       ratio: totalProjects ? (ongoingProjects / totalProjects) * 100 : 0,
@@ -115,12 +133,6 @@ function AdminOverviewCards({
     },
   ] as const
 
-  const toneStyles = {
-    red: { icon: 'text-primary', bar: 'bg-primary' },
-    green: { icon: 'text-emerald-800', bar: 'bg-emerald-800' },
-    slate: { icon: 'text-slate-600', bar: 'bg-slate-600' },
-  }
-
   return (
     <section aria-labelledby="admin-overview-title" className="space-y-4">
       <div className="rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
@@ -132,44 +144,22 @@ function AdminOverviewCards({
         </h2>
         <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
           Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
-          banco.
+          banco. Projetos desativados ficam fora das contagens do acervo.
         </p>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => {
-          const tone = toneStyles[card.tone]
-          return (
-            <article
-              key={card.title}
-              className="min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-xs font-medium leading-5 text-[#765e58] sm:text-[13px]">
-                  {card.title}
-                </p>
-                <i
-                  className={`fi ${card.icon} flex shrink-0 text-lg ${tone.icon}`}
-                  aria-hidden="true"
-                />
-              </div>
-              <p
-                className={`mt-3 text-3xl font-bold tracking-tight tabular-nums ${card.title === 'Contas Inativas' ? 'text-slate-800' : card.tone === 'green' ? 'text-emerald-800' : 'text-slate-900'}`}
-              >
-                {card.value}
-              </p>
-              <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-[#765e58]">{card.note}</p>
-              <div
-                className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200"
-                aria-hidden="true"
-              >
-                <div
-                  className={`h-full rounded-full transition-all ${tone.bar}`}
-                  style={{ width: `${Math.max(0, Math.min(100, card.ratio))}%` }}
-                />
-              </div>
-            </article>
-          )
-        })}
+        {cards.map((card) => (
+          <StatCard
+            key={card.title}
+            title={card.title}
+            value={card.value}
+            note={card.note}
+            icon={card.icon}
+            tone={card.tone}
+            ratio={card.ratio}
+            valueTone={card.title === 'Contas Inativas' ? 'slate' : undefined}
+          />
+        ))}
       </div>
       {!userMetrics && (
         <p
@@ -573,6 +563,9 @@ export function RoleDashboard({
   role,
   projects,
   adminUserMetrics,
+  adminMetrics,
+  registrations,
+  professorMetrics,
 }: RoleDashboardProps) {
   const publishedProjects = useMemo(
     () => projects.filter((project) => project.status === 'publicado'),
@@ -642,9 +635,23 @@ export function RoleDashboard({
 
       <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
         {role === 'admin' && (
-          <AdminOverviewCards projects={projects} userMetrics={adminUserMetrics} />
+          <AdminOverviewCards
+            projects={projects}
+            userMetrics={adminUserMetrics}
+            ongoingWithTasks={adminMetrics?.projects.ongoingWithTasks}
+          />
+        )}
+        {role === 'admin' && adminMetrics && (
+          <AdminInsights
+            metrics={adminMetrics}
+            registrations={registrations}
+            userMetrics={adminUserMetrics}
+          />
         )}
         {role === 'admin' && <AdminUsersSection currentUserId={currentUserId} />}
+        {role === 'professor' && professorMetrics && (
+          <ProfessorOverview metrics={professorMetrics} />
+        )}
 
         <ProjectsSection
           title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}

@@ -1,6 +1,11 @@
 import { type Either, left, right } from '@/core/either'
 import { InvalidProjectError } from '@/domain/enterprise/errors/invalid-project-error'
-import { type ProjectFieldsInput, parseProjectFields, text } from './project-fields'
+import {
+  type ProjectFieldsInput,
+  parseProjectAdvisors,
+  parseProjectFields,
+  text,
+} from './project-fields'
 
 export interface CreateProjectTaskInput {
   title: string
@@ -11,6 +16,7 @@ export interface CreateProjectTaskInput {
 
 export interface CreateProjectInput extends ProjectFieldsInput {
   advisorEmail: string
+  coAdvisorEmails: string[]
   tasks: CreateProjectTaskInput[]
 }
 
@@ -35,7 +41,9 @@ export function parseCreateProjectInput(
   if (!body || typeof body !== 'object') return fail('Informe os dados do projeto.')
   const data = body as Record<string, unknown>
 
-  const advisorEmail = text(data.advisorEmail).toLowerCase()
+  const advisors = parseProjectAdvisors(data)
+  if (advisors.isLeft()) return left(advisors.value)
+  const { advisorEmail } = advisors.value
   if (!advisorEmail) return fail('Selecione o professor orientador.')
 
   const fields = parseProjectFields(data)
@@ -72,5 +80,10 @@ export function parseCreateProjectInput(
     })
   }
 
-  return right({ ...fields.value, advisorEmail, tasks })
+  return right({
+    ...fields.value,
+    advisorEmail,
+    coAdvisorEmails: advisors.value.coAdvisorEmails ?? [],
+    tasks,
+  })
 }

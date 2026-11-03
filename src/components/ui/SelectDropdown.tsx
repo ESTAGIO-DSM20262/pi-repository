@@ -24,6 +24,8 @@ interface SelectDropdownProps {
 }
 
 const EXIT_DURATION = 150
+const DEFAULT_DROPDOWN_Z_INDEX = 100
+const MODAL_DROPDOWN_Z_INDEX = 2147483647
 
 export function SelectDropdown({
   value,
@@ -82,12 +84,13 @@ export function SelectDropdown({
 
     setMenuStyle({
       position: 'fixed',
+      zIndex: layer === 'modal' ? MODAL_DROPDOWN_Z_INDEX : DEFAULT_DROPDOWN_Z_INDEX,
       top,
       left,
       width: menuWidth,
       maxHeight: Math.min(320, viewportHeight - padding * 2),
     })
-  }, [options.length])
+  }, [options.length, layer])
 
   const closeMenu = useCallback((restoreFocus = false) => {
     setIsOpen(false)
@@ -229,7 +232,7 @@ export function SelectDropdown({
             aria-hidden={!isOpen}
             inert={!isOpen}
             style={menuStyle}
-            className={`${layer === 'modal' ? 'z-[var(--z-modal-dropdown)]' : 'z-[100]'} overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
+            className={`overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
               isOpen
                 ? 'visible translate-y-0 scale-100 opacity-100'
                 : 'invisible -translate-y-1 scale-[0.98] opacity-0'

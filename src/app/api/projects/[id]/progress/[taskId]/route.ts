@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { and, eq, sql } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
+import { canEditProgressTask } from '@/application/projects/project-permissions'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks } from '@/db/schema'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
@@ -100,6 +101,12 @@ export async function PATCH(request: Request, context: RouteContext) {
       .where(and(eq(projectProgressTasks.id, taskId), eq(projectProgressTasks.projectId, id)))
       .limit(1)
     if (!existing) return jsonError('A tarefa não foi encontrada.', 404)
+    if (!canEditProgressTask(access.project, access.user, existing)) {
+      return jsonError(
+        'Você só pode editar as tarefas criadas por você. Esta tarefa pertence a outro professor.',
+        403,
+      )
+    }
 
     const now = new Date()
     const [updated] = await db

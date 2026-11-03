@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto'
 import { desc, eq, inArray } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
+import { canEditProgressTask } from '@/application/projects/project-permissions'
 import { db } from '@/db'
-import { projectProgressRevisions, projectProgressTasks } from '@/db/schema'
+import { projectProgressRevisions, projectProgressTasks, users } from '@/db/schema'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
 
 interface RouteContext {
@@ -125,10 +126,44 @@ export async function GET(request: Request, context: RouteContext) {
             revision.targetStudentEmail.toLowerCase() === access.user.email,
         )
 
+    const personIds = [
+      ...new Set([
+        ...visibleTasks.map((task) => task.createdByUserId),
+        ...revisions.map((revision) => revision.changedByUserId),
+      ]),
+    ]
+    const people =
+      personIds.length > 0
+        ? await db
+            .select({ id: users.id, name: users.name })
+            .from(users)
+            .where(inArray(users.id, personIds))
+        : []
+    const nameById = new Map(people.map((person) => [person.id, person.name]))
+    const viewer = { id: access.user.id, email: access.user.email, role: access.user.role }
+
+    const tasks = visibleTasks.map((task) => {
+      const lastEdit = revisions.find(
+        (revision) => revision.taskId === task.id && revision.action === 'updated',
+      )
+      return {
+        ...task,
+        createdByName: nameById.get(task.createdByUserId) ?? 'Usuário removido',
+        lastEditedByName: lastEdit
+          ? (nameById.get(lastEdit.changedByUserId) ?? 'Usuário removido')
+          : null,
+        lastEditedAt: lastEdit?.changedAt ?? null,
+        canEdit: canEditProgressTask(access.project, viewer, task),
+      }
+    })
+
     return NextResponse.json(
       {
-        tasks: visibleTasks,
-        revisions,
+        tasks,
+        revisions: revisions.map((revision) => ({
+          ...revision,
+          changedByName: nameById.get(revision.changedByUserId) ?? 'Usuário removido',
+        })),
         canManage: access.canManage,
         projectStatus: access.project.status,
       },

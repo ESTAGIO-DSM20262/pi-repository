@@ -300,8 +300,21 @@ export function ProjectProgressSection({
 
                 <div className="mt-auto pt-4">
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
-                    <span>Última atualização: {formatDateTime(selectedTask.updatedAt)}</span>
-                    {canManage && (
+                    <span>
+                      Criada por{' '}
+                      <strong className="text-slate-700">{selectedTask.createdByName}</strong>
+                      {selectedTask.lastEditedByName && (
+                        <>
+                          {' '}
+                          · Última edição por{' '}
+                          <strong className="text-slate-700">
+                            {selectedTask.lastEditedByName}
+                          </strong>
+                        </>
+                      )}{' '}
+                      · Atualizada em {formatDateTime(selectedTask.updatedAt)}
+                    </span>
+                    {canManage && selectedTask.canEdit && (
                       <button
                         type="button"
                         onClick={() => openEditDialog(selectedTask)}
@@ -373,7 +386,8 @@ export function ProjectProgressSection({
                                 {revision.action === 'created'
                                   ? 'Tarefa criada'
                                   : 'Tarefa revisada'}{' '}
-                                — {revision.changeNote || 'Sem observação para esta versão.'}
+                                por <strong>{revision.changedByName}</strong> —{' '}
+                                {revision.changeNote || 'Sem observação para esta versão.'}
                               </p>
                             </li>
                           ))}
@@ -445,8 +459,12 @@ export function ProjectProgressSection({
                         <i className="fi fi-rr-clock flex" aria-hidden="true" /> Atualizada em{' '}
                         {formatDateTime(task.updatedAt)}
                       </p>
+                      <p className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-500">
+                        <i className="fi fi-rr-user flex" aria-hidden="true" /> Criada por{' '}
+                        {task.createdByName}
+                      </p>
                     </button>
-                    {canManage && (
+                    {canManage && task.canEdit && (
                       <button
                         type="button"
                         onClick={() => openEditDialog(task)}
