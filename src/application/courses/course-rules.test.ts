@@ -80,9 +80,10 @@ describe('validateCourseInput', () => {
 
 describe('resolveUserCourse', () => {
   it('converte variantes para o nome oficial', () => {
-    expect(
-      resolveUserCourse({ input: 'D.S.M.', isStudent: true, courses: [DSM, ADS] }),
-    ).toEqual({ ok: true, course: DSM.name })
+    expect(resolveUserCourse({ input: 'D.S.M.', isStudent: true, courses: [DSM, ADS] })).toEqual({
+      ok: true,
+      course: DSM.name,
+    })
   })
 
   it('recusa curso inexistente ou desativado para aluno', () => {

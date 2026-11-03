@@ -65,8 +65,7 @@ export function AdminCoursesSection() {
   async function createCourse(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const created = await run(
-      () =>
-        sendCourseRequest('POST', { body: { name: newName, abbreviation: newAbbreviation } }),
+      () => sendCourseRequest('POST', { body: { name: newName, abbreviation: newAbbreviation } }),
       'Curso cadastrado. Ele já aparece nas listas de seleção.',
     )
     if (created) {

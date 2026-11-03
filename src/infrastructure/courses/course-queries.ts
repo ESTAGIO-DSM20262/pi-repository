@@ -17,9 +17,10 @@ export async function listCourses(): Promise<CourseWithUsage[]> {
       name: courses.name,
       abbreviation: courses.abbreviation,
       active: courses.active,
-      userCount: sql<number>`(SELECT count(*) FROM ${users} WHERE ${users.course} = ${courses.name})`
-        .mapWith(Number)
-        .as('user_count'),
+      userCount:
+        sql<number>`(SELECT count(*) FROM ${users} WHERE ${users.course} = ${courses.name})`
+          .mapWith(Number)
+          .as('user_count'),
     })
     .from(courses)
     .orderBy(asc(sql`lower(${courses.name})`))

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
 import {
   buildCourseOptions,
   formatUserCourse,
@@ -11,7 +12,6 @@ import {
 import { Pagination } from '@/components/projects/Pagination'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
-import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
@@ -361,7 +361,9 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                     <dt className="text-[0.625rem] font-semibold uppercase tracking-wide text-text-muted">
                       Curso
                     </dt>
-                    <dd className="mt-0.5 break-words font-medium text-slate-800">{formatUserCourse(user.course, courses)}</dd>
+                    <dd className="mt-0.5 break-words font-medium text-slate-800">
+                      {formatUserCourse(user.course, courses)}
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -623,8 +625,12 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                 <label className="block text-xs font-semibold text-slate-700">
                   R.A. / Matrícula
                   <input
-                    minLength={editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
-                    maxLength={editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
+                    minLength={
+                      editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
+                    }
+                    maxLength={
+                      editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
+                    }
                     value={editForm.registrationNumber}
                     onChange={(event) =>
                       setEditForm((current) => ({

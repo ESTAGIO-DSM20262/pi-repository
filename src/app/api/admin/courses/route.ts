@@ -35,8 +35,17 @@ export async function POST(request: Request) {
   if (!access.ok) return access.response
 
   try {
-    const body = (await request.json()) as { name?: unknown; abbreviation?: unknown }
-    const validation = validateCourseInput(body, await listCourses())
+    const body = (await request.json()) as {
+      name?: unknown
+      abbreviation?: unknown
+    }
+    const validation = validateCourseInput(
+      {
+        name: body.name,
+        abbreviation: body.abbreviation,
+      },
+      await listCourses(),
+    )
     if (!validation.ok) return jsonError(validation.error, 400)
 
     const [created] = await db

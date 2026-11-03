@@ -3,11 +3,11 @@
 import Link from 'next/link'
 import { type DragEvent, type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
 import { buildCourseOptions, useAdminCourses } from '@/components/admin/use-admin-courses'
 import { BackButton } from '@/components/ui/BackButton'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
-import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 

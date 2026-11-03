@@ -28,10 +28,6 @@ export default function LoginPage() {
             className="h-14 w-auto self-start"
           />
 
-          <span className="mt-6 inline-flex w-fit rounded border border-primary/20 bg-primary-light px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-wide text-primary">
-            Acesso institucional
-          </span>
-
           <div className="mt-5 flex h-1 w-16 gap-0.5" aria-hidden="true">
             <span className="flex-[3] bg-primary" />
             <span className="flex-[2] bg-secondary" />
