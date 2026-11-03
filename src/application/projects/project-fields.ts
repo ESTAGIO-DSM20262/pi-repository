@@ -42,6 +42,7 @@ export interface ProjectFieldsInput {
 }
 
 export const MAX_TAGS = 20
+export const MAX_TAG_LENGTH = 60
 const CYCLE_PATTERN = /^\d{4}\/[12]$/
 
 export function text(value: unknown): string {
@@ -51,7 +52,7 @@ export function text(value: unknown): string {
 function tags(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return normalizeTechnologyList(
-    value.map((item) => text(item)),
+    value.map((item) => text(item)).filter((tag) => tag && tag.length <= MAX_TAG_LENGTH),
     MAX_TAGS + 1,
   )
 }

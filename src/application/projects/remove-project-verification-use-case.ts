@@ -53,7 +53,7 @@ export class RemoveProjectVerificationUseCase
     const remaining = existing.filter((item) => item.verifierUserId !== viewer.id)
     const summary = buildVerificationSummary(getProjectAdvisors(project), remaining)
 
-    await this.verifications.removeByUser(projectId, viewer.id, summary.complete)
+    await this.verifications.removeByUser(projectId, viewer.id)
     return right({ summary })
   }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Project } from '@/domain/enterprise/entities/project'
+import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
 import { InMemoryProjectReader } from '@/test/repositories/in-memory-project-reader'
 import { InMemoryProjectVerificationRepository } from '@/test/repositories/in-memory-project-verification-repository'
 import { GetProjectVerificationUseCase } from './get-project-verification-use-case'
@@ -60,7 +61,9 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 const now = new Date('2026-10-27T15:00:00Z')
 
 function setup(project: Project = makeProject()) {
-  const verifications = new InMemoryProjectVerificationRepository()
+  const verifications = new InMemoryProjectVerificationRepository({
+    [project.id]: getProjectAdvisors(project),
+  })
   const useCase = new VerifyProjectUseCase(
     new InMemoryProjectReader([project]),
     verifications,
@@ -179,6 +182,18 @@ describe('VerifyProjectUseCase', () => {
     if (asProfessor.isLeft()) expect(asProfessor.value.status).toBe(404)
   })
 
+  it('pede ao administrador para reativar o projeto antes de indicá-lo', async () => {
+    const { useCase, verifications } = setup(makeProject({ active: false }))
+    const result = await useCase.execute({
+      viewer: admin,
+      projectId: 'p-1',
+      body: { criteria: ['source_code'] },
+    })
+    expect(result.isLeft()).toBe(true)
+    if (result.isLeft()) expect(result.value.status).toBe(409)
+    expect(verifications.records.size).toBe(0)
+  })
+
   it('devolve não encontrado para projeto inexistente ou demonstrativo', async () => {
     const { useCase } = setup()
     const result = await useCase.execute({
@@ -195,18 +210,14 @@ describe('VerifyProjectUseCase', () => {
 describe('GetProjectVerificationUseCase', () => {
   it('monta o resumo a partir dos orientadores atuais e das verificações salvas', async () => {
     const verifications = new InMemoryProjectVerificationRepository()
-    await verifications.save(
-      'p-1',
-      {
-        verifierUserId: ana.id,
-        verifierEmail: ana.email,
-        verifierName: ana.name,
-        verifierRole: 'professor',
-        criteria: ['source_code'],
-        verifiedAt: now.toISOString(),
-      },
-      false,
-    )
+    await verifications.save('p-1', {
+      verifierUserId: ana.id,
+      verifierEmail: ana.email,
+      verifierName: ana.name,
+      verifierRole: 'professor',
+      criteria: ['source_code'],
+      verifiedAt: now.toISOString(),
+    })
 
     const summary = await new GetProjectVerificationUseCase(verifications).execute({
       project: makeProject(),
