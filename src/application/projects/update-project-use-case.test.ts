@@ -262,8 +262,8 @@ describe('UpdateProjectUseCase', () => {
   describe('verificação', () => {
     it('adicionar um orientador a um projeto verificado volta o projeto para não verificado', async () => {
       const { repository, verifications, useCase, existing } = seed('publicado')
-      await verifications.save('project-1', record(principal.email, principal.name), false)
-      await verifications.save('project-1', record(satellite.email, satellite.name), true)
+      await verifications.save('project-1', record(principal.email, principal.name))
+      await verifications.save('project-1', record(satellite.email, satellite.name))
 
       const result = await useCase.execute({
         project: existing(),
@@ -278,11 +278,12 @@ describe('UpdateProjectUseCase', () => {
 
       expect(result.isRight()).toBe(true)
       expect(repository.projects.get('project-1')?.verified).toBe(false)
+      expect(verifications.refreshedProjectIds).toEqual(['project-1'])
     })
 
     it('remover o orientador pendente completa a verificação e apaga a verificação de quem saiu', async () => {
       const { repository, verifications, useCase, existing } = seed('publicado')
-      await verifications.save('project-1', record(principal.email, principal.name), false)
+      await verifications.save('project-1', record(principal.email, principal.name))
 
       const result = await useCase.execute({
         project: existing(),
@@ -300,8 +301,8 @@ describe('UpdateProjectUseCase', () => {
 
     it('voltar o projeto para em andamento limpa as verificações e remove o selo', async () => {
       const { repository, verifications, useCase, existing } = seed('publicado')
-      await verifications.save('project-1', record(principal.email, principal.name), false)
-      await verifications.save('project-1', record(satellite.email, satellite.name), true)
+      await verifications.save('project-1', record(principal.email, principal.name))
+      await verifications.save('project-1', record(satellite.email, satellite.name))
 
       await useCase.execute({
         project: existing(),

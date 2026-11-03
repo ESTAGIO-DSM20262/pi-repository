@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { VERIFICATION_CRITERION_IDS } from '@/domain/enterprise/entities/project-verification'
 
 export const projectFormSchema = z.object({
   title: z
@@ -23,6 +24,26 @@ export const projectFormSchema = z.object({
     .max(80, 'Informe o tema do projeto.'),
   status: z.enum(['publicado', 'em_andamento']),
   advisorEmail: z.email('Selecione um professor orientador válido.'),
+  coAdvisorEmails: z.array(z.string()),
+  links: z.array(
+    z.object({ key: z.string(), title: z.string(), url: z.string(), icon: z.string() }),
+  ),
+  images: z.array(
+    z.object({
+      key: z.string(),
+      title: z.string(),
+      url: z.string(),
+      orientation: z.enum(['horizontal', 'vertical']),
+    }),
+  ),
 })
 
 export type ProjectFormValues = z.infer<typeof projectFormSchema>
+
+export const projectVerificationSchema = z.object({
+  criteria: z
+    .array(z.enum(VERIFICATION_CRITERION_IDS as [string, ...string[]]))
+    .min(1, 'Marque ao menos um critério para indicar o projeto.'),
+})
+
+export type ProjectVerificationValues = z.infer<typeof projectVerificationSchema>

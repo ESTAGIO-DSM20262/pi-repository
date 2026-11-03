@@ -1,20 +1,29 @@
-import type { ProjectVerificationRecord } from '@/domain/enterprise/entities/project-verification'
+import type { ProjectAdvisor } from '@/domain/enterprise/entities/project'
+import {
+  buildVerificationSummary,
+  type ProjectVerificationRecord,
+} from '@/domain/enterprise/entities/project-verification'
 import type { ProjectVerificationRepository } from '@/domain/enterprise/repositories/project-verification-repository'
 
 export class InMemoryProjectVerificationRepository implements ProjectVerificationRepository {
   readonly records = new Map<string, ProjectVerificationRecord[]>()
   readonly verifiedFlags = new Map<string, boolean>()
+  readonly refreshedProjectIds: string[] = []
+
+  constructor(private readonly advisorsByProject: Record<string, ProjectAdvisor[]> = {}) {}
 
   async findByProject(projectId: string) {
     return [...(this.records.get(projectId) ?? [])]
   }
 
-  async save(projectId: string, record: ProjectVerificationRecord, verified: boolean) {
+  async save(projectId: string, record: ProjectVerificationRecord) {
     const others = (this.records.get(projectId) ?? []).filter(
       (item) => item.verifierUserId !== record.verifierUserId,
     )
-    this.records.set(projectId, [...others, record])
-    this.verifiedFlags.set(projectId, verified)
+    const records = [...others, record]
+    this.records.set(projectId, records)
+    const advisors = this.advisorsByProject[projectId] ?? []
+    this.verifiedFlags.set(projectId, buildVerificationSummary(advisors, records).complete)
   }
 
   async removeByEmails(projectId: string, emails: string[]) {
@@ -29,5 +38,9 @@ export class InMemoryProjectVerificationRepository implements ProjectVerificatio
 
   async clear(projectId: string) {
     this.records.delete(projectId)
+  }
+
+  async refreshVerified(projectId: string) {
+    this.refreshedProjectIds.push(projectId)
   }
 }

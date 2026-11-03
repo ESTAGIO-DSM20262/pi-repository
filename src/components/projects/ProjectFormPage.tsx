@@ -151,6 +151,15 @@ export function ProjectFormPage({
       advisorEmail:
         initialValues?.advisorEmail ??
         (role === 'professor' ? currentUserEmail : (professors[0]?.email ?? '')),
+      coAdvisorEmails: initialValues?.coAdvisorEmails ?? [],
+      links: (initialValues?.links ?? []).map((link, index) => ({
+        key: `initial-link-${index}`,
+        ...link,
+      })),
+      images: (initialValues?.images ?? []).map((image, index) => ({
+        key: `initial-image-${index}`,
+        ...image,
+      })),
     },
   })
   const title = watch('title')
@@ -161,9 +170,21 @@ export function ProjectFormPage({
   const theme = watch('theme')
   const status = watch('status')
   const advisorEmail = watch('advisorEmail')
-  const [coAdvisorEmails, setCoAdvisorEmails] = useState<string[]>(
-    initialValues?.coAdvisorEmails ?? [],
-  )
+  const coAdvisorEmails = watch('coAdvisorEmails')
+  const links: DraftProjectLink[] = watch('links')
+  const images: DraftProjectImage[] = watch('images')
+
+  function setCoAdvisorEmails(update: (current: string[]) => string[]) {
+    setValue('coAdvisorEmails', update(coAdvisorEmails), { shouldDirty: true })
+  }
+
+  function setLinks(update: (current: DraftProjectLink[]) => DraftProjectLink[]) {
+    setValue('links', update(links), { shouldDirty: true })
+  }
+
+  function setImages(next: DraftProjectImage[]) {
+    setValue('images', next, { shouldDirty: true })
+  }
   const [languages, setLanguages] = useState<string[]>(initialValues?.languages ?? [])
   const [stack, setStack] = useState<string[]>(initialValues?.stack ?? [])
   const [selectedEmails, setSelectedEmails] = useState<string[]>(initialValues?.studentEmails ?? [])
@@ -182,15 +203,6 @@ export function ProjectFormPage({
   const [studentQuery, setStudentQuery] = useState('')
   const [studentNotice, setStudentNotice] = useState('')
   const [tasks, setTasks] = useState<DraftTask[]>([])
-  const [links, setLinks] = useState<DraftProjectLink[]>(
-    (initialValues?.links ?? []).map((link, index) => ({ key: `initial-link-${index}`, ...link })),
-  )
-  const [images, setImages] = useState<DraftProjectImage[]>(
-    (initialValues?.images ?? []).map((image, index) => ({
-      key: `initial-image-${index}`,
-      ...image,
-    })),
-  )
 
   const selectedStudents = useMemo(
     () =>
