@@ -57,3 +57,23 @@ export function recommendAwardCandidates(candidates: AwardCandidate[]) {
     }
   })
 }
+
+export function sortAwardCandidates(candidates: AwardCandidate[]) {
+  return [...candidates].sort(
+    (a, b) =>
+      Number(b.selected) - Number(a.selected) ||
+      Number(isAwardEligible(b.project)) - Number(isAwardEligible(a.project)) ||
+      b.score - a.score ||
+      a.project.title.localeCompare(b.project.title, 'pt-BR'),
+  )
+}
+
+export function summarizeAwardGroup(candidates: AwardCandidate[]) {
+  const recommended = candidates.filter((item) => item.recommended)
+  return {
+    winnerTitle: candidates.find((item) => item.winnerTitle)?.winnerTitle ?? null,
+    recommended,
+    highestScore: recommended[0]?.score ?? 0,
+    eligibleCount: candidates.filter((item) => isAwardEligible(item.project)).length,
+  }
+}

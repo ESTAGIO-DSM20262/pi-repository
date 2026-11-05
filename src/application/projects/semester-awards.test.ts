@@ -9,6 +9,8 @@ import {
   canChooseSemesterAward,
   isAwardEligible,
   recommendAwardCandidates,
+  sortAwardCandidates,
+  summarizeAwardGroup,
 } from './semester-awards'
 
 const principal = {
@@ -177,5 +179,39 @@ describe('melhor PI do semestre', () => {
         })
       ).isLeft(),
     ).toBe(true)
+  })
+  it('ordena o escolhido primeiro, depois os elegíveis por critérios e por fim os demais', () => {
+    const sorted = sortAwardCandidates([
+      candidate('em-andamento', 7, { status: 'em_andamento' }),
+      candidate('beta', 3, { title: 'Beta' }),
+      candidate('alfa', 3, { title: 'Alfa' }),
+      { ...candidate('escolhido', 1), selected: true },
+      candidate('lider', 5),
+    ])
+    expect(sorted.map((item) => item.project.id)).toEqual([
+      'escolhido',
+      'lider',
+      'alfa',
+      'beta',
+      'em-andamento',
+    ])
+  })
+  it('resume o grupo com sugestões, pontuação máxima e quantidade de concorrentes', () => {
+    const group = recommendAwardCandidates([
+      { ...candidate('a', 4), winnerTitle: 'Projeto escolhido' },
+      { ...candidate('b', 4), winnerTitle: 'Projeto escolhido' },
+      { ...candidate('c', 1), winnerTitle: 'Projeto escolhido' },
+      { ...candidate('d', 7, { status: 'em_andamento' }), winnerTitle: 'Projeto escolhido' },
+    ])
+    const summary = summarizeAwardGroup(group)
+    expect(summary.recommended.map((item) => item.project.id)).toEqual(['a', 'b'])
+    expect(summary.highestScore).toBe(4)
+    expect(summary.eligibleCount).toBe(3)
+    expect(summary.winnerTitle).toBe('Projeto escolhido')
+    expect(summarizeAwardGroup([candidate('x', 0)])).toMatchObject({
+      recommended: [],
+      highestScore: 0,
+      winnerTitle: null,
+    })
   })
 })

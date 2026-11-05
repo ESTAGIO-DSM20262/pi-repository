@@ -273,7 +273,7 @@ export const semesterAwards = pgTable(
     selectedAt: timestamp('selected_at').notNull().defaultNow(),
   },
   (table) => [
-    primaryKey({ columns: [table.cycle, table.semester] }),
+    primaryKey({ name: 'semester_awards_pkey', columns: [table.cycle, table.semester] }),
     unique('semester_awards_project_unique').on(table.projectId),
     check('semester_awards_semester_check', sql`${table.semester} BETWEEN 1 AND 6`),
   ],

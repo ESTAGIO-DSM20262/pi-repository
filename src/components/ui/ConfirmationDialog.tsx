@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
 
@@ -8,6 +8,7 @@ interface ConfirmationDialogProps {
   open: boolean
   title: string
   description: string
+  details?: ReactNode
   confirmLabel: string
   cancelLabel?: string
   icon?: string
@@ -21,6 +22,7 @@ export function ConfirmationDialog({
   open,
   title,
   description,
+  details,
   confirmLabel,
   cancelLabel = 'Cancelar',
   icon = 'fi-rr-triangle-warning',
@@ -124,7 +126,11 @@ export function ConfirmationDialog({
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirmation-dialog-title"
-        aria-describedby="confirmation-dialog-description"
+        aria-describedby={
+          details
+            ? 'confirmation-dialog-description confirmation-dialog-details'
+            : 'confirmation-dialog-description'
+        }
         className={`relative overflow-y-auto rounded-2xl border border-border bg-white p-6 shadow-2xl transition duration-200 motion-reduce:transition-none sm:p-7 ${
           shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-1 scale-[0.98] opacity-0'
         }`}
@@ -153,6 +159,14 @@ export function ConfirmationDialog({
             >
               {description}
             </p>
+            {details && (
+              <div
+                id="confirmation-dialog-details"
+                className="mt-4 rounded-lg border border-border bg-surface-secondary p-3.5 text-sm leading-relaxed text-slate-800"
+              >
+                {details}
+              </div>
+            )}
           </div>
         </div>
 
