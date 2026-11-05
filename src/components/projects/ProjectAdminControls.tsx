@@ -7,11 +7,18 @@ import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 interface ProjectAdminControlsProps {
   projectId: string
   active: boolean
+  canDelete: boolean
+  bestOfSemester: boolean
 }
 
 type PendingAction = 'toggle' | 'delete' | null
 
-export function ProjectAdminControls({ projectId, active }: ProjectAdminControlsProps) {
+export function ProjectAdminControls({
+  projectId,
+  active,
+  canDelete,
+  bestOfSemester,
+}: ProjectAdminControlsProps) {
   const router = useRouter()
   const [confirming, setConfirming] = useState<PendingAction>(null)
   const [pending, setPending] = useState(false)
@@ -56,7 +63,7 @@ export function ProjectAdminControls({ projectId, active }: ProjectAdminControls
         <i className={`fi ${active ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} flex`} aria-hidden="true" />
         {active ? 'Desativar projeto' : 'Reativar projeto'}
       </button>
-      {!active && (
+      {canDelete && !active && (
         <button
           type="button"
           onClick={() => setConfirming('delete')}
@@ -77,8 +84,12 @@ export function ProjectAdminControls({ projectId, active }: ProjectAdminControls
         title={active ? 'Desativar este projeto?' : 'Reativar este projeto?'}
         description={
           active
-            ? 'O projeto deixa de aparecer para todos os usuários, exceto administradores. Você poderá reativá-lo depois.'
-            : 'O projeto volta a ficar visível conforme a sua situação (em andamento ou concluído).'
+            ? `O projeto deixa de aparecer para os demais usuários e continua visível para os orientadores e administradores. Você poderá reativá-lo depois.${
+                bestOfSemester
+                  ? '\n\nEle é o melhor PI do semestre: a escolha será retirada ao desativar.'
+                  : ''
+              }`
+            : 'O projeto volta a ficar visível para todos conforme a sua situação (em andamento ou concluído).'
         }
         confirmLabel={active ? 'Desativar' : 'Reativar'}
         icon={active ? 'fi-rr-eye-crossed' : 'fi-rr-eye'}

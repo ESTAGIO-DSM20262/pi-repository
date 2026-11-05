@@ -30,6 +30,7 @@ interface ProjectPublicViewProps {
   canVerify?: boolean
   canManageSemesterAward?: boolean
   canManageActivation?: boolean
+  canDelete?: boolean
   verification?: ProjectVerificationSummary | null
   viewerEmail?: string | null
 }
@@ -365,6 +366,7 @@ export function ProjectPublicView({
   canVerify = false,
   canManageSemesterAward = false,
   canManageActivation = false,
+  canDelete = false,
   verification = null,
   viewerEmail = null,
 }: ProjectPublicViewProps) {
@@ -420,7 +422,14 @@ export function ProjectPublicView({
         </nav>
         {(canEditProject || canVerify || canManageActivation) && (
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            {canManageActivation && <ProjectAdminControls projectId={project.id} active={active} />}
+            {canManageActivation && (
+              <ProjectAdminControls
+                projectId={project.id}
+                active={active}
+                canDelete={canDelete}
+                bestOfSemester={project.bestOfSemester === true}
+              />
+            )}
             {canVerify && verification && (
               <ProjectVerificationButton
                 projectId={project.id}
@@ -446,7 +455,7 @@ export function ProjectPublicView({
           className="mb-4 flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-800"
         >
           <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" />
-          Projeto desativado: ele fica oculto para todos, exceto administradores.
+          Projeto desativado: ele fica oculto para os demais usuários e continua visível para os orientadores e administradores.
         </p>
       )}
 
@@ -455,6 +464,12 @@ export function ProjectPublicView({
           {project.status === 'publicado' && (
             <span className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[0.625rem] font-bold text-white sm:text-[0.6875rem]">
               <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
+            </span>
+          )}
+          {project.bestOfSemester && (
+            <span className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-1 text-[0.625rem] font-bold text-white sm:text-[0.6875rem]">
+              <i className="fi fi-rr-trophy flex" aria-hidden="true" /> Melhor PI de {project.cycle} ·{' '}
+              {project.semester}º semestre
             </span>
           )}
           {project.verified && (

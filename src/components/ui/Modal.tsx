@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { primaryButtonClass } from '../../libs/styles'
 import { useRestoreFocus } from '../../libs/useRestoreFocus'
 
-export type ModalVariant = 'success' | 'error' | 'warning'
+export type ModalVariant = 'success' | 'error' | 'warning' | 'award'
 
 export interface Notice {
   variant: ModalVariant
@@ -19,6 +19,11 @@ const VARIANT: Record<ModalVariant, { icon: string; halo: string; core: string }
     icon: 'fi-rr-exclamation',
     halo: 'bg-primary-light/60',
     core: 'bg-primary-light text-primary',
+  },
+  award: {
+    icon: 'fi-rr-trophy',
+    halo: 'bg-accent-light/60',
+    core: 'bg-accent-light text-secondary-hover',
   },
   warning: {
     icon: 'fi-rr-triangle-warning',

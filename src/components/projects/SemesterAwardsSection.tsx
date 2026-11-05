@@ -89,6 +89,23 @@ function HowItWorks() {
   )
 }
 
+function PublicationNotice() {
+  return (
+    <div className="mt-4 flex items-start gap-3 rounded-xl border border-accent/40 bg-accent-light px-4 py-3.5">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-secondary-hover">
+        <i className="fi fi-rr-globe flex text-base" aria-hidden="true" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-slate-900">Por que escolher o melhor PI?</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-slate-700 sm:text-[0.8125rem]">
+          A escolha registra qual foi o melhor PI de cada semestre. Só os melhores PIs de cada
+          semestre seguem para o site da Fatec Itaquera, na aba Projetos Integradores.
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function AwardCard({
   item,
   busy,
@@ -103,13 +120,13 @@ function AwardCard({
 
   return (
     <article
-      className={`flex min-w-0 flex-col rounded-xl border p-4 shadow-sm ${
-        item.selected ? 'border-secondary ring-1 ring-secondary/30' : 'border-border'
-      } ${eligible ? 'bg-white' : 'bg-surface-secondary/60'}`}
+      className={`flex min-w-0 flex-col rounded-xl border border-l-4 p-4 shadow-sm ${
+        item.selected ? 'border-secondary bg-accent-light/40' : 'border-border border-l-border'
+      } ${eligible ? (item.selected ? '' : 'bg-white') : 'bg-surface-secondary/60'}`}
     >
       <div className="flex flex-wrap items-center gap-1.5">
         {item.selected && (
-          <span className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1 text-[0.6875rem] font-bold text-white shadow-sm">
             <i className="fi fi-rr-trophy flex" aria-hidden="true" /> Melhor PI escolhido
           </span>
         )}
@@ -192,7 +209,12 @@ function AwardCard({
 function ChoiceDetails({ pending }: { pending: PendingChoice }) {
   const { item, suggestions } = pending
   if (item.selected) {
-    return <p>Este ciclo e semestre ficará sem melhor PI até que você escolha outro projeto.</p>
+    return (
+      <p>
+        Este ciclo e semestre ficará sem melhor PI, e o projeto deixa de ser elegível para o site da
+        Fatec Itaquera, até que você escolha outro projeto.
+      </p>
+    )
   }
   let suggestion: string
   if (item.recommended) {
@@ -211,6 +233,10 @@ function ChoiceDetails({ pending }: { pending: PendingChoice }) {
         Este projeto tem <strong>{criteriaText(item.score)}</strong>.
       </li>
       <li>{suggestion}</li>
+      <li>
+        Só os melhores PIs de cada semestre seguem para o site da Fatec Itaquera, na aba
+        Projetos Integradores.
+      </li>
       {item.winnerTitle && (
         <li>
           A escolha atual, <strong>{item.winnerTitle}</strong>, será substituída.
@@ -338,7 +364,7 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
               description: `${item.project.title} deixou de ser o melhor PI de ${item.project.cycle}, ${item.project.semester}º semestre.`,
             }
           : {
-              variant: 'success',
+              variant: 'award',
               title: 'Melhor PI definido',
               description: `${item.project.title} é o melhor PI de ${item.project.cycle}, ${item.project.semester}º semestre.`,
             },
@@ -383,7 +409,7 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
               projectId ? 'text-lg font-bold sm:text-xl' : 'text-lg font-semibold sm:text-xl'
             }`}
           >
-            <i className="fi fi-rr-trophy flex text-base text-primary" aria-hidden="true" />
+            <i className="fi fi-rr-trophy flex text-base text-secondary" aria-hidden="true" />
             Melhor PI do semestre
           </h2>
           <p className="mt-0.5 text-xs text-text-secondary sm:text-[0.8125rem]">
@@ -394,10 +420,11 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
         </div>
       </div>
 
+      <PublicationNotice />
       <HowItWorks />
 
       {!projectId && candidates.length > 0 && (
-        <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
             <span className={labelClass}>Ciclo</span>
             <SelectDropdown
@@ -420,15 +447,6 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
               onChange={(value) => setSemesterChoice(Number(value))}
             />
           </div>
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void load()}
-            className={`${secondaryActionClass} w-full sm:w-auto`}
-          >
-            <i className="fi fi-rr-rotate-right flex" aria-hidden="true" />
-            Atualizar
-          </button>
         </div>
       )}
 
@@ -523,7 +541,7 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
         details={choice ? <ChoiceDetails pending={choice} /> : undefined}
         confirmLabel={choice?.item.selected ? 'Retirar escolha' : 'Confirmar escolha'}
         icon="fi-rr-trophy"
-        tone={choice?.item.selected ? 'danger' : 'primary'}
+        tone={choice?.item.selected ? 'danger' : 'award'}
         pending={pending}
         onConfirm={save}
         onCancel={() => setChoice(null)}

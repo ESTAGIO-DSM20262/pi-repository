@@ -97,6 +97,18 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
         where: 'Painel de indicação na página do projeto',
       },
       {
+        icon: 'fi-rr-trophy',
+        title: 'Escolher o melhor PI do semestre',
+        text: 'Se você é o orientador principal, escolha o melhor PI do ciclo e semestre. Só os melhores PIs de cada semestre seguem para a aba Projetos Integradores do site da Fatec Itaquera.',
+        where: 'Painel do professor e página do projeto',
+      },
+      {
+        icon: 'fi-rr-eye-crossed',
+        title: 'Desativar e reativar projetos',
+        text: 'O orientador principal pode desativar o projeto e reativá-lo depois. Projeto desativado continua visível para os orientadores; a exclusão definitiva é só do administrador.',
+        where: 'Página do projeto',
+      },
+      {
         icon: 'fi-rr-chart-histogram',
         title: 'Acompanhar pelo painel',
         text: 'Veja tarefas atrasadas, projetos parados ou sem tarefas e os que estão prontos para concluir, com filtros por semestre, situação e projeto.',
@@ -159,9 +171,9 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       },
       {
         icon: 'fi-rr-shield-check',
-        title: 'Indicar PIs',
-        text: 'Indique projetos concluídos como referência técnica, assim como os professores orientadores.',
-        where: 'Painel de indicação na página do projeto',
+        title: 'Melhor PI do semestre',
+        text: 'Escolha o melhor PI de cada ciclo e semestre. Só os melhores PIs de cada semestre seguem para a aba Projetos Integradores do site da Fatec Itaquera. A indicação de referência técnica é feita só pelos orientadores.',
+        where: 'Painel do administrador e página do projeto',
       },
       {
         icon: 'fi-rr-star',

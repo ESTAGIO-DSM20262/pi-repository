@@ -1,4 +1,4 @@
-import type { ProjectViewer } from '@/application/projects/project-permissions'
+import { canViewProject, type ProjectViewer } from '@/application/projects/project-permissions'
 import {
   awardCriteria,
   canChooseSemesterAward,
@@ -17,7 +17,7 @@ export async function listSemesterAwards(viewer: ProjectViewer) {
   ])
   return recommendAwardCandidates(
     projects
-      .filter((project) => project.active !== false || viewer.role === 'admin')
+      .filter((project) => canViewProject(project, viewer))
       .map((project) => {
         const criteria = awardCriteria(
           project,

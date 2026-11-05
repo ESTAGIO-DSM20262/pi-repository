@@ -73,7 +73,7 @@ describe('melhor PI do semestre', () => {
     expect(canChooseSemesterAward(project, student)).toBe(false)
     expect(canChooseSemesterAward(project, { ...principal, email: 'outro@fatec.br' })).toBe(false)
   })
-  it('conta critérios distintos e ignora indicações de professores removidos do projeto', () => {
+  it('conta critérios distintos e ignora indicações de professores removidos do projeto e do administrador', () => {
     expect(
       awardCriteria(project, [
         record(principal.email, ['documentation', 'source_code']),
@@ -81,7 +81,7 @@ describe('melhor PI do semestre', () => {
         record('antigo@fatec.br', ['process']),
         record(admin.email, ['interface'], 'admin'),
       ]),
-    ).toEqual(['source_code', 'documentation', 'interface'])
+    ).toEqual(['source_code', 'documentation'])
   })
   it('recomenda todos os empatados e separa semestres e ciclos', () => {
     const result = recommendAwardCandidates([

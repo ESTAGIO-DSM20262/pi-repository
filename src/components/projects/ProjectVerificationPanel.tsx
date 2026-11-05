@@ -335,10 +335,8 @@ export function ProjectVerificationButton({
   const [removing, setRemoving] = useState(false)
   const [removalError, setRemovalError] = useState('')
   const email = viewerEmail?.toLowerCase() ?? ''
-  const mine =
-    summary.advisors.find((advisor) => advisor.email === email) ??
-    summary.administrators.find((admin) => admin.email === email)
-  const alreadyVerified = mine ? ('verified' in mine ? mine.verified : true) : false
+  const mine = summary.advisors.find((advisor) => advisor.email === email)
+  const alreadyVerified = mine?.verified ?? false
 
   async function removeMine() {
     setRemoving(true)
@@ -512,13 +510,6 @@ export function ProjectVerificationPanel({
                   </li>
                 ))}
               </ul>
-
-              {summary.administrators.length > 0 && (
-                <p className="mt-3 text-[0.6875rem] text-text-secondary">
-                  Também indicado pela administração:{' '}
-                  {summary.administrators.map((admin) => admin.name).join(', ')}.
-                </p>
-              )}
             </div>
           )}
         </div>

@@ -18,9 +18,11 @@ O comando `npm run db:migrate` não executa essa migração manual. Nenhuma alte
 - Cada combinação de ciclo letivo e semestre do curso tem um único vencedor. Por exemplo, `2026/2 / 2º semestre` é uma seleção independente de `2026/2 / 3º semestre` e de `2025/2 / 2º semestre`.
 - O administrador pode escolher qualquer projeto elegível. O professor pode escolher apenas os projetos em que consta como orientador principal. Participar como professor satélite não concede permissão de escolha nem de retirada.
 - O detalhe do projeto também mostra a seção para o orientador principal e o administrador. Após alterar uma indicação, os pontos são recarregados junto com os dados da página.
-- Cada um dos sete critérios distintos indicados vale um ponto. Repetições do mesmo critério não multiplicam a pontuação. São consideradas indicações de orientadores atualmente vinculados e de administradores.
+- Cada um dos sete critérios distintos indicados vale um ponto. Repetições do mesmo critério não multiplicam a pontuação. São consideradas apenas as indicações de orientadores atualmente vinculados: o administrador não indica projetos, e registros antigos de indicação feitos por administradores são ignorados.
 - A recomendação considera todos os projetos ativos e concluídos daquele ciclo e semestre, independentemente dos filtros da tela. Empates são exibidos como recomendações equivalentes. Sem pontos, não há recomendação automática.
 - A decisão é manual: um projeto com menos critérios, ou até sem indicação, pode ser escolhido. Antes de escolher ou retirar, o pop-up de confirmação mostra os critérios do projeto, o que o sistema sugere e, se houver, a escolha que será substituída. O resultado aparece em um aviso de sucesso ou erro.
+- O painel mostra um aviso explicando que só os melhores PIs de cada semestre seguem para o site da Fatec Itaquera, na aba Projetos Integradores. O mesmo lembrete aparece no pop-up de confirmação. A lista é sempre carregada atualizada, por isso não há botão de atualizar.
+- O projeto escolhido recebe a etiqueta **Melhor PI escolhido** no card da página inicial e a etiqueta **Melhor PI de ciclo · semestre** na página do projeto.
 - Uma escolha concorrente não é sobrescrita silenciosamente: atualize a lista se receber um aviso de conflito.
 - Desativar, reabrir ou mudar o ciclo/semestre do vencedor retira sua escolha. A exclusão também a remove. Alterar as indicações não substitui automaticamente a decisão do professor.
 

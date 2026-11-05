@@ -12,7 +12,7 @@ interface ConfirmationDialogProps {
   confirmLabel: string
   cancelLabel?: string
   icon?: string
-  tone?: 'primary' | 'danger'
+  tone?: 'primary' | 'danger' | 'award'
   pending?: boolean
   onConfirm: () => void | Promise<void>
   onCancel: () => void
@@ -101,7 +101,13 @@ export function ConfirmationDialog({
   const buttonTone =
     tone === 'danger'
       ? 'bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary'
-      : 'bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-700'
+      : tone === 'award'
+        ? 'bg-secondary text-white hover:bg-secondary-hover focus-visible:ring-secondary'
+        : 'bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-700'
+  const iconTone =
+    tone === 'award'
+      ? 'border border-accent/40 bg-accent-light text-secondary-hover'
+      : 'bg-primary-light text-primary'
 
   return createPortal(
     <div
@@ -143,7 +149,9 @@ export function ConfirmationDialog({
         }}
       >
         <div className="flex items-start gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
+          <span
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconTone}`}
+          >
             <i className={`fi ${icon} flex text-xl`} aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1 pt-0.5">
@@ -170,7 +178,7 @@ export function ConfirmationDialog({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap justify-end gap-3">
+        <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-border-light pt-5">
           <button
             ref={cancelButtonRef}
             type="button"

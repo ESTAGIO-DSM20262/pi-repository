@@ -10,7 +10,7 @@ import {
 import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 import type { ProjectVerificationRepository } from '@/domain/enterprise/repositories/project-verification-repository'
 import { ProjectOperationError } from './project-operation-error'
-import { canVerifyProject, type ProjectViewer } from './project-permissions'
+import { canVerifyProject, canViewProject, type ProjectViewer } from './project-permissions'
 
 interface VerifyProjectRequest {
   viewer: ProjectViewer
@@ -39,7 +39,7 @@ export class VerifyProjectUseCase
     Either<ProjectOperationError, { summary: ProjectVerificationSummary }>
   > {
     const project = await this.reader.findById(projectId)
-    if (!project || (!isProjectActive(project) && viewer.role !== 'admin')) {
+    if (!project || !canViewProject(project, viewer)) {
       return left(
         new ProjectOperationError(
           'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser indicados.',
@@ -58,7 +58,7 @@ export class VerifyProjectUseCase
     if (!canVerifyProject(project, viewer)) {
       return left(
         new ProjectOperationError(
-          'Somente os professores orientadores ou um administrador podem indicar este projeto.',
+          'Somente os professores orientadores podem indicar este projeto.',
           403,
         ),
       )
@@ -76,7 +76,7 @@ export class VerifyProjectUseCase
       verifierUserId: viewer.id,
       verifierEmail: viewer.email.trim().toLowerCase(),
       verifierName: viewer.name,
-      verifierRole: viewer.role === 'admin' ? 'admin' : 'professor',
+      verifierRole: 'professor',
       criteria,
       verifiedAt: this.now().toISOString(),
     }

@@ -114,7 +114,7 @@ describe('ListProjectsUseCase', () => {
     expect(projects[0].related).toBe(true)
   })
 
-  it('projeto desativado só aparece para o administrador', async () => {
+  it('projeto desativado aparece para o administrador e para os orientadores dele', async () => {
     const deactivatedRepository = new InMemoryProjectRepository([
       makeProject('desativado', { active: false }),
       makeProject('ativo'),
@@ -123,10 +123,12 @@ describe('ListProjectsUseCase', () => {
 
     const forAdmin = await list.execute({ viewer: admin })
     const forAdvisor = await list.execute({ viewer: carlos })
+    const forOtherProfessor = await list.execute({ viewer: ana })
     const forVisitor = await list.execute({ viewer: null })
 
     expect(ids(forAdmin.projects)).toEqual(['ativo', 'desativado'])
-    expect(ids(forAdvisor.projects)).toEqual(['ativo'])
+    expect(ids(forAdvisor.projects)).toEqual(['ativo', 'desativado'])
+    expect(ids(forOtherProfessor.projects)).toEqual(['ativo'])
     expect(ids(forVisitor.projects)).toEqual(['ativo'])
   })
 })

@@ -4,14 +4,10 @@ import {
   normalizeVerificationCriteria,
   type ProjectVerificationRecord,
 } from '@/domain/enterprise/entities/project-verification'
-import type { ProjectViewer } from './project-permissions'
+import { isPrincipalAdvisorOf, type ProjectViewer } from './project-permissions'
 
 export function canChooseSemesterAward(project: Project, viewer: ProjectViewer) {
-  return (
-    viewer.role === 'admin' ||
-    (viewer.role === 'professor' &&
-      project.advisor.email.trim().toLowerCase() === viewer.email.trim().toLowerCase())
-  )
+  return viewer.role === 'admin' || isPrincipalAdvisorOf(project, viewer)
 }
 
 export function isAwardEligible(project: Project) {
@@ -24,7 +20,7 @@ export function awardCriteria(project: Project, records: ProjectVerificationReco
     records
       .filter(
         (record) =>
-          record.verifierRole === 'admin' ||
+          record.verifierRole === 'professor' &&
           advisors.has(record.verifierEmail.trim().toLowerCase()),
       )
       .flatMap((record) => record.criteria),

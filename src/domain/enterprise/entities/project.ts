@@ -66,6 +66,7 @@ export interface Project {
   theme: string
   status: ProjectStatus
   verified: boolean
+  bestOfSemester?: boolean
   active?: boolean
   accessCount?: number
   cover: { icon: string; label: string; tone: 'red' | 'blue' | 'slate' }
