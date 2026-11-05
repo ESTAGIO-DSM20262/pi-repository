@@ -745,3 +745,10 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Menu da conta no mobile**: `Header.tsx` mantém o dropdown ancorado no desktop e usa um bottom sheet próprio em telas menores, renderizado via portal no `document.body` para escapar de `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de fundo.
 - **Listagem administrativa**: `AdminUsersSection.tsx` mostra cartões com ações acessíveis em telas menores e preserva a tabela com rolagem horizontal a partir do breakpoint `sm`.
 - **Filtros do catálogo**: tecnologias selecionadas usam o fundo `bg-primary` e texto branco, seguindo a mesma cor ativa dos demais filtros.
+
+## Tela "Como funciona" (`/como-funciona`)
+
+- `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
+- O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); orientador edita apenas as tarefas que criou.
+- O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

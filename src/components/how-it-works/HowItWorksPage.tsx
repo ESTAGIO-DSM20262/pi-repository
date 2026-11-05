@@ -4,7 +4,16 @@ import Link from 'next/link'
 import { useState } from 'react'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
-import { ROLE_GUIDES, type RoleGuide } from './how-it-works-content'
+import {
+  ACCESSIBILITY_FEATURES,
+  type AccessLevel,
+  MATRIX_ROLES,
+  type MatrixCell,
+  type MatrixRole,
+  PERMISSION_MATRIX,
+  ROLE_GUIDES,
+  type RoleGuide,
+} from './how-it-works-content'
 
 const VISIBLE_ROLES: Record<Role, Role[]> = {
   student: ['student'],
@@ -58,8 +67,14 @@ const LIFECYCLE = [
   {
     icon: 'fi-rr-check-circle',
     label: 'PI Indicado',
-    text: 'Um professor revisou o projeto e o aprovou como referência técnica para outros alunos.',
+    text: 'Todos os professores orientadores revisaram o projeto concluído e o aprovaram como referência técnica para outros alunos.',
     badge: 'bg-accent-light text-secondary-hover',
+  },
+  {
+    icon: 'fi-rr-trophy',
+    label: 'Melhor PI do semestre',
+    text: 'Entre os concluídos de cada ciclo e semestre do curso, um é escolhido e segue para a aba Projetos Integradores do site da Fatec Itaquera.',
+    badge: 'bg-secondary text-white',
   },
 ]
 
@@ -234,7 +249,7 @@ function About({ role }: { role: Role | null }) {
 
       <section className="space-y-4">
         <SectionTitle eyebrow="Ciclo de vida" title="As etapas de um projeto" />
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {LIFECYCLE.map((stage) => (
             <article
               key={stage.label}
@@ -254,7 +269,8 @@ function About({ role }: { role: Role | null }) {
         </div>
         <p className="text-xs text-text-secondary sm:text-[0.8125rem]">
           Todos os projetos ativos — em andamento ou concluídos — ficam visíveis no acervo, com ou
-          sem login.
+          sem login. Um projeto desativado sai da vista pública e continua visível só para a
+          administração e para os orientadores.
         </p>
       </section>
 
@@ -279,6 +295,10 @@ function About({ role }: { role: Role | null }) {
           ))}
         </div>
       </section>
+
+      <PermissionMatrix role={role} />
+
+      <AccessibilitySection />
     </div>
   )
 }
@@ -287,31 +307,173 @@ const PROFILE_SUMMARY = [
   {
     icon: 'fi-rr-globe',
     title: 'Visitante',
-    text: 'Navega, pesquisa e consulta todos os projetos do acervo, sem precisar entrar. Para favoritar, é preciso ter login.',
+    text: 'Navega, pesquisa e consulta todos os projetos ativos do acervo, sem precisar entrar. Para favoritar, é preciso ter login.',
   },
   {
     icon: 'fi-rr-graduation-cap',
     title: 'Aluno',
-    text: 'Favorita projetos, acompanha os PIs de que participa e usa os indicados como referência.',
+    text: 'Favorita projetos, acompanha as tarefas e os prazos dos PIs de que participa e usa os indicados como referência.',
   },
   {
     icon: 'fi-rr-chalkboard-user',
     title: 'Professor',
-    text: 'Cadastra e orienta projetos, acompanha o cronograma, indica os melhores PIs e favorita referências.',
+    text: 'Cadastra e orienta projetos, gerencia o cronograma, indica PIs como referência e, como orientador principal, desativa projetos e escolhe o Melhor PI do semestre.',
   },
   {
     icon: 'fi-rr-settings',
     title: 'Administrador',
-    text: 'Gerencia usuários e projetos, tem a visão geral do acervo e também pode favoritar projetos.',
+    text: 'Gerencia usuários, cursos e projetos, escolhe o Melhor PI do semestre e tem a visão geral do acervo. Não indica PIs: isso cabe aos orientadores.',
   },
 ]
 
+const LEVEL_STYLE: Record<AccessLevel, { icon: string; label: string; badge: string }> = {
+  yes: {
+    icon: 'fi-rr-check-circle',
+    label: 'Pode',
+    badge: 'bg-accent-light text-secondary-hover',
+  },
+  partial: {
+    icon: 'fi-rr-minus-circle',
+    label: 'Em parte',
+    badge: 'bg-amber-100 text-amber-900',
+  },
+  no: {
+    icon: 'fi-rr-cross-circle',
+    label: 'Não pode',
+    badge: 'bg-surface-secondary text-text-secondary',
+  },
+}
+
+function MatrixCellView({ cell }: { cell: MatrixCell }) {
+  const style = LEVEL_STYLE[cell.level]
+
+  return (
+    <div className="space-y-1">
+      <span
+        className={`inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-xs font-semibold ${style.badge}`}
+      >
+        <i className={`fi ${style.icon} flex`} aria-hidden="true" />
+        {style.label}
+      </span>
+      {cell.note && (
+        <p className="text-[0.6875rem] leading-snug text-text-secondary">{cell.note}</p>
+      )}
+    </div>
+  )
+}
+
+function PermissionMatrix({ role }: { role: Role | null }) {
+  const ownColumn: MatrixRole = role ?? 'visitor'
+
+  return (
+    <section className="space-y-4">
+      <SectionTitle eyebrow="Resumo" title="Quem pode o quê" />
+      <p className="max-w-3xl text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
+        Compare o que cada perfil faz no sistema. Em parte indica uma permissão com condição, que
+        aparece descrita abaixo do rótulo.
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+        <table className="w-full min-w-[56rem] border-collapse text-left">
+          <caption className="sr-only">
+            Permissões de visitantes, alunos, professores e administradores no Acervo Acadêmico
+          </caption>
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                className="bg-surface-secondary px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-900"
+              >
+                Funcionalidade
+              </th>
+              {MATRIX_ROLES.map((item) => (
+                <th
+                  key={item.id}
+                  scope="col"
+                  className={`px-3 py-3 text-left text-xs font-bold uppercase tracking-wider ${
+                    item.id === ownColumn
+                      ? 'bg-primary-light text-primary'
+                      : 'bg-surface-secondary text-slate-900'
+                  }`}
+                >
+                  {item.label}
+                  {item.id === ownColumn ? ' (você)' : ''}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          {PERMISSION_MATRIX.map((group) => (
+            <tbody key={group.title}>
+              <tr>
+                <th
+                  scope="rowgroup"
+                  colSpan={MATRIX_ROLES.length + 1}
+                  className="border-t border-border bg-surface-secondary px-4 py-2 text-left text-[0.6875rem] font-bold uppercase tracking-wider text-primary"
+                >
+                  {group.title}
+                </th>
+              </tr>
+              {group.rows.map((row) => (
+                <tr key={row.ability} className="border-t border-border align-top">
+                  <th
+                    scope="row"
+                    className="w-[22%] px-4 py-3 text-left text-[0.8125rem] font-semibold leading-snug text-slate-900 sm:text-sm"
+                  >
+                    {row.ability}
+                  </th>
+                  {MATRIX_ROLES.map((item) => (
+                    <td key={item.id} className="px-3 py-3">
+                      <MatrixCellView cell={row.cells[item.id]} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          ))}
+        </table>
+      </div>
+    </section>
+  )
+}
+
+function AccessibilitySection() {
+  return (
+    <section className="space-y-4">
+      <SectionTitle eyebrow="Para todos os perfis" title="Acessibilidade" />
+      <p className="max-w-3xl text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
+        O botão de acessibilidade, no canto inferior direito de todas as páginas, está disponível
+        para visitantes e para todos os perfis, sem precisar entrar. As escolhas ficam salvas neste
+        navegador.
+      </p>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {ACCESSIBILITY_FEATURES.map((feature) => (
+          <article
+            key={feature.title}
+            className="flex gap-4 rounded-xl border border-border bg-white p-5 shadow-sm"
+          >
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-light text-secondary">
+              <i className={`fi ${feature.icon} flex text-base`} aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-slate-900">{feature.title}</h3>
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm">
+                {feature.text}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function VisitorOffer() {
   const offers = [
-    'Ver todos os projetos do acervo, concluídos e em andamento',
-    'Buscar e filtrar por tema, tecnologia, semestre e orientador',
-    'Abrir a página de cada projeto, com equipe, links e imagens',
-    'Identificar os PIs indicados como referência técnica',
+    'Ver todos os projetos ativos do acervo, concluídos e em andamento',
+    'Buscar, filtrar e ordenar por tema, tecnologia, semestre e orientador',
+    'Abrir a página de cada projeto, com equipe, orientadores, tecnologias e links',
+    'Identificar os PIs indicados e os escolhidos como Melhor PI do semestre',
+    'Ver quais orientadores indicaram cada critério de um PI indicado',
+    'Ajustar o tamanho do texto, o contraste e as cores e usar o VLibras',
   ]
 
   return (
