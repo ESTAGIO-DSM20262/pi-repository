@@ -183,6 +183,19 @@ describe('parseCreateProjectInput', () => {
     }
   })
 
+  it('descarta tecnologias com mais de 60 caracteres', () => {
+    const result = parseCreateProjectInput({
+      ...valid,
+      languages: ['TypeScript', 'x'.repeat(61)],
+      stack: ['y'.repeat(60)],
+    })
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      expect(result.value.languages).toEqual(['TypeScript'])
+      expect(result.value.stack).toEqual(['y'.repeat(60)])
+    }
+  })
+
   it('aceita professores orientadores adicionais sem repetir o principal', () => {
     const result = parseCreateProjectInput({
       ...valid,

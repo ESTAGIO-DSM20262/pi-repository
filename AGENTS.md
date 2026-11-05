@@ -516,8 +516,17 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
 - **Fluxo:** o botão abre um modal com os critérios em checkbox (`VERIFICATION_CRITERIA` em
   `domain/enterprise/entities/project-verification.ts`: código-fonte, documentação, resultado final,
   arquitetura, testes e qualidade, interface e usabilidade, processo de desenvolvimento). É preciso
-  marcar ao menos um. `POST /api/projects/[id]/verification` chama `VerifyProjectUseCase`; o
-  orientador pode atualizar a própria indicação.
+  marcar ao menos um (o modal usa React Hook Form + `projectVerificationSchema` de
+  `presentation/projects/validation.ts`). `POST /api/projects/[id]/verification` chama
+  `VerifyProjectUseCase`; o orientador pode atualizar a própria indicação. Projeto desativado devolve
+  404 para professores e 409 para o administrador (é preciso reativá-lo antes).
+- **Gravação atômica:** `DbProjectVerificationRepository.save` trava a linha do projeto
+  (`SELECT … FOR UPDATE`), grava a indicação e recalcula `projects.verified` em SQL no mesmo lote
+  (todos os e-mails de `advisor_email` e `co_advisors` precisam ter uma indicação de professor). Assim,
+  dois orientadores indicando ao mesmo tempo não deixam o selo desatualizado. Ao editar o projeto,
+  `UpdateProjectUseCase` chama `refreshVerified` depois de limpar as indicações, que repete o mesmo
+  cálculo sob trava (o selo também exige `status = 'publicado'`). A regra espelha
+  `buildVerificationSummary`; ao mudá-la, atualize os dois.
 - **Sem tag para projeto não indicado:** o selo verde "Indicado" só aparece quando o projeto é
   indicado; projetos não indicados simplesmente não exibem nenhum selo de indicação na página.
 - **Quando o projeto é indicado:** quando **todos** os orientadores atuais indicaram
@@ -550,7 +559,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   (`domain/enterprise/entities/technology-catalog.ts`) enquanto a pessoa digita e mostra os mais
   usados. A padronização acontece no servidor (`normalizeTechnologyList`): o nome digitado ou um
   apelido conhecido vira o nome oficial ("nodejs" → "Node.js") e duplicadas são removidas, mesmo
-  escritas de formas diferentes. Nomes fora do catálogo são mantidos como digitados. Para incluir uma
+  escritas de formas diferentes. Nomes fora do catálogo são mantidos como digitados. Itens com mais
+  de 60 caracteres (`MAX_TAG_LENGTH`) são descartados e cada lista aceita até 20 (`MAX_TAGS`). Para incluir uma
   tecnologia no catálogo, adicione uma entrada em `TECHNOLOGY_CATALOG` (o teste impede apelidos
   ambíguos entre tecnologias).
 - **Links:** lista totalmente personalizável em `publicDetails.externalLinks`
@@ -601,7 +611,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   `AdminInsights` adiciona projetos por situação e por semestre, tarefas do sistema, projetos que
   precisam de atenção (atrasados, parados ou sem tarefas), pendências (concluídos sem indicação,
   em andamento sem tarefas, alunos e professores sem projeto, desativados), carga dos orientadores
-  e usuários por perfil com novos cadastros dos últimos 6 meses.
+  e usuários por perfil com novos cadastros dos últimos 6 meses (o mês de cada cadastro é calculado
+  em `America/Sao_Paulo`, tanto na janela quanto no `to_char` da consulta).
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
   `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
   cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.

@@ -248,10 +248,9 @@ export class UpdateProjectUseCase
   ) {
     if (project.status === 'publicado' && nextStatus !== 'publicado') {
       await this.verifications.clear(project.id)
-      return
-    }
-    if (removedEmails.length > 0) {
+    } else if (removedEmails.length > 0) {
       await this.verifications.removeByEmails(project.id, removedEmails)
     }
+    await this.verifications.refreshVerified(project.id)
   }
 }

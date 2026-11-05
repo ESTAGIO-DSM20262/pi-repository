@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Project } from '@/domain/enterprise/entities/project'
+import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
 import { InMemoryProjectReader } from '@/test/repositories/in-memory-project-reader'
 import { InMemoryProjectVerificationRepository } from '@/test/repositories/in-memory-project-verification-repository'
 import type { ProjectViewer } from './project-permissions'
@@ -53,7 +54,9 @@ function makeProject(overrides: Partial<Project> = {}): Project {
 
 async function setup(project: Project = makeProject()) {
   const reader = new InMemoryProjectReader([project])
-  const verifications = new InMemoryProjectVerificationRepository()
+  const verifications = new InMemoryProjectVerificationRepository({
+    [project.id]: getProjectAdvisors(project),
+  })
   const verify = new VerifyProjectUseCase(reader, verifications)
   const remove = new RemoveProjectVerificationUseCase(reader, verifications)
   await verify.execute({ viewer: ana, projectId: 'p-1', body: { criteria: ['source_code'] } })

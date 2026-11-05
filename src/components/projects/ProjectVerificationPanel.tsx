@@ -1,8 +1,10 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useForm } from 'react-hook-form'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import {
   type ProjectVerificationSummary,
@@ -10,6 +12,10 @@ import {
   type VerificationCriterionId,
 } from '@/domain/enterprise/entities/project-verification'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
+import {
+  type ProjectVerificationValues,
+  projectVerificationSchema,
+} from '@/presentation/projects/validation'
 
 interface ProjectVerificationPanelProps {
   projectId: string
@@ -37,9 +43,18 @@ function VerificationDialog({
   onSaved: () => void
 }) {
   const titleId = useId()
-  const [selected, setSelected] = useState<VerificationCriterionId[]>(initialCriteria)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const {
+    register,
+    handleSubmit,
+    setError,
+    watch,
+    formState: { errors, isSubmitting: saving },
+  } = useForm<ProjectVerificationValues>({
+    resolver: zodResolver(projectVerificationSchema),
+    defaultValues: { criteria: initialCriteria },
+  })
+  const selected = watch('criteria')
+  const error = errors.root?.server?.message ?? errors.criteria?.message ?? ''
   const savingRef = useRef(false)
   const onCloseRef = useRef(onClose)
   useRestoreFocus(true)
@@ -64,26 +79,14 @@ function VerificationDialog({
     }
   }, [])
 
-  function toggle(id: VerificationCriterionId) {
-    setSelected((current) =>
-      current.includes(id) ? current.filter((item) => item !== id) : [...current, id],
-    )
-  }
-
-  async function submit() {
-    if (selected.length === 0) {
-      setError('Marque ao menos um critério para indicar o projeto.')
-      return
-    }
-    setSaving(true)
-    setError('')
+  const submit = handleSubmit(async ({ criteria }) => {
     try {
       const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
         signal: AbortSignal.timeout(30_000),
-        body: JSON.stringify({ criteria: selected }),
+        body: JSON.stringify({ criteria }),
       })
       const result = (await response.json().catch(() => null)) as { error?: string } | null
       if (!response.ok) {
@@ -91,10 +94,11 @@ function VerificationDialog({
       }
       onSaved()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Ocorreu um erro ao indicar o projeto.')
-      setSaving(false)
+      setError('root.server', {
+        message: caught instanceof Error ? caught.message : 'Ocorreu um erro ao indicar o projeto.',
+      })
     }
-  }
+  })
 
   return createPortal(
     <div className="fixed inset-0 z-[2147483646] flex items-center justify-center p-3 sm:p-6">
@@ -162,8 +166,8 @@ function VerificationDialog({
                     >
                       <input
                         type="checkbox"
-                        checked={checked}
-                        onChange={() => toggle(criterion.id)}
+                        value={criterion.id}
+                        {...register('criteria')}
                         className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
                       />
                       <span>

@@ -1,6 +1,6 @@
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
-import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
+import { getProjectAdvisors, isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import {
   buildVerificationSummary,
   normalizeVerificationCriteria,
@@ -39,13 +39,16 @@ export class VerifyProjectUseCase
     Either<ProjectOperationError, { summary: ProjectVerificationSummary }>
   > {
     const project = await this.reader.findById(projectId)
-    if (!project || (project.active === false && viewer.role !== 'admin')) {
+    if (!project || (!isProjectActive(project) && viewer.role !== 'admin')) {
       return left(
         new ProjectOperationError(
           'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser indicados.',
           404,
         ),
       )
+    }
+    if (!isProjectActive(project)) {
+      return left(new ProjectOperationError('Reative o projeto antes de indicá-lo.', 409))
     }
     if (project.status !== 'publicado') {
       return left(
@@ -81,7 +84,7 @@ export class VerifyProjectUseCase
     const records = [...existing.filter((item) => item.verifierUserId !== viewer.id), record]
     const summary = buildVerificationSummary(getProjectAdvisors(project), records)
 
-    await this.verifications.save(projectId, record, summary.complete)
+    await this.verifications.save(projectId, record)
     return right({ summary })
   }
 }

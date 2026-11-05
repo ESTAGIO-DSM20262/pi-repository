@@ -4,6 +4,37 @@ import { projects, projectVerifications } from '@/db/schema'
 import type { ProjectVerificationRecord } from '@/domain/enterprise/entities/project-verification'
 import type { ProjectVerificationRepository } from '@/domain/enterprise/repositories/project-verification-repository'
 
+function lockProject(projectId: string) {
+  return db
+    .select({ id: projects.id })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .for('update')
+}
+
+function recomputeVerified(projectId: string) {
+  return db
+    .update(projects)
+    .set({
+      verified: sql`${projects.status} = 'publicado' AND NOT EXISTS (
+        SELECT 1
+        FROM (
+          SELECT lower(${projects.advisorEmail}) AS email
+          UNION
+          SELECT lower(advisor ->> 'email') FROM jsonb_array_elements(${projects.coAdvisors}) AS advisor
+        ) AS project_advisors
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM ${projectVerifications}
+          WHERE ${projectVerifications.projectId} = ${projects.id}
+            AND ${projectVerifications.verifierRole} = 'professor'
+            AND lower(${projectVerifications.verifierEmail}) = project_advisors.email
+        )
+      )`,
+    })
+    .where(eq(projects.id, projectId))
+}
+
 export class DbProjectVerificationRepository implements ProjectVerificationRepository {
   async findByProject(projectId: string): Promise<ProjectVerificationRecord[]> {
     const rows = await db
@@ -22,7 +53,7 @@ export class DbProjectVerificationRepository implements ProjectVerificationRepos
     }))
   }
 
-  async save(projectId: string, record: ProjectVerificationRecord, verified: boolean) {
+  async save(projectId: string, record: ProjectVerificationRecord) {
     const values = {
       projectId,
       verifierUserId: record.verifierUserId,
@@ -33,6 +64,7 @@ export class DbProjectVerificationRepository implements ProjectVerificationRepos
       verifiedAt: new Date(record.verifiedAt),
     }
     await db.batch([
+      lockProject(projectId),
       db
         .insert(projectVerifications)
         .values({ id: crypto.randomUUID(), ...values })
@@ -46,12 +78,13 @@ export class DbProjectVerificationRepository implements ProjectVerificationRepos
             verifiedAt: values.verifiedAt,
           },
         }),
-      db.update(projects).set({ verified }).where(eq(projects.id, projectId)),
+      recomputeVerified(projectId),
     ])
   }
 
-  async removeByUser(projectId: string, verifierUserId: string, verified: boolean) {
+  async removeByUser(projectId: string, verifierUserId: string) {
     await db.batch([
+      lockProject(projectId),
       db
         .delete(projectVerifications)
         .where(
@@ -60,7 +93,7 @@ export class DbProjectVerificationRepository implements ProjectVerificationRepos
             eq(projectVerifications.verifierUserId, verifierUserId),
           ),
         ),
-      db.update(projects).set({ verified }).where(eq(projects.id, projectId)),
+      recomputeVerified(projectId),
     ])
   }
 
@@ -79,5 +112,9 @@ export class DbProjectVerificationRepository implements ProjectVerificationRepos
 
   async clear(projectId: string) {
     await db.delete(projectVerifications).where(eq(projectVerifications.projectId, projectId))
+  }
+
+  async refreshVerified(projectId: string) {
+    await db.batch([lockProject(projectId), recomputeVerified(projectId)])
   }
 }

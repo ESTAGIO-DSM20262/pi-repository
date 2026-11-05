@@ -60,24 +60,49 @@ const MONTH_LABELS = [
   'dez',
 ]
 
-export async function loadRegistrationsByMonth(months = 6): Promise<MonthlyRegistration[]> {
-  const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1)
+const DASHBOARD_TIME_ZONE = 'America/Sao_Paulo'
+
+function currentMonthIn(timeZone: string, now: Date) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(now)
+  const year = Number(parts.find((part) => part.type === 'year')?.value)
+  const month = Number(parts.find((part) => part.type === 'month')?.value)
+  return { year, month }
+}
+
+function monthKey(year: number, monthIndex: number) {
+  const date = new Date(Date.UTC(year, monthIndex, 1))
+  return {
+    key: `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`,
+    monthIndex: date.getUTCMonth(),
+  }
+}
+
+export async function loadRegistrationsByMonth(
+  months = 6,
+  now = new Date(),
+): Promise<MonthlyRegistration[]> {
+  const current = currentMonthIn(DASHBOARD_TIME_ZONE, now)
+  const window = Array.from({ length: months }, (_, index) =>
+    monthKey(current.year, current.month - months + index),
+  )
+  const startKey = window[0]?.key ?? ''
+  const localMonth = sql<string>`to_char((${users.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE 'America/Sao_Paulo', 'YYYY-MM')`
 
   const rows = await db
-    .select({
-      key: sql<string>`to_char(${users.createdAt}, 'YYYY-MM')`,
-      count: sql<number>`count(*)`.mapWith(Number),
-    })
+    .select({ key: localMonth, count: sql<number>`count(*)`.mapWith(Number) })
     .from(users)
-    .where(sql`${users.createdAt} >= ${start}`)
-    .groupBy(sql`to_char(${users.createdAt}, 'YYYY-MM')`)
+    .where(sql`${localMonth} >= ${startKey}`)
+    .groupBy(localMonth)
 
   const counts = new Map(rows.map((row) => [row.key, row.count]))
 
-  return Array.from({ length: months }, (_, index) => {
-    const date = new Date(start.getFullYear(), start.getMonth() + index, 1)
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    return { key, label: MONTH_LABELS[date.getMonth()] ?? key, count: counts.get(key) ?? 0 }
-  })
+  return window.map(({ key, monthIndex }) => ({
+    key,
+    label: MONTH_LABELS[monthIndex] ?? key,
+    count: counts.get(key) ?? 0,
+  }))
 }
