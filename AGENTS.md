@@ -10,6 +10,15 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Arquitetura — Acervo Acadêmico Fatec
 
+## Melhor PI por ciclo e semestre
+
+- A escolha é única por `(cycle, semester)`: ciclo é o período letivo (ex. 2026-2) e semestre é a etapa do curso (1 a 6). Não é uma escolha por professor.
+- `application/projects/semester-awards.ts` centraliza elegibilidade, permissão e pontuação. Apenas o orientador em `project.advisor` e o administrador podem escolher ou retirar a escolha. Coorientadores continuam indicando critérios, mas não escolhem o vencedor.
+- Só projetos cadastrados, ativos e concluídos participam. Cada critério distinto indicado por um orientador atual ou administrador vale um ponto; repetições não somam. Recomendações comparam todos os projetos elegíveis do mesmo ciclo e semestre, antes dos filtros visuais. Todos os empatados no máximo positivo são recomendados; zero pontos não gera recomendação. A escolha manual pode contrariar o ranking, inclusive com zero pontos.
+- `ChooseSemesterAward` usa o leitor e a porta `SemesterAwardRepository`; a API revalida a conta ativa e não aceita identidade ou papel fornecido no corpo. O cliente informa a escolha anterior para evitar sobrescrever silenciosamente uma escolha concorrente. Conflito retorna 409 e exige atualizar a lista.
+- `semester_awards` guarda vencedor, autor e data, com chave primária composta e unicidade do projeto. A migração manual `src/db/migrations/20261105_semester_awards.sql` deve ser aplicada antes de usar o recurso; `npm run db:migrate` não executa SQLs manuais. Ela instala validação no banco e retira a escolha se o projeto for desativado, reaberto ou mudar de ciclo/semestre. Excluir o projeto remove a escolha por cascata. Alterações nas indicações não trocam o vencedor automaticamente.
+- `GET /api/semester-awards` lista candidatos para professores/admin; `?projectId=` limita o retorno sem limitar a comparação. `POST` recebe `projectId`, `expectedWinnerId` (string ou null) e `remove` opcional. As respostas não são armazenadas em cache. Integração/publicação no WordPress não faz parte desta alteração; os vencedores ficam persistidos para uma futura integração.
+
 Este documento descreve como o código está organizado depois da adoção de **DDD +
 Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.
 

@@ -1,0 +1,59 @@
+import type { Project } from '@/domain/enterprise/entities/project'
+import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
+import {
+  normalizeVerificationCriteria,
+  type ProjectVerificationRecord,
+} from '@/domain/enterprise/entities/project-verification'
+import type { ProjectViewer } from './project-permissions'
+
+export function canChooseSemesterAward(project: Project, viewer: ProjectViewer) {
+  return (
+    viewer.role === 'admin' ||
+    (viewer.role === 'professor' &&
+      project.advisor.email.trim().toLowerCase() === viewer.email.trim().toLowerCase())
+  )
+}
+
+export function isAwardEligible(project: Project) {
+  return project.active !== false && project.status === 'publicado'
+}
+
+export function awardCriteria(project: Project, records: ProjectVerificationRecord[]) {
+  const advisors = new Set(getProjectAdvisors(project).map((a) => a.email.trim().toLowerCase()))
+  return normalizeVerificationCriteria(
+    records
+      .filter(
+        (record) =>
+          record.verifierRole === 'admin' ||
+          advisors.has(record.verifierEmail.trim().toLowerCase()),
+      )
+      .flatMap((record) => record.criteria),
+  )
+}
+
+export interface AwardCandidate {
+  project: Project
+  criteria: ReturnType<typeof awardCriteria>
+  score: number
+  recommended: boolean
+  canChoose: boolean
+  selected: boolean
+  winnerId: string | null
+  winnerTitle: string | null
+}
+
+export function recommendAwardCandidates(candidates: AwardCandidate[]) {
+  return candidates.map((candidate) => {
+    const peers = candidates.filter(
+      (other) =>
+        other.project.cycle === candidate.project.cycle &&
+        other.project.semester === candidate.project.semester &&
+        isAwardEligible(other.project),
+    )
+    const highest = Math.max(0, ...peers.map((other) => other.score))
+    return {
+      ...candidate,
+      recommended: isAwardEligible(candidate.project) && highest > 0 && candidate.score === highest,
+    }
+  })
+}

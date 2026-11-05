@@ -259,6 +259,26 @@ export const projects = pgTable(
   ],
 )
 
+export const semesterAwards = pgTable(
+  'semester_awards',
+  {
+    cycle: text('cycle').notNull(),
+    semester: integer('semester').notNull(),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    selectedByUserId: text('selected_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    selectedAt: timestamp('selected_at').notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.cycle, table.semester] }),
+    unique('semester_awards_project_unique').on(table.projectId),
+    check('semester_awards_semester_check', sql`${table.semester} BETWEEN 1 AND 6`),
+  ],
+)
+
 export const projectVerifications = pgTable(
   'project_verifications',
   {
