@@ -1,9 +1,14 @@
-export default function ComoFunciona() {
-  return (
-    <section className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-7">
-        <h1 className="text-2xl font-semibold text-slate-900">Como funciona</h1>
-      </div>
-    </section>
-  )
+import { headers } from 'next/headers'
+import { HowItWorksPage } from '@/components/how-it-works/HowItWorksPage'
+import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
+import { auth } from '@/libs/auth'
+
+export const metadata = { title: 'Como funciona | Acervo Acadêmico' }
+export const instant = false
+
+export default async function ComoFuncionaPage() {
+  const session = await auth.api.getSession({ headers: await headers() })
+  const user = session ? toDomainUser(session.user) : null
+
+  return <HowItWorksPage role={user?.role ?? null} />
 }

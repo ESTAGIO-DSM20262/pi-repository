@@ -50,13 +50,13 @@ describe('canViewProject', () => {
     expect(canViewProject(inactive, null)).toBe(false)
   })
 
-  it('projeto em andamento só é visível para admin, orientadores e integrantes', () => {
+  it('projeto em andamento e ativo é visível para todos, inclusive visitantes', () => {
     const project = makeProject()
 
     expect(canViewProject(project, satellite)).toBe(true)
     expect(canViewProject(project, member)).toBe(true)
-    expect(canViewProject(project, outsider)).toBe(false)
-    expect(canViewProject(project, null)).toBe(false)
+    expect(canViewProject(project, outsider)).toBe(true)
+    expect(canViewProject(project, null)).toBe(true)
   })
 
   it('projeto concluído e ativo é público', () => {

@@ -10,7 +10,7 @@ describe('renderPasswordResetEmail', () => {
 
     expect(subject).toBe('Redefinição de senha • Acervo Acadêmico')
     expect(html).toContain('abc123')
-    expect(html).toContain('background-color:rgb(141,0,0)')
+    expect(html).toContain('background-color:rgb(178,0,0)')
     expect(html).toContain('Acervo Acadêmico')
     expect(html).toContain('Olá, Maria!')
   })

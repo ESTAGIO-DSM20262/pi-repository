@@ -3,6 +3,7 @@ import type { Project } from '@/domain/enterprise/entities/project'
 import {
   buildAdminDashboardMetrics,
   buildProfessorDashboardMetrics,
+  buildStudentDashboardMetrics,
   type DashboardTask,
   daysFromToday,
   isTaskOverdue,
@@ -197,5 +198,39 @@ describe('dashboard-metrics', () => {
     expect(metrics.advisorLoad[0]?.ongoing).toBe(1)
     expect(metrics.people.studentsWithoutProject).toBe(1)
     expect(metrics.people.professorsWithoutProject).toBe(1)
+  })
+
+  it('monta o painel do aluno considerando só as tarefas dele e as da equipe toda', () => {
+    const projects = [
+      makeProject({ id: 'p1', memberEmails: ['joao@aluno.cps.sp.gov.br'] }),
+      makeProject({ id: 'p2', status: 'publicado', verified: true }),
+    ]
+    const tasks = [
+      makeTask({ id: 't1', status: 'completed' }),
+      makeTask({ id: 't2', targetStudentEmail: 'JOAO@aluno.cps.sp.gov.br', dueDate: '2026-10-25' }),
+      makeTask({
+        id: 't3',
+        targetStudentEmail: 'maria@aluno.cps.sp.gov.br',
+        dueDate: '2026-10-20',
+      }),
+      makeTask({ id: 't4', dueDate: '2026-10-30' }),
+    ]
+
+    const metrics = buildStudentDashboardMetrics({
+      projects,
+      tasks,
+      email: 'joao@aluno.cps.sp.gov.br',
+      today: TODAY,
+      now: NOW,
+    })
+
+    expect(metrics.projects).toEqual({ total: 2, ongoing: 1, completed: 1, indicated: 1 })
+    expect(metrics.tasks.total).toBe(3)
+    expect(metrics.tasks.overdue).toBe(1)
+    expect(metrics.tasks.dueSoon).toBe(1)
+    expect(metrics.deadlines.map((row) => row.taskId)).toEqual(['t2', 't4'])
+    expect(metrics.progress).toHaveLength(1)
+    expect(metrics.progress[0].total).toBe(4)
+    expect(metrics.progress[0].percent).toBe(25)
   })
 })

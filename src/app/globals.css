@@ -1,20 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #8d0000;
-  --primary-hover: #750000;
-  --primary-light: #f5e5e5;
+  --primary: #b20000;
+  --primary-hover: #7e0000;
+  --primary-light: #fdeceb;
 
-  --background: #ede8e8;
+  --secondary: #005c6d;
+  --secondary-hover: #004854;
+  --accent: #00c1cf;
+  --accent-hover: #00d8e8;
+  --accent-light: #d9f6f9;
+
+  --background: #f8f8f8;
   --surface: #ffffff;
-  --surface-secondary: #f8f6f6;
+  --surface-secondary: #f2f2f2;
 
-  --foreground: #1f1f1f;
+  --foreground: #333333;
   --text-secondary: #666666;
-  --text-muted: #888888;
+  --text-muted: #767676;
 
-  --border: #e6e2e2;
-  --border-light: #eeeeee;
+  --border: #dadada;
+  --border-light: #e6e6e6;
+
+  --shadow-1: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  --shadow-2: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
 
   --header-height: 48px;
   --footer-height: 32px;
@@ -30,6 +39,12 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-light: var(--primary-light);
 
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-secondary: var(--surface-secondary);
@@ -40,11 +55,104 @@
 
   --color-border: var(--border);
   --color-border-light: var(--border-light);
+
+  --shadow-sm: var(--shadow-1);
+  --shadow-md: var(--shadow-1);
+  --shadow-lg: var(--shadow-2);
+
+  --font-sans: var(--font-roboto), Roboto, Arial, Helvetica, sans-serif;
+  --font-slab: var(--font-roboto-slab), "Roboto Slab", Georgia, serif;
+}
+
+@theme {
+  --color-emerald-50: #eaf8fa;
+  --color-emerald-100: #d9f6f9;
+  --color-emerald-200: #b4ebf0;
+  --color-emerald-300: #6fd3dc;
+  --color-emerald-400: #25b4c4;
+  --color-emerald-500: #00748a;
+  --color-emerald-600: #005c6d;
+  --color-emerald-700: #004854;
+  --color-emerald-800: #003a44;
+  --color-emerald-900: #002d35;
+  --color-emerald-950: #001f25;
+
+  --color-amber-50: #fff8e6;
+  --color-amber-100: #ffefc2;
+  --color-amber-200: #ffe08a;
+  --color-amber-300: #ffcd4d;
+  --color-amber-400: #f5b50f;
+  --color-amber-500: #e9a100;
+  --color-amber-600: #c58500;
+  --color-amber-700: #8f5f00;
+  --color-amber-800: #6e4900;
+
+  --color-rose-50: #fff1ef;
+  --color-rose-100: #fdd5d1;
+  --color-rose-200: #fbb7b0;
+  --color-rose-300: #f95b4d;
+  --color-rose-400: #e8412f;
+  --color-rose-500: #d32719;
+  --color-rose-600: #b81f13;
+  --color-rose-700: #98190f;
+  --color-rose-800: #76130b;
+}
+
+@theme {
+  /* Paleta dos dashboards: família verde-azulada da Fatec, em tons mais suaves.
+     Vermelho só aparece para atraso/alerta e âmbar apenas para atenção moderada. */
+  --color-tone-done: #4a8b97;
+  --color-tone-done-soft: #e4f0f2;
+  --color-tone-done-ink: #2f6670;
+
+  --color-tone-ongoing: #6db2bd;
+  --color-tone-ongoing-soft: #e8f4f6;
+  --color-tone-ongoing-ink: #33727e;
+
+  --color-tone-indicated: #2b6b7a;
+  --color-tone-indicated-soft: #dcebee;
+  --color-tone-indicated-ink: #1f4f5b;
+
+  --color-tone-awaiting: #b4d3d9;
+  --color-tone-awaiting-soft: #eef5f6;
+  --color-tone-awaiting-ink: #48676e;
+
+  --color-tone-pending: #c4cacd;
+  --color-tone-pending-soft: #f1f3f4;
+  --color-tone-pending-ink: #596267;
+
+  --color-tone-info: #7fa5af;
+  --color-tone-info-soft: #edf3f5;
+  --color-tone-info-ink: #3f5f68;
+
+  --color-tone-professor: #35727f;
+  --color-tone-professor-soft: #e0eef1;
+  --color-tone-professor-ink: #25505c;
+
+  --color-tone-neutral: #b9c0c4;
+  --color-tone-neutral-soft: #f1f3f4;
+  --color-tone-neutral-ink: #4d555a;
+
+  --color-tone-warning: #d9a84e;
+  --color-tone-warning-soft: #fbf2de;
+  --color-tone-warning-ink: #7a5712;
+
+  --color-tone-alert: #c0594f;
+  --color-tone-alert-soft: #fae8e5;
+  --color-tone-alert-ink: #8a3028;
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-slab);
+  }
 }
 
 html {
   scroll-behavior: smooth;
-  scrollbar-gutter: stable;
+  scrollbar-gutter: auto;
 }
 
 body {
@@ -53,7 +161,7 @@ body {
   background-color: var(--background);
   color: var(--foreground);
 
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -229,15 +337,15 @@ select:disabled {
 }
 
 .scrollbar-success {
-  scrollbar-color: #6ee7b7 #ecfdf5;
+  scrollbar-color: #6fd3dc #eaf8fa;
 }
 
 .scrollbar-warning {
-  scrollbar-color: #fcd34d #fffbeb;
+  scrollbar-color: #ffcd4d #fff8e6;
 }
 
 .scrollbar-danger {
-  scrollbar-color: #fda4af #fff1f2;
+  scrollbar-color: #fbb7b0 #fff1ef;
 }
 
 .scrollbar-success::-webkit-scrollbar,
@@ -248,43 +356,43 @@ select:disabled {
 }
 
 .scrollbar-success::-webkit-scrollbar-track {
-  background: #ecfdf5;
+  background: #eaf8fa;
   border-radius: 9999px;
 }
 
 .scrollbar-warning::-webkit-scrollbar-track {
-  background: #fffbeb;
+  background: #fff8e6;
   border-radius: 9999px;
 }
 
 .scrollbar-danger::-webkit-scrollbar-track {
-  background: #fff1f2;
+  background: #fff1ef;
   border-radius: 9999px;
 }
 
 .scrollbar-success::-webkit-scrollbar-thumb {
-  background: #6ee7b7;
+  background: #6fd3dc;
   border-radius: 9999px;
 }
 
 .scrollbar-warning::-webkit-scrollbar-thumb {
-  background: #fcd34d;
+  background: #ffcd4d;
   border-radius: 9999px;
 }
 
 .scrollbar-danger::-webkit-scrollbar-thumb {
-  background: #fda4af;
+  background: #fbb7b0;
   border-radius: 9999px;
 }
 
 .scrollbar-success::-webkit-scrollbar-thumb:hover {
-  background: #34d399;
+  background: #005c6d;
 }
 
 .scrollbar-warning::-webkit-scrollbar-thumb:hover {
-  background: #fbbf24;
+  background: #e9a100;
 }
 
 .scrollbar-danger::-webkit-scrollbar-thumb:hover {
-  background: #fb7185;
+  background: #f95b4d;
 }

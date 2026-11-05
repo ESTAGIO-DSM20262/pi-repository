@@ -4,7 +4,6 @@ import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisor
 export interface Filters {
   query: string
   verified: boolean
-  unverified: boolean
   cycle: string
   semesters: number[]
   stack: string[]
@@ -16,7 +15,6 @@ export interface Filters {
 export const EMPTY_FILTERS: Filters = {
   query: '',
   verified: false,
-  unverified: false,
   cycle: '',
   semesters: [],
   stack: [],
@@ -53,8 +51,7 @@ export function applyFilters(list: ListedProject[], f: Filters): ListedProject[]
       )
       if (!normalize(text).includes(q)) return false
     }
-    if (f.verified && !f.unverified && !p.verified) return false
-    if (f.unverified && !f.verified && p.verified) return false
+    if (f.verified && !p.verified) return false
     if (f.cycle && p.cycle !== f.cycle) return false
     if (f.semesters.length && !f.semesters.includes(p.semester)) return false
     if (f.stack.length && !f.stack.some((s) => p.stack.includes(s))) return false
@@ -168,10 +165,6 @@ export function getChips(f: Filters, advisors: Facets['advisors']): Chip[] {
     chips.push({ id: 'verified', label: 'PI Indicado', verified: true })
   }
 
-  if (f.unverified) {
-    chips.push({ id: 'unverified', label: 'Não indicados' })
-  }
-
   return chips
 }
 
@@ -183,8 +176,6 @@ export function removeChip(f: Filters, id: string): Filters {
       return { ...f, query: '' }
     case 'verified':
       return { ...f, verified: false }
-    case 'unverified':
-      return { ...f, unverified: false }
     case 'cycle':
       return { ...f, cycle: '' }
     case 'sem':

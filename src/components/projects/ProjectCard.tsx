@@ -49,13 +49,19 @@ export function ProjectCard({
           {p.cover.label}
         </span>
 
+        {p.verified && (
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-[11px] font-semibold text-secondary-hover border border-accent">
+            <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> PI Indicado
+          </span>
+        )}
+
         {inactive ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[11px] font-semibold text-white">
             <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
           </span>
-        ) : p.verified ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-0.5 text-[11px] font-semibold text-emerald-900">
-            <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> PI Indicado
+        ) : p.status === 'publicado' ? (
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-white">
+            <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
           </span>
         ) : p.status === 'em_andamento' ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">

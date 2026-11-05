@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { ProfileRecord } from '@/presentation/profile/profile-record'
-import { ChangePasswordForm } from './ChangePasswordForm'
+import { PasswordSection } from './PasswordSection'
 import { ProfileForm } from './ProfileForm'
 import { ProfilePageHeader } from './ProfilePageHeader'
 import { ProfileSummary } from './ProfileSummary'
@@ -18,7 +18,7 @@ export function ProfilePage({ initialProfile }: { initialProfile: ProfileRecord 
         <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
           <ProfileSummary profile={profile} />
           <ProfileForm profile={profile} onSaved={setProfile} />
-          <ChangePasswordForm />
+          <PasswordSection />
         </section>
       </div>
     </div>

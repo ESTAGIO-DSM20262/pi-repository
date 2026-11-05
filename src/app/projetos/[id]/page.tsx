@@ -36,7 +36,7 @@ async function findProject(id: string): Promise<Project | null> {
 
 async function findPublicProject(id: string) {
   const project = await findProject(id)
-  return project?.status === 'publicado' && isProjectActive(project) ? project : null
+  return project && isProjectActive(project) ? project : null
 }
 
 async function addRegisteredSocialProfiles(project: Project): Promise<Project> {

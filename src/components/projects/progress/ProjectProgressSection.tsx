@@ -271,7 +271,7 @@ export function ProjectProgressSection({
                 <h3 className="mt-3 text-base font-bold leading-snug text-slate-900 sm:text-lg">
                   {selectedTask.title}
                 </h3>
-                <p className="mt-3 whitespace-pre-line break-words text-[13px] leading-relaxed text-[#6f514b]">
+                <p className="mt-3 whitespace-pre-line break-words text-[13px] leading-relaxed text-[#666666]">
                   {selectedTask.description}
                 </p>
 

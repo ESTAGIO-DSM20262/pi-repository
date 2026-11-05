@@ -48,17 +48,17 @@ const useCase = new ListProjectsUseCase(repository)
 const ids = (list: { id: string }[]) => list.map((p) => p.id).sort()
 
 describe('ListProjectsUseCase', () => {
-  it('visitante vê apenas projetos publicados', async () => {
+  it('visitante vê todos os projetos ativos, inclusive em andamento', async () => {
     const { projects } = await useCase.execute({ viewer: null })
 
-    expect(ids(projects)).toEqual(['publico'])
+    expect(ids(projects)).toEqual(['do-joao', 'publico', 'rascunho'])
     expect(projects.every((p) => !p.related)).toBe(true)
   })
 
-  it('aluno vê publicados e os próprios em andamento, marcando os relacionados', async () => {
+  it('aluno vê todos os projetos, marcando os relacionados', async () => {
     const { projects } = await useCase.execute({ viewer: joao })
 
-    expect(ids(projects)).toEqual(['do-joao', 'publico'])
+    expect(ids(projects)).toEqual(['do-joao', 'publico', 'rascunho'])
     expect(projects.find((p) => p.id === 'do-joao')?.related).toBe(true)
     expect(projects.find((p) => p.id === 'publico')?.related).toBe(false)
   })
@@ -70,7 +70,7 @@ describe('ListProjectsUseCase', () => {
     expect(projects.every((p) => p.related === (p.advisor.email === carlos.email))).toBe(true)
   })
 
-  it('professor não vê rascunhos de projetos que não orienta', async () => {
+  it('professor também vê projetos em andamento que não orienta, sem marcá-los como relacionados', async () => {
     const other = new ListProjectsUseCase(
       new InMemoryProjectRepository([
         makeProject('meu', {
@@ -82,7 +82,8 @@ describe('ListProjectsUseCase', () => {
     )
     const { projects } = await other.execute({ viewer: ana })
 
-    expect(ids(projects)).toEqual(['meu'])
+    expect(ids(projects)).toEqual(['alheio', 'meu'])
+    expect(projects.find((p) => p.id === 'alheio')?.related).toBe(false)
   })
 
   it('admin vê todos e nenhum projeto é marcado como relacionado', async () => {

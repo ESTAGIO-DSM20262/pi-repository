@@ -537,6 +537,12 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   critério (`statement`, o mesmo texto do modal de indicação) e os nomes dos orientadores que o
   indicaram. Fecha com a própria tag, o botão de fechar ou `Esc`. Não depende de banco: a descrição
   vem de `VERIFICATION_CRITERIA` e os nomes de `summary.advisors[].criteria`.
+- **Remover a própria indicação:** quem já indicou (orientador ou administrador) vê o botão
+  "Remover minha indicação" ao lado de "Atualizar indicação", com confirmação.
+  `DELETE /api/projects/[id]/verification` chama `RemoveProjectVerificationUseCase`, que apaga só o
+  registro de quem pediu, recalcula o resumo e atualiza `projects.verified` (o projeto deixa de ser
+  indicado se faltar algum orientador). Responde 404 se a pessoa ainda não indicou e 403 para quem
+  não é orientador nem administrador.
 - **Orientadores e administradores** veem também a barra de progresso e quem já indicou ou falta.
 - **Administrador:** pode registrar a própria indicação, mas ela é listada à parte e **não conta**
   para completar o projeto; apenas orientadores completam.
@@ -619,3 +625,60 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   (`z-[var(--z-modal-dropdown)]`) foi removida porque o menu ficava atrás do modal e as opções (por
   exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Todo dropdown usado
   dentro de um modal deve passar `layer="modal"`.
+
+## 23. Identidade visual (Centro Paula Souza / Fatec)
+
+A interface segue o Manual de Identidade Visual do CPS (jan/2026) e o Guia de Estilo do site CPS.
+Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/app/globals.css`.
+
+- **Cores:** `--primary` `#b20000` (vermelho CPS) e `--primary-hover` `#7e0000`; `--secondary`
+  `#005c6d` (azul), `--secondary-hover` `#004854` e `--accent` `#00c1cf`. Neutros do guia:
+  `#333333` (texto), `#666666` (texto secundário), `#dadada`/`#e6e6e6` (bordas) e `#f8f8f8`
+  (fundo). As paletas `emerald`, `amber` e `rose` do Tailwind foram redefinidas em `@theme` com as
+  cores de feedback do guia (concluído, andamento, cancelado), então as classes de status
+  existentes seguem o padrão sem alteração.
+- **Tipografia:** Roboto (corpo, via `font-sans`) e Roboto Slab (títulos `h1`–`h3` e `font-slab`),
+  carregadas com `next/font/google` em `src/app/layout.tsx`.
+- **Sombras:** `shadow-sm`/`shadow-md` usam `box-shadow-1` do guia e `shadow-lg` usa `box-shadow-2`.
+- **Logos:** ficam em `public/brand/` (`fatec-itaquera-*`, `cps-*`; `cor` para fundo claro, `br`
+  para fundo escuro) e já estão recortadas sem margem transparente. Usar sempre com `h-auto`/`w-auto`
+  proporcional (nunca distorcer, sem sombra, contorno ou transparência) e altura mínima de 44px
+  para o CPS. A Fatec fica à esquerda e o CPS à direita, como na régua de logotipos do manual.
+- **Onde aparecem:** `Header` (faixa vermelha/azul, Fatec e CPS), `Footer` (fundo `#004854`, logos
+  brancas), página `/login` (painel azul com logo branca e padrão `formas-contorno.svg`),
+  `AuthCardHeader` e o `Hero` da home.
+- **Uso:** o manual restringe os logos CPS/Fatec a servidores e unidades de ensino; alunos e
+  terceiros precisam de autorização prévia da unidade.
+- **E-mail:** `src/infrastructure/email/templates/brand.ts` espelha os mesmos tokens.
+
+### Ajustes de cor e rolagem
+
+- **Indicado:** o selo "Indicado" (cartão, página do projeto, contador da home, chips de filtro) usa
+  fundo azul claro (`bg-accent-light`, token `--accent-light` `#d9f6f9`) com texto `secondary-hover`
+  e ícone vermelho (`text-primary`). O painel "Projeto indicado" da página do projeto segue o mesmo
+  esquema: cabeçalho azul claro com ícone vermelho em quadrado, critérios como tags retangulares e
+  cartão de detalhe com borda esquerda vermelha.
+- **Concluído:** projetos com `status = 'publicado'` que ainda não são indicados exibem a tag
+  "Concluído" em vermelho (`bg-primary`, texto branco) no cartão e na página do projeto. Projetos
+  indicados mostram o selo "Indicado" à esquerda e a tag "Concluído" à direita.
+- **Rolagem:** `html` usa `scrollbar-gutter: auto`, então a faixa lateral só ocupa espaço quando a
+  página realmente rola (inclusive no login).
+- **Card do projeto:** o selo "PI Indicado" fica no canto superior esquerdo; no direito fica só a
+  situação (Concluído em vermelho, Em andamento em dourado ou Desativado).
+- **Cores dos dashboards (admin e professor):** cada cor tem um único significado, definido em
+  `TONE_STYLES` (`DashboardWidgets.tsx`): `ongoing`/`warning` dourado = em andamento ou prazo
+  próximo; `done` vermelho = concluído(a), igual à tag "Concluído"; `indicated` azul = concluído e
+  indicado; `awaiting` coral = concluído sem indicação; `pending` cinza = pendente; `alert` preto =
+  atrasado, parado ou conta inativa; `info` ciano = totais e dados neutros; `violet` = professores
+  nos gráficos de usuários; `neutral` = administradores. Barras de progresso e listas têm legenda
+  (`ToneLegend`) explicando a cor.
+- **Filtros dos dashboards:** `DashboardFiltersBar` filtra por semestre, situação (em andamento,
+  concluídos, concluídos e indicados) e projeto; o administrador também filtra por orientador. O
+  servidor (`DashboardPage`) envia tarefas e dados brutos, e `RoleDashboard` recalcula os
+  indicadores com `buildAdminDashboardMetrics`/`buildProfessorDashboardMetrics` sobre os projetos
+  filtrados por `filterDashboardProjects` (`application/dashboard/dashboard-filters.ts`). Para o
+  administrador, dados de usuários e "alunos/professores sem projeto" ignoram o filtro. Mudar
+  semestre, situação ou orientador volta o filtro de projeto para "Todos".
+- **Ícones:** o pacote `@flaticon/flaticon-uicons` (estilo regular rounded) não tem
+  `fi-rr-folder-check`; os cards de concluídos usam `fi-rr-flag-checkered`. Antes de usar um ícone
+  novo, confira se a classe existe em `rounded.css`.

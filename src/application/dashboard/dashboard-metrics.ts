@@ -512,3 +512,58 @@ export function buildAdminDashboardMetrics({
     },
   }
 }
+
+export interface StudentDashboardMetrics {
+  projects: {
+    total: number
+    ongoing: number
+    completed: number
+    indicated: number
+  }
+  tasks: TaskSummary
+  progress: ProjectProgressRow[]
+  deadlines: TaskDeadlineRow[]
+}
+
+interface StudentMetricsInput {
+  projects: Project[]
+  tasks: DashboardTask[]
+  email: string
+  today: string
+  now: Date
+}
+
+export function buildStudentDashboardMetrics({
+  projects,
+  tasks,
+  email,
+  today,
+  now,
+}: StudentMetricsInput): StudentDashboardMetrics {
+  const mine = normalizeEmail(email)
+  const followed = projects.filter(isProjectActive)
+  const followedIds = new Set(followed.map((project) => project.id))
+  const projectTasks = tasks.filter((task) => followedIds.has(task.projectId))
+  const myTasks = projectTasks.filter(
+    (task) => task.targetStudentEmail === null || normalizeEmail(task.targetStudentEmail) === mine,
+  )
+  const tasksByProject = groupTasksByProject(projectTasks)
+  const names = resolveStudentNames(followed)
+
+  const ongoingProjects = followed.filter((project) => project.status === 'em_andamento')
+  const completedProjects = followed.filter((project) => project.status === 'publicado')
+
+  return {
+    projects: {
+      total: followed.length,
+      ongoing: ongoingProjects.length,
+      completed: completedProjects.length,
+      indicated: completedProjects.filter((project) => project.verified).length,
+    },
+    tasks: summarizeTasks(myTasks, today),
+    progress: ongoingProjects
+      .map((project) => buildProjectRow(project, tasksByProject.get(project.id) ?? [], today, now))
+      .sort(compareByAttention),
+    deadlines: buildDeadlines(followed, myTasks, today, names, 8),
+  }
+}

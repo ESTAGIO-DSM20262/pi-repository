@@ -177,7 +177,7 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
           </div>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-3 text-[#6f514b]">
+      <div className="flex shrink-0 items-center gap-3 text-[#666666]">
         {githubUrl && (
           <a
             href={githubUrl}
@@ -336,7 +336,7 @@ function ExternalProjectLink({ label, url, icon }: { label: string; url?: string
   if (url) {
     return (
       <a href={url} target="_blank" rel="noreferrer" className={className}>
-        {iconElement} {label} <span aria-hidden="true">↗</span>
+        {iconElement} {label}
       </a>
     )
   }
@@ -346,7 +346,7 @@ function ExternalProjectLink({ label, url, icon }: { label: string; url?: string
       title="Link externo ainda não cadastrado"
       className={`${className} cursor-not-allowed opacity-80`}
     >
-      {iconElement} {label} <span aria-hidden="true">↗</span>
+      {iconElement} {label}
       <span className="sr-only">, endereço não cadastrado</span>
     </span>
   )
@@ -447,9 +447,14 @@ export function ProjectPublicView({
 
       <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-6 lg:p-7">
         <div className="flex flex-wrap items-center gap-1.5">
+          {project.status === 'publicado' && (
+            <span className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold text-white sm:text-[11px]">
+              <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
+            </span>
+          )}
           {project.verified && (
-            <span className="inline-flex items-center gap-1 rounded bg-emerald-200 px-2 py-1 text-[10px] font-bold text-emerald-900 sm:text-[11px]">
-              <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Indicado
+            <span className="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-1 text-[10px] font-bold text-secondary-hover sm:text-[11px]">
+              <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> Indicado
             </span>
           )}
           <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">
@@ -543,7 +548,7 @@ export function ProjectPublicView({
           <div
             className={`mt-3 grid grid-cols-1 gap-3 ${images.length === 0 ? 'xl:grid-cols-2' : ''}`}
           >
-            <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[13px] leading-relaxed text-[#6f514b]">
+            <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[13px] leading-relaxed text-[#666666]">
               {details?.overview ?? summary}
             </p>
             {images.length === 0 && <DashboardPreview />}
@@ -553,7 +558,7 @@ export function ProjectPublicView({
         <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <SectionTitle icon="fi-rr-users">Equipe de Desenvolvimento</SectionTitle>
-            <span className="shrink-0 text-[10px] font-semibold text-[#6f514b] sm:text-[11px]">
+            <span className="shrink-0 text-[10px] font-semibold text-[#666666] sm:text-[11px]">
               {team.length} {team.length === 1 ? 'integrante' : 'integrantes'}
             </span>
           </div>

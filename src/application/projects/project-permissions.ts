@@ -44,10 +44,7 @@ export function canViewProject(
   viewer: Pick<ProjectViewer, 'role' | 'email'> | null,
 ) {
   if (viewer?.role === 'admin') return true
-  if (!isProjectActive(project)) return false
-  if (project.status === 'publicado') return true
-  if (!viewer) return false
-  return isAdvisorOf(project, viewer) || isMemberOf(project, viewer)
+  return isProjectActive(project)
 }
 
 export function canManageProgress(

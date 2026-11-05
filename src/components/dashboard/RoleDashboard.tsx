@@ -2,10 +2,19 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import type {
-  AdminDashboardMetrics,
-  MonthlyRegistration,
-  ProfessorDashboardMetrics,
+import {
+  EMPTY_DASHBOARD_FILTERS,
+  filterDashboardProjects,
+  listAdvisorOptions,
+  listProjectOptions,
+  listSemesterOptions,
+} from '@/application/dashboard/dashboard-filters'
+import {
+  buildAdminDashboardMetrics,
+  buildProfessorDashboardMetrics,
+  buildStudentDashboardMetrics,
+  type DashboardTask,
+  type MonthlyRegistration,
 } from '@/application/dashboard/dashboard-metrics'
 import type { ListedProject } from '@/application/projects/list-projects'
 import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
@@ -16,8 +25,10 @@ import { formatPersonName } from '@/libs/initials'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 import { AdminInsights } from './AdminInsights'
+import { DashboardFiltersBar } from './DashboardFiltersBar'
 import { formatMetric, StatCard } from './DashboardWidgets'
 import { ProfessorOverview } from './ProfessorOverview'
+import { StudentOverview } from './StudentOverview'
 
 export interface AdminUserMetrics {
   total: number
@@ -30,6 +41,27 @@ export interface AdminUserMetrics {
   admins: number
 }
 
+export interface AdminDashboardData {
+  tasks: DashboardTask[]
+  activeStudentEmails: string[]
+  activeProfessorEmails: string[]
+  today: string
+  nowIso: string
+}
+
+export interface ProfessorDashboardData {
+  tasks: DashboardTask[]
+  indicatedProjectIds: string[]
+  today: string
+  nowIso: string
+}
+
+export interface StudentDashboardData {
+  tasks: DashboardTask[]
+  today: string
+  nowIso: string
+}
+
 interface RoleDashboardProps {
   currentUserId: string
   name: string
@@ -37,9 +69,10 @@ interface RoleDashboardProps {
   role: Role
   projects: ListedProject[]
   adminUserMetrics?: AdminUserMetrics
-  adminMetrics?: AdminDashboardMetrics
+  adminData?: AdminDashboardData
   registrations?: MonthlyRegistration[]
-  professorMetrics?: ProfessorDashboardMetrics
+  professorData?: ProfessorDashboardData
+  studentData?: StudentDashboardData
 }
 
 function AdminOverviewCards({
@@ -69,7 +102,7 @@ function AdminOverviewCards({
       value: formatMetric(totalProjects),
       note: `${formatMetric(ongoingProjects)} em andamento · ${formatMetric(completedProjects)} concluídos${deactivatedProjects > 0 ? ` · ${formatMetric(deactivatedProjects)} desativados` : ''}`,
       icon: 'fi-rr-duplicate',
-      tone: 'red',
+      tone: 'neutral',
       ratio: 100,
     },
     {
@@ -77,7 +110,7 @@ function AdminOverviewCards({
       value: formatMetric(verifiedProjects),
       note: `${formatMetric(verifiedProjects)} de ${formatMetric(completedProjects)} projetos concluídos`,
       icon: 'fi-rr-badge-check',
-      tone: 'green',
+      tone: 'indicated',
       ratio: completedProjects ? (verifiedProjects / completedProjects) * 100 : 0,
     },
     {
@@ -88,15 +121,15 @@ function AdminOverviewCards({
           ? `${formatMetric(ongoingWithTasks)} com tarefas cadastradas`
           : 'Projetos ainda em desenvolvimento',
       icon: 'fi-rr-time-fast',
-      tone: 'slate',
+      tone: 'ongoing',
       ratio: totalProjects ? (ongoingProjects / totalProjects) * 100 : 0,
     },
     {
       title: 'Projetos Concluídos',
       value: formatMetric(completedProjects),
       note: 'Disponíveis no acervo público',
-      icon: 'fi-rr-folder-check',
-      tone: 'green',
+      icon: 'fi-rr-flag-checkered',
+      tone: 'done',
       ratio: totalProjects ? (completedProjects / totalProjects) * 100 : 0,
     },
     {
@@ -104,7 +137,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.total),
       note: `${formatMetric(userMetrics?.newThisMonth)} novos cadastros neste mês`,
       icon: 'fi-rr-users',
-      tone: 'slate',
+      tone: 'info',
       ratio: 100,
     },
     {
@@ -112,7 +145,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.active),
       note: `${formatMetric(userMetrics?.students)} alunos · ${formatMetric(userMetrics?.professors)} professores`,
       icon: 'fi-rr-user-check',
-      tone: 'green',
+      tone: 'professor',
       ratio: totalUsers ? ((userMetrics?.active ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -120,7 +153,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.inactive),
       note: 'Sem permissão para acessar o sistema',
       icon: 'fi-rr-user-lock',
-      tone: 'red',
+      tone: 'warning',
       ratio: totalUsers ? ((userMetrics?.inactive ?? 0) / totalUsers) * 100 : 0,
     },
     {
@@ -128,7 +161,7 @@ function AdminOverviewCards({
       value: formatMetric(userMetrics?.verifiedEmails),
       note: `${formatMetric(userMetrics?.admins)} contas administrativas`,
       icon: 'fi-rr-shield-check',
-      tone: 'green',
+      tone: 'neutral',
       ratio: totalUsers ? ((userMetrics?.verifiedEmails ?? 0) / totalUsers) * 100 : 0,
     },
   ] as const
@@ -142,7 +175,7 @@ function AdminOverviewCards({
         >
           Visão geral do sistema
         </h2>
-        <p className="mt-1 text-xs text-[#765e58] sm:text-[13px]">
+        <p className="mt-1 text-xs text-text-secondary sm:text-[13px]">
           Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
           banco. Projetos desativados ficam fora das contagens do acervo.
         </p>
@@ -157,7 +190,6 @@ function AdminOverviewCards({
             icon={card.icon}
             tone={card.tone}
             ratio={card.ratio}
-            valueTone={card.title === 'Contas Inativas' ? 'slate' : undefined}
           />
         ))}
       </div>
@@ -196,7 +228,7 @@ function SectionHeading({
       <div className="flex items-start gap-3">
         <span
           className={`mt-1 h-6 w-2 shrink-0 rounded-full ${
-            accent === 'green' ? 'bg-emerald-800' : 'bg-slate-600'
+            accent === 'green' ? 'bg-secondary' : 'bg-primary'
           }`}
           aria-hidden="true"
         />
@@ -205,7 +237,7 @@ function SectionHeading({
             <i className={`fi ${icon} flex text-base text-primary`} aria-hidden="true" />
             {title}
           </h2>
-          <p className="mt-0.5 text-xs text-[#765e58] sm:text-[13px]">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-text-secondary sm:text-[13px]">{subtitle}</p>
         </div>
       </div>
 
@@ -230,23 +262,23 @@ function DashboardThumbnail({ label }: { label: string }) {
         <div className="grid h-[calc(100%_-_12px)] grid-cols-[0.7fr_1.3fr] gap-1">
           <div className="grid grid-cols-2 gap-1">
             <span className="rounded-[2px] bg-emerald-200" />
-            <span className="rounded-[2px] bg-rose-200" />
+            <span className="rounded-[2px] bg-primary/25" />
             <span className="rounded-[2px] bg-slate-100" />
             <span className="rounded-[2px] bg-emerald-100" />
-            <span className="rounded-[2px] bg-rose-100" />
+            <span className="rounded-[2px] bg-primary-light" />
             <span className="rounded-[2px] bg-slate-100" />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-1 items-end gap-1 rounded-[2px] bg-slate-50 px-1 pt-1">
               <span className="h-[40%] flex-1 rounded-t-[1px] bg-emerald-300" />
               <span className="h-[75%] flex-1 rounded-t-[1px] bg-primary/70" />
-              <span className="h-[55%] flex-1 rounded-t-[1px] bg-rose-300" />
+              <span className="h-[55%] flex-1 rounded-t-[1px] bg-primary/45" />
               <span className="h-[90%] flex-1 rounded-t-[1px] bg-emerald-500/70" />
               <span className="h-[65%] flex-1 rounded-t-[1px] bg-slate-400" />
             </div>
             <div className="flex h-2 gap-1">
               <span className="flex-1 rounded-[1px] bg-slate-200" />
-              <span className="flex-1 rounded-[1px] bg-rose-100" />
+              <span className="flex-1 rounded-[1px] bg-primary-light" />
               <span className="flex-1 rounded-[1px] bg-emerald-100" />
             </div>
           </div>
@@ -276,12 +308,12 @@ function DashboardProjectCard({
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[10px] font-medium text-[#765e58] sm:text-[11px]">
+          <span className="truncate text-[10px] font-medium text-text-secondary sm:text-[11px]">
             DSM • {project.semester}º Sem
           </span>
           <span
             className={`shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold ${
-              isPublished ? 'bg-emerald-200 text-emerald-950' : 'bg-amber-100 text-amber-900'
+              isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
             }`}
           >
             {isPublished ? 'Concluído' : 'Em andamento'}
@@ -294,7 +326,7 @@ function DashboardProjectCard({
         >
           {project.title}
         </Link>
-        <p className="line-clamp-1 text-[10px] text-[#765e58] sm:text-[11px]">
+        <p className="line-clamp-1 text-[10px] text-text-secondary sm:text-[11px]">
           Orientador: {project.advisor.name} <span aria-hidden="true">•</span> {memberCount}{' '}
           {memberCount === 1 ? 'estudante' : 'estudantes'}
         </p>
@@ -369,7 +401,7 @@ function ProjectFilters({
       <label className="relative min-w-0 flex-1 lg:max-w-[340px]">
         <span className="sr-only">Buscar projeto por título, orientador, tema ou aluno</span>
         <i
-          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#765e58]"
+          className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-secondary"
           aria-hidden="true"
         />
         <input
@@ -421,7 +453,7 @@ function ProjectFilters({
         onClick={onClear}
         title="Limpar filtros dos projetos"
         aria-label="Limpar filtros dos projetos"
-        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-[#f2f3f4] text-[#765e58] transition hover:bg-primary-light hover:text-primary lg:self-auto"
+        className="cursor-pointer inline-flex h-10 w-10 shrink-0 items-center justify-center self-end rounded-lg bg-surface-secondary text-text-secondary transition hover:bg-primary-light hover:text-primary lg:self-auto"
       >
         <i className="fi fi-rr-settings-sliders flex" aria-hidden="true" />
       </button>
@@ -516,7 +548,7 @@ function ProjectsSection({
             cycleOptions={cycleOptions}
             onClear={clearFilters}
           />
-          <p className="mb-3 text-[11px] text-[#765e58]" role="status">
+          <p className="mb-3 text-[11px] text-text-secondary" role="status">
             Exibindo {filteredProjects.length} de {projects.length}{' '}
             {projects.length === 1 ? 'projeto' : 'projetos'}.
           </p>
@@ -563,9 +595,10 @@ export function RoleDashboard({
   role,
   projects,
   adminUserMetrics,
-  adminMetrics,
+  adminData,
   registrations,
-  professorMetrics,
+  professorData,
+  studentData,
 }: RoleDashboardProps) {
   const publishedProjects = useMemo(
     () => projects.filter((project) => project.status === 'publicado'),
@@ -573,6 +606,63 @@ export function RoleDashboard({
   )
   const relatedProjects = useMemo(() => projects.filter((project) => project.related), [projects])
   const displayedProjects = role === 'admin' ? projects : relatedProjects
+  const [filters, setFilters] = useState(EMPTY_DASHBOARD_FILTERS)
+  const filterBase = displayedProjects
+  const filteredProjects = useMemo(
+    () => filterDashboardProjects(filterBase, filters),
+    [filterBase, filters],
+  )
+  const semesterOptions = useMemo(() => listSemesterOptions(filterBase), [filterBase])
+  const projectOptions = useMemo(
+    () => listProjectOptions(filterDashboardProjects(filterBase, filters, ['projectId'])),
+    [filterBase, filters],
+  )
+  const advisorOptions = useMemo(
+    () => (role === 'admin' ? listAdvisorOptions(filterBase) : undefined),
+    [filterBase, role],
+  )
+  const adminMetrics = useMemo(() => {
+    if (role !== 'admin' || !adminData) return undefined
+    const metrics = buildAdminDashboardMetrics({
+      projects: filteredProjects,
+      tasks: adminData.tasks,
+      activeStudentEmails: adminData.activeStudentEmails,
+      activeProfessorEmails: adminData.activeProfessorEmails,
+      today: adminData.today,
+      now: new Date(adminData.nowIso),
+    })
+    const overall = buildAdminDashboardMetrics({
+      projects,
+      tasks: adminData.tasks,
+      activeStudentEmails: adminData.activeStudentEmails,
+      activeProfessorEmails: adminData.activeProfessorEmails,
+      today: adminData.today,
+      now: new Date(adminData.nowIso),
+    })
+    return { ...metrics, people: overall.people }
+  }, [role, adminData, filteredProjects, projects])
+  const professorMetrics = useMemo(() => {
+    if (role !== 'professor' || !professorData) return undefined
+    return buildProfessorDashboardMetrics({
+      projects: filteredProjects,
+      tasks: professorData.tasks,
+      indicatedProjectIds: professorData.indicatedProjectIds,
+      today: professorData.today,
+      now: new Date(professorData.nowIso),
+    })
+  }, [role, professorData, filteredProjects])
+  const studentMetrics = useMemo(() => {
+    if (role !== 'student' || !studentData) return undefined
+    return buildStudentDashboardMetrics({
+      projects: relatedProjects,
+      tasks: studentData.tasks,
+      email,
+      today: studentData.today,
+      now: new Date(studentData.nowIso),
+    })
+  }, [role, studentData, relatedProjects, email])
+  const showFilters =
+    (role === 'admin' && Boolean(adminData)) || (role === 'professor' && Boolean(professorData))
   const firstName =
     formatPersonName(name)
       .split(/\s+/)
@@ -619,7 +709,7 @@ export function RoleDashboard({
                   Painel institucional
                 </p>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-800 text-white' : role === 'professor' ? 'bg-rose-100 text-rose-900' : 'bg-slate-100 text-slate-700'}`}
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-accent-light text-secondary-hover'}`}
                 >
                   {ROLE_LABEL[role]}
                 </span>
@@ -634,9 +724,26 @@ export function RoleDashboard({
       </section>
 
       <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
+        {showFilters && (
+          <DashboardFiltersBar
+            filters={filters}
+            onChange={setFilters}
+            onClear={() => setFilters(EMPTY_DASHBOARD_FILTERS)}
+            semesterOptions={semesterOptions}
+            projectOptions={projectOptions}
+            advisorOptions={advisorOptions}
+            shown={filteredProjects.length}
+            total={filterBase.length}
+            scopeNote={
+              role === 'admin'
+                ? 'Vale para os indicadores de projetos e tarefas e para os gráficos. Dados de usuários e de pessoas sem projeto consideram todo o sistema.'
+                : 'Vale para os indicadores, prazos, gráficos e listas de acompanhamento abaixo.'
+            }
+          />
+        )}
         {role === 'admin' && (
           <AdminOverviewCards
-            projects={projects}
+            projects={filteredProjects}
             userMetrics={adminUserMetrics}
             ongoingWithTasks={adminMetrics?.projects.ongoingWithTasks}
           />
@@ -652,6 +759,7 @@ export function RoleDashboard({
         {role === 'professor' && professorMetrics && (
           <ProfessorOverview metrics={professorMetrics} />
         )}
+        {role === 'student' && studentMetrics && <StudentOverview metrics={studentMetrics} />}
 
         <ProjectsSection
           title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}

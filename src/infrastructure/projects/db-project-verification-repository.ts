@@ -82,6 +82,21 @@ export class DbProjectVerificationRepository implements ProjectVerificationRepos
     ])
   }
 
+  async removeByUser(projectId: string, verifierUserId: string) {
+    await db.batch([
+      lockProject(projectId),
+      db
+        .delete(projectVerifications)
+        .where(
+          and(
+            eq(projectVerifications.projectId, projectId),
+            eq(projectVerifications.verifierUserId, verifierUserId),
+          ),
+        ),
+      recomputeVerified(projectId),
+    ])
+  }
+
   async removeByEmails(projectId: string, emails: string[]) {
     if (emails.length === 0) return
     await db.delete(projectVerifications).where(

@@ -66,7 +66,7 @@ const RAIL = [
   {
     icon: 'fi-rr-shield-check',
     title: 'Indicação',
-    active: (f: Filters) => f.verified || f.unverified,
+    active: (f: Filters) => f.verified,
     on: 'bg-emerald-50 text-emerald-700',
   },
   {
@@ -109,27 +109,17 @@ function FilterFields({
             type="checkbox"
             checked={filters.verified}
             onChange={(e) => onChange({ verified: e.target.checked })}
-            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-emerald-700"
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
           />
           <span className="min-w-0">
             <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-              <i className="fi fi-rr-check-circle flex text-emerald-700" aria-hidden="true" />
+              <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" />
               Apenas PIs Indicados
             </span>
             <span className="mt-0.5 block text-xs leading-relaxed text-text-secondary">
               Revisados e aprovados como referência técnica.
             </span>
           </span>
-        </label>
-
-        <label className="flex cursor-pointer items-start gap-2.5 text-[13px] text-slate-700">
-          <input
-            type="checkbox"
-            checked={filters.unverified}
-            onChange={(e) => onChange({ unverified: e.target.checked })}
-            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
-          />
-          <span>Não indicados / Em andamento</span>
         </label>
       </div>
 
@@ -293,13 +283,13 @@ export function FilterPanel({
                 key={chip.id}
                 className={`inline-flex h-11 max-w-[220px] shrink-0 items-center gap-1 rounded-md border px-3 text-xs ${
                   chip.verified
-                    ? 'border-emerald-200 bg-emerald-100 font-medium text-emerald-900'
+                    ? 'border-accent/40 bg-accent-light font-medium text-secondary-hover'
                     : 'border-border bg-surface text-slate-800'
                 }`}
               >
                 {chip.verified && (
                   <i
-                    className="fi fi-rr-check-circle flex shrink-0 text-emerald-700"
+                    className="fi fi-rr-check-circle flex shrink-0 text-primary"
                     aria-hidden="true"
                   />
                 )}

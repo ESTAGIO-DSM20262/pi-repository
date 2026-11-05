@@ -1,10 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import {
-  buildAdminDashboardMetrics,
-  buildProfessorDashboardMetrics,
-} from '@/application/dashboard/dashboard-metrics'
 import { ListProjectsUseCase } from '@/application/projects/list-projects'
 import { db } from '@/db'
 import { users } from '@/db/schema'
@@ -19,7 +15,13 @@ import {
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
-import { type AdminUserMetrics, RoleDashboard } from './RoleDashboard'
+import {
+  type AdminDashboardData,
+  type AdminUserMetrics,
+  type ProfessorDashboardData,
+  RoleDashboard,
+  type StudentDashboardData,
+} from './RoleDashboard'
 
 function todayInSaoPaulo(now: Date) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(now)
@@ -74,7 +76,7 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
   const now = new Date()
   const today = todayInSaoPaulo(now)
 
-  let adminMetrics: ReturnType<typeof buildAdminDashboardMetrics> | undefined
+  let adminData: AdminDashboardData | undefined
   let registrations: Awaited<ReturnType<typeof loadRegistrationsByMonth>> | undefined
   if (user.role === 'admin') {
     try {
@@ -83,21 +85,20 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
         loadActivePeople(),
         loadRegistrationsByMonth(),
       ])
-      adminMetrics = buildAdminDashboardMetrics({
-        projects,
+      adminData = {
         tasks,
         activeStudentEmails: people.students,
         activeProfessorEmails: people.professors,
         today,
-        now,
-      })
+        nowIso: now.toISOString(),
+      }
       registrations = monthly
     } catch (error) {
       console.error('[Admin dashboard insights]', error)
     }
   }
 
-  let professorMetrics: ReturnType<typeof buildProfessorDashboardMetrics> | undefined
+  let professorData: ProfessorDashboardData | undefined
   if (user.role === 'professor') {
     try {
       const followed = projects.filter((project) => project.related)
@@ -105,15 +106,20 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
         loadProgressTasks(followed.map((project) => project.id)),
         loadIndicatedProjectIds(String(session.user.id)),
       ])
-      professorMetrics = buildProfessorDashboardMetrics({
-        projects: followed,
-        tasks,
-        indicatedProjectIds,
-        today,
-        now,
-      })
+      professorData = { tasks, indicatedProjectIds, today, nowIso: now.toISOString() }
     } catch (error) {
       console.error('[Professor dashboard metrics]', error)
+    }
+  }
+
+  let studentData: StudentDashboardData | undefined
+  if (user.role === 'student') {
+    try {
+      const followed = projects.filter((project) => project.related)
+      const tasks = await loadProgressTasks(followed.map((project) => project.id))
+      studentData = { tasks, today, nowIso: now.toISOString() }
+    } catch (error) {
+      console.error('[Student dashboard metrics]', error)
     }
   }
 
@@ -125,9 +131,10 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
       role={user.role}
       projects={projects}
       adminUserMetrics={adminUserMetrics}
-      adminMetrics={adminMetrics}
+      adminData={adminData}
       registrations={registrations}
-      professorMetrics={professorMetrics}
+      professorData={professorData}
+      studentData={studentData}
     />
   )
 }

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 export const fieldClass =
   'block h-10 w-full rounded-lg border border-border bg-surface-secondary px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15 read-only:cursor-not-allowed read-only:text-slate-500'
 export const labelClass = 'mb-1.5 block text-xs font-bold text-slate-800'
-export const hintClass = 'mt-1.5 text-[11px] leading-relaxed text-[#765e58]'
+export const hintClass = 'mt-1.5 text-[11px] leading-relaxed text-[#666666]'
 export const sectionClass = 'rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7'
 
 export function FormSection({
@@ -30,7 +30,7 @@ export function FormSection({
             <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
               {title}
             </h2>
-            <p className="mt-0.5 text-xs text-[#765e58] sm:text-[13px]">{subtitle}</p>
+            <p className="mt-0.5 text-xs text-[#666666] sm:text-[13px]">{subtitle}</p>
           </div>
         </div>
         {badge}

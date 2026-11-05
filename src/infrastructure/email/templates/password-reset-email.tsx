@@ -29,7 +29,7 @@ export function PasswordResetEmail({ name, resetUrl }: PasswordResetEmailProps) 
     <Html lang="pt-BR">
       <Tailwind config={emailTailwindConfig}>
         <Head>
-          <Font fontFamily="Plus Jakarta Sans" fallbackFontFamily={['Arial', 'Helvetica']} />
+          <Font fontFamily="Roboto" fallbackFontFamily={['Arial', 'Helvetica']} />
           <link rel="stylesheet" href={emailBrand.fontStylesheet} />
         </Head>
         <Preview>Redefina sua senha do {emailBrand.name}</Preview>

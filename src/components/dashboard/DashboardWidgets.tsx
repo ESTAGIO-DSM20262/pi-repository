@@ -1,38 +1,117 @@
 import type { ReactNode } from 'react'
 
-export type WidgetTone = 'red' | 'green' | 'amber' | 'slate'
+export type WidgetTone =
+  | 'ongoing'
+  | 'warning'
+  | 'done'
+  | 'indicated'
+  | 'awaiting'
+  | 'pending'
+  | 'alert'
+  | 'info'
+  | 'professor'
+  | 'neutral'
 
-const TONE_STYLES: Record<
-  WidgetTone,
-  { icon: string; bar: string; stroke: string; dot: string; value: string }
-> = {
-  red: {
-    icon: 'text-primary',
-    bar: 'bg-primary',
-    stroke: 'stroke-primary',
-    dot: 'bg-primary',
-    value: 'text-primary',
-  },
-  green: {
-    icon: 'text-emerald-800',
-    bar: 'bg-emerald-700',
-    stroke: 'stroke-emerald-700',
-    dot: 'bg-emerald-700',
-    value: 'text-emerald-800',
-  },
-  amber: {
-    icon: 'text-amber-700',
-    bar: 'bg-amber-500',
-    stroke: 'stroke-amber-500',
-    dot: 'bg-amber-500',
-    value: 'text-amber-700',
-  },
-  slate: {
-    icon: 'text-slate-600',
-    bar: 'bg-slate-500',
-    stroke: 'stroke-slate-400',
-    dot: 'bg-slate-400',
+interface ToneStyle {
+  icon: string
+  chip: string
+  bar: string
+  stroke: string
+  dot: string
+  value: string
+  badge: string
+}
+
+const TONE_STYLES: Record<WidgetTone, ToneStyle> = {
+  done: {
+    icon: 'text-tone-done-ink',
+    chip: 'bg-tone-done-soft',
+    bar: 'bg-tone-done',
+    stroke: 'stroke-tone-done',
+    dot: 'bg-tone-done',
     value: 'text-slate-900',
+    badge: 'bg-tone-done-soft text-tone-done-ink',
+  },
+  ongoing: {
+    icon: 'text-tone-ongoing-ink',
+    chip: 'bg-tone-ongoing-soft',
+    bar: 'bg-tone-ongoing',
+    stroke: 'stroke-tone-ongoing',
+    dot: 'bg-tone-ongoing',
+    value: 'text-slate-900',
+    badge: 'bg-tone-ongoing-soft text-tone-ongoing-ink',
+  },
+  indicated: {
+    icon: 'text-tone-indicated-ink',
+    chip: 'bg-tone-indicated-soft',
+    bar: 'bg-tone-indicated',
+    stroke: 'stroke-tone-indicated',
+    dot: 'bg-tone-indicated',
+    value: 'text-slate-900',
+    badge: 'bg-tone-indicated-soft text-tone-indicated-ink',
+  },
+  awaiting: {
+    icon: 'text-tone-awaiting-ink',
+    chip: 'bg-tone-awaiting-soft',
+    bar: 'bg-tone-awaiting',
+    stroke: 'stroke-tone-awaiting',
+    dot: 'bg-tone-awaiting',
+    value: 'text-slate-900',
+    badge: 'bg-tone-awaiting-soft text-tone-awaiting-ink',
+  },
+  pending: {
+    icon: 'text-tone-pending-ink',
+    chip: 'bg-tone-pending-soft',
+    bar: 'bg-tone-pending',
+    stroke: 'stroke-tone-pending',
+    dot: 'bg-tone-pending',
+    value: 'text-slate-900',
+    badge: 'bg-tone-pending-soft text-tone-pending-ink',
+  },
+  info: {
+    icon: 'text-tone-info-ink',
+    chip: 'bg-tone-info-soft',
+    bar: 'bg-tone-info',
+    stroke: 'stroke-tone-info',
+    dot: 'bg-tone-info',
+    value: 'text-slate-900',
+    badge: 'bg-tone-info-soft text-tone-info-ink',
+  },
+  professor: {
+    icon: 'text-tone-professor-ink',
+    chip: 'bg-tone-professor-soft',
+    bar: 'bg-tone-professor',
+    stroke: 'stroke-tone-professor',
+    dot: 'bg-tone-professor',
+    value: 'text-slate-900',
+    badge: 'bg-tone-professor-soft text-tone-professor-ink',
+  },
+  neutral: {
+    icon: 'text-tone-neutral-ink',
+    chip: 'bg-tone-neutral-soft',
+    bar: 'bg-tone-neutral',
+    stroke: 'stroke-tone-neutral',
+    dot: 'bg-tone-neutral',
+    value: 'text-slate-900',
+    badge: 'bg-tone-neutral-soft text-tone-neutral-ink',
+  },
+  warning: {
+    icon: 'text-tone-warning-ink',
+    chip: 'bg-tone-warning-soft',
+    bar: 'bg-tone-warning',
+    stroke: 'stroke-tone-warning',
+    dot: 'bg-tone-warning',
+    value: 'text-tone-warning-ink',
+    badge: 'bg-tone-warning-soft text-tone-warning-ink',
+  },
+  alert: {
+    icon: 'text-tone-alert-ink',
+    chip: 'bg-tone-alert-soft',
+    bar: 'bg-tone-alert',
+    stroke: 'stroke-tone-alert',
+    dot: 'bg-tone-alert',
+    value: 'text-tone-alert-ink',
+    badge: 'bg-tone-alert-soft text-tone-alert-ink',
   },
 }
 
@@ -62,19 +141,23 @@ export function StatCard({
   valueTone?: WidgetTone
 }) {
   const styles = TONE_STYLES[tone]
-  const valueStyles = TONE_STYLES[valueTone ?? (tone === 'green' ? 'green' : 'slate')]
+  const valueStyles = TONE_STYLES[valueTone ?? tone]
 
   return (
-    <article className="min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5">
+    <article className="min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium leading-5 text-[#765e58] sm:text-[13px]">{title}</p>
-        <i className={`fi ${icon} flex shrink-0 text-lg ${styles.icon}`} aria-hidden="true" />
+        <p className="text-xs font-medium leading-5 text-text-secondary sm:text-[13px]">{title}</p>
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${styles.chip}`}
+        >
+          <i className={`fi ${icon} flex text-base ${styles.icon}`} aria-hidden="true" />
+        </span>
       </div>
       <p className={`mt-3 text-3xl font-bold tracking-tight tabular-nums ${valueStyles.value}`}>
         {value}
       </p>
-      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-[#765e58]">{note}</p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200" aria-hidden="true">
+      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-text-secondary">{note}</p>
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-border-light" aria-hidden="true">
         <div
           className={`h-full rounded-full transition-all ${styles.bar}`}
           style={{ width: `${Math.max(0, Math.min(100, ratio))}%` }}
@@ -101,7 +184,7 @@ export function Panel({
 }) {
   return (
     <section
-      className={`min-w-0 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:p-5 ${className}`}
+      className={`min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5 ${className}`}
     >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
@@ -109,7 +192,9 @@ export function Panel({
             <i className={`fi ${icon} flex text-sm text-primary`} aria-hidden="true" />
             {title}
           </h3>
-          {subtitle && <p className="mt-0.5 text-[11px] text-[#765e58] sm:text-xs">{subtitle}</p>}
+          {subtitle && (
+            <p className="mt-0.5 text-[11px] text-text-secondary sm:text-xs">{subtitle}</p>
+          )}
         </div>
         {action}
       </div>
@@ -191,7 +276,7 @@ export function DonutChart({
             r={DONUT_RADIUS}
             fill="none"
             strokeWidth="12"
-            className="stroke-slate-100"
+            className="stroke-border-light"
           />
           {arcs.map((arc) => (
             <circle
@@ -209,7 +294,7 @@ export function DonutChart({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tabular-nums text-slate-900">{centerValue}</span>
-          <span className="text-[10px] font-medium uppercase tracking-wide text-[#765e58]">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-text-secondary">
             {centerLabel}
           </span>
         </div>
@@ -233,7 +318,7 @@ export function StackedBar({
   return (
     <div className="space-y-3">
       <div
-        className="flex h-3 overflow-hidden rounded-full bg-slate-100"
+        className="flex h-3 overflow-hidden rounded-full bg-border-light"
         role="img"
         aria-label={ariaLabel}
       >
@@ -285,7 +370,7 @@ export function ColumnChart({
                 {total > 0 ? total : ''}
               </span>
               <div
-                className="flex w-full flex-col-reverse overflow-hidden rounded-t-md bg-slate-100"
+                className="flex w-full flex-col-reverse overflow-hidden rounded-t-md bg-border-light"
                 style={{ height: total > 0 ? `${(total / max) * 100}%` : '2px' }}
               >
                 {column.segments
@@ -306,7 +391,7 @@ export function ColumnChart({
         {columns.map((column) => (
           <span
             key={column.label}
-            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-[#765e58]"
+            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-text-secondary"
           >
             {column.label}
           </span>
@@ -331,7 +416,7 @@ export function ColumnChart({
 
 export function ProgressBar({
   percent,
-  tone = 'green',
+  tone = 'done',
   label,
 }: {
   percent: number
@@ -342,7 +427,7 @@ export function ProgressBar({
 
   return (
     <div
-      className="h-2 overflow-hidden rounded-full bg-slate-200"
+      className="h-2 overflow-hidden rounded-full bg-border-light"
       role="progressbar"
       aria-label={label}
       aria-valuemin={0}
@@ -357,17 +442,26 @@ export function ProgressBar({
   )
 }
 
-export function Badge({ tone, children }: { tone: WidgetTone; children: ReactNode }) {
-  const styles: Record<WidgetTone, string> = {
-    red: 'bg-rose-100 text-rose-900',
-    green: 'bg-emerald-100 text-emerald-900',
-    amber: 'bg-amber-100 text-amber-900',
-    slate: 'bg-slate-100 text-slate-700',
-  }
+export function ToneLegend({ items }: { items: Array<{ tone: WidgetTone; label: string }> }) {
+  return (
+    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-light pt-2.5">
+      {items.map((item) => (
+        <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+          <span
+            className={`h-2 w-2 shrink-0 rounded-full ${TONE_STYLES[item.tone].dot}`}
+            aria-hidden="true"
+          />
+          {item.label}
+        </li>
+      ))}
+    </ul>
+  )
+}
 
+export function Badge({ tone, children }: { tone: WidgetTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-semibold ${styles[tone]}`}
+      className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-semibold ${TONE_STYLES[tone].badge}`}
     >
       {children}
     </span>
@@ -382,9 +476,9 @@ export function formatShortDate(date: string) {
 export function describeDueDate(daysUntilDue: number): { label: string; tone: WidgetTone } {
   if (daysUntilDue < 0) {
     const days = Math.abs(daysUntilDue)
-    return { label: `Atrasada há ${days} ${days === 1 ? 'dia' : 'dias'}`, tone: 'red' }
+    return { label: `Atrasada há ${days} ${days === 1 ? 'dia' : 'dias'}`, tone: 'alert' }
   }
-  if (daysUntilDue === 0) return { label: 'Vence hoje', tone: 'amber' }
-  if (daysUntilDue === 1) return { label: 'Vence amanhã', tone: 'amber' }
-  return { label: `Vence em ${daysUntilDue} dias`, tone: daysUntilDue <= 7 ? 'amber' : 'slate' }
+  if (daysUntilDue === 0) return { label: 'Vence hoje', tone: 'warning' }
+  if (daysUntilDue === 1) return { label: 'Vence amanhã', tone: 'warning' }
+  return { label: `Vence em ${daysUntilDue} dias`, tone: daysUntilDue <= 7 ? 'ongoing' : 'pending' }
 }
