@@ -12,6 +12,7 @@ import {
   isMemberOf,
   resolveProjectEditScope,
 } from '@/application/projects/project-permissions'
+import { canChooseSemesterAward } from '@/application/projects/semester-awards'
 import { ProjectPublicView } from '@/components/projects/ProjectPublicView'
 import { db } from '@/db'
 import { users } from '@/db/schema'
@@ -176,6 +177,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       showProjectProgress={isInvolved}
       canEditProject={canEditProject}
       canVerify={canVerify}
+      canManageSemesterAward={
+        viewer !== null && !isExampleProject && canChooseSemesterAward(project, viewer)
+      }
       canManageActivation={canManageProjectActivation}
       verification={verification}
       viewerEmail={viewer?.email ?? null}

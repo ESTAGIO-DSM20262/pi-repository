@@ -20,6 +20,7 @@ import type { ListedProject } from '@/application/projects/list-projects'
 import { AdminCoursesSection } from '@/components/admin/AdminCoursesSection'
 import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
 import { FavoriteButton } from '@/components/projects/FavoriteButton'
+import { SemesterAwardsSection } from '@/components/projects/SemesterAwardsSection'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { formatPersonName } from '@/libs/initials'
@@ -762,6 +763,12 @@ export function RoleDashboard({
           <ProfessorOverview metrics={professorMetrics} />
         )}
         {role === 'student' && studentMetrics && <StudentOverview metrics={studentMetrics} />}
+        {(role === 'admin' ||
+          (role === 'professor' &&
+            projects.some(
+              (project) =>
+                project.advisor.email.trim().toLowerCase() === email.trim().toLowerCase(),
+            ))) && <SemesterAwardsSection />}
 
         <ProjectsSection
           title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}

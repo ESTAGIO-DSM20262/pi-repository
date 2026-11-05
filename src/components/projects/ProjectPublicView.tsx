@@ -7,6 +7,7 @@ import {
   ProjectVerificationPanel,
 } from '@/components/projects/ProjectVerificationPanel'
 import { ProjectProgressSection } from '@/components/projects/progress/ProjectProgressSection'
+import { SemesterAwardsSection } from '@/components/projects/SemesterAwardsSection'
 import { BackButton } from '@/components/ui/BackButton'
 import type {
   Project,
@@ -27,6 +28,7 @@ interface ProjectPublicViewProps {
   showProjectProgress: boolean
   canEditProject?: boolean
   canVerify?: boolean
+  canManageSemesterAward?: boolean
   canManageActivation?: boolean
   verification?: ProjectVerificationSummary | null
   viewerEmail?: string | null
@@ -361,6 +363,7 @@ export function ProjectPublicView({
   showProjectProgress,
   canEditProject = false,
   canVerify = false,
+  canManageSemesterAward = false,
   canManageActivation = false,
   verification = null,
   viewerEmail = null,
@@ -543,6 +546,12 @@ export function ProjectPublicView({
             summary={verification}
             showProgress={canVerify || canEditProject}
           />
+        </div>
+      )}
+
+      {canManageSemesterAward && (
+        <div className="mt-5">
+          <SemesterAwardsSection key={JSON.stringify(verification)} projectId={project.id} />
         </div>
       )}
 
