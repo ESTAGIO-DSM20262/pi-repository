@@ -16,7 +16,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `application/projects/semester-awards.ts` centraliza elegibilidade, permissão e pontuação. Apenas o orientador em `project.advisor` e o administrador podem escolher ou retirar a escolha. Coorientadores continuam indicando critérios, mas não escolhem o vencedor. O administrador não indica projetos (`canVerifyProject` só vale para orientadores); `awardCriteria` ignora registros antigos de indicação feitos por administradores e o resumo de indicação não tem mais o campo `administrators`.
 - Só projetos cadastrados, ativos e concluídos participam. Cada critério distinto indicado por um orientador atual vale um ponto; repetições não somam. Recomendações comparam todos os projetos elegíveis do mesmo ciclo e semestre, antes dos filtros visuais. Todos os empatados no máximo positivo são recomendados; zero pontos não gera recomendação. A escolha manual pode contrariar o ranking, inclusive com zero pontos.
 - `ChooseSemesterAward` usa o leitor e a porta `SemesterAwardRepository`; a API revalida a conta ativa e não aceita identidade ou papel fornecido no corpo. O cliente informa a escolha anterior para evitar sobrescrever silenciosamente uma escolha concorrente. Conflito retorna 409 e exige atualizar a lista.
-- `semester_awards` guarda vencedor, autor e data, com chave primária composta e unicidade do projeto. A migração manual `src/db/migrations/20261105_semester_awards.sql` deve ser aplicada antes de usar o recurso e depois de `20261021_projects.sql` e `20261027_project_advisors_verification.sql` (a validação usa `projects.active`); `npm run db:migrate` não executa SQLs manuais. Ela usa o schema `public`, nomeia explicitamente as restrições como em `db/schema.ts` (`semester_awards_pkey`, `semester_awards_project_unique`, `semester_awards_semester_check`), renomeia a restrição única criada com o nome automático em bancos que já receberam a versão anterior e pode ser reaplicada. Ela instala validação no banco e retira a escolha se o projeto for desativado, reaberto ou mudar de ciclo/semestre. Excluir o projeto remove a escolha por cascata. Alterações nas indicações não trocam o vencedor automaticamente.
+- `semester_awards` guarda vencedor, autor e data, com chave primária composta e unicidade do projeto. A migration `src/db/migrations/20261105_semester_awards.sql` é aplicada por `npm run db:migrate`, depois de `20261021_projects.sql` e `20261027_project_advisors_verification.sql` (a validação usa `projects.active`). Ela usa o schema `public`, nomeia explicitamente as restrições como em `db/schema.ts` (`semester_awards_pkey`, `semester_awards_project_unique`, `semester_awards_semester_check`), renomeia a restrição única criada com o nome automático em bancos que já receberam a versão anterior e pode ser reaplicada. Ela instala validação no banco e retira a escolha se o projeto for desativado, reaberto ou mudar de ciclo/semestre. Excluir o projeto remove a escolha por cascata. Alterações nas indicações não trocam o vencedor automaticamente.
 - `GET /api/semester-awards` lista candidatos para professores/admin; `?projectId=` limita o retorno sem limitar a comparação. `POST` recebe `projectId`, `expectedWinnerId` (string ou null) e `remove` opcional. As respostas não são armazenadas em cache. Integração/publicação no WordPress não faz parte desta alteração; os vencedores ficam persistidos para uma futura integração.
 - `SemesterAwardsSection` segue o padrão visual do painel (cabeçalho com barra e ícone, `SelectDropdown`, botões e cartões do dashboard). No painel, o professor escolhe primeiro o **ciclo** e o **semestre do curso** (sem opção "todos"; o padrão é o ciclo mais recente e o primeiro semestre que tem projetos, com a contagem de projetos em cada opção) e vê só os projetos desse grupo, com um resumo "Escolha do professor" e "Sugestão do sistema". Cada projeto mostra "N de 7 critérios atendidos", uma barra de 7 segmentos e a lista dos 7 critérios marcados como atendido ou não atendido (com texto para leitores de tela). Projetos em andamento ou desativados aparecem por último, sem botão. `sortAwardCandidates` e `summarizeAwardGroup` (em `semester-awards.ts`) ordenam o grupo e calculam sugestões, pontuação máxima e quantidade de concorrentes. `DbProjectRepository` marca `Project.bestOfSemester` a partir de `semester_awards` (falha na leitura é registrada e a lista segue sem a marca); `ProjectCard` e `ProjectPublicView` mostram a etiqueta. A seção explica que só os melhores PIs de cada semestre vão para o site da Fatec Itaquera (aba Projetos Integradores) e não tem botão de atualizar. A escolha e a retirada passam pelo `ConfirmationDialog` (tom `award`, nas cores do site) (que aceita o slot opcional `details` para listar critérios, sugestão do sistema e a escolha substituída) e o resultado aparece no `Modal` (variante `award` em caso de sucesso); após um erro a lista é recarregada. No detalhe do projeto (`projectId`), a seção mostra só aquele projeto, e a chave acompanha o resumo das indicações para recarregar os critérios após `router.refresh()`. Escolhido, sugerido, atendido e não atendido têm texto, sem depender exclusivamente da cor.
 
@@ -376,9 +376,12 @@ A escrita do papel é feita no servidor, por cadastro ou gestão administrativa,
 - `users.role` é `text().$type<Role>()`, preenchido **apenas no servidor**; nunca vem do cliente.
 - `users.registration_number`, `course`, `active`, `github_url` e `linkedin_url` armazenam os
   dados de matrícula, estado da conta e links públicos usados no perfil e nas páginas de projetos.
-- **Fontes de migração:** `drizzle/` mantém as migrações Drizzle já existentes; os SQLs manuais em
-  `src/db/migrations/` provisionam/atualizam tabelas de domínio e extensões do usuário e precisam
-  ser executados no Neon em ordem de dependência. `npm run db:migrate` não executa esses SQLs.
+- **Fontes de migração:** `drizzle/` mantém as migrações Drizzle; os SQLs em
+  `src/db/migrations/` provisionam/atualizam tabelas de domínio e extensões do usuário. `npm run
+  db:migrate` executa as duas fontes em sequência: `drizzle-kit migrate` e depois
+  `src/db/migrate-sql.ts`, que aplica em ordem de nome os SQLs ainda não registrados em
+  `public.sql_migrations` (uma transação por arquivo, sem `BEGIN`/`COMMIT` nos scripts). Os SQLs
+  precisam ser idempotentes. `npm run db:migrate:sql` roda só essa segunda etapa.
   Antes de gerar uma migração nova, revise o diff do Drizzle Kit: o snapshot histórico de `drizzle/`
   não registra todas as tabelas já gerenciadas por SQL manual, então gerar cegamente pode propor
   recriar objetos que já existem. Mantenha as definições de `schema.ts` refletidas no SQL manual.
@@ -429,7 +432,8 @@ documente aqui.
 | `npm run lint:fix` | Biome com correções/format |
 | `npm test` | testes (Vitest, one-shot) |
 | `npm run test:watch` | testes em watch |
-| `npm run db:migrate` | aplica migrações Drizzle |
+| `npm run db:migrate` | aplica migrações Drizzle e depois os SQLs de `src/db/migrations/` |
+| `npm run db:migrate:sql` | aplica só os SQLs de `src/db/migrations/` pendentes |
 | `npm run db:seed` | cria contas de desenvolvimento |
 | `npm run email:dev` | preview dos templates React Email (porta 3001) |
 
@@ -489,7 +493,7 @@ documente aqui.
   internas. Com `href` navega para o destino; sem `href` volta no histórico (ou para `/`). O link
   "Voltar para o login" dentro dos cartões de autenticação é um link de texto e não faz parte do
   padrão.
-- **Migrações de restrições:** `src/db/migrations/20261022_project_constraints.sql` garante que os índices e checks do schema existam também em bancos Neon que receberam migrações manuais parciais. O script usa `IF NOT EXISTS`/consultas a `pg_constraint` para poder ser repetido sem recriar restrições já corretas. Os índices de usuários também estão em `20261014_admin_user_registration.sql`; os checks de progresso, em `20261014_project_progress.sql`; e os checks de semestre/status, em `20261021_projects.sql`. Os arquivos desta pasta são SQL manual: execute-os em ordem cronológica no SQL Editor do Neon. `npm run db:migrate` usa o diretório `drizzle/` e não aplica automaticamente estes arquivos manuais.
+- **Migrações de restrições:** `src/db/migrations/20261022_project_constraints.sql` garante que os índices e checks do schema existam também em bancos Neon que receberam migrações manuais parciais. O script usa `IF NOT EXISTS`/consultas a `pg_constraint` para poder ser repetido sem recriar restrições já corretas. Os índices de usuários também estão em `20261014_admin_user_registration.sql`; os checks de progresso, em `20261014_project_progress.sql`; e os checks de semestre/status, em `20261021_projects.sql`. Os arquivos desta pasta são aplicados em ordem cronológica por `npm run db:migrate`, que registra cada um em `sql_migrations`; não há etapa manual no Neon.
 
 ## 18. Orientadores, desativação e exclusão
 
@@ -703,7 +707,7 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - A tabela `courses` (`id`, `name`, `abbreviation`, `active`) define os cursos que podem ser
   escolhidos. `users.course` continua guardando o **nome** do curso (sem chave estrangeira), então
   renomear um curso atualiza os usuários vinculados na mesma `db.batch`.
-- Migração: `src/db/migrations/20261102_courses.sql` (idempotente, executar no Neon). Uma cópia da SQL
+- Migração: `src/db/migrations/20261102_courses.sql` (idempotente, aplicada por `npm run db:migrate`). Uma cópia da SQL
   está em `drizzle-repair/20261102100000_courses/migration.sql`, mas o script `db:migrate:repair` e o
   `drizzle-repair.config.ts` foram removidos, então essa pasta não é executada por nenhum comando.
   Ela cria a tabela, semeia **Desenvolvimento de Software Multiplataforma (DSM)**, padroniza

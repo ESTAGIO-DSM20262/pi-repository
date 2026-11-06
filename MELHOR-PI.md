@@ -5,10 +5,10 @@ A branch `feat/acessibilidade` mantém as melhorias de acessibilidade e incorpor
 ## Antes de usar
 
 1. Instale as dependências com `npm ci` e configure as variáveis descritas em `.env.example`.
-2. No banco PostgreSQL/Neon do projeto, aplique `src/db/migrations/20261105_semester_awards.sql`, depois das migrações existentes que criam `users` e `projects` (`20261021_projects.sql` e `20261027_project_advisors_verification.sql`, esta última cria `projects.active`). O SQL é transacional e pode ser reaplicado, inclusive em bancos que já receberam a versão anterior: a restrição única criada com nome automático é renomeada para `semester_awards_project_unique`. Não apaga projetos nem indicações.
+2. Rode `npm run db:migrate`. Depois das migrations do Drizzle, ele aplica automaticamente `src/db/migrations/20261105_semester_awards.sql`, que vem depois de `20261021_projects.sql` e `20261027_project_advisors_verification.sql` (esta última cria `projects.active`). O SQL é transacional e pode ser reaplicado, inclusive em bancos que já receberam a versão anterior: a restrição única criada com nome automático é renomeada para `semester_awards_project_unique`. Não apaga projetos nem indicações.
 3. Inicie o sistema e acesse o painel como administrador ou orientador principal de um projeto.
 
-O comando `npm run db:migrate` não executa essa migração manual. Nenhuma alteração foi aplicada ao banco remoto durante esta entrega.
+Não há SQL manual a executar no banco. Nenhuma alteração foi aplicada ao banco remoto durante esta entrega.
 
 ## Como funciona
 
