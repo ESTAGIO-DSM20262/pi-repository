@@ -6,8 +6,8 @@ function stripLineComments(statement: string) {
 
 /**
  * Divide um arquivo SQL em comandos individuais, respeitando strings, comentários e blocos
- * `$$ ... $$` (funções e DO). Remove `BEGIN`/`COMMIT`, pois o executor já usa uma transação por
- * arquivo, e descarta trechos que são apenas comentários.
+ * `$$ ... $$` (funções e DO). Remove `BEGIN`/`COMMIT`, pois o executor já usa uma transação
+ * por arquivo, e descarta trechos que são apenas comentários.
  */
 export function splitSqlStatements(content: string) {
   const sql = content.replace(/\r\n/g, '\n')
