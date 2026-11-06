@@ -58,7 +58,8 @@ export function ProjectCard({
             )}
             {p.verified && (
               <span className="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-[0.6875rem] font-semibold text-secondary-hover border border-accent">
-                <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> PI Indicado
+                <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> PI
+                Indicado
               </span>
             )}
           </div>

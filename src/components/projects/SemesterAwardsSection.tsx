@@ -234,8 +234,8 @@ function ChoiceDetails({ pending }: { pending: PendingChoice }) {
       </li>
       <li>{suggestion}</li>
       <li>
-        Só os melhores PIs de cada semestre seguem para o site da Fatec Itaquera, na aba
-        Projetos Integradores.
+        Só os melhores PIs de cada semestre seguem para o site da Fatec Itaquera, na aba Projetos
+        Integradores.
       </li>
       {item.winnerTitle && (
         <li>

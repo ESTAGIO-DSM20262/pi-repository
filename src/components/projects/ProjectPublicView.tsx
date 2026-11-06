@@ -455,7 +455,8 @@ export function ProjectPublicView({
           className="mb-4 flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-800"
         >
           <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" />
-          Projeto desativado: ele fica oculto para os demais usuários e continua visível para os orientadores e administradores.
+          Projeto desativado: ele fica oculto para os demais usuários e continua visível para os
+          orientadores e administradores.
         </p>
       )}
 
@@ -468,8 +469,8 @@ export function ProjectPublicView({
           )}
           {project.bestOfSemester && (
             <span className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-1 text-[0.625rem] font-bold text-white sm:text-[0.6875rem]">
-              <i className="fi fi-rr-trophy flex" aria-hidden="true" /> Melhor PI de {project.cycle} ·{' '}
-              {project.semester}º semestre
+              <i className="fi fi-rr-trophy flex" aria-hidden="true" /> Melhor PI de {project.cycle}{' '}
+              · {project.semester}º semestre
             </span>
           )}
           {project.verified && (

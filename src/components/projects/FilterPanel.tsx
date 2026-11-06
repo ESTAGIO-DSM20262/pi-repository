@@ -127,6 +127,8 @@ function FilterFields({
 
       <Group title="Semestre letivo">
         <SelectDropdown
+          searchable
+          searchPlaceholder="Pesquisar semestre..."
           ariaLabel="Semestre letivo"
           value={filters.cycle}
           onChange={(cycle) => onChange({ cycle })}
