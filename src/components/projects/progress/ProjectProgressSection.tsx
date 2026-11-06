@@ -166,7 +166,7 @@ export function ProjectProgressSection({
             <i className="fi fi-rr-time-fast flex text-base text-primary" aria-hidden="true" />
             Progresso do Projeto
           </h2>
-          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[13px]">
+          <p className="mt-1 max-w-2xl text-xs leading-relaxed text-slate-600 sm:text-[0.8125rem]">
             {projectStatus === 'publicado'
               ? 'Histórico das tarefas e orientações registradas durante o desenvolvimento deste projeto.'
               : canManage
@@ -176,7 +176,7 @@ export function ProjectProgressSection({
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {!canManage && (
-            <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 text-[11px] font-semibold text-slate-600">
+            <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 text-[0.6875rem] font-semibold text-slate-600">
               <i className="fi fi-rr-lock flex" aria-hidden="true" />
               {projectStatus === 'publicado'
                 ? 'Projeto concluído · somente consulta'
@@ -256,11 +256,11 @@ export function ProjectProgressSection({
             {selectedTask ? (
               <>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-primary px-2 py-1 text-[10px] font-extrabold tracking-wide text-white">
+                  <span className="rounded bg-primary px-2 py-1 text-[0.625rem] font-extrabold tracking-wide text-white">
                     {versionLabel(selectedTask)}
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold ${STATUS[selectedTask.status].badge}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.625rem] font-bold ${STATUS[selectedTask.status].badge}`}
                   >
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${STATUS[selectedTask.status].dot.split(' ')[0]}`}
@@ -271,13 +271,13 @@ export function ProjectProgressSection({
                 <h3 className="mt-3 text-base font-bold leading-snug text-slate-900 sm:text-lg">
                   {selectedTask.title}
                 </h3>
-                <p className="mt-3 whitespace-pre-line break-words text-[13px] leading-relaxed text-[#666666]">
+                <p className="mt-3 whitespace-pre-line break-words text-[0.8125rem] leading-relaxed text-text-secondary">
                   {selectedTask.description}
                 </p>
 
                 <dl className="mt-5 grid grid-cols-1 gap-2 border-t border-slate-200 pt-4 text-xs sm:grid-cols-2">
                   <div className="rounded-md border border-slate-200 bg-white p-3">
-                    <dt className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    <dt className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-wide text-slate-500">
                       <i className="fi fi-rr-user flex text-primary" aria-hidden="true" />{' '}
                       Responsável
                     </dt>
@@ -289,7 +289,7 @@ export function ProjectProgressSection({
                     </dd>
                   </div>
                   <div className="rounded-md border border-slate-200 bg-white p-3">
-                    <dt className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                    <dt className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-wide text-slate-500">
                       <i className="fi fi-rr-calendar flex text-primary" aria-hidden="true" /> Prazo
                     </dt>
                     <dd className="mt-1.5 font-semibold text-slate-800">
@@ -299,7 +299,7 @@ export function ProjectProgressSection({
                 </dl>
 
                 <div className="mt-auto pt-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-[0.625rem] text-slate-500">
                     <span>
                       Criada por{' '}
                       <strong className="text-slate-700">{selectedTask.createdByName}</strong>
@@ -318,7 +318,7 @@ export function ProjectProgressSection({
                       <button
                         type="button"
                         onClick={() => openEditDialog(selectedTask)}
-                        className="cursor-pointer inline-flex min-h-8 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 text-[11px] font-bold text-primary transition hover:border-primary hover:bg-primary-light/40"
+                        className="cursor-pointer inline-flex min-h-8 items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 text-[0.6875rem] font-bold text-primary transition hover:border-primary hover:bg-primary-light/40"
                       >
                         <i className="fi fi-rr-edit flex" aria-hidden="true" /> Editar tarefa
                       </button>
@@ -350,26 +350,26 @@ export function ProjectProgressSection({
                               className="rounded-md border border-slate-200 bg-white p-3"
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-[11px] font-extrabold text-primary">
+                                <span className="text-[0.6875rem] font-extrabold text-primary">
                                   v{revision.versionMajor}.{revision.versionMinor}
                                 </span>
-                                <span className="text-[10px] text-slate-500">
+                                <span className="text-[0.625rem] text-slate-500">
                                   {formatDateTime(revision.changedAt)}
                                 </span>
                               </div>
-                              <p className="mt-1 text-[11px] font-bold text-slate-800">
+                              <p className="mt-1 text-[0.6875rem] font-bold text-slate-800">
                                 {revision.title}
                               </p>
-                              <p className="mt-1 line-clamp-3 break-words whitespace-pre-line text-[11px] leading-relaxed text-slate-600">
+                              <p className="mt-1 line-clamp-3 break-words whitespace-pre-line text-[0.6875rem] leading-relaxed text-slate-600">
                                 {revision.description}
                               </p>
                               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                                 <span
-                                  className={`rounded-full border px-2 py-0.5 text-[9px] font-bold ${STATUS[revision.status].badge}`}
+                                  className={`rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold ${STATUS[revision.status].badge}`}
                                 >
                                   {STATUS[revision.status].label}
                                 </span>
-                                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[9px] font-semibold text-slate-600">
+                                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[0.5625rem] font-semibold text-slate-600">
                                   {revision.targetStudentEmail
                                     ? (memberNameByEmail.get(
                                         revision.targetStudentEmail.toLowerCase(),
@@ -377,12 +377,12 @@ export function ProjectProgressSection({
                                     : 'Todo o grupo'}
                                 </span>
                                 {revision.dueDate && (
-                                  <span className="text-[9px] text-slate-500">
+                                  <span className="text-[0.5625rem] text-slate-500">
                                     Prazo: {formatDateOnly(revision.dueDate)}
                                   </span>
                                 )}
                               </div>
-                              <p className="mt-2 border-t border-slate-100 pt-2 text-[10px] leading-relaxed text-slate-500">
+                              <p className="mt-2 border-t border-slate-100 pt-2 text-[0.625rem] leading-relaxed text-slate-500">
                                 {revision.action === 'created'
                                   ? 'Tarefa criada'
                                   : 'Tarefa revisada'}{' '}
@@ -416,7 +416,7 @@ export function ProjectProgressSection({
               <h3 className="text-xs font-bold uppercase tracking-wide text-slate-700">
                 Entregas e versões
               </h3>
-              <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-600">
+              <span className="rounded-full bg-slate-100 px-2 py-1 text-[0.625rem] font-bold text-slate-600">
                 {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}
               </span>
             </div>
@@ -432,7 +432,7 @@ export function ProjectProgressSection({
                       className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${STATUS[task.status].dot}`}
                     >
                       <i
-                        className={`fi ${task.status === 'completed' ? 'fi-rr-check' : task.status === 'in_progress' ? 'fi-rr-hourglass-start' : 'fi-rr-clock'} flex text-[11px] text-white`}
+                        className={`fi ${task.status === 'completed' ? 'fi-rr-check' : task.status === 'in_progress' ? 'fi-rr-hourglass-start' : 'fi-rr-clock'} flex text-[0.6875rem] text-white`}
                         aria-hidden="true"
                       />
                     </span>
@@ -444,22 +444,22 @@ export function ProjectProgressSection({
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-extrabold ${selected ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'}`}
+                          className={`rounded px-1.5 py-0.5 text-[0.625rem] font-extrabold ${selected ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'}`}
                         >
                           {versionLabel(task)}
                         </span>
-                        <span className="text-[9px] font-semibold text-slate-500">
+                        <span className="text-[0.5625rem] font-semibold text-slate-500">
                           {STATUS[task.status].label}
                         </span>
                       </div>
-                      <p className="mt-1 line-clamp-2 break-words text-xs font-bold leading-snug text-slate-900 sm:text-[13px]">
+                      <p className="mt-1 line-clamp-2 break-words text-xs font-bold leading-snug text-slate-900 sm:text-[0.8125rem]">
                         {task.title}
                       </p>
-                      <p className="mt-1 flex items-center gap-1 text-[10px] text-slate-500">
+                      <p className="mt-1 flex items-center gap-1 text-[0.625rem] text-slate-500">
                         <i className="fi fi-rr-clock flex" aria-hidden="true" /> Atualizada em{' '}
                         {formatDateTime(task.updatedAt)}
                       </p>
-                      <p className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-500">
+                      <p className="mt-0.5 flex items-center gap-1 text-[0.625rem] text-slate-500">
                         <i className="fi fi-rr-user flex" aria-hidden="true" /> Criada por{' '}
                         {task.createdByName}
                       </p>
@@ -479,7 +479,7 @@ export function ProjectProgressSection({
                 )
               })}
             </ol>
-            <p className="mt-3 border-t border-slate-100 pt-3 text-[10px] leading-relaxed text-slate-500">
+            <p className="mt-3 border-t border-slate-100 pt-3 text-[0.625rem] leading-relaxed text-slate-500">
               <i
                 className="fi fi-rr-info inline-flex align-[-2px] text-primary"
                 aria-hidden="true"

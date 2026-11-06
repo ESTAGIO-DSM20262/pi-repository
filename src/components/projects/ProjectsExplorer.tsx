@@ -21,11 +21,11 @@ import { ResultsBar } from './ResultsBar'
 import { SearchBar } from './SearchBar'
 
 const PAGE_SIZE = 6
-const GRID = 'grid gap-5 sm:grid-cols-2 xl:grid-cols-3'
+const GRID = 'grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3'
 
 function Hero({ total, verified }: { total: number; verified: number }) {
   return (
-    <section className="relative isolate flex flex-col gap-6 overflow-hidden rounded-xl border border-border bg-surface py-6 pl-8 pr-6 shadow-sm sm:py-8 sm:pl-10 sm:pr-8 md:flex-row md:items-center md:justify-between">
+    <section className="relative isolate flex flex-col gap-6 overflow-hidden rounded-xl border border-border bg-surface py-5 pl-6 pr-4 shadow-sm sm:py-8 sm:pl-10 sm:pr-8 md:flex-row md:items-center md:justify-between">
       <span className="absolute inset-y-0 left-0 w-2 bg-primary" aria-hidden="true" />
       <span className="absolute inset-y-0 left-2 w-1 bg-secondary" aria-hidden="true" />
       <div
@@ -33,10 +33,10 @@ function Hero({ total, verified }: { total: number; verified: number }) {
         aria-hidden="true"
       />
       <div className="max-w-2xl">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs">
+        <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
           Fatec Itaquera – Repositório oficial
         </p>
-        <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
           Projetos Integradores
         </h1>
         <div className="mt-3 flex h-1 w-16 gap-0.5" aria-hidden="true">
@@ -50,19 +50,19 @@ function Hero({ total, verified }: { total: number; verified: number }) {
         </p>
       </div>
 
-      <dl className="flex shrink-0 divide-x divide-border self-start rounded-lg border border-border bg-surface-secondary md:self-center">
-        <div className="px-6 py-3 text-center">
-          <dd className="text-2xl font-bold text-slate-900">{total}</dd>
-          <dt className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
+      <dl className="flex w-full shrink-0 divide-x divide-border rounded-lg border border-border bg-surface-secondary md:w-auto md:self-center">
+        <div className="flex-1 px-4 py-2.5 text-center sm:px-6 sm:py-3 md:flex-none">
+          <dd className="text-xl sm:text-2xl font-bold text-slate-900">{total}</dd>
+          <dt className="mt-0.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-600">
             PIs no acervo
           </dt>
         </div>
-        <div className="bg-accent-light px-6 py-3 text-center">
-          <dd className="flex items-center justify-center gap-1.5 text-2xl font-bold text-secondary-hover">
+        <div className="flex-1 bg-accent-light px-4 py-2.5 text-center sm:px-6 sm:py-3 md:flex-none">
+          <dd className="flex items-center justify-center gap-1.5 text-xl sm:text-2xl font-bold text-secondary-hover">
             {verified}{' '}
             <i className="fi fi-rr-check-circle flex text-base text-primary" aria-hidden="true" />
           </dd>
-          <dt className="mt-0.5 text-[11px] font-semibold uppercase tracking-wider text-secondary-hover">
+          <dt className="mt-0.5 text-[0.6875rem] font-semibold uppercase tracking-wider text-secondary-hover">
             Indicados
           </dt>
         </div>
@@ -297,7 +297,7 @@ export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: Proj
               <p className="text-sm font-bold text-slate-900">
                 Está desenvolvendo o seu Projeto Integrador?
               </p>
-              <p className="mt-0.5 text-[13px] leading-relaxed text-text-secondary">
+              <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-text-secondary">
                 Utilize os projetos indicados como padrão de documentação de requisitos funcionais,
                 modelagem C4 e arquitetura de banco de dados.
               </p>

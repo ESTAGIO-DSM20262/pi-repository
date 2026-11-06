@@ -1,4 +1,5 @@
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
+import { formatCourseWithAbbreviation } from '@/application/courses/course-rules'
 import type { ProfileRecord } from '@/presentation/profile/profile-record'
 import type { ProfileFormInput } from '@/presentation/profile/validation'
 import {
@@ -67,7 +68,14 @@ export function AccountFields({ profile, register, errors }: AccountFieldsProps)
             label="Registro Acadêmico (RA)"
             value={profile.registrationNumber ?? 'Não informado'}
           />
-          <ReadOnlyField label="Curso" value={profile.course ?? 'Não informado'} />
+          <ReadOnlyField
+            label="Curso"
+            value={
+              profile.course
+                ? formatCourseWithAbbreviation(profile.course, profile.courseAbbreviation)
+                : 'Não informado'
+            }
+          />
         </>
       )}
       {profile.role === 'professor' && (

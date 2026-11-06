@@ -144,20 +144,29 @@ export function StatCard({
   const valueStyles = TONE_STYLES[valueTone ?? tone]
 
   return (
-    <article className="min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm sm:p-5">
+    <article className="min-w-0 rounded-xl border border-border bg-white p-3 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium leading-5 text-text-secondary sm:text-[13px]">{title}</p>
+        <p className="text-[0.6875rem] font-medium leading-4 text-text-secondary sm:text-[0.8125rem] sm:leading-5">
+          {title}
+        </p>
         <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${styles.chip}`}
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg sm:h-9 sm:w-9 ${styles.chip}`}
         >
           <i className={`fi ${icon} flex text-base ${styles.icon}`} aria-hidden="true" />
         </span>
       </div>
-      <p className={`mt-3 text-3xl font-bold tracking-tight tabular-nums ${valueStyles.value}`}>
+      <p
+        className={`mt-2 text-2xl font-bold tracking-tight tabular-nums sm:mt-3 sm:text-3xl ${valueStyles.value}`}
+      >
         {value}
       </p>
-      <p className="mt-1 min-h-8 text-[11px] leading-relaxed text-text-secondary">{note}</p>
-      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-border-light" aria-hidden="true">
+      <p className="mt-1 text-[0.6875rem] leading-snug text-text-secondary sm:min-h-8 sm:leading-relaxed">
+        {note}
+      </p>
+      <div
+        className="mt-2 h-1.5 overflow-hidden rounded-full bg-border-light sm:mt-3"
+        aria-hidden="true"
+      >
         <div
           className={`h-full rounded-full transition-all ${styles.bar}`}
           style={{ width: `${Math.max(0, Math.min(100, ratio))}%` }}
@@ -193,7 +202,7 @@ export function Panel({
             {title}
           </h3>
           {subtitle && (
-            <p className="mt-0.5 text-[11px] text-text-secondary sm:text-xs">{subtitle}</p>
+            <p className="mt-0.5 text-[0.6875rem] text-text-secondary sm:text-xs">{subtitle}</p>
           )}
         </div>
         {action}
@@ -294,7 +303,7 @@ export function DonutChart({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-2xl font-bold tabular-nums text-slate-900">{centerValue}</span>
-          <span className="text-[10px] font-medium uppercase tracking-wide text-text-secondary">
+          <span className="text-[0.625rem] font-medium uppercase tracking-wide text-text-secondary">
             {centerLabel}
           </span>
         </div>
@@ -366,7 +375,7 @@ export function ColumnChart({
               key={column.label}
               className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1"
             >
-              <span className="text-center text-[11px] font-semibold tabular-nums text-slate-700">
+              <span className="text-center text-[0.6875rem] font-semibold tabular-nums text-slate-700">
                 {total > 0 ? total : ''}
               </span>
               <div
@@ -391,7 +400,7 @@ export function ColumnChart({
         {columns.map((column) => (
           <span
             key={column.label}
-            className="min-w-0 flex-1 truncate text-center text-[10px] font-medium text-text-secondary"
+            className="min-w-0 flex-1 truncate text-center text-[0.625rem] font-medium text-text-secondary"
           >
             {column.label}
           </span>
@@ -400,7 +409,10 @@ export function ColumnChart({
       {legend && (
         <ul className="flex flex-wrap gap-x-4 gap-y-1">
           {legend.map((item) => (
-            <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+            <li
+              key={item.label}
+              className="flex items-center gap-1.5 text-[0.6875rem] text-slate-700"
+            >
               <span
                 className={`h-2 w-2 rounded-full ${TONE_STYLES[item.tone].dot}`}
                 aria-hidden="true"
@@ -446,7 +458,7 @@ export function ToneLegend({ items }: { items: Array<{ tone: WidgetTone; label: 
   return (
     <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-border-light pt-2.5">
       {items.map((item) => (
-        <li key={item.label} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+        <li key={item.label} className="flex items-center gap-1.5 text-[0.6875rem] text-slate-700">
           <span
             className={`h-2 w-2 shrink-0 rounded-full ${TONE_STYLES[item.tone].dot}`}
             aria-hidden="true"
@@ -461,7 +473,7 @@ export function ToneLegend({ items }: { items: Array<{ tone: WidgetTone; label: 
 export function Badge({ tone, children }: { tone: WidgetTone; children: ReactNode }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[10px] font-semibold ${TONE_STYLES[tone].badge}`}
+      className={`inline-flex shrink-0 items-center rounded px-2 py-0.5 text-[0.625rem] font-semibold ${TONE_STYLES[tone].badge}`}
     >
       {children}
     </span>

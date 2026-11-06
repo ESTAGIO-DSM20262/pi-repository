@@ -4,7 +4,7 @@ import { isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 import type { ProjectRepository } from '@/domain/enterprise/repositories/project-repository'
 import { ProjectOperationError } from './project-operation-error'
-import { canManageActivation, type ProjectViewer } from './project-permissions'
+import { canDeleteProject, type ProjectViewer } from './project-permissions'
 
 interface DeleteProjectRequest {
   viewer: Pick<ProjectViewer, 'role'>
@@ -23,7 +23,7 @@ export class DeleteProjectUseCase
     viewer,
     projectId,
   }: DeleteProjectRequest): Promise<Either<ProjectOperationError, { id: string }>> {
-    if (!canManageActivation(viewer)) {
+    if (!canDeleteProject(viewer)) {
       return left(new ProjectOperationError('Somente administradores podem excluir projetos.', 403))
     }
     const project = await this.reader.findById(projectId)

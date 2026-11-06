@@ -1,0 +1,207 @@
+@import "./accessibility-tokens.css";
+
+:root {
+  --focus-color: #005c6d;
+  --focus-halo: #ffffff;
+  --color-slate-400: #5f6e82;
+  --color-slate-500: #526173;
+  --vlibras-btn-focus-visible-outline: 3px solid #b20000;
+  --vlibras-btn-focus-visible-shadow: 0 0 0 4px #ffffff, 0 0 0 7px #b20000;
+  --vlibras-btn-hover-filter: brightness(1.12);
+}
+
+@layer base {
+  :where(a, button, summary, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--focus-color);
+    outline-offset: 2px;
+  }
+}
+
+html {
+  scroll-padding-top: 1rem;
+}
+
+html[data-a11y-text="110"] {
+  font-size: 110%;
+}
+
+html[data-a11y-text="125"] {
+  font-size: 125%;
+}
+
+html[data-a11y-text="150"] {
+  font-size: 150%;
+}
+
+html[data-a11y-text="175"] {
+  font-size: 175%;
+}
+
+html[data-a11y-text="200"] {
+  font-size: 200%;
+}
+
+html[data-a11y-theme="dark"] {
+  --focus-color: #7dd3fc;
+  --focus-halo: #111820;
+}
+
+html[data-a11y-theme="dark"] body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+html[data-a11y-theme="dark"] ::placeholder {
+  color: var(--text-muted);
+}
+
+html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"]) {
+  --focus-color: #000000;
+  --focus-halo: #ffe600;
+}
+
+html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"]) .text-primary,
+html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"]) .hover\:text-primary:hover {
+  color: var(--primary);
+}
+
+html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"]) [class*="border"] {
+  border-color: var(--border);
+}
+
+:where(html[data-a11y-contrast="high"][data-a11y-theme="dark"]) a {
+  color: #00ffff;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+:where(html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"])) main a,
+:where(html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"])) footer a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"])
+  :where(.shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl) {
+  box-shadow: var(--shadow-1);
+}
+
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] {
+  color-scheme: dark;
+  --primary: #ffdf00;
+  --primary-hover: #fff36a;
+  --primary-light: #242000;
+  --secondary: #00ffff;
+  --secondary-hover: #00ffff;
+  --accent: #00ffff;
+  --accent-hover: #ffffff;
+  --accent-light: #092b2b;
+  --background: #000000;
+  --surface: #000000;
+  --surface-secondary: #111111;
+  --foreground: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #ffffff;
+  --border: #ffffff;
+  --border-light: #ffffff;
+  --focus-color: #ffdf00;
+  --focus-halo: #000000;
+}
+
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] body,
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] :where([class*="bg-"]) {
+  background-color: #000000;
+}
+
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] :where([class*="text-"]),
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] body {
+  color: #ffffff;
+}
+
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] :where(.border, [class*="border-"]) {
+  border-color: #ffffff;
+}
+
+html[data-a11y-contrast="high"][data-a11y-theme="dark"]
+  :where(button, .bg-primary, .bg-primary-hover) {
+  background-color: #242000;
+  color: #ffdf00;
+  border: 2px solid #ffdf00;
+}
+
+html[data-a11y-contrast="high"][data-a11y-theme="dark"] :where(input, select, textarea) {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+html[data-a11y-underline="on"] :where(main, header, footer, nav) a {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.2em;
+}
+
+html[data-a11y-focus="strong"] :focus-visible {
+  outline: 3px solid var(--focus-color);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--focus-halo);
+}
+
+html[data-a11y-motion="reduce"] *,
+html[data-a11y-motion="reduce"] *::before,
+html[data-a11y-motion="reduce"] *::after {
+  animation-duration: 0.01ms;
+  animation-iteration-count: 1;
+  transition-duration: 0.01ms;
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:root:root *,
+  html:root:root *::before,
+  html:root:root *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  html:root :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 3px;
+  }
+}
+
+.skip-links {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+
+.skip-links button {
+  position: absolute;
+  left: -9999px;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #7e0000;
+  font-size: 0.875rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 0 0 3px #b20000;
+}
+
+.skip-links button:focus {
+  position: static;
+}
+
+html[data-a11y-theme="dark"] .text-secondary-hover,
+html[data-a11y-theme="dark"] .hover\:text-secondary-hover:hover {
+  color: var(--accent);
+}

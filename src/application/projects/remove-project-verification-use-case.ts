@@ -8,7 +8,7 @@ import {
 import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 import type { ProjectVerificationRepository } from '@/domain/enterprise/repositories/project-verification-repository'
 import { ProjectOperationError } from './project-operation-error'
-import { canVerifyProject, type ProjectViewer } from './project-permissions'
+import { canVerifyProject, canViewProject, type ProjectViewer } from './project-permissions'
 
 interface RemoveProjectVerificationRequest {
   viewer: ProjectViewer
@@ -33,13 +33,13 @@ export class RemoveProjectVerificationUseCase
     projectId,
   }: RemoveProjectVerificationRequest): Promise<RemoveProjectVerificationResponse> {
     const project = await this.reader.findById(projectId)
-    if (!project || (project.active === false && viewer.role !== 'admin')) {
+    if (!project || !canViewProject(project, viewer)) {
       return left(new ProjectOperationError('Projeto não encontrado.', 404))
     }
     if (!canVerifyProject(project, viewer)) {
       return left(
         new ProjectOperationError(
-          'Somente os professores orientadores ou um administrador podem remover a indicação deste projeto.',
+          'Somente os professores orientadores podem remover a indicação deste projeto.',
           403,
         ),
       )

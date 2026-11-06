@@ -476,21 +476,21 @@ export function ProjectFormPage({
   return (
     <div className="w-full bg-background px-3 py-4 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-4 rounded-2xl border border-border bg-white p-3 shadow-sm sm:mb-5 sm:p-6">
-          <div className="flex items-start gap-2.5 sm:gap-3">
+        <div className="mb-4 rounded-2xl border border-border bg-white p-3.5 shadow-sm sm:mb-5 sm:p-6">
+          <div className="flex min-w-0 items-start gap-2.5 sm:gap-3">
             <BackButton
               href={backHref}
               replace={isEdit}
               label={isEdit ? 'Voltar ao projeto' : 'Voltar ao painel'}
             />
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
                 Projeto Integrador
               </p>
-              <h1 className="mt-1 text-xl font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
+              <h1 className="mt-1 break-words text-lg font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
                 {pageTitle}
               </h1>
-              <p className="mt-1.5 max-w-2xl text-[11px] leading-relaxed text-text-secondary sm:text-sm">
+              <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
                 {pageDescription}
               </p>
             </div>
@@ -635,7 +635,7 @@ export function ProjectFormPage({
                           <label className={labelClass} htmlFor="project-summary">
                             Resumo <Required />
                           </label>
-                          <span className="mb-1.5 text-[11px] font-semibold text-[#666666]">
+                          <span className="mb-1.5 text-[0.6875rem] font-semibold text-text-secondary">
                             {summary.length} / 600 caracteres
                           </span>
                         </div>
@@ -657,7 +657,7 @@ export function ProjectFormPage({
                             Descrição detalhada{' '}
                             <span className="font-normal text-slate-500">(opcional)</span>
                           </label>
-                          <span className="mb-1.5 text-[11px] font-semibold text-[#666666]">
+                          <span className="mb-1.5 text-[0.6875rem] font-semibold text-text-secondary">
                             {overview.length} / 5000 caracteres
                           </span>
                         </div>
@@ -778,7 +778,7 @@ export function ProjectFormPage({
                             >
                               <div className="mb-4 flex items-center justify-between gap-2">
                                 <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-900">
-                                  <span className="rounded bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                  <span className="rounded bg-primary px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
                                     v{index + 1}.0
                                   </span>
                                   Tarefa {index + 1}
@@ -832,6 +832,8 @@ export function ProjectFormPage({
                                     <span className={labelClass}>Responsável pela entrega</span>
                                     <SelectDropdown
                                       value={task.targetStudentEmail}
+                                      searchable
+                                      searchPlaceholder="Pesquisar pelo nome..."
                                       ariaLabel={`Responsável pela tarefa ${index + 1}`}
                                       width="full"
                                       tone="muted"
@@ -880,14 +882,14 @@ export function ProjectFormPage({
             <section className={sectionClass}>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="slate">Somente leitura</Badge>
-                <span className="text-xs text-[#666666]">
+                <span className="text-xs text-text-secondary">
                   {initialValues?.semester}º semestre · ciclo {initialValues?.cycle}
                 </span>
               </div>
               <h2 className="mt-3 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 {initialValues?.title}
               </h2>
-              <p className="mt-1 text-xs text-[#666666] sm:text-[13px]">
+              <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
                 Orientador:{' '}
                 {professors.find((professor) => professor.email === advisorEmail)?.name ??
                   advisorEmail}

@@ -1,10 +1,16 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { asc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
+import { type CourseRecord, resolveUserCourse } from '@/application/courses/course-rules'
+import {
+  isValidStudentRegistrationNumber,
+  STUDENT_REGISTRATION_ERROR,
+} from '@/application/users/registration-number'
 import { type ImportedUserRow, parseUserWorkbook } from '@/application/users/user-import'
 import { db } from '@/db'
 import { accounts, sessions, users } from '@/db/schema'
 import { isRole, type Role } from '@/domain/enterprise/entities/role'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { auth } from '@/libs/auth'
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
@@ -55,12 +61,14 @@ async function requireAdmin(request: Request) {
   return { ok: true as const, session }
 }
 
-function normalizeAndValidate(input: UserInput): Omit<ImportedUserRow, 'sheet' | 'rowNumber'> {
+function normalizeAndValidate(
+  input: UserInput,
+  courses: CourseRecord[],
+): Omit<ImportedUserRow, 'sheet' | 'rowNumber'> {
   const name = normalizedString(input.name)
   const email = normalizedString(input.email).toLowerCase()
   const role = input.role
   const registrationNumber = normalizedString(input.registrationNumber)
-  const course = normalizedString(input.course)
 
   if (name.length < 3) throw new UserInputError('Informe o nome completo do usuário.')
   if (name.length > 160) throw new UserInputError('O nome deve ter no máximo 160 caracteres.')
@@ -71,16 +79,23 @@ function normalizeAndValidate(input: UserInput): Omit<ImportedUserRow, 'sheet' |
     throw new UserInputError('Selecione um perfil válido: aluno, professor ou administrador.')
   if (registrationNumber.length > 80)
     throw new UserInputError('RA/matrícula deve ter no máximo 80 caracteres.')
-  if (course.length > 160) throw new UserInputError('O curso deve ter no máximo 160 caracteres.')
 
   if (role !== 'admin' && !registrationNumber) {
     throw new UserInputError(
       role === 'student' ? 'Informe o RA do aluno.' : 'Informe a matrícula funcional do professor.',
     )
   }
-  if (role === 'student' && !course) throw new UserInputError('Informe o curso do aluno.')
+  if (role === 'student' && !isValidStudentRegistrationNumber(registrationNumber))
+    throw new UserInputError(STUDENT_REGISTRATION_ERROR)
 
-  return { name, email, role, registrationNumber, course }
+  const resolvedCourse = resolveUserCourse({
+    input: input.course,
+    isStudent: role === 'student',
+    courses,
+  })
+  if (!resolvedCourse.ok) throw new UserInputError(resolvedCourse.error)
+
+  return { name, email, role, registrationNumber, course: resolvedCourse.course ?? '' }
 }
 
 function createTemporaryPassword() {
@@ -90,8 +105,9 @@ function createTemporaryPassword() {
 async function createUserAccount(
   input: UserInput,
   passwordContext: { hash: (password: string) => Promise<string> },
+  courses: CourseRecord[],
 ) {
-  const user = normalizeAndValidate(input)
+  const user = normalizeAndValidate(input, courses)
   const alreadyExists = await db
     .select({ id: users.id })
     .from(users)
@@ -155,7 +171,7 @@ async function createUserAccount(
 async function handleSingleCreate(request: Request) {
   const body = (await request.json()) as UserInput
   const context = await auth.$context
-  const credential = await createUserAccount(body, context.password)
+  const credential = await createUserAccount(body, context.password, await listCourses())
   return NextResponse.json(
     { credential },
     { status: 201, headers: { 'Cache-Control': 'no-store' } },
@@ -185,6 +201,7 @@ async function handleBulkCreate(request: Request) {
     return jsonError(`O limite é de ${MAX_IMPORT_ROWS} registros por lote.`, 400)
 
   const context = await auth.$context
+  const courses = await listCourses()
   const credentials: CredentialResult[] = []
   const skipped: Array<{ sheet: string; rowNumber: number; email: string; reason: string }> = []
   const errors: Array<{ sheet: string; rowNumber: number; email: string; reason: string }> = []
@@ -213,7 +230,7 @@ async function handleBulkCreate(request: Request) {
     if (email) seenEmails.add(email)
 
     try {
-      credentials.push(await createUserAccount(row, context.password))
+      credentials.push(await createUserAccount(row, context.password, courses))
     } catch (error) {
       const reason =
         error instanceof Error ? error.message : 'Falha inesperada ao cadastrar esta linha.'
@@ -314,8 +331,6 @@ export async function PATCH(request: Request) {
       body.registrationNumber === undefined
         ? current.registrationNumber
         : normalizedString(body.registrationNumber) || null
-    const nextCourse =
-      body.course === undefined ? current.course : normalizedString(body.course) || null
     const nextActive = body.active === undefined ? current.active : body.active
 
     const isEditingSelf = id === String(access.session.user.id)
@@ -340,8 +355,25 @@ export async function PATCH(request: Request) {
 
     if (nextRole !== 'admin' && !String(nextRegistration ?? '').trim())
       return jsonError('RA/matrícula é obrigatório para alunos e professores.', 400)
-    if (nextRole === 'student' && !String(nextCourse ?? '').trim())
-      return jsonError('Curso é obrigatório para alunos.', 400)
+    // RA antigo fora do padrão continua editável: a regra vale só para RA novo ou alterado.
+    if (
+      nextRole === 'student' &&
+      (nextRegistration !== current.registrationNumber || current.role !== 'student') &&
+      !isValidStudentRegistrationNumber(String(nextRegistration ?? ''))
+    )
+      return jsonError(STUDENT_REGISTRATION_ERROR, 400)
+
+    let nextCourse = current.course
+    if (body.course !== undefined || nextRole === 'student') {
+      const resolvedCourse = resolveUserCourse({
+        input: body.course === undefined ? current.course : body.course,
+        isStudent: nextRole === 'student',
+        courses: await listCourses(),
+        currentCourse: current.course,
+      })
+      if (!resolvedCourse.ok) return jsonError(resolvedCourse.error, 400)
+      nextCourse = resolvedCourse.course
+    }
 
     const updated = await db
       .update(users)

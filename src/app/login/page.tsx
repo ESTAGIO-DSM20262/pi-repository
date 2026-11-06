@@ -28,23 +28,19 @@ export default function LoginPage() {
             className="h-14 w-auto self-start"
           />
 
-          <span className="mt-6 inline-flex w-fit rounded border border-primary/20 bg-primary-light px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
-            Acesso institucional
-          </span>
-
           <div className="mt-5 flex h-1 w-16 gap-0.5" aria-hidden="true">
             <span className="flex-[3] bg-primary" />
             <span className="flex-[2] bg-secondary" />
             <span className="flex-1 bg-accent" />
           </div>
 
-          <h1 className="mt-5 text-[28px] font-semibold leading-snug text-foreground">
+          <h1 className="mt-5 text-[1.75rem] font-semibold leading-snug text-foreground">
             Portfólio de Projetos
             <br />
             Integradores
           </h1>
 
-          <p className="mt-4 max-w-[320px] text-[15px] leading-relaxed text-text-secondary">
+          <p className="mt-4 max-w-[320px] text-[0.9375rem] leading-relaxed text-text-secondary">
             Consulte, acompanhe e conheça os Projetos Integradores desenvolvidos pelos alunos da
             Fatec Itaquera.
           </p>
@@ -55,7 +51,7 @@ export default function LoginPage() {
                 className="fi fi-rr-check mt-px flex shrink-0 text-base leading-none text-primary"
                 aria-hidden="true"
               />
-              <p className="max-w-[290px] text-[13px] leading-relaxed text-text-secondary">
+              <p className="max-w-[290px] text-[0.8125rem] leading-relaxed text-text-secondary">
                 Acesso para alunos, professores, coordenação e gestão institucional.
               </p>
             </li>
@@ -64,7 +60,7 @@ export default function LoginPage() {
                 className="fi fi-rr-lock mt-px flex shrink-0 text-base leading-none text-secondary"
                 aria-hidden="true"
               />
-              <p className="max-w-[290px] text-[13px] leading-relaxed text-text-secondary">
+              <p className="max-w-[290px] text-[0.8125rem] leading-relaxed text-text-secondary">
                 Autenticação unificada via e-mail institucional do Centro Paula Souza.
               </p>
             </li>
@@ -82,7 +78,7 @@ export default function LoginPage() {
             />
             <span className="h-10 w-px bg-border" aria-hidden="true" />
             <div className="leading-tight">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
+              <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-secondary">
                 Centro Paula Souza
               </p>
               <p className="mt-1 text-sm font-bold text-foreground">Acervo Acadêmico</p>

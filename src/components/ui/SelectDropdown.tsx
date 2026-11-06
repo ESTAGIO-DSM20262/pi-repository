@@ -21,11 +21,23 @@ interface SelectDropdownProps {
   tone?: 'surface' | 'muted'
   layer?: 'default' | 'modal'
   className?: string
+  searchable?: boolean
+  searchPlaceholder?: string
+  emptyMessage?: string
 }
 
+const SEARCH_BAR_HEIGHT = 56
 const EXIT_DURATION = 150
 const DEFAULT_DROPDOWN_Z_INDEX = 100
 const MODAL_DROPDOWN_Z_INDEX = 2147483647
+
+function normalizeText(text: string) {
+  return text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
 
 export function SelectDropdown({
   value,
@@ -38,11 +50,17 @@ export function SelectDropdown({
   tone = 'surface',
   layer = 'default',
   className = '',
+  searchable = false,
+  searchPlaceholder = 'Pesquisar...',
+  emptyMessage = 'Nenhum resultado encontrado',
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({})
+  const [query, setQuery] = useState('')
+  const [focusSearch, setFocusSearch] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -51,14 +69,15 @@ export function SelectDropdown({
   const frameRef = useRef<number | null>(null)
   const listboxId = useId()
 
-  const selectedIndex = Math.max(
-    0,
-    options.findIndex((option) => option.value === value),
-  )
+  const normalizedQuery = normalizeText(query)
+  const visibleOptions =
+    searchable && normalizedQuery
+      ? options.filter((option) => normalizeText(option.label).includes(normalizedQuery))
+      : options
   const selectedOption = options.find((option) => option.value === value)
   const widthClass = width === 'full' ? 'w-full' : 'w-auto'
   const sizeClass =
-    size === 'compact' ? 'h-9 min-w-[168px] px-2.5 text-[13px]' : 'h-10 px-3.5 text-sm'
+    size === 'compact' ? 'h-9 min-w-[168px] px-2.5 text-[0.8125rem]' : 'h-10 px-3.5 text-sm'
   const toneClass = tone === 'muted' ? 'bg-surface-secondary' : 'bg-white'
 
   const updatePosition = useCallback(() => {
@@ -70,7 +89,7 @@ export function SelectDropdown({
     const viewportHeight = window.innerHeight
     const menuWidth = Math.min(Math.max(rect.width, 216), viewportWidth - padding * 2)
     const estimatedHeight = Math.min(
-      Math.max(options.length * 42 + 12, 84),
+      Math.max(options.length * 42 + 12, 84) + (searchable ? SEARCH_BAR_HEIGHT : 0),
       320,
       viewportHeight - padding * 2,
     )
@@ -90,7 +109,7 @@ export function SelectDropdown({
       width: menuWidth,
       maxHeight: Math.min(320, viewportHeight - padding * 2),
     })
-  }, [options.length, layer])
+  }, [options.length, layer, searchable])
 
   const closeMenu = useCallback((restoreFocus = false) => {
     setIsOpen(false)
@@ -109,11 +128,18 @@ export function SelectDropdown({
       window.clearTimeout(closeTimerRef.current)
       closeTimerRef.current = null
     }
-    setActiveIndex(selectedIndex)
+    setQuery('')
+    setFocusSearch(searchable)
+    setActiveIndex(
+      Math.max(
+        0,
+        options.findIndex((option) => option.value === value),
+      ),
+    )
     updatePosition()
     setIsMounted(true)
     frameRef.current = window.requestAnimationFrame(() => setIsOpen(true))
-  }, [selectedIndex, updatePosition])
+  }, [options, value, searchable, updatePosition])
 
   useEffect(() => {
     return () => {
@@ -156,9 +182,12 @@ export function SelectDropdown({
 
   useEffect(() => {
     if (!isOpen) return
-    const frame = window.requestAnimationFrame(() => optionRefs.current[activeIndex]?.focus())
+    const frame = window.requestAnimationFrame(() => {
+      if (focusSearch) searchRef.current?.focus()
+      else optionRefs.current[activeIndex]?.focus()
+    })
     return () => window.cancelAnimationFrame(frame)
-  }, [isOpen, activeIndex])
+  }, [isOpen, activeIndex, focusSearch])
 
   function toggleMenu() {
     if (isOpen) closeMenu()
@@ -175,24 +204,48 @@ export function SelectDropdown({
       event.preventDefault()
       if (!isOpen) {
         openMenu()
-      } else {
+      } else if (visibleOptions.length > 0) {
         const direction = event.key === 'ArrowDown' ? 1 : -1
-        setActiveIndex((current) => (current + direction + options.length) % options.length)
+        setActiveIndex(
+          (current) => (current + direction + visibleOptions.length) % visibleOptions.length,
+        )
       }
     }
   }
 
+  function handleQueryChange(next: string) {
+    setQuery(next)
+    setActiveIndex(0)
+  }
+
+  function handleSearchKeyDown(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown' && visibleOptions.length > 0) {
+      event.preventDefault()
+      setFocusSearch(false)
+      setActiveIndex(0)
+    } else if (event.key === 'Enter') {
+      event.preventDefault()
+      const first = visibleOptions[0]
+      if (first) selectOption(first)
+    } else if (event.key === 'Tab') {
+      closeMenu()
+    }
+  }
+
   function handleOptionKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>, index: number) {
-    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    if (event.key === 'ArrowUp' && index === 0 && searchable) {
+      event.preventDefault()
+      setFocusSearch(true)
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       const direction = event.key === 'ArrowDown' ? 1 : -1
-      setActiveIndex((index + direction + options.length) % options.length)
+      setActiveIndex((index + direction + visibleOptions.length) % visibleOptions.length)
     } else if (event.key === 'Home') {
       event.preventDefault()
       setActiveIndex(0)
     } else if (event.key === 'End') {
       event.preventDefault()
-      setActiveIndex(options.length - 1)
+      setActiveIndex(visibleOptions.length - 1)
     } else if (event.key === 'Tab') {
       closeMenu()
     }
@@ -226,53 +279,84 @@ export function SelectDropdown({
         createPortal(
           <div
             ref={menuRef}
-            id={listboxId}
-            role="listbox"
-            aria-label={ariaLabel}
             aria-hidden={!isOpen}
             inert={!isOpen}
             style={menuStyle}
-            className={`overflow-y-auto rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
+            className={`flex flex-col overflow-hidden rounded-xl border border-border/90 bg-white shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
               isOpen
                 ? 'visible translate-y-0 scale-100 opacity-100'
                 : 'invisible -translate-y-1 scale-[0.98] opacity-0'
             }`}
           >
-            {options.map((option, index) => {
-              const selected = option.value === value
-              return (
-                <button
-                  key={option.value}
-                  ref={(element) => {
-                    optionRefs.current[index] = element
-                  }}
-                  type="button"
-                  role="option"
-                  aria-selected={selected}
-                  tabIndex={isOpen && activeIndex === index ? 0 : -1}
-                  onClick={() => selectOption(option)}
-                  onFocus={() => setActiveIndex(index)}
-                  onKeyDown={(event) => handleOptionKeyDown(event, index)}
-                  className={`flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors duration-100 ${
-                    selected
-                      ? 'bg-primary-light/80 font-semibold text-primary'
-                      : 'text-slate-700 hover:bg-surface-secondary hover:text-slate-950'
-                  } ${activeIndex === index && isOpen ? 'outline-none ring-2 ring-inset ring-primary/15' : ''}`}
-                >
-                  <span className="min-w-0 flex-1 truncate">{option.label}</span>
-                  {option.count !== undefined && (
-                    <span
-                      className={`ml-auto shrink-0 text-[11px] ${selected ? 'text-primary/75' : 'text-text-muted'}`}
-                    >
-                      {option.count}
-                    </span>
-                  )}
-                  {selected && (
-                    <i className="fi fi-rr-check flex shrink-0 text-sm" aria-hidden="true" />
-                  )}
-                </button>
-              )
-            })}
+            {searchable && (
+              <div className="shrink-0 border-b border-border-light p-2">
+                <div className="relative">
+                  <i
+                    className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 flex -translate-y-1/2 text-sm text-text-muted"
+                    aria-hidden="true"
+                  />
+                  <input
+                    ref={searchRef}
+                    type="text"
+                    value={query}
+                    onChange={(event) => handleQueryChange(event.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    placeholder={searchPlaceholder}
+                    aria-label={`Pesquisar: ${ariaLabel}`}
+                    aria-controls={listboxId}
+                    autoComplete="off"
+                    className="h-10 w-full rounded-lg border border-border bg-surface-secondary pl-9 pr-3 text-sm text-slate-800 outline-none placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/15"
+                  />
+                </div>
+              </div>
+            )}
+            <div
+              id={listboxId}
+              role="listbox"
+              aria-label={ariaLabel}
+              className="min-h-0 flex-1 overflow-y-auto p-1.5"
+            >
+              {visibleOptions.map((option, index) => {
+                const selected = option.value === value
+                return (
+                  <button
+                    key={option.value}
+                    ref={(element) => {
+                      optionRefs.current[index] = element
+                    }}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    tabIndex={isOpen && activeIndex === index ? 0 : -1}
+                    onClick={() => selectOption(option)}
+                    onFocus={() => setActiveIndex(index)}
+                    onKeyDown={(event) => handleOptionKeyDown(event, index)}
+                    className={`flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[0.8125rem] transition-colors duration-100 ${
+                      selected
+                        ? 'bg-primary-light/80 font-semibold text-primary'
+                        : 'text-slate-700 hover:bg-surface-secondary hover:text-slate-950'
+                    } ${activeIndex === index && isOpen ? 'outline-none ring-2 ring-inset ring-primary/15' : ''}`}
+                  >
+                    <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                    {option.count !== undefined && (
+                      <span
+                        className={`ml-auto shrink-0 text-[0.6875rem] ${selected ? 'text-primary/75' : 'text-text-muted'}`}
+                      >
+                        {option.count}
+                      </span>
+                    )}
+                    {selected && (
+                      <i className="fi fi-rr-check flex shrink-0 text-sm" aria-hidden="true" />
+                    )}
+                  </button>
+                )
+              })}
+              {searchable && visibleOptions.length === 0 && (
+                <p role="status" className="px-3 py-4 text-center text-[0.8125rem] text-text-muted">
+                  {emptyMessage}
+                </p>
+              )}
+            </div>
           </div>,
           document.body,
         )}

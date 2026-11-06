@@ -39,12 +39,20 @@ export function resolveProjectEditScope(
   return null
 }
 
+export function isPrincipalAdvisorOf(
+  project: Pick<Project, 'advisor'>,
+  viewer: Pick<ProjectViewer, 'role' | 'email'>,
+) {
+  return viewer.role === 'professor' && normalize(project.advisor.email) === normalize(viewer.email)
+}
+
 export function canViewProject(
   project: ProjectSubject,
   viewer: Pick<ProjectViewer, 'role' | 'email'> | null,
 ) {
-  if (viewer?.role === 'admin') return true
-  return isProjectActive(project)
+  if (isProjectActive(project)) return true
+  if (!viewer) return false
+  return viewer.role === 'admin' || isAdvisorOf(project, viewer)
 }
 
 export function canManageProgress(
@@ -71,9 +79,16 @@ export function canVerifyProject(
   viewer: Pick<ProjectViewer, 'role' | 'email'>,
 ) {
   if (project.status !== 'publicado' || !isProjectActive(project)) return false
-  return viewer.role === 'admin' || isAdvisorOf(project, viewer)
+  return isAdvisorOf(project, viewer)
 }
 
-export function canManageActivation(viewer: Pick<ProjectViewer, 'role'>) {
+export function canManageActivation(
+  project: Pick<Project, 'advisor'>,
+  viewer: Pick<ProjectViewer, 'role' | 'email'>,
+) {
+  return viewer.role === 'admin' || isPrincipalAdvisorOf(project, viewer)
+}
+
+export function canDeleteProject(viewer: Pick<ProjectViewer, 'role'>) {
   return viewer.role === 'admin'
 }

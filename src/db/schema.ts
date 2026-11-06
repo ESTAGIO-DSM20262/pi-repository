@@ -11,6 +11,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 import type {
   ProjectAdvisor,
@@ -53,6 +54,26 @@ export const users = pgTable(
     index('users_registration_number_idx')
       .on(table.registrationNumber)
       .where(sql`${table.registrationNumber} IS NOT NULL`),
+  ],
+)
+
+export const courses = pgTable(
+  'courses',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    abbreviation: text('abbreviation'),
+    active: boolean('active').default(true).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('courses_name_unique_idx').on(sql`lower(${table.name})`),
+    index('courses_active_idx').on(table.active),
+    check('courses_name_not_blank', sql`length(btrim(${table.name})) > 0`),
   ],
 )
 
@@ -235,6 +256,26 @@ export const projects = pgTable(
     check('projects_co_advisors_check', sql`jsonb_typeof(${table.coAdvisors}) = 'array'`),
     check('projects_semester_check', sql`${table.semester} BETWEEN 1 AND 6`),
     check('projects_status_check', sql`${table.status} IN ('publicado', 'em_andamento')`),
+  ],
+)
+
+export const semesterAwards = pgTable(
+  'semester_awards',
+  {
+    cycle: text('cycle').notNull(),
+    semester: integer('semester').notNull(),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    selectedByUserId: text('selected_by_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    selectedAt: timestamp('selected_at').notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ name: 'semester_awards_pkey', columns: [table.cycle, table.semester] }),
+    unique('semester_awards_project_unique').on(table.projectId),
+    check('semester_awards_semester_check', sql`${table.semester} BETWEEN 1 AND 6`),
   ],
 )
 

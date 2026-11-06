@@ -100,10 +100,11 @@ function ResetPasswordFields({ token }: { token: string }) {
             placeholder="Digite sua nova senha"
             autoComplete="new-password"
             aria-invalid={errors.password ? true : undefined}
+            aria-describedby={errors.password ? 'password-error' : undefined}
             {...register('password')}
           />
           {errors.password && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="password-error" className={fieldErrorClass} role="alert">
               {errors.password.message}
             </p>
           )}
@@ -116,17 +117,18 @@ function ResetPasswordFields({ token }: { token: string }) {
             placeholder="Confirme sua nova senha"
             autoComplete="new-password"
             aria-invalid={errors.confirm ? true : undefined}
+            aria-describedby={errors.confirm ? 'confirm-error' : undefined}
             {...register('confirm')}
           />
           {errors.confirm && (
-            <p className={fieldErrorClass} role="alert">
+            <p id="confirm-error" className={fieldErrorClass} role="alert">
               {errors.confirm.message}
             </p>
           )}
         </div>
 
         <div className={`p-3 sm:p-4 ${infoBoxClass}`}>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary sm:text-xs">
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-secondary sm:text-xs">
             Requisitos de segurança:
           </p>
           <ul className="mt-2 space-y-1.5">
@@ -135,7 +137,7 @@ function ResetPasswordFields({ token }: { token: string }) {
               return (
                 <li
                   key={rule.label}
-                  className={`flex items-center gap-2 text-xs sm:text-[13px] ${met ? 'text-emerald-700' : 'text-text-secondary'}`}
+                  className={`flex items-center gap-2 text-xs sm:text-[0.8125rem] ${met ? 'text-emerald-700' : 'text-text-secondary'}`}
                 >
                   <span
                     className={`flex h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4 items-center justify-center rounded-full border transition ${
@@ -146,7 +148,7 @@ function ResetPasswordFields({ token }: { token: string }) {
                   >
                     {met && (
                       <i
-                        className="fi fi-br-check flex text-[7px] leading-none sm:text-[8px]"
+                        className="fi fi-br-check flex text-[0.4375rem] leading-none sm:text-[0.5rem]"
                         aria-hidden="true"
                       />
                     )}
