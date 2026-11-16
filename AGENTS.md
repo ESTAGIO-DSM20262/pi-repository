@@ -643,6 +643,11 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
   `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
   cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.
+- **Dropdown de semestre letivo (ciclo):** na home (`FilterPanel`), no filtro de ciclo da lista de
+  projetos do painel e na escolha de ciclo da seção Melhor PI, o `SelectDropdown` é `searchable` e
+  lista só os 6 mais recentes (`RECENT_SEMESTER_LIMIT`, opção "Todos" fixa via `pinnedCount`),
+  com a dica "Pesquise para ver os demais". A pesquisa percorre todos os ciclos existentes; um ciclo
+  selecionado fora dos 6 continua visível na lista. `limitOptions` em `libs/limit-options.ts`.
 - **Organização em blocos (reunião de 09/11/2026):** `RoleDashboard` agrupa as seções em
   `DashboardBlock` (cabeçalho com ícone e descrição, âncora `#id`) e mostra `DashboardSectionNav`
   (atalhos horizontais) no topo. Admin: `acompanhamento` (indicadores, com os filtros), `graficos`,

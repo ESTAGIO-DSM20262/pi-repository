@@ -13,6 +13,10 @@ import { Modal, type Notice } from '@/components/ui/Modal'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import { VERIFICATION_CRITERIA } from '@/domain/enterprise/entities/project-verification'
 import { labelClass } from '@/libs/styles'
+import {
+  RECENT_SEMESTER_HINT,
+  RECENT_SEMESTER_LIMIT,
+} from '@/presentation/projects/semester-dropdown'
 
 const SEMESTERS = [1, 2, 3, 4, 5, 6]
 const TOTAL_CRITERIA = VERIFICATION_CRITERIA.length
@@ -429,6 +433,10 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
             <span className={labelClass}>Ciclo</span>
             <SelectDropdown
               ariaLabel="Escolher o ciclo"
+              searchable
+              searchPlaceholder="Pesquisar semestre..."
+              visibleLimit={RECENT_SEMESTER_LIMIT}
+              limitHint={RECENT_SEMESTER_HINT}
               value={cycle}
               options={cycles}
               onChange={changeCycle}

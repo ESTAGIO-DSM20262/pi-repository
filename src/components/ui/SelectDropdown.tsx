@@ -3,6 +3,7 @@
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { limitOptions } from '@/libs/limit-options'
 
 export interface SelectDropdownOption {
   value: string
@@ -24,6 +25,9 @@ interface SelectDropdownProps {
   searchable?: boolean
   searchPlaceholder?: string
   emptyMessage?: string
+  visibleLimit?: number
+  pinnedCount?: number
+  limitHint?: string
 }
 
 const SEARCH_BAR_HEIGHT = 56
@@ -53,6 +57,9 @@ export function SelectDropdown({
   searchable = false,
   searchPlaceholder = 'Pesquisar...',
   emptyMessage = 'Nenhum resultado encontrado',
+  visibleLimit,
+  pinnedCount = 0,
+  limitHint = 'Pesquise para ver os demais.',
 }: SelectDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
@@ -70,10 +77,12 @@ export function SelectDropdown({
   const listboxId = useId()
 
   const normalizedQuery = normalizeText(query)
-  const visibleOptions =
-    searchable && normalizedQuery
-      ? options.filter((option) => normalizeText(option.label).includes(normalizedQuery))
-      : options
+  const baseOptions = limitOptions(options, value, pinnedCount, visibleLimit)
+  const isSearching = searchable && normalizedQuery !== ''
+  const visibleOptions = isSearching
+    ? options.filter((option) => normalizeText(option.label).includes(normalizedQuery))
+    : baseOptions
+  const showLimitHint = searchable && !isSearching && baseOptions.length < options.length
   const selectedOption = options.find((option) => option.value === value)
   const widthClass = width === 'full' ? 'w-full' : 'w-auto'
   const sizeClass =
@@ -89,7 +98,7 @@ export function SelectDropdown({
     const viewportHeight = window.innerHeight
     const menuWidth = Math.min(Math.max(rect.width, 216), viewportWidth - padding * 2)
     const estimatedHeight = Math.min(
-      Math.max(options.length * 42 + 12, 84) + (searchable ? SEARCH_BAR_HEIGHT : 0),
+      Math.max(baseOptions.length * 42 + 12, 84) + (searchable ? SEARCH_BAR_HEIGHT : 0),
       320,
       viewportHeight - padding * 2,
     )
@@ -109,7 +118,7 @@ export function SelectDropdown({
       width: menuWidth,
       maxHeight: Math.min(320, viewportHeight - padding * 2),
     })
-  }, [options.length, layer, searchable])
+  }, [baseOptions.length, layer, searchable])
 
   const closeMenu = useCallback((restoreFocus = false) => {
     setIsOpen(false)
@@ -133,13 +142,13 @@ export function SelectDropdown({
     setActiveIndex(
       Math.max(
         0,
-        options.findIndex((option) => option.value === value),
+        baseOptions.findIndex((option) => option.value === value),
       ),
     )
     updatePosition()
     setIsMounted(true)
     frameRef.current = window.requestAnimationFrame(() => setIsOpen(true))
-  }, [options, value, searchable, updatePosition])
+  }, [baseOptions, value, searchable, updatePosition])
 
   useEffect(() => {
     return () => {
@@ -357,6 +366,11 @@ export function SelectDropdown({
                 </p>
               )}
             </div>
+            {showLimitHint && (
+              <p className="shrink-0 border-t border-border-light px-3 py-2 text-center text-[0.6875rem] text-text-muted">
+                {limitHint}
+              </p>
+            )}
           </div>,
           document.body,
         )}

@@ -10,6 +10,10 @@ import {
   type SortKey,
   toggleValue,
 } from '@/presentation/projects/project-filters'
+import {
+  RECENT_SEMESTER_HINT,
+  RECENT_SEMESTER_LIMIT,
+} from '@/presentation/projects/semester-dropdown'
 
 interface FilterPanelProps {
   facets: Facets
@@ -129,6 +133,9 @@ function FilterFields({
         <SelectDropdown
           searchable
           searchPlaceholder="Pesquisar semestre..."
+          visibleLimit={RECENT_SEMESTER_LIMIT}
+          pinnedCount={1}
+          limitHint={RECENT_SEMESTER_HINT}
           ariaLabel="Semestre letivo"
           value={filters.cycle}
           onChange={(cycle) => onChange({ cycle })}

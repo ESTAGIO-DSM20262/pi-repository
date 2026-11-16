@@ -26,6 +26,10 @@ import type { Role } from '@/domain/enterprise/entities/role'
 import { formatPersonName } from '@/libs/initials'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+import {
+  RECENT_SEMESTER_HINT,
+  RECENT_SEMESTER_LIMIT,
+} from '@/presentation/projects/semester-dropdown'
 import { AdminInsights } from './AdminInsights'
 import { DashboardBlock, DashboardSectionNav } from './DashboardBlock'
 import { DashboardFiltersBar } from './DashboardFiltersBar'
@@ -463,6 +467,11 @@ function ProjectFilters({
           size="compact"
           tone="muted"
           width="full"
+          searchable
+          searchPlaceholder="Pesquisar semestre..."
+          visibleLimit={RECENT_SEMESTER_LIMIT}
+          pinnedCount={1}
+          limitHint={RECENT_SEMESTER_HINT}
           options={[{ value: 'all', label: 'Todos os ciclos' }, ...cycleOptions]}
           onChange={onCycleChange}
         />
