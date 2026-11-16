@@ -190,7 +190,7 @@ export async function POST(request: Request, context: RouteContext) {
         access.project.status === 'em_andamento')
     ) {
       return jsonError(
-        'Somente o professor responsável ou o administrador pode criar tarefas.',
+        'Somente o orientador principal ou o administrador pode criar tarefas.',
         403,
       )
     }

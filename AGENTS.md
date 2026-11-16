@@ -520,8 +520,11 @@ documente aqui.
   `lastEditedByName`, `lastEditedAt` e `canEdit` por tarefa, e `changedByName` nas revisões. O
   professor só edita as tarefas que ele mesmo criou (`canEditProgressTask`, 403 no `PATCH` caso
   contrário); o administrador edita qualquer uma. Tarefas criadas por um administrador (por exemplo,
-  as iniciais de um projeto criado por ele) só o administrador edita. A criação continua liberada a
-  todos os orientadores.
+  as iniciais de um projeto criado por ele) só o administrador edita. Desde a reunião de 09/11/2026
+  só o orientador principal (`project.advisor`) e o administrador criam e editam tarefas
+  (`canManageProgress`); orientadores adicionais (satélites) apenas acompanham o cronograma e não
+  editam nem as tarefas que criaram antes da mudança. `createdByName` continua exibido em cada
+  tarefa.
 
 ## 19. Indicação de projetos
 
@@ -754,5 +757,5 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 
 - `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
 - O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
-- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); orientador edita apenas as tarefas que criou.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

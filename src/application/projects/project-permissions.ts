@@ -61,7 +61,7 @@ export function canManageProgress(
 ) {
   if (!isProjectActive(project) && viewer.role !== 'admin') return false
   if (project.status !== 'em_andamento') return false
-  return viewer.role === 'admin' || isAdvisorOf(project, viewer)
+  return viewer.role === 'admin' || isPrincipalAdvisorOf(project, viewer)
 }
 
 export function canEditProgressTask(

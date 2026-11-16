@@ -70,12 +70,18 @@ describe('canViewProject', () => {
 describe('permissões de tarefas do progresso', () => {
   const task = { createdByUserId: principal.id }
 
-  it('o professor só edita as tarefas que ele mesmo criou', () => {
+  it('o orientador principal só edita as tarefas que ele mesmo criou', () => {
     const project = makeProject()
 
     expect(canEditProgressTask(project, principal, task)).toBe(true)
+    expect(canEditProgressTask(project, principal, { createdByUserId: satellite.id })).toBe(false)
+  })
+
+  it('o co-orientador não edita nem as tarefas que ele mesmo criou', () => {
+    const project = makeProject()
+
     expect(canEditProgressTask(project, satellite, task)).toBe(false)
-    expect(canEditProgressTask(project, satellite, { createdByUserId: satellite.id })).toBe(true)
+    expect(canEditProgressTask(project, satellite, { createdByUserId: satellite.id })).toBe(false)
   })
 
   it('o administrador edita qualquer tarefa', () => {
@@ -90,9 +96,12 @@ describe('permissões de tarefas do progresso', () => {
     expect(canManageProgress(done, admin)).toBe(false)
   })
 
-  it('co-orientador gerencia o progresso, assim como o principal', () => {
-    expect(canManageProgress(makeProject(), satellite)).toBe(true)
+  it('só o orientador principal e o administrador gerenciam o progresso', () => {
+    expect(canManageProgress(makeProject(), principal)).toBe(true)
+    expect(canManageProgress(makeProject(), admin)).toBe(true)
+    expect(canManageProgress(makeProject(), satellite)).toBe(false)
     expect(canManageProgress(makeProject(), outsider)).toBe(false)
+    expect(canManageProgress(makeProject(), member)).toBe(false)
   })
 })
 

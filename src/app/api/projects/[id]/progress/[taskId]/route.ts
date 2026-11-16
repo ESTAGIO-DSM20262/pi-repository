@@ -42,7 +42,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         access.project.status === 'em_andamento')
     ) {
       return jsonError(
-        'Somente o professor responsável ou o administrador pode editar tarefas.',
+        'Somente o orientador principal ou o administrador pode editar tarefas.',
         403,
       )
     }
