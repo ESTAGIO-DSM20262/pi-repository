@@ -6,6 +6,7 @@ import { AccessibilityPanel } from '@/components/accessibility/AccessibilityPane
 import { SkipLinks } from '@/components/accessibility/SkipLinks'
 import { VLibras } from '@/components/accessibility/VLibras'
 import { Footer } from '@/components/Footer'
+import { FirstAccessGuard } from '@/components/FirstAccessGuard'
 import { Header } from '@/components/Header'
 import { AccessibilityProvider } from '@/presentation/accessibility/accessibility-context'
 import { ACCESSIBILITY_NO_FLASH_SCRIPT } from '@/presentation/accessibility/no-flash-script'
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       >
         <AccessibilityProvider>
           <AuthProvider>
+            <FirstAccessGuard />
             <Suspense fallback={null}>
               <SkipLinks />
             </Suspense>

@@ -9,6 +9,7 @@ export interface BetterAuthUser {
   image?: string | null
   createdAt?: Date | string
   role?: unknown
+  mustChangePassword?: boolean | null
 }
 
 export function toDomainUser(dto: BetterAuthUser): User | null {
@@ -20,6 +21,7 @@ export function toDomainUser(dto: BetterAuthUser): User | null {
       image: dto.image ?? null,
       createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
       role: isRole(dto.role) ? dto.role : undefined,
+      mustChangePassword: dto.mustChangePassword === true,
     },
     dto.id,
   )

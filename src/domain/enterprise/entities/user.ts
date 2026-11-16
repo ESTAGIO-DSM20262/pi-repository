@@ -12,6 +12,7 @@ interface UserProps {
   image: string | null
   createdAt: Date
   role: Role
+  mustChangePassword: boolean
 }
 
 interface CreateUserInput {
@@ -21,6 +22,7 @@ interface CreateUserInput {
   image?: string | null
   createdAt?: Date
   role?: Role
+  mustChangePassword?: boolean
 }
 
 export class User extends Entity<UserProps> {
@@ -52,6 +54,10 @@ export class User extends Entity<UserProps> {
     return this.props.createdAt
   }
 
+  get mustChangePassword() {
+    return this.props.mustChangePassword
+  }
+
   static create(
     input: CreateUserInput,
     id?: UniqueEntityId | string,
@@ -75,6 +81,7 @@ export class User extends Entity<UserProps> {
         image: input.image ?? null,
         createdAt: input.createdAt ?? new Date(),
         role: input.role ?? 'student',
+        mustChangePassword: input.mustChangePassword ?? false,
       },
       uniqueId,
     )
