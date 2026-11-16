@@ -76,12 +76,6 @@ export interface ProjectVerificationSummary {
   requiredCount: number
   complete: boolean
   criteria: VerificationCriterionSummary[]
-  administrators: {
-    email: string
-    name: string
-    verifiedAt: string
-    criteria: VerificationCriterionId[]
-  }[]
 }
 
 function normalize(email: string) {
@@ -135,22 +129,12 @@ export function buildVerificationSummary(
     }
   }).filter((criterion) => criterion.endorsedBy > 0)
 
-  const administrators = records
-    .filter((record) => record.verifierRole === 'admin')
-    .map((record) => ({
-      email: normalize(record.verifierEmail),
-      name: record.verifierName,
-      verifiedAt: record.verifiedAt,
-      criteria: record.criteria,
-    }))
-
   return {
     advisors: advisorStatuses,
     verifiedCount,
     requiredCount,
     complete,
     criteria,
-    administrators,
   }
 }
 

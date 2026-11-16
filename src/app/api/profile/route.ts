@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { isRole } from '@/domain/enterprise/entities/role'
+import { findCourseAbbreviation } from '@/infrastructure/courses/course-queries'
 import { auth } from '@/libs/auth'
 import {
   getSafeSocialProfileUrl,
@@ -42,6 +43,7 @@ async function getActiveUser(request: Request) {
   return {
     user: {
       ...user,
+      courseAbbreviation: await findCourseAbbreviation(user.course),
       githubUrl: getSafeSocialProfileUrl(user.githubUrl, 'github'),
       linkedinUrl: getSafeSocialProfileUrl(user.linkedinUrl, 'linkedin'),
     },
@@ -146,7 +148,10 @@ export async function PATCH(request: Request) {
         active: users.active,
       })
 
-    return NextResponse.json({ profile: updated }, { headers: { 'Cache-Control': 'no-store' } })
+    return NextResponse.json(
+      { profile: { ...updated, courseAbbreviation: result.user.courseAbbreviation } },
+      { headers: { 'Cache-Control': 'no-store' } },
+    )
   } catch (error) {
     const errorCode =
       (error as { cause?: { code?: string }; code?: string })?.cause?.code ??

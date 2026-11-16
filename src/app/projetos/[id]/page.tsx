@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { GetProjectVerificationUseCase } from '@/application/projects/get-project-verification-use-case'
 import {
+  canDeleteProject,
   canManageActivation,
   canManageProgress as canManageProjectProgress,
   canVerifyProject,
@@ -12,6 +13,7 @@ import {
   isMemberOf,
   resolveProjectEditScope,
 } from '@/application/projects/project-permissions'
+import { canChooseSemesterAward } from '@/application/projects/semester-awards'
 import { ProjectPublicView } from '@/components/projects/ProjectPublicView'
 import { db } from '@/db'
 import { users } from '@/db/schema'
@@ -155,11 +157,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     (viewer.role === 'admin' || isAdvisorOf(project, viewer) || isMemberOf(project, viewer))
   const isExampleProject = Boolean(await new MockProjectRepository().findById(project.id))
   const canEditProject =
-    viewer !== null && !isExampleProject && resolveProjectEditScope(project, viewer) !== null
+    viewer !== null &&
+    !isExampleProject &&
+    (isProjectActive(project) || viewer.role === 'admin') &&
+    resolveProjectEditScope(project, viewer) !== null
   const canManageProgress = viewer !== null && canManageProjectProgress(project, viewer)
   const canVerify = viewer !== null && !isExampleProject && canVerifyProject(project, viewer)
   const canManageProjectActivation =
-    viewer !== null && !isExampleProject && canManageActivation(viewer)
+    viewer !== null && !isExampleProject && canManageActivation(project, viewer)
+  const canDeleteInactiveProject = viewer !== null && !isExampleProject && canDeleteProject(viewer)
 
   let verification: ProjectVerificationSummary | null = null
   if (!isExampleProject && project.status === 'publicado') {
@@ -176,7 +182,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       showProjectProgress={isInvolved}
       canEditProject={canEditProject}
       canVerify={canVerify}
+      canManageSemesterAward={
+        viewer !== null && !isExampleProject && canChooseSemesterAward(project, viewer)
+      }
       canManageActivation={canManageProjectActivation}
+      canDelete={canDeleteInactiveProject}
       verification={verification}
       viewerEmail={viewer?.email ?? null}
     />

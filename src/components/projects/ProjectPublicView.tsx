@@ -7,6 +7,7 @@ import {
   ProjectVerificationPanel,
 } from '@/components/projects/ProjectVerificationPanel'
 import { ProjectProgressSection } from '@/components/projects/progress/ProjectProgressSection'
+import { SemesterAwardsSection } from '@/components/projects/SemesterAwardsSection'
 import { BackButton } from '@/components/ui/BackButton'
 import type {
   Project,
@@ -27,7 +28,9 @@ interface ProjectPublicViewProps {
   showProjectProgress: boolean
   canEditProject?: boolean
   canVerify?: boolean
+  canManageSemesterAward?: boolean
   canManageActivation?: boolean
+  canDelete?: boolean
   verification?: ProjectVerificationSummary | null
   viewerEmail?: string | null
 }
@@ -78,7 +81,7 @@ function DashboardPreview() {
               <div className="h-2 w-24 rounded bg-slate-700 sm:w-32" />
               <div className="mt-1.5 h-1.5 w-16 rounded bg-slate-200 sm:w-20" />
             </div>
-            <span className="rounded bg-emerald-100 px-1.5 py-1 text-[7px] font-bold text-emerald-800 sm:text-[8px]">
+            <span className="rounded bg-emerald-100 px-1.5 py-1 text-[0.4375rem] font-bold text-emerald-800 sm:text-[0.5rem]">
               PAINEL DSM
             </span>
           </div>
@@ -89,10 +92,12 @@ function DashboardPreview() {
               ['DISPONÍVEIS', '05'],
             ].map(([label, value]) => (
               <div key={label} className="rounded border border-slate-200 bg-slate-50 p-1.5">
-                <div className="truncate text-[6px] font-semibold text-slate-500 sm:text-[7px]">
+                <div className="truncate text-[0.375rem] font-semibold text-slate-500 sm:text-[0.4375rem]">
                   {label}
                 </div>
-                <div className="mt-1 text-[11px] font-bold text-slate-800 sm:text-sm">{value}</div>
+                <div className="mt-1 text-[0.6875rem] font-bold text-slate-800 sm:text-sm">
+                  {value}
+                </div>
               </div>
             ))}
           </div>
@@ -134,7 +139,7 @@ function DashboardPreview() {
               </div>
             </div>
           </div>
-          <p className="mt-2 text-right text-[7px] text-slate-400 sm:text-[8px]">
+          <p className="mt-2 text-right text-[0.4375rem] text-slate-400 sm:text-[0.5rem]">
             Prévia ilustrativa da interface
           </p>
         </div>
@@ -159,25 +164,25 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
         {initials}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-semibold text-slate-900 sm:text-sm">
+        <p className="truncate text-[0.8125rem] font-semibold text-slate-900 sm:text-sm">
           {displayName}
         </p>
         {(member.isLeader || member.roleTitle) && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {member.isLeader && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-1.5 py-0.5 text-[10px] font-bold text-primary">
+              <span className="inline-flex items-center gap-1 rounded-full border border-primary/10 bg-primary-light px-1.5 py-0.5 text-[0.625rem] font-bold text-primary">
                 <i className="fi fi-rr-crown flex" aria-hidden="true" /> Líder
               </span>
             )}
             {member.roleTitle && (
-              <span className="inline-flex max-w-full items-center rounded border border-slate-300 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600">
+              <span className="inline-flex max-w-full items-center rounded border border-slate-300 bg-slate-50 px-1.5 py-0.5 text-[0.625rem] font-semibold text-slate-600">
                 <span className="truncate">{member.roleTitle}</span>
               </span>
             )}
           </div>
         )}
       </div>
-      <div className="flex shrink-0 items-center gap-3 text-[#666666]">
+      <div className="flex shrink-0 items-center gap-3 text-text-secondary">
         {githubUrl && (
           <a
             href={githubUrl}
@@ -210,7 +215,7 @@ function TeamMemberRow({ member }: { member: ProjectTeamMember }) {
 function TechnologyGroupCard({ group }: { group: ProjectTechnologyGroup }) {
   return (
     <section className="rounded-lg border-0 bg-transparent p-0 md:border md:border-slate-300 md:bg-slate-50/70 md:p-3">
-      <h3 className="flex items-center gap-1.5 text-[12px] font-bold text-slate-800 sm:text-[13px]">
+      <h3 className="flex items-center gap-1.5 text-[0.75rem] font-bold text-slate-800 sm:text-[0.8125rem]">
         <i className={`fi ${group.icon} flex text-xs text-primary`} aria-hidden="true" />
         {group.title}
       </h3>
@@ -218,7 +223,7 @@ function TechnologyGroupCard({ group }: { group: ProjectTechnologyGroup }) {
         {group.items.map((item) => (
           <li
             key={item}
-            className="rounded border border-slate-300 bg-white px-1.5 py-1 text-[11px] leading-none text-slate-800 sm:text-xs"
+            className="rounded border border-slate-300 bg-white px-1.5 py-1 text-[0.6875rem] leading-none text-slate-800 sm:text-xs"
           >
             {item}
           </li>
@@ -287,11 +292,11 @@ function AdvisorLinks({
           {getNameInitials(advisor.name)}
         </span>
         <div className="min-w-0 flex-1">
-          <p className="break-words text-xs font-bold leading-snug text-slate-900 md:text-[13px]">
+          <p className="break-words text-xs font-bold leading-snug text-slate-900 md:text-[0.8125rem]">
             {formatPersonName(advisor.name)}
           </p>
           {(githubUrl || linkedinUrl) && (
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] md:text-xs">
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.6875rem] md:text-xs">
               {links}
             </div>
           )}
@@ -301,7 +306,7 @@ function AdvisorLinks({
   }
 
   return (
-    <div className="flex min-w-0 items-center gap-1 text-[11px] leading-snug sm:gap-1.5 sm:text-xs md:text-[13px]">
+    <div className="flex min-w-0 items-center gap-1 text-[0.6875rem] leading-snug sm:gap-1.5 sm:text-xs md:text-[0.8125rem]">
       <span className="min-w-0 flex-1 truncate font-bold text-slate-900">
         {formatPersonName(advisor.name)}
       </span>
@@ -325,7 +330,7 @@ function getTeamMemberKey(member: ProjectTeamMember) {
 
 function ExternalProjectLink({ label, url, icon }: { label: string; url?: string; icon?: string }) {
   const className =
-    'flex min-h-10 w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 sm:text-[13px]'
+    'flex min-h-10 w-full items-center justify-center gap-1.5 rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-center text-xs font-semibold text-primary transition hover:border-primary hover:bg-primary/5 sm:text-[0.8125rem]'
   const iconElement = (
     <i
       className={`fi ${resolveProjectLinkIcon({ label, icon })} flex text-xs`}
@@ -359,7 +364,9 @@ export function ProjectPublicView({
   showProjectProgress,
   canEditProject = false,
   canVerify = false,
+  canManageSemesterAward = false,
   canManageActivation = false,
+  canDelete = false,
   verification = null,
   viewerEmail = null,
 }: ProjectPublicViewProps) {
@@ -399,7 +406,7 @@ export function ProjectPublicView({
         <BackButton />
         <nav
           aria-label="Caminho de navegação"
-          className="flex min-w-0 items-center gap-1.5 text-xs sm:text-[13px]"
+          className="flex min-w-0 items-center gap-1.5 text-xs sm:text-[0.8125rem]"
         >
           <Link
             href="/"
@@ -415,7 +422,14 @@ export function ProjectPublicView({
         </nav>
         {(canEditProject || canVerify || canManageActivation) && (
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            {canManageActivation && <ProjectAdminControls projectId={project.id} active={active} />}
+            {canManageActivation && (
+              <ProjectAdminControls
+                projectId={project.id}
+                active={active}
+                canDelete={canDelete}
+                bestOfSemester={project.bestOfSemester === true}
+              />
+            )}
             {canVerify && verification && (
               <ProjectVerificationButton
                 projectId={project.id}
@@ -441,32 +455,39 @@ export function ProjectPublicView({
           className="mb-4 flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-800"
         >
           <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" />
-          Projeto desativado: ele fica oculto para todos, exceto administradores.
+          Projeto desativado: ele fica oculto para os demais usuários e continua visível para os
+          orientadores e administradores.
         </p>
       )}
 
       <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-6 lg:p-7">
         <div className="flex flex-wrap items-center gap-1.5">
           {project.status === 'publicado' && (
-            <span className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[10px] font-bold text-white sm:text-[11px]">
+            <span className="inline-flex items-center gap-1 rounded bg-primary px-2 py-1 text-[0.625rem] font-bold text-white sm:text-[0.6875rem]">
               <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
             </span>
           )}
+          {project.bestOfSemester && (
+            <span className="inline-flex items-center gap-1 rounded bg-secondary px-2 py-1 text-[0.625rem] font-bold text-white sm:text-[0.6875rem]">
+              <i className="fi fi-rr-trophy flex" aria-hidden="true" /> Melhor PI de {project.cycle}{' '}
+              · {project.semester}º semestre
+            </span>
+          )}
           {project.verified && (
-            <span className="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-1 text-[10px] font-bold text-secondary-hover sm:text-[11px]">
+            <span className="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-1 text-[0.625rem] font-bold text-secondary-hover sm:text-[0.6875rem]">
               <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> Indicado
             </span>
           )}
-          <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">
+          <span className="rounded bg-slate-200 px-2 py-1 text-[0.625rem] font-semibold text-slate-800 sm:text-[0.6875rem]">
             {project.theme}
           </span>
-          <span className="rounded bg-slate-200 px-2 py-1 text-[10px] font-semibold text-slate-800 sm:text-[11px]">
+          <span className="rounded bg-slate-200 px-2 py-1 text-[0.625rem] font-semibold text-slate-800 sm:text-[0.6875rem]">
             {courseLabel}
           </span>
         </div>
 
         <div className="mt-3 flex flex-col items-start gap-3 sm:flex-row sm:justify-between sm:gap-4">
-          <h1 className="w-full text-[25px] font-bold leading-tight tracking-tight text-[#191d1f] sm:min-w-0 sm:flex-1 sm:w-auto sm:text-3xl lg:max-w-[850px] lg:text-4xl">
+          <h1 className="w-full min-w-0 break-words text-2xl font-bold leading-tight tracking-tight text-[#191d1f] sm:flex-1 sm:w-auto sm:text-3xl lg:max-w-[850px] lg:text-4xl">
             {project.title}
           </h1>
           {isAuthenticated && project.status === 'publicado' && (
@@ -477,14 +498,16 @@ export function ProjectPublicView({
             />
           )}
         </div>
-        <p className="mt-2 text-[12px] leading-relaxed text-slate-600 sm:hidden">{summary}</p>
+        <p className="mt-2 break-words text-xs leading-relaxed text-slate-600 sm:hidden">
+          {summary}
+        </p>
 
         <div
           className={`mt-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 md:flex md:gap-5 ${advisors.length > 1 ? 'md:items-start' : 'md:items-center'} md:rounded-lg md:border md:border-slate-300 md:bg-slate-50 md:px-3 md:py-2`}
         >
           {advisors.length > 1 ? (
             <div className="col-span-2 min-w-0 rounded-lg border border-slate-300 bg-slate-50 p-2.5 md:flex-1 md:border-0 md:bg-transparent md:p-0">
-              <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+              <p className="text-[0.5625rem] font-semibold uppercase tracking-wider text-slate-500 sm:text-[0.625rem]">
                 Orientadores
               </p>
               <ul className="mt-1.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -504,7 +527,7 @@ export function ProjectPublicView({
                 {getNameInitials(project.advisor.name)}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+                <p className="text-[0.5625rem] font-semibold uppercase tracking-wider text-slate-500 sm:text-[0.625rem]">
                   Orientador
                 </p>
                 <ul className="mt-0.5 space-y-0.5">
@@ -522,10 +545,10 @@ export function ProjectPublicView({
               <i className="fi fi-rr-calendar flex" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+              <p className="text-[0.5625rem] font-semibold uppercase tracking-wider text-slate-500 sm:text-[0.625rem]">
                 Período
               </p>
-              <p className="mt-0.5 truncate text-[11px] font-bold text-slate-900 sm:text-xs md:text-[13px]">
+              <p className="mt-0.5 truncate text-[0.6875rem] font-bold text-slate-900 sm:text-xs md:text-[0.8125rem]">
                 {project.cycle}
               </p>
             </div>
@@ -542,13 +565,19 @@ export function ProjectPublicView({
         </div>
       )}
 
+      {canManageSemesterAward && (
+        <div className="mt-5">
+          <SemesterAwardsSection key={JSON.stringify(verification)} projectId={project.id} />
+        </div>
+      )}
+
       <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)]">
         <section className="hidden rounded-xl border border-white bg-white p-5 shadow-sm lg:block lg:p-6">
           <SectionTitle icon="fi-rr-align-left">Visão Geral</SectionTitle>
           <div
             className={`mt-3 grid grid-cols-1 gap-3 ${images.length === 0 ? 'xl:grid-cols-2' : ''}`}
           >
-            <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[13px] leading-relaxed text-[#666666]">
+            <p className="rounded-lg border border-slate-300 bg-slate-50 p-4 text-[0.8125rem] leading-relaxed text-text-secondary">
               {details?.overview ?? summary}
             </p>
             {images.length === 0 && <DashboardPreview />}
@@ -558,7 +587,7 @@ export function ProjectPublicView({
         <section className="rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5">
           <div className="flex items-center justify-between gap-2">
             <SectionTitle icon="fi-rr-users">Equipe de Desenvolvimento</SectionTitle>
-            <span className="shrink-0 text-[10px] font-semibold text-[#666666] sm:text-[11px]">
+            <span className="shrink-0 text-[0.625rem] font-semibold text-text-secondary sm:text-[0.6875rem]">
               {team.length} {team.length === 1 ? 'integrante' : 'integrantes'}
             </span>
           </div>
@@ -607,7 +636,7 @@ export function ProjectPublicView({
       {externalLinks.length > 0 && (
         <section className="mt-5 rounded-xl border border-white bg-white p-4 shadow-sm sm:p-5 lg:p-6">
           <SectionTitle icon="fi-rr-folder-open">Artefatos do Projeto</SectionTitle>
-          <h3 className="mb-2.5 mt-3 text-[11px] font-extrabold uppercase tracking-wider text-slate-800 sm:text-xs">
+          <h3 className="mb-2.5 mt-3 text-[0.6875rem] font-extrabold uppercase tracking-wider text-slate-800 sm:text-xs">
             Links externos
           </h3>
           <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">

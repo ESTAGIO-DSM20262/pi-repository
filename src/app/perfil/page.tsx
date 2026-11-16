@@ -5,6 +5,7 @@ import { ProfilePage } from '@/components/profile/ProfilePage'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { isRole } from '@/domain/enterprise/entities/role'
+import { findCourseAbbreviation } from '@/infrastructure/courses/course-queries'
 import { auth } from '@/libs/auth'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
@@ -37,6 +38,7 @@ export default async function PerfilPage() {
     <ProfilePage
       initialProfile={{
         ...record,
+        courseAbbreviation: await findCourseAbbreviation(record.course),
         githubUrl: getSafeSocialProfileUrl(record.githubUrl, 'github'),
         linkedinUrl: getSafeSocialProfileUrl(record.linkedinUrl, 'linkedin'),
       }}

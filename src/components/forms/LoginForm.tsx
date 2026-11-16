@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { type SubmitErrorHandler, useForm } from 'react-hook-form'
 import { Modal, type Notice } from '@/components/ui/Modal'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { useResetOnLeave } from '@/libs/useResetOnLeave'
@@ -12,7 +12,6 @@ import { useAuth } from '@/presentation/auth/auth-context'
 import { type LoginValues, loginSchema } from '@/presentation/auth/validation'
 import {
   buttonClass,
-  fieldErrorClass,
   inputClass,
   labelClass,
   linkClass,
@@ -29,10 +28,10 @@ export function LoginForm() {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    getValues,
+    formState: { isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    mode: 'onTouched',
     defaultValues: { email: '', password: '' },
   })
 
@@ -42,6 +41,46 @@ export function LoginForm() {
   })
 
   useEffect(() => () => clearAuthAction(), [clearAuthAction])
+
+  const onInvalid: SubmitErrorHandler<LoginValues> = (errors) => {
+    const email = getValues('email').trim()
+    const password = getValues('password')
+
+    if (!email && !password) {
+      setNotice({
+        variant: 'warning',
+        title: 'Dados não informados',
+        description: 'Informe seu e-mail e sua senha para continuar.',
+      })
+      return
+    }
+
+    if (!email) {
+      setNotice({
+        variant: 'warning',
+        title: 'E-mail não informado',
+        description: 'Insira seu e-mail para continuar.',
+      })
+      return
+    }
+
+    if (!password) {
+      setNotice({
+        variant: 'warning',
+        title: 'Senha não informada',
+        description: 'Insira sua senha para continuar.',
+      })
+      return
+    }
+
+    if (errors.email) {
+      setNotice({
+        variant: 'warning',
+        title: 'E-mail inválido',
+        description: 'Digite um endereço de e-mail válido para continuar.',
+      })
+    }
+  }
 
   const onSubmit = handleSubmit(async (values) => {
     setNotice(null)
@@ -61,7 +100,7 @@ export function LoginForm() {
         description: err instanceof Error ? err.message : 'Tente novamente em instantes.',
       })
     }
-  })
+  }, onInvalid)
 
   async function handleMicrosoft() {
     setNotice(null)
@@ -97,14 +136,8 @@ export function LoginForm() {
             autoCapitalize="none"
             placeholder="Digite seu e-mail"
             className={inputClass}
-            aria-invalid={errors.email ? true : undefined}
             {...register('email')}
           />
-          {errors.email && (
-            <p className={fieldErrorClass} role="alert">
-              {errors.email.message}
-            </p>
-          )}
         </div>
 
         <div>
@@ -113,16 +146,10 @@ export function LoginForm() {
             label="Senha"
             placeholder="Digite sua senha"
             autoComplete="current-password"
-            aria-invalid={errors.password ? true : undefined}
             {...register('password')}
           />
-          {errors.password && (
-            <p className={fieldErrorClass} role="alert">
-              {errors.password.message}
-            </p>
-          )}
           <div className="mt-1.5 text-right">
-            <Link href="/esqueci-senha" className={`text-xs sm:text-[13px] ${linkClass}`}>
+            <Link href="/esqueci-senha" className={`text-xs sm:text-[0.8125rem] ${linkClass}`}>
               Esqueci minha senha
             </Link>
           </div>
@@ -135,7 +162,7 @@ export function LoginForm() {
 
           <div className="flex items-center gap-3" aria-hidden="true">
             <span className="h-px flex-1 bg-border" />
-            <span className="text-[11px] text-text-muted sm:text-xs">ou</span>
+            <span className="text-[0.6875rem] text-text-muted sm:text-xs">ou</span>
             <span className="h-px flex-1 bg-border" />
           </div>
 

@@ -12,6 +12,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     cycle: '2026/2',
     semester: 3,
     advisor: { email: 'prof@cps.sp.gov.br', name: 'Prof.' },
+    coAdvisors: [{ email: 'satelite@cps.sp.gov.br', name: 'Satélite' }],
     memberEmails: [],
     languages: [],
     stack: [],
@@ -35,28 +36,45 @@ function setup() {
   return { repository, useCase }
 }
 
+const principalViewer = { role: 'professor' as const, email: 'Prof@cps.sp.gov.br' }
+const satelliteViewer = { role: 'professor' as const, email: 'satelite@cps.sp.gov.br' }
+const adminViewer = { role: 'admin' as const, email: 'admin@cps.sp.gov.br' }
+
 describe('SetProjectActivationUseCase', () => {
   it('permite ao administrador desativar e reativar o projeto', async () => {
     const { repository, useCase } = setup()
 
-    const off = await useCase.execute({
-      viewer: { role: 'admin' },
-      projectId: 'p-1',
-      active: false,
-    })
+    const off = await useCase.execute({ viewer: adminViewer, projectId: 'p-1', active: false })
     expect(off.isRight()).toBe(true)
     expect(repository.activation.get('p-1')).toEqual({ active: false, changedAt: now })
 
-    const on = await useCase.execute({ viewer: { role: 'admin' }, projectId: 'p-1', active: true })
+    const on = await useCase.execute({ viewer: adminViewer, projectId: 'p-1', active: true })
     expect(on.isRight()).toBe(true)
     expect(repository.activation.get('p-1')?.active).toBe(true)
   })
 
-  it('nega professor e aluno, inclusive o orientador do projeto', async () => {
+  it('permite ao orientador principal desativar e reativar o projeto', async () => {
     const { repository, useCase } = setup()
 
-    for (const role of ['professor', 'student'] as const) {
-      const result = await useCase.execute({ viewer: { role }, projectId: 'p-1', active: false })
+    const off = await useCase.execute({ viewer: principalViewer, projectId: 'p-1', active: false })
+    expect(off.isRight()).toBe(true)
+    expect(repository.activation.get('p-1')).toEqual({ active: false, changedAt: now })
+
+    const on = await useCase.execute({ viewer: principalViewer, projectId: 'p-1', active: true })
+    expect(on.isRight()).toBe(true)
+    expect(repository.activation.get('p-1')?.active).toBe(true)
+  })
+
+  it('nega orientador adicional, professor de fora e aluno', async () => {
+    const { repository, useCase } = setup()
+    const viewers = [
+      satelliteViewer,
+      { role: 'professor' as const, email: 'fora@cps.sp.gov.br' },
+      { role: 'student' as const, email: 'prof@cps.sp.gov.br' },
+    ]
+
+    for (const viewer of viewers) {
+      const result = await useCase.execute({ viewer, projectId: 'p-1', active: false })
       expect(result.isLeft()).toBe(true)
       if (result.isLeft()) expect(result.value.status).toBe(403)
     }
@@ -65,11 +83,7 @@ describe('SetProjectActivationUseCase', () => {
 
   it('devolve não encontrado para projeto que não está no banco', async () => {
     const { repository, useCase } = setup()
-    const result = await useCase.execute({
-      viewer: { role: 'admin' },
-      projectId: 'demo',
-      active: false,
-    })
+    const result = await useCase.execute({ viewer: adminViewer, projectId: 'demo', active: false })
 
     expect(result.isLeft()).toBe(true)
     if (result.isLeft()) expect(result.value.status).toBe(404)

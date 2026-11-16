@@ -62,7 +62,7 @@ npm run db:migrate
 npm run db:seed
 ```
 
-Além das migrations geradas na pasta `drizzle/`, confira e aplique no banco Neon de destino os scripts SQL pendentes de `src/db/migrations/`. A tela de perfil e os links sociais dos projetos exigem a migration `20261019_user_social_profiles.sql`, que adiciona as colunas `github_url` e `linkedin_url` à tabela `users`.
+`npm run db:migrate` aplica tudo em sequência: primeiro as migrations do Drizzle (pasta `drizzle/`) e depois os scripts SQL de `src/db/migrations/`, em ordem cronológica. Os scripts SQL são registrados na tabela `sql_migrations`, então cada um roda uma única vez, e como são idempotentes também funcionam em bancos que já os receberam manualmente. Não é preciso executar nada à mão no Neon. Para rodar só a etapa dos scripts SQL, use `npm run db:migrate:sql`.
 
 Inicie o servidor de desenvolvimento:
 

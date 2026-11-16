@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Project } from '@/domain/enterprise/entities/project'
 import {
+  canDeleteProject,
   canEditProgressTask,
   canManageActivation,
   canManageProgress,
@@ -41,11 +42,13 @@ describe('resolveProjectEditScope', () => {
 })
 
 describe('canViewProject', () => {
-  it('projeto desativado só é visível para o administrador, mesmo para os orientadores', () => {
+  it('projeto desativado fica visível para o administrador e para os orientadores do projeto', () => {
     const inactive = makeProject({ status: 'publicado', active: false })
 
     expect(canViewProject(inactive, admin)).toBe(true)
-    expect(canViewProject(inactive, principal)).toBe(false)
+    expect(canViewProject(inactive, principal)).toBe(true)
+    expect(canViewProject(inactive, satellite)).toBe(true)
+    expect(canViewProject(inactive, outsider)).toBe(false)
     expect(canViewProject(inactive, member)).toBe(false)
     expect(canViewProject(inactive, null)).toBe(false)
   })
@@ -102,20 +105,39 @@ describe('canVerifyProject', () => {
     expect(canVerifyProject(makeProject({ status: 'publicado' }), principal)).toBe(true)
   })
 
-  it('vale para orientadores e administrador, e não para outros', () => {
+  it('vale para os orientadores e não para o administrador nem para outros', () => {
     const done = makeProject({ status: 'publicado' })
 
+    expect(canVerifyProject(done, principal)).toBe(true)
     expect(canVerifyProject(done, satellite)).toBe(true)
-    expect(canVerifyProject(done, admin)).toBe(true)
+    expect(canVerifyProject(done, admin)).toBe(false)
     expect(canVerifyProject(done, outsider)).toBe(false)
     expect(canVerifyProject(done, member)).toBe(false)
   })
 })
 
 describe('canManageActivation', () => {
+  it('vale para o administrador e para o orientador principal, e não para os demais', () => {
+    const project = makeProject()
+
+    expect(canManageActivation(project, admin)).toBe(true)
+    expect(canManageActivation(project, principal)).toBe(true)
+    expect(canManageActivation(project, satellite)).toBe(false)
+    expect(canManageActivation(project, outsider)).toBe(false)
+    expect(canManageActivation(project, member)).toBe(false)
+  })
+
+  it('não vale para aluno que use o e-mail do orientador principal', () => {
+    expect(
+      canManageActivation(makeProject(), { ...member, email: principal.email.toUpperCase() }),
+    ).toBe(false)
+  })
+})
+
+describe('canDeleteProject', () => {
   it('é exclusivo do administrador', () => {
-    expect(canManageActivation(admin)).toBe(true)
-    expect(canManageActivation(principal)).toBe(false)
-    expect(canManageActivation(member)).toBe(false)
+    expect(canDeleteProject(admin)).toBe(true)
+    expect(canDeleteProject(principal)).toBe(false)
+    expect(canDeleteProject(member)).toBe(false)
   })
 })

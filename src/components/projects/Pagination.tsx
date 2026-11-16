@@ -28,7 +28,7 @@ export function Pagination({ page, pageSize, total, onChange }: PaginationProps)
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
-      <p className="text-[13px] text-text-secondary">
+      <p className="text-[0.8125rem] text-text-secondary">
         Mostrando{' '}
         <strong className="text-slate-900">
           {from}–{to}

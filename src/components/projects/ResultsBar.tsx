@@ -23,7 +23,7 @@ export function ResultsBar({
   mine,
 }: ResultsBarProps) {
   const seg = (active: boolean) =>
-    `cursor-pointer rounded-md px-3 py-1.5 text-[13px] font-semibold transition ${
+    `cursor-pointer rounded-md px-3 py-1.5 text-[0.8125rem] font-semibold transition ${
       active ? 'bg-primary text-white shadow-sm' : 'text-slate-600 hover:text-primary'
     }`
 
@@ -31,7 +31,7 @@ export function ResultsBar({
     <div className="hidden rounded-xl border border-border bg-surface shadow-sm xl:block">
       {mine && (
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border-light px-4 py-3 sm:px-5">
-          <span className="text-xs text-text-secondary sm:text-[13px]">
+          <span className="text-xs text-text-secondary sm:text-[0.8125rem]">
             {mine.value ? 'Exibindo apenas ' : 'Seus projetos aparecem no topo: '}
             <strong className="text-slate-800">{mine.label.toLowerCase()}</strong>
           </span>
@@ -61,14 +61,14 @@ export function ResultsBar({
 
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-5">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-600">
+          <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-slate-600">
             Filtros ativos:
           </span>
-          {chips.length === 0 && <span className="text-[13px] text-text-muted">nenhum</span>}
+          {chips.length === 0 && <span className="text-[0.8125rem] text-text-muted">nenhum</span>}
           {chips.map((c) => (
             <span
               key={c.id}
-              className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[13px] ${
+              className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[0.8125rem] ${
                 c.verified
                   ? 'border-accent/40 bg-accent-light font-medium text-secondary-hover'
                   : 'border-border bg-surface-secondary text-slate-800'
@@ -99,7 +99,7 @@ export function ResultsBar({
           )}
         </div>
 
-        <div className="flex items-center gap-3 text-[13px] text-slate-700">
+        <div className="flex items-center gap-3 text-[0.8125rem] text-slate-700">
           <span>
             <strong>{total}</strong> {total === 1 ? 'projeto encontrado' : 'projetos encontrados'}
           </span>

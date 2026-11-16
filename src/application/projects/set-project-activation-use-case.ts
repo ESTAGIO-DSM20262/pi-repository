@@ -6,7 +6,7 @@ import { ProjectOperationError } from './project-operation-error'
 import { canManageActivation, type ProjectViewer } from './project-permissions'
 
 interface SetProjectActivationRequest {
-  viewer: Pick<ProjectViewer, 'role'>
+  viewer: Pick<ProjectViewer, 'role' | 'email'>
   projectId: string
   active: boolean
 }
@@ -31,14 +31,12 @@ export class SetProjectActivationUseCase
   }: SetProjectActivationRequest): Promise<
     Either<ProjectOperationError, { id: string; active: boolean }>
   > {
-    if (!canManageActivation(viewer)) {
-      return left(
-        new ProjectOperationError(
-          'Somente administradores podem ativar ou desativar projetos.',
-          403,
-        ),
-      )
-    }
+    const forbidden = new ProjectOperationError(
+      'Somente o orientador principal ou um administrador podem ativar ou desativar este projeto.',
+      403,
+    )
+    if (viewer.role !== 'admin' && viewer.role !== 'professor') return left(forbidden)
+
     const project = await this.reader.findById(projectId)
     if (!project) {
       return left(
@@ -48,6 +46,7 @@ export class SetProjectActivationUseCase
         ),
       )
     }
+    if (!canManageActivation(project, viewer)) return left(forbidden)
     await this.projects.setActive(projectId, active, this.now())
     return right({ id: projectId, active })
   }

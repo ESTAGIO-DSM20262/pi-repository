@@ -53,11 +53,11 @@ export function Footer() {
           />
         </div>
         {isProjectDetailsPage ? (
-          <p className="text-center text-[10px] text-white/80">
+          <p className="text-center text-[0.625rem] text-white/80">
             © 2026 Centro Paula Souza • Fatec Itaquera
           </p>
         ) : (
-          <p className="max-w-[280px] text-center text-[11px] leading-relaxed text-white/80">
+          <p className="max-w-[280px] text-center text-[0.6875rem] leading-relaxed text-white/80">
             Acesso unificado com a conta cadastrada
             <br />
             (use o e-mail vinculado à sua conta)

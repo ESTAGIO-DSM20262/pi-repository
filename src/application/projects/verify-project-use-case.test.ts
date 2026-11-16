@@ -155,7 +155,7 @@ describe('VerifyProjectUseCase', () => {
     expect(await verifications.findByProject('p-1')).toEqual([])
   })
 
-  it('o administrador pode verificar, mas isso não conta como orientador', async () => {
+  it('o administrador não pode indicar o projeto', async () => {
     const { verifications, useCase } = setup()
     const result = await useCase.execute({
       viewer: admin,
@@ -163,29 +163,26 @@ describe('VerifyProjectUseCase', () => {
       body: { criteria: ['final_result'] },
     })
 
-    expect(result.isRight()).toBe(true)
-    if (result.isRight()) {
-      expect(result.value.summary.complete).toBe(false)
-      expect(result.value.summary.administrators).toHaveLength(1)
-    }
-    expect(verifications.verifiedFlags.get('p-1')).toBe(false)
+    expect(result.isLeft()).toBe(true)
+    if (result.isLeft()) expect(result.value.status).toBe(403)
+    expect(verifications.records.size).toBe(0)
   })
 
-  it('projeto desativado fica inacessível para professor, mas o administrador ainda enxerga', async () => {
+  it('projeto desativado fica inacessível para professor de fora', async () => {
     const { useCase } = setup(makeProject({ active: false }))
-    const asProfessor = await useCase.execute({
-      viewer: ana,
+    const result = await useCase.execute({
+      viewer: outsider,
       projectId: 'p-1',
       body: { criteria: ['source_code'] },
     })
-    expect(asProfessor.isLeft()).toBe(true)
-    if (asProfessor.isLeft()) expect(asProfessor.value.status).toBe(404)
+    expect(result.isLeft()).toBe(true)
+    if (result.isLeft()) expect(result.value.status).toBe(404)
   })
 
-  it('pede ao administrador para reativar o projeto antes de indicá-lo', async () => {
+  it('pede ao orientador para reativar o projeto antes de indicá-lo', async () => {
     const { useCase, verifications } = setup(makeProject({ active: false }))
     const result = await useCase.execute({
-      viewer: admin,
+      viewer: ana,
       projectId: 'p-1',
       body: { criteria: ['source_code'] },
     })

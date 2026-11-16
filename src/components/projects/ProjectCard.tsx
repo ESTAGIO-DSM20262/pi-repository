@@ -42,46 +42,56 @@ export function ProjectCard({
       } ${inactive ? 'opacity-70' : ''}`}
     >
       <div
-        className={`relative flex h-[150px] flex-col items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]}`}
+        className={`relative flex h-28 flex-col sm:h-[150px] items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]}`}
       >
         <i className={`fi ${p.cover.icon} flex text-3xl text-slate-700`} aria-hidden="true" />
-        <span className="px-3 text-center text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+        <span className="px-3 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
           {p.cover.label}
         </span>
 
-        {p.verified && (
-          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-[11px] font-semibold text-secondary-hover border border-accent">
-            <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> PI Indicado
-          </span>
+        {(p.bestOfSemester || p.verified) && (
+          <div className="absolute left-2 top-2 flex flex-col items-start gap-1">
+            {p.bestOfSemester && (
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary px-2.5 py-1 text-[0.6875rem] font-bold text-white shadow-sm">
+                <i className="fi fi-rr-trophy flex" aria-hidden="true" /> Melhor PI escolhido
+              </span>
+            )}
+            {p.verified && (
+              <span className="inline-flex items-center gap-1 rounded bg-accent-light px-2 py-0.5 text-[0.6875rem] font-semibold text-secondary-hover border border-accent">
+                <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" /> PI
+                Indicado
+              </span>
+            )}
+          </div>
         )}
 
         {inactive ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[11px] font-semibold text-white">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
             <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
           </span>
         ) : p.status === 'publicado' ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-white">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
             <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
           </span>
         ) : p.status === 'em_andamento' ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-[0.6875rem] font-semibold text-amber-900">
             <i className="fi fi-rr-clock flex" aria-hidden="true" /> Em andamento
           </span>
         ) : null}
 
-        <span className="absolute bottom-2 left-2 rounded bg-slate-700/90 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+        <span className="absolute bottom-2 left-2 rounded bg-slate-700/90 px-1.5 py-0.5 text-[0.6875rem] font-semibold text-white">
           DSM {p.semester}º Semestre
         </span>
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-center justify-between gap-2 text-[11px] font-medium text-slate-600">
+        <div className="flex items-center justify-between gap-2 text-[0.6875rem] font-medium text-slate-600">
           <span>Ciclo {p.cycle}</span>
           <span className="text-right">
             {advisorLabel}: {advisorText}
           </span>
         </div>
-        <h3 className="mt-2 line-clamp-3 text-lg font-semibold leading-snug text-slate-900">
+        <h3 className="mt-2 line-clamp-3 text-base font-semibold sm:text-lg leading-snug text-slate-900">
           {p.title}
         </h3>
         <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-text-secondary">
@@ -91,7 +101,7 @@ export function ProjectCard({
           {chips.map((c) => (
             <li
               key={c}
-              className="rounded bg-surface-secondary px-1.5 py-0.5 text-[11px] font-medium text-slate-700"
+              className="rounded bg-surface-secondary px-1.5 py-0.5 text-[0.6875rem] font-medium text-slate-700"
             >
               {c}
             </li>

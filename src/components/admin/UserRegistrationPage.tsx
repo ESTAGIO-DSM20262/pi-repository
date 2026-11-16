@@ -1,9 +1,13 @@
 'use client'
 
-import { type DragEvent, type FormEvent, type ReactNode, useRef, useState } from 'react'
+import Link from 'next/link'
+import { type DragEvent, type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
 import * as XLSX from 'xlsx'
+import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
+import { buildCourseOptions, useAdminCourses } from '@/components/admin/use-admin-courses'
 import { BackButton } from '@/components/ui/BackButton'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 
@@ -42,7 +46,7 @@ const labelClass = 'block text-xs font-semibold text-slate-800'
 
 function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => void }) {
   return (
-    <fieldset className="inline-flex max-w-full flex-wrap rounded-xl bg-[#eceeef] p-1">
+    <fieldset className="grid w-full min-w-0 grid-cols-3 gap-1 rounded-xl bg-[#eceeef] p-1 sm:inline-flex sm:w-auto sm:max-w-full sm:flex-wrap sm:gap-0">
       <legend className="sr-only">Perfil do novo usuário</legend>
       {ROLE_OPTIONS.map((option) => (
         <button
@@ -50,7 +54,7 @@ function RoleTabs({ value, onChange }: { value: Role; onChange: (role: Role) => 
           type="button"
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
-          className={`cursor-pointer inline-flex h-9 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
+          className={`cursor-pointer inline-flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-1 py-1.5 text-[0.625rem] font-semibold leading-tight transition-colors sm:h-9 sm:min-h-0 sm:flex-none sm:flex-row sm:gap-1.5 sm:px-3 sm:py-0 sm:text-xs ${value === option.value ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-white/80 hover:text-primary'}`}
         >
           <i className={`fi ${option.icon} flex text-sm`} aria-hidden="true" />
           {option.label}
@@ -137,8 +141,11 @@ export function UserRegistrationPage() {
     name: '',
     email: '',
     registrationNumber: '',
-    course: 'D.S.M.',
+    course: '',
   })
+  const { courses, loading: loadingCourses, error: coursesError } = useAdminCourses()
+  const courseOptions = buildCourseOptions(courses)
+  const defaultCourse = courseOptions[0]?.value ?? ''
   const [savingSingle, setSavingSingle] = useState(false)
   const [singleError, setSingleError] = useState('')
   const [singleCredential, setSingleCredential] = useState<Credential | null>(null)
@@ -150,13 +157,20 @@ export function UserRegistrationPage() {
   const [batchConfirmationOpen, setBatchConfirmationOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Pré-seleciona o primeiro curso ativo quando a lista chega ou o perfil volta a ser aluno.
+  useEffect(() => {
+    if (role === 'student' && !form.course && defaultCourse) {
+      setForm((current) => ({ ...current, course: current.course || defaultCourse }))
+    }
+  }, [role, form.course, defaultCourse])
+
   function changeRole(nextRole: Role) {
     setRole(nextRole)
     setSingleError('')
     setSingleCredential(null)
     setForm((current) => ({
       ...current,
-      course: nextRole === 'student' ? current.course || 'D.S.M.' : '',
+      course: nextRole === 'student' ? current.course || defaultCourse : '',
     }))
   }
 
@@ -165,6 +179,11 @@ export function UserRegistrationPage() {
     setSavingSingle(true)
     setSingleError('')
     setSingleCredential(null)
+    if (role === 'student' && !form.course) {
+      setSingleError('Selecione o curso do aluno.')
+      setSavingSingle(false)
+      return
+    }
     try {
       const response = await fetch('/api/admin/users', {
         method: 'POST',
@@ -179,7 +198,7 @@ export function UserRegistrationPage() {
         name: '',
         email: '',
         registrationNumber: '',
-        course: role === 'student' ? 'D.S.M.' : '',
+        course: role === 'student' ? defaultCourse : '',
       })
     } catch (error) {
       setSingleError(
@@ -251,16 +270,16 @@ export function UserRegistrationPage() {
   }
 
   return (
-    <div className="w-full bg-background px-4 py-7 sm:px-6 sm:py-9 lg:px-8">
+    <div className="w-full bg-background px-3 py-5 sm:px-6 sm:py-9 lg:px-8">
       <div className="mx-auto max-w-[1400px]">
-        <div className="mb-7 rounded-2xl border border-border bg-white p-4 shadow-sm sm:mb-9 sm:p-6">
-          <div className="flex items-start gap-3">
+        <div className="mb-5 rounded-2xl border border-border bg-white p-3.5 shadow-sm sm:mb-9 sm:p-6">
+          <div className="flex min-w-0 items-start gap-3">
             <BackButton href="/admin" label="Voltar ao painel administrativo" />
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
                 Painel administrativo
               </p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Cadastro de Usuários
               </h1>
               <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-text-secondary sm:text-sm">
@@ -272,19 +291,19 @@ export function UserRegistrationPage() {
         </div>
 
         <div className="grid items-stretch gap-5 xl:grid-cols-[1.35fr_1fr] xl:gap-6">
-          <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-7 lg:p-9">
+          <section className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7 lg:p-9">
             <div className="mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div className="max-w-xl">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <i className="fi fi-rr-user-add flex text-lg" aria-hidden="true" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
+                  <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
                     Novo registro
                   </span>
                 </div>
                 <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                   Cadastro individual de usuário
                 </h2>
-                <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[13px]">
+                <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[0.8125rem]">
                   Crie uma conta para estudante, docente ou administrador.
                 </p>
               </div>
@@ -339,6 +358,8 @@ export function UserRegistrationPage() {
                   {role !== 'admin' && <span className="text-primary">*</span>}
                   <input
                     required={role !== 'admin'}
+                    minLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
+                    maxLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
                     value={form.registrationNumber}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, registrationNumber: event.target.value }))
@@ -352,20 +373,42 @@ export function UserRegistrationPage() {
                           : 'Opcional'
                     }
                   />
+                  {role === 'student' && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      O RA deve ter {STUDENT_REGISTRATION_LENGTH} caracteres.
+                    </span>
+                  )}
                 </label>
                 {role === 'student' ? (
-                  <label className={labelClass}>
-                    Curso tecnológico <span className="text-primary">*</span>
-                    <input
-                      required
+                  <div>
+                    <span className={labelClass}>
+                      Curso tecnológico <span className="text-primary">*</span>
+                    </span>
+                    <SelectDropdown
                       value={form.course}
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, course: event.target.value }))
-                      }
-                      className={fieldClass}
-                      placeholder="Ex.: D.S.M."
+                      ariaLabel="Curso tecnológico"
+                      width="full"
+                      tone="muted"
+                      className="mt-1.5"
+                      placeholder={loadingCourses ? 'Carregando cursos…' : 'Selecione o curso'}
+                      options={courseOptions}
+                      onChange={(value) => setForm((current) => ({ ...current, course: value }))}
                     />
-                  </label>
+                    {coursesError && (
+                      <p role="alert" className="mt-1 text-[0.625rem] text-rose-800">
+                        {coursesError}
+                      </p>
+                    )}
+                    {!loadingCourses && !coursesError && courseOptions.length === 0 && (
+                      <p className="mt-1 text-[0.625rem] text-text-secondary">
+                        Nenhum curso ativo.{' '}
+                        <Link href="/admin#cursos" className="font-semibold text-primary underline">
+                          Cadastre um curso
+                        </Link>{' '}
+                        no painel administrativo.
+                      </p>
+                    )}
+                  </div>
                 ) : (
                   <div className="flex min-h-[68px] items-center rounded-lg border border-border-light bg-surface-secondary/65 px-3.5 py-3 text-xs leading-relaxed text-text-secondary">
                     <i
@@ -398,7 +441,7 @@ export function UserRegistrationPage() {
                   </div>
                   <div className="flex flex-col gap-2 rounded-lg border border-emerald-200/80 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                      <p className="text-[0.625rem] font-bold uppercase tracking-wide text-text-secondary">
                         Senha temporária
                       </p>
                       <code className="mt-1 block break-all text-sm font-semibold text-slate-900">
@@ -434,7 +477,7 @@ export function UserRegistrationPage() {
                       )}
                     </div>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-emerald-900">
+                  <p className="text-[0.6875rem] leading-relaxed text-emerald-900">
                     Copie e entregue a senha ao usuário por um canal seguro. O sistema ainda não tem
                     envio de e-mail configurado e esta senha não será exibida novamente após sair
                     desta tela.
@@ -443,7 +486,7 @@ export function UserRegistrationPage() {
               )}
 
               <div className="flex flex-col-reverse gap-3 border-t border-border-light pt-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="max-w-sm text-[11px] leading-relaxed text-text-secondary">
+                <p className="max-w-sm text-[0.6875rem] leading-relaxed text-text-secondary">
                   A senha temporária é gerada automaticamente e armazenada apenas em formato hash.
                 </p>
                 <button
@@ -461,18 +504,18 @@ export function UserRegistrationPage() {
             </form>
           </section>
 
-          <section className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-7">
+          <section className="rounded-2xl border border-border bg-white p-4 shadow-sm sm:p-7">
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2 text-emerald-800">
                 <i className="fi fi-rr-file-spreadsheet flex text-lg" aria-hidden="true" />
-                <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
+                <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
                   Importação em lote
                 </span>
               </div>
               <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 Importar planilha do SIGA
               </h2>
-              <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[13px]">
+              <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:text-[0.8125rem]">
                 A importação reconhece automaticamente as abas <strong>Alunos</strong> e{' '}
                 <strong>Professores</strong> do modelo enviado.
               </p>
@@ -545,12 +588,12 @@ export function UserRegistrationPage() {
               <div className="rounded-xl bg-surface-secondary p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-slate-900">Colunas reconhecidas</p>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-800">
+                  <span className="inline-flex items-center gap-1 text-[0.625rem] font-semibold text-emerald-800">
                     <i className="fi fi-rr-check-circle flex" aria-hidden="true" /> Modelo DSM
                     compatível
                   </span>
                 </div>
-                <div className="mt-3 space-y-2 text-[11px] leading-relaxed text-text-secondary">
+                <div className="mt-3 space-y-2 text-[0.6875rem] leading-relaxed text-text-secondary">
                   <p>
                     <strong className="text-slate-800">Aba Alunos:</strong> Curso · RA · Nome Aluno
                     · E-mail
@@ -573,7 +616,7 @@ export function UserRegistrationPage() {
                 <div className="space-y-3 rounded-xl border border-border bg-white p-4">
                   <div>
                     <p className="text-sm font-semibold text-slate-900">Importação finalizada</p>
-                    <p className="mt-1 text-[11px] text-text-secondary">
+                    <p className="mt-1 text-[0.6875rem] text-text-secondary">
                       Abas: {batchResult.summary.sheets.join(', ') || '—'} · Linhas lidas:{' '}
                       {batchResult.summary.read}
                     </p>
@@ -583,19 +626,19 @@ export function UserRegistrationPage() {
                       <p className="text-lg font-bold text-emerald-800">
                         {batchResult.summary.created}
                       </p>
-                      <p className="text-[10px] text-emerald-900">Criados</p>
+                      <p className="text-[0.625rem] text-emerald-900">Criados</p>
                     </div>
                     <div className="rounded-lg bg-amber-50 p-2.5">
                       <p className="text-lg font-bold text-amber-800">
                         {batchResult.summary.skipped}
                       </p>
-                      <p className="text-[10px] text-amber-900">Ignorados</p>
+                      <p className="text-[0.625rem] text-amber-900">Ignorados</p>
                     </div>
                     <div className="rounded-lg bg-rose-50 p-2.5">
                       <p className="text-lg font-bold text-rose-800">
                         {batchResult.summary.invalid}
                       </p>
-                      <p className="text-[10px] text-rose-900">Inválidos</p>
+                      <p className="text-[0.625rem] text-rose-900">Inválidos</p>
                     </div>
                   </div>
                   {batchResult.credentials.length > 0 && (
@@ -623,7 +666,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-emerald-900">
                         Ver usuários criados ({batchResult.credentials.length})
                       </summary>
-                      <ul className="scrollbar-success mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[11px] leading-relaxed text-emerald-900">
+                      <ul className="scrollbar-success mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[0.6875rem] leading-relaxed text-emerald-900">
                         {batchResult.credentials.slice(0, 50).map((item) => (
                           <li key={item.email}>
                             <strong>{item.name}</strong> — {item.email} ({ROLE_LABEL[item.role]})
@@ -637,7 +680,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-rose-900">
                         Ver linhas que precisam de correção ({batchResult.errors.length})
                       </summary>
-                      <ul className="scrollbar-danger mt-2 max-h-44 space-y-2 overflow-auto pr-1 text-[11px] leading-relaxed text-rose-900">
+                      <ul className="scrollbar-danger mt-2 max-h-44 space-y-2 overflow-auto pr-1 text-[0.6875rem] leading-relaxed text-rose-900">
                         {batchResult.errors.slice(0, 50).map((item) => (
                           <li key={`${item.sheet}-${item.rowNumber}`}>
                             <strong>
@@ -655,7 +698,7 @@ export function UserRegistrationPage() {
                       <summary className="cursor-pointer text-xs font-semibold text-amber-900">
                         Ver registros ignorados ({batchResult.skipped.length})
                       </summary>
-                      <ul className="scrollbar-warning mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[11px] leading-relaxed text-amber-900">
+                      <ul className="scrollbar-warning mt-2 max-h-36 space-y-1.5 overflow-auto pr-1 text-[0.6875rem] leading-relaxed text-amber-900">
                         {batchResult.skipped.slice(0, 50).map((item) => (
                           <li key={`${item.sheet}-${item.rowNumber}`}>
                             <strong>

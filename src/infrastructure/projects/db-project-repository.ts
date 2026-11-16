@@ -1,12 +1,12 @@
 import { desc, eq } from 'drizzle-orm'
 import { db } from '@/db'
-import { projects } from '@/db/schema'
+import { projects, semesterAwards } from '@/db/schema'
 import type { Project } from '@/domain/enterprise/entities/project'
 import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 
 type ProjectRow = typeof projects.$inferSelect
 
-export function toDomainProject(row: ProjectRow): Project {
+export function toDomainProject(row: ProjectRow, bestOfSemester = false): Project {
   return {
     id: row.id,
     title: row.title,
@@ -22,6 +22,7 @@ export function toDomainProject(row: ProjectRow): Project {
     theme: row.theme,
     status: row.status,
     verified: row.verified,
+    bestOfSemester,
     active: row.active,
     accessCount: 0,
     cover: {
@@ -33,14 +34,29 @@ export function toDomainProject(row: ProjectRow): Project {
   }
 }
 
+async function loadAwardedProjectIds() {
+  try {
+    const rows = await db.select({ projectId: semesterAwards.projectId }).from(semesterAwards)
+    return new Set(rows.map((row) => row.projectId))
+  } catch (error) {
+    console.error('[Melhor PI do semestre]', error)
+    return new Set<string>()
+  }
+}
+
 export class DbProjectRepository implements ProjectReader {
   async findAll(): Promise<Project[]> {
-    const rows = await db.select().from(projects).orderBy(desc(projects.createdAt))
-    return rows.map(toDomainProject)
+    const [rows, awarded] = await Promise.all([
+      db.select().from(projects).orderBy(desc(projects.createdAt)),
+      loadAwardedProjectIds(),
+    ])
+    return rows.map((row) => toDomainProject(row, awarded.has(row.id)))
   }
 
   async findById(id: string): Promise<Project | null> {
     const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1)
-    return row ? toDomainProject(row) : null
+    if (!row) return null
+    const awarded = await loadAwardedProjectIds()
+    return toDomainProject(row, awarded.has(row.id))
   }
 }

@@ -157,7 +157,7 @@ export function SearchSelect({
             role="option"
             aria-selected={!hasSelection}
             onClick={() => choose(allValue)}
-            className={`flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
+            className={`flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[0.8125rem] transition-colors ${
               hasSelection
                 ? 'text-slate-700 hover:bg-surface-secondary'
                 : 'bg-primary-light/80 font-semibold text-primary'
@@ -168,7 +168,7 @@ export function SearchSelect({
           </button>
 
           {results.length === 0 ? (
-            <p className="px-3 py-3 text-[13px] text-text-secondary">
+            <p className="px-3 py-3 text-[0.8125rem] text-text-secondary">
               Nenhum {noun} encontrado para “{query.trim()}”.
             </p>
           ) : (
@@ -183,7 +183,7 @@ export function SearchSelect({
                     aria-selected={isSelected}
                     onMouseEnter={() => setActiveIndex(index)}
                     onClick={() => choose(option.value)}
-                    className={`flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
+                    className={`flex min-h-10 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left text-[0.8125rem] transition-colors ${
                       isSelected
                         ? 'bg-primary-light/80 font-semibold text-primary'
                         : activeIndex === index
@@ -193,7 +193,9 @@ export function SearchSelect({
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                     {option.hint && (
-                      <span className="shrink-0 text-[11px] text-text-muted">{option.hint}</span>
+                      <span className="shrink-0 text-[0.6875rem] text-text-muted">
+                        {option.hint}
+                      </span>
                     )}
                     {isSelected && (
                       <i className="fi fi-rr-check flex shrink-0 text-sm" aria-hidden="true" />
@@ -205,7 +207,7 @@ export function SearchSelect({
           )}
 
           {totalMatches > results.length && (
-            <p className="border-t border-border-light px-3 pt-2 pb-1 text-[11px] text-text-muted">
+            <p className="border-t border-border-light px-3 pt-2 pb-1 text-[0.6875rem] text-text-muted">
               Mostrando {results.length} de {totalMatches}. Continue digitando para refinar.
             </p>
           )}

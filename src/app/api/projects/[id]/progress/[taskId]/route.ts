@@ -15,7 +15,7 @@ type TaskStatus = 'pending' | 'in_progress' | 'completed'
 function progressDatabaseErrorMessage(error: unknown, fallback: string) {
   const detail = error instanceof Error ? error.message : String(error)
   if (/42P01|relation ["']?project_progress_(tasks|revisions)["']? does not exist/i.test(detail)) {
-    return 'As tabelas do progresso ainda não existem no banco. Execute src/db/migrations/20261014_project_progress.sql no SQL Editor do Neon e tente novamente.'
+    return 'As tabelas do progresso ainda não existem no banco. Execute npm run db:migrate para aplicar as migrations pendentes e tente novamente.'
   }
   return fallback
 }

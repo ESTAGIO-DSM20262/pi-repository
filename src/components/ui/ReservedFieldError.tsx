@@ -4,7 +4,7 @@ interface ReservedFieldErrorProps {
   className?: string
 }
 
-const textClass = 'col-start-1 row-start-1 text-xs leading-4 sm:text-[13px] sm:leading-4'
+const textClass = 'col-start-1 row-start-1 text-xs leading-4 sm:text-[0.8125rem] sm:leading-4'
 
 export function ReservedFieldError({ message, reserve, className = '' }: ReservedFieldErrorProps) {
   return (

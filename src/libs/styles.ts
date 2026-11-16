@@ -1,24 +1,24 @@
 export const eyebrowClass =
-  'text-[11px] font-semibold uppercase tracking-wider text-primary sm:text-xs'
+  'text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs'
 export const titleClass = 'text-xl font-semibold text-slate-900 sm:text-2xl'
-export const descriptionClass = 'text-[13px] leading-relaxed text-text-secondary sm:text-sm'
+export const descriptionClass = 'text-[0.8125rem] leading-relaxed text-text-secondary sm:text-sm'
 export const labelClass =
-  'mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-foreground sm:text-xs'
+  'mb-1.5 block text-[0.6875rem] font-semibold uppercase tracking-wider text-foreground sm:text-xs'
 
 export const inputClass =
-  'h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/15 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus:border-red-400 aria-[invalid=true]:focus:ring-red-500/15 sm:h-11 sm:px-3.5 sm:text-[15px]'
-export const fieldErrorClass = 'mt-1.5 text-xs text-red-600 sm:text-[13px]'
+  'h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-foreground outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/15 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus:border-red-400 aria-[invalid=true]:focus:ring-red-500/15 sm:h-11 sm:px-3.5 sm:text-[0.9375rem]'
+export const fieldErrorClass = 'mt-1.5 text-xs text-red-600 sm:text-[0.8125rem]'
 
 export const buttonClass =
-  'inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2.5 rounded-lg text-sm font-semibold transition disabled:cursor-wait disabled:opacity-70 sm:h-11 sm:text-[15px]'
+  'inline-flex h-10 w-full cursor-pointer items-center justify-center gap-2.5 rounded-lg text-sm font-semibold transition disabled:cursor-wait disabled:opacity-70 sm:h-11 sm:text-[0.9375rem]'
 export const primaryButtonClass = `${buttonClass} bg-primary text-white hover:bg-primary-hover`
 
 export const linkClass = 'font-semibold text-primary hover:underline'
 export const mutedLinkClass =
-  'inline-flex items-center gap-1.5 text-xs text-text-secondary transition hover:text-primary sm:text-[13px]'
+  'inline-flex items-center gap-1.5 text-xs text-text-secondary transition hover:text-primary sm:text-[0.8125rem]'
 
 export const alertClass =
-  'flex items-start gap-2 rounded-lg bg-primary-light px-3 py-2 text-[13px] text-primary sm:py-2.5 sm:text-sm'
+  'flex items-start gap-2 rounded-lg bg-primary-light px-3 py-2 text-[0.8125rem] text-primary sm:py-2.5 sm:text-sm'
 export const infoBoxClass = 'rounded-lg border border-border bg-surface-secondary'
 export const cardClass = 'rounded-xl border border-border bg-surface shadow-sm'
 

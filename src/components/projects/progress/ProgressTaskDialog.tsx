@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
 import { formatPersonName } from '@/libs/initials'
+import { useRestoreFocus } from '@/libs/useRestoreFocus'
 
 export interface ProgressTask {
   id: string
@@ -87,6 +88,7 @@ export function ProgressTaskDialog({
   const [error, setError] = useState('')
   const onCloseRef = useRef(onClose)
   const savingRef = useRef(saving)
+  useRestoreFocus(open)
 
   useEffect(() => {
     onCloseRef.current = onClose
@@ -198,7 +200,7 @@ export function ProgressTaskDialog({
             />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">
+            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-primary">
               Progresso do projeto
             </p>
             <h2
@@ -233,7 +235,7 @@ export function ProgressTaskDialog({
               <i className="fi fi-rr-code-branch flex text-primary" aria-hidden="true" />
               Versão {nextVersionLabel}
             </div>
-            <span className="text-[11px] text-slate-600">
+            <span className="text-[0.6875rem] text-slate-600">
               {task ? 'Revisão menor da mesma tarefa' : 'Nova entrega do projeto'}
             </span>
           </div>
@@ -253,7 +255,7 @@ export function ProgressTaskDialog({
                 placeholder="Ex.: Entregar documentação final"
                 required
               />
-              <p className="mt-1 text-right text-[10px] text-slate-500">
+              <p className="mt-1 text-right text-[0.625rem] text-slate-500">
                 {title.length}/160 caracteres
               </p>
             </div>
@@ -272,7 +274,7 @@ export function ProgressTaskDialog({
                 placeholder="Explique o que deve ser entregue, os requisitos e como o professor avaliará a tarefa."
                 required
               />
-              <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+              <p className="mt-1 text-[0.625rem] leading-relaxed text-slate-500">
                 Descreva o resultado esperado para que todos entendam claramente a solicitação.
               </p>
             </div>
@@ -282,6 +284,8 @@ export function ProgressTaskDialog({
                 <span className={labelClass}>Responsável pela entrega</span>
                 <SelectDropdown
                   value={targetStudentEmail}
+                  searchable
+                  searchPlaceholder="Pesquisar pelo nome..."
                   ariaLabel="Responsável pela entrega"
                   width="full"
                   layer="modal"
@@ -295,7 +299,7 @@ export function ProgressTaskDialog({
                   ]}
                   onChange={setTargetStudentEmail}
                 />
-                <p className="mt-1 text-[10px] text-slate-500">
+                <p className="mt-1 text-[0.625rem] text-slate-500">
                   Tarefas individuais ficam visíveis apenas ao aluno selecionado.
                 </p>
               </div>
@@ -310,7 +314,7 @@ export function ProgressTaskDialog({
                   value={dueDate}
                   onChange={(event) => setDueDate(event.target.value)}
                 />
-                <p className="mt-1 text-[10px] text-slate-500">
+                <p className="mt-1 text-[0.625rem] text-slate-500">
                   O prazo pode ser deixado em branco.
                 </p>
               </div>

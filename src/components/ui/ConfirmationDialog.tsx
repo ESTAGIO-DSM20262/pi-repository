@@ -1,16 +1,18 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useRestoreFocus } from '@/libs/useRestoreFocus'
 
 interface ConfirmationDialogProps {
   open: boolean
   title: string
   description: string
+  details?: ReactNode
   confirmLabel: string
   cancelLabel?: string
   icon?: string
-  tone?: 'primary' | 'danger'
+  tone?: 'primary' | 'danger' | 'award'
   pending?: boolean
   onConfirm: () => void | Promise<void>
   onCancel: () => void
@@ -20,6 +22,7 @@ export function ConfirmationDialog({
   open,
   title,
   description,
+  details,
   confirmLabel,
   cancelLabel = 'Cancelar',
   icon = 'fi-rr-triangle-warning',
@@ -29,6 +32,7 @@ export function ConfirmationDialog({
   onCancel,
 }: ConfirmationDialogProps) {
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
+  useRestoreFocus(open)
   const dialogRef = useRef<HTMLDivElement>(null)
   const onCancelRef = useRef(onCancel)
   const pendingRef = useRef(pending)
@@ -97,7 +101,13 @@ export function ConfirmationDialog({
   const buttonTone =
     tone === 'danger'
       ? 'bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary'
-      : 'bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-700'
+      : tone === 'award'
+        ? 'bg-secondary text-white hover:bg-secondary-hover focus-visible:ring-secondary'
+        : 'bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-700'
+  const iconTone =
+    tone === 'award'
+      ? 'border border-accent/40 bg-accent-light text-secondary-hover'
+      : 'bg-primary-light text-primary'
 
   return createPortal(
     <div
@@ -122,7 +132,11 @@ export function ConfirmationDialog({
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirmation-dialog-title"
-        aria-describedby="confirmation-dialog-description"
+        aria-describedby={
+          details
+            ? 'confirmation-dialog-description confirmation-dialog-details'
+            : 'confirmation-dialog-description'
+        }
         className={`relative overflow-y-auto rounded-2xl border border-border bg-white p-6 shadow-2xl transition duration-200 motion-reduce:transition-none sm:p-7 ${
           shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-1 scale-[0.98] opacity-0'
         }`}
@@ -135,7 +149,9 @@ export function ConfirmationDialog({
         }}
       >
         <div className="flex items-start gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
+          <span
+            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconTone}`}
+          >
             <i className={`fi ${icon} flex text-xl`} aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1 pt-0.5">
@@ -151,10 +167,18 @@ export function ConfirmationDialog({
             >
               {description}
             </p>
+            {details && (
+              <div
+                id="confirmation-dialog-details"
+                className="mt-4 rounded-lg border border-border bg-surface-secondary p-3.5 text-sm leading-relaxed text-slate-800"
+              >
+                {details}
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap justify-end gap-3">
+        <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-border-light pt-5">
           <button
             ref={cancelButtonRef}
             type="button"

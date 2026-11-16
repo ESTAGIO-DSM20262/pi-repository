@@ -76,7 +76,7 @@ export function ProfileForm({ profile, onSaved }: ProfileFormProps) {
   const serverError = errors.root?.server?.message
 
   return (
-    <form onSubmit={onSubmit} className="p-5 sm:p-7" noValidate>
+    <form onSubmit={onSubmit} className="p-4 sm:p-7" noValidate>
       <div className="mb-6">
         <h3 className="text-sm font-bold text-slate-900">Dados da conta</h3>
         <p className="mt-1 text-xs leading-relaxed text-text-secondary">

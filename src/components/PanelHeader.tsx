@@ -10,9 +10,9 @@ interface PanelHeaderProps {
 
 export function PanelHeader({ name, email, role }: PanelHeaderProps) {
   return (
-    <section className="mx-auto max-w-3xl p-6">
+    <section className="mx-auto max-w-3xl p-4 sm:p-6">
       <div className="rounded-2xl border border-border bg-white p-5 shadow-sm sm:p-6">
-        <h2 className="text-2xl font-semibold">Olá, {formatPersonName(name)}</h2>
+        <h2 className="text-xl font-semibold sm:text-2xl">Olá, {formatPersonName(name)}</h2>
         <p className="mt-2 text-sm text-text-secondary">
           Você entrou como <strong>{ROLE_LABEL[role]}</strong> ({email}).
         </p>

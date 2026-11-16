@@ -100,8 +100,6 @@ describe('buildVerificationSummary', () => {
 
     expect(summary.complete).toBe(false)
     expect(summary.verifiedCount).toBe(1)
-    expect(summary.administrators).toHaveLength(1)
-    expect(summary.administrators[0].email).toBe('admin@cps.sp.gov.br')
   })
 
   it('ignora verificação de quem não é mais orientador do projeto', () => {

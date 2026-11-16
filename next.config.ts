@@ -1,18 +1,10 @@
 import type { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
   devIndicators: false,
-  turbopack: {
-    rules: {
-      '*.css': {
-        loaders: ['@tailwindcss/turbopack'],
-        as: '*.css',
-      },
-    },
-  },
-}
+} satisfies NextConfig
 
 export default nextConfig
