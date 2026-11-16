@@ -24,6 +24,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - `canManageActivation(project, viewer)` vale para o administrador e para o orientador principal (`project.advisor`); orientadores adicionais, outros professores e alunos não ativam nem desativam. `canDeleteProject` continua exclusivo do administrador, e só projeto desativado pode ser excluído.
 - `canViewProject` mostra projeto desativado ao administrador e a todos os orientadores do projeto (principal e adicionais), que o encontram na página inicial e no painel com a etiqueta "Desativado" e podem reativá-lo pelo orientador principal. Desativar retira a escolha de melhor PI (gatilho do banco). Orientador não edita projeto desativado; só o administrador.
+- Projeto desativado aparece apagado (cinza, opacidade reduzida e borda tracejada) com o selo "Desativado" no `ProjectCard` da home (selo centralizado sobre a capa) e no `DashboardProjectCard` do painel. No painel do administrador, o filtro de situação da lista "Projetos Cadastrados" tem a opção "Desativados" (`includeInactiveFilter`); professores e alunos não veem essa opção.
 
 Este documento descreve como o código está organizado depois da adoção de **DDD +
 Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.

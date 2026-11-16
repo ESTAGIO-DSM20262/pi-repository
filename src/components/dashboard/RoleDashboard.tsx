@@ -305,22 +305,35 @@ function DashboardProjectCard({
     project.publicDetails?.team?.length ??
     project.memberEmails.length
   const isPublished = project.status === 'publicado'
+  const inactive = project.active === false
 
   return (
-    <article className="group flex min-w-0 gap-2.5 rounded-xl border border-border bg-white p-2.5 shadow-sm transition-colors hover:bg-surface-secondary sm:gap-3 sm:p-3">
+    <article
+      className={`group flex min-w-0 gap-2.5 rounded-xl border p-2.5 shadow-sm transition-colors hover:bg-surface-secondary sm:gap-3 sm:p-3 ${
+        inactive
+          ? 'border-dashed border-slate-300 bg-slate-50 opacity-70 grayscale'
+          : 'border-border bg-white'
+      }`}
+    >
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
           <span className="truncate text-[0.625rem] font-medium text-text-secondary sm:text-[0.6875rem]">
             DSM • {project.semester}º Sem
           </span>
-          <span
-            className={`shrink-0 rounded px-2 py-0.5 text-[0.625rem] font-semibold ${
-              isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
-            }`}
-          >
-            {isPublished ? 'Concluído' : 'Em andamento'}
-          </span>
+          {inactive ? (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[0.625rem] font-semibold text-white">
+              <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
+            </span>
+          ) : (
+            <span
+              className={`shrink-0 rounded px-2 py-0.5 text-[0.625rem] font-semibold ${
+                isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {isPublished ? 'Concluído' : 'Em andamento'}
+            </span>
+          )}
         </div>
         <Link
           href={`/projetos/${project.id}`}
@@ -355,7 +368,7 @@ function DashboardProjectCard({
   )
 }
 
-type ProjectStatusFilter = 'all' | 'em_andamento' | 'publicado'
+type ProjectStatusFilter = 'all' | 'em_andamento' | 'publicado' | 'inactive'
 
 function normalizeText(value: string) {
   return value.trim().toLocaleLowerCase('pt-BR')
@@ -386,6 +399,7 @@ function ProjectFilters({
   cycle,
   onCycleChange,
   cycleOptions,
+  includeInactive,
   onClear,
 }: {
   query: string
@@ -397,6 +411,7 @@ function ProjectFilters({
   cycle: string
   onCycleChange: (value: string) => void
   cycleOptions: Array<{ value: string; label: string; count: number }>
+  includeInactive: boolean
   onClear: () => void
 }) {
   return (
@@ -425,6 +440,7 @@ function ProjectFilters({
             { value: 'all', label: 'Todas as situações' },
             { value: 'em_andamento', label: 'Em andamento' },
             { value: 'publicado', label: 'Concluído' },
+            ...(includeInactive ? [{ value: 'inactive', label: 'Desativados' }] : []),
           ]}
           onChange={(value) => onStatusChange(value as ProjectStatusFilter)}
         />
@@ -474,6 +490,7 @@ function ProjectsSection({
   action,
   emptyText,
   filterable = false,
+  includeInactiveFilter = false,
 }: {
   title: string
   subtitle: string
@@ -484,6 +501,7 @@ function ProjectsSection({
   action?: React.ReactNode
   emptyText: string
   filterable?: boolean
+  includeInactiveFilter?: boolean
 }) {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
@@ -507,7 +525,11 @@ function ProjectsSection({
         normalizeText(
           `${project.title} ${project.advisor.name} ${project.theme} ${project.summary} ${projectStudentNames(project)}`,
         ).includes(normalized)
-      const matchesStatus = statusFilter === 'all' || project.status === statusFilter
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'inactive'
+          ? project.active === false
+          : project.status === statusFilter)
       const matchesSemester =
         semesterFilter === 'all' || String(project.semester) === semesterFilter
       const matchesCycle = cycleFilter === 'all' || project.cycle === cycleFilter
@@ -549,6 +571,7 @@ function ProjectsSection({
             cycle={cycleFilter}
             onCycleChange={setCycleFilter}
             cycleOptions={cycleOptions}
+            includeInactive={includeInactiveFilter}
             onClear={clearFilters}
           />
           <p className="mb-3 text-[0.6875rem] text-text-secondary" role="status">
@@ -866,6 +889,7 @@ export function RoleDashboard({
             onToggleFavorite={toggleFavorite}
             action={newProjectAction}
             filterable={role !== 'student'}
+            includeInactiveFilter={role === 'admin'}
             emptyText={
               role === 'admin'
                 ? 'Ainda não há projetos cadastrados no acervo.'

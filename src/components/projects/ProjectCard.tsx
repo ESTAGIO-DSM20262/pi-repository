@@ -37,12 +37,23 @@ export function ProjectCard({
 
   return (
     <article
-      className={`flex h-full flex-col overflow-hidden rounded-xl border bg-surface shadow-sm transition hover:shadow-md ${
-        p.related ? 'border-primary/30' : 'border-border'
-      } ${inactive ? 'opacity-70' : ''}`}
+      className={`relative flex h-full flex-col overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md ${
+        inactive
+          ? 'border-dashed border-slate-300 bg-slate-50'
+          : `bg-surface ${p.related ? 'border-primary/30' : 'border-border'}`
+      }`}
     >
+      {inactive && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex h-28 items-center justify-center sm:h-[150px]">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-slate-700 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+            <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
+          </span>
+        </div>
+      )}
       <div
-        className={`relative flex h-28 flex-col sm:h-[150px] items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]}`}
+        className={`relative flex h-28 flex-col sm:h-[150px] items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]} ${
+          inactive ? 'opacity-50 grayscale' : ''
+        }`}
       >
         <i className={`fi ${p.cover.icon} flex text-3xl text-slate-700`} aria-hidden="true" />
         <span className="px-3 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
@@ -65,11 +76,7 @@ export function ProjectCard({
           </div>
         )}
 
-        {inactive ? (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
-            <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
-          </span>
-        ) : p.status === 'publicado' ? (
+        {inactive ? null : p.status === 'publicado' ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded bg-primary px-2 py-0.5 text-[0.6875rem] font-semibold text-white">
             <i className="fi fi-rr-flag flex" aria-hidden="true" /> Concluído
           </span>
@@ -84,7 +91,7 @@ export function ProjectCard({
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
+      <div className={`flex flex-1 flex-col p-4 ${inactive ? 'opacity-70 grayscale' : ''}`}>
         <div className="flex items-center justify-between gap-2 text-[0.6875rem] font-medium text-slate-600">
           <span>Ciclo {p.cycle}</span>
           <span className="text-right">
