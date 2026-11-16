@@ -160,6 +160,37 @@ describe('dashboard-metrics', () => {
     expect(metrics.projects.readyToConclude).toBe(1)
   })
 
+  it('conta tarefas apenas dos projetos em que o professor e orientador principal', () => {
+    const projects = [
+      makeProject({ id: 'p1' }),
+      makeProject({
+        id: 'p2',
+        advisor: { email: 'bruno@fatec.sp.gov.br', name: 'Bruno Alves' },
+        coAdvisors: [{ email: 'ana@fatec.sp.gov.br', name: 'Ana Souza' }],
+      }),
+    ]
+    const tasks = [
+      makeTask({ id: 't1', projectId: 'p1', dueDate: '2026-10-20' }),
+      makeTask({ id: 't2', projectId: 'p2', dueDate: '2026-10-21' }),
+      makeTask({ id: 't3', projectId: 'p2', status: 'completed' }),
+    ]
+    const metrics = buildProfessorDashboardMetrics({
+      projects,
+      tasks,
+      indicatedProjectIds: [],
+      today: TODAY,
+      now: NOW,
+      advisorEmail: 'Ana@fatec.sp.gov.br',
+    })
+
+    expect(metrics.projects.total).toBe(2)
+    expect(metrics.projects.ongoing).toBe(2)
+    expect(metrics.tasks.total).toBe(1)
+    expect(metrics.progress.map((row) => row.projectId)).toEqual(['p1'])
+    expect(metrics.deadlines.map((row) => row.taskId)).toEqual(['t1'])
+    expect(metrics.projects.withoutTasks).toBe(0)
+  })
+
   it('monta o painel do administrador com desativados, pendencias e carga de orientadores', () => {
     const projects = [
       makeProject({ id: 'p1', memberEmails: ['aluno1@aluno.fatec.sp.gov.br'] }),

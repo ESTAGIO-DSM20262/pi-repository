@@ -627,7 +627,11 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   atrasadas e próximos prazos (14 dias); progresso por projeto em andamento, ordenado por
   urgência; gráficos de tarefas por situação, projetos por semestre e situação/indicação; carga por
   aluno (tarefas atribuídas a cada um); projetos concluídos que o professor ainda não indicou. Só
-  entram projetos ativos em que ele é orientador ou coorientador (`related`).
+  entram projetos ativos em que ele é orientador ou coorientador (`related`). As tarefas, prazos, carga de alunos, progresso por projeto e os alertas de
+  parado/sem tarefas consideram só os projetos em que ele é orientador principal
+  (`advisorEmail` em `buildProfessorDashboardMetrics`; `DashboardPage` também só carrega tarefas
+  desses projetos); projetos em que ele é adicional continuam nas contagens de projetos e na lista
+  de indicação, sem tarefas.
 - **Administrador:** os cartões agora contam apenas projetos **ativos** (desativados aparecem na
   nota do primeiro cartão e em "Pendências"); "Projetos Indicados" é proporcional aos concluídos.
   `AdminInsights` adiciona projetos por situação e por semestre, tarefas do sistema, projetos que

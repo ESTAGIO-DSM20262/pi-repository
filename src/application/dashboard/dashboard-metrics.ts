@@ -366,6 +366,7 @@ interface ProfessorMetricsInput {
   indicatedProjectIds: string[]
   today: string
   now: Date
+  advisorEmail?: string
 }
 
 export function buildProfessorDashboardMetrics({
@@ -374,17 +375,24 @@ export function buildProfessorDashboardMetrics({
   indicatedProjectIds,
   today,
   now,
+  advisorEmail,
 }: ProfessorMetricsInput): ProfessorDashboardMetrics {
   const followed = projects.filter(isProjectActive)
-  const followedIds = new Set(followed.map((project) => project.id))
-  const followedTasks = tasks.filter((task) => followedIds.has(task.projectId))
+  const taskProjects = advisorEmail
+    ? followed.filter(
+        (project) => normalizeEmail(project.advisor.email) === normalizeEmail(advisorEmail),
+      )
+    : followed
+  const taskProjectIds = new Set(taskProjects.map((project) => project.id))
+  const followedTasks = tasks.filter((task) => taskProjectIds.has(task.projectId))
   const tasksByProject = groupTasksByProject(followedTasks)
   const indicated = new Set(indicatedProjectIds)
-  const names = resolveStudentNames(followed)
+  const names = resolveStudentNames(taskProjects)
 
   const ongoingProjects = followed.filter((project) => project.status === 'em_andamento')
   const completedProjects = followed.filter((project) => project.status === 'publicado')
-  const progress = ongoingProjects
+  const progress = taskProjects
+    .filter((project) => project.status === 'em_andamento')
     .map((project) => buildProjectRow(project, tasksByProject.get(project.id) ?? [], today, now))
     .sort(compareByAttention)
   const awaitingIndication = completedProjects
@@ -409,7 +417,7 @@ export function buildProfessorDashboardMetrics({
     tasks: summarizeTasks(followedTasks, today),
     semesters: buildSemesterDistribution(followed),
     progress,
-    deadlines: buildDeadlines(followed, followedTasks, today, names, 10),
+    deadlines: buildDeadlines(taskProjects, followedTasks, today, names, 10),
     students: buildStudentWorkload(followedTasks, names, today, 8),
     awaitingIndication,
   }

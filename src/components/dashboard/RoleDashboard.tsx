@@ -651,8 +651,9 @@ export function RoleDashboard({
       indicatedProjectIds: professorData.indicatedProjectIds,
       today: professorData.today,
       now: new Date(professorData.nowIso),
+      advisorEmail: email,
     })
-  }, [role, professorData, filteredProjects])
+  }, [role, professorData, filteredProjects, email])
   const studentMetrics = useMemo(() => {
     if (role !== 'student' || !studentData) return undefined
     return buildStudentDashboardMetrics({
