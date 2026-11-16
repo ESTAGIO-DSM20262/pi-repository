@@ -627,8 +627,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   atrasadas e próximos prazos (14 dias); progresso por projeto em andamento, ordenado por
   urgência; gráficos de tarefas por situação, projetos por semestre e situação/indicação; carga por
   aluno (tarefas atribuídas a cada um); projetos concluídos que o professor ainda não indicou. Só
-  entram projetos ativos em que ele é orientador ou coorientador (`related`). As tarefas, prazos, carga de alunos, progresso por projeto e os alertas de
-  parado/sem tarefas consideram só os projetos em que ele é orientador principal
+  entram projetos ativos em que ele é orientador ou coorientador (`related`).
+  As tarefas, prazos, carga de alunos, progresso por projeto e os alertas de parado/sem tarefas consideram só os projetos em que ele é orientador principal
   (`advisorEmail` em `buildProfessorDashboardMetrics`; `DashboardPage` também só carrega tarefas
   desses projetos); projetos em que ele é adicional continuam nas contagens de projetos e na lista
   de indicação, sem tarefas.
@@ -642,6 +642,13 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
   `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
   cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.
+- **Organização em blocos (reunião de 09/11/2026):** `RoleDashboard` agrupa as seções em
+  `DashboardBlock` (cabeçalho com ícone e descrição, âncora `#id`) e mostra `DashboardSectionNav`
+  (atalhos horizontais) no topo. Admin: `acompanhamento` (indicadores, com os filtros), `graficos`,
+  `gestao` (usuários e cursos), `melhor-pi` e `projetos` (projetos e favoritos); professor e aluno
+  usam `acompanhamento`, `melhor-pi` (só orientador principal) e `projetos`. `DashboardGroupLabel`
+  separa os painéis dentro de `AdminInsights` e `ProfessorOverview`. Os painéis, indicadores e
+  filtros não mudaram; só o agrupamento.
 
 ## 22. Dropdowns dentro de modais
 

@@ -3,6 +3,7 @@ import type {
   AdminDashboardMetrics,
   MonthlyRegistration,
 } from '@/application/dashboard/dashboard-metrics'
+import { DashboardGroupLabel } from './DashboardBlock'
 import {
   Badge,
   ColumnChart,
@@ -155,6 +156,7 @@ export function AdminInsights({
         </p>
       </div>
 
+      <DashboardGroupLabel>Panorama do acervo</DashboardGroupLabel>
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-3">
         <Panel
           title="Projetos por situação"
@@ -244,6 +246,7 @@ export function AdminInsights({
         </Panel>
       </div>
 
+      <DashboardGroupLabel>Atenção e pendências</DashboardGroupLabel>
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         <Panel
           title="Projetos que precisam de atenção"
@@ -297,6 +300,7 @@ export function AdminInsights({
         </Panel>
       </div>
 
+      <DashboardGroupLabel>Orientadores e usuários</DashboardGroupLabel>
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-3">
         <Panel
           title="Carga dos orientadores"

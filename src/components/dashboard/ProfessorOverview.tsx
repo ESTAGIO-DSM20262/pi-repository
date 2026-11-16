@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ProfessorDashboardMetrics } from '@/application/dashboard/dashboard-metrics'
+import { DashboardGroupLabel } from './DashboardBlock'
 import {
   Badge,
   ColumnChart,
@@ -317,6 +318,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
         ))}
       </div>
 
+      <DashboardGroupLabel>Prazos e progresso</DashboardGroupLabel>
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         <Panel
           title="Atrasadas e próximos prazos"
@@ -334,6 +336,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
         </Panel>
       </div>
 
+      <DashboardGroupLabel>Visão em gráficos</DashboardGroupLabel>
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-3">
         <Panel
           title="Tarefas por situação"
@@ -403,6 +406,7 @@ export function ProfessorOverview({ metrics }: { metrics: ProfessorDashboardMetr
         </Panel>
       </div>
 
+      <DashboardGroupLabel>Alunos e indicações</DashboardGroupLabel>
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
         <Panel
           title="Carga por aluno"
