@@ -11,6 +11,21 @@ import {
 } from '@/components/admin/use-admin-courses'
 import { Pagination } from '@/components/projects/Pagination'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import {
+  dialogBackdropClass,
+  dialogBodyClass,
+  dialogCancelButtonClass,
+  dialogCloseClass,
+  dialogConfirmButtonClass,
+  dialogEyebrowClass,
+  dialogFooterClass,
+  dialogHeaderClass,
+  dialogIconChipClass,
+  dialogLayerClass,
+  dialogOverlayClass,
+  dialogPanelClass,
+  dialogTitleClass,
+} from '@/components/ui/dialog-styles'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
@@ -555,12 +570,12 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">
+        <div className={`${dialogOverlayClass} ${dialogLayerClass}`}>
           <button
             type="button"
             tabIndex={-1}
             aria-label="Fechar edição de usuário"
-            className="absolute inset-0 cursor-default"
+            className={dialogBackdropClass}
             onMouseDown={() => {
               if (!saving) setEditing(null)
             }}
@@ -570,25 +585,32 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           />
           <form
             onSubmit={saveEdit}
-            className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-white p-5 shadow-2xl sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-user-dialog-title"
+            className={dialogPanelClass('md')}
           >
-            <div className="mb-5 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[0.625rem] font-bold uppercase tracking-widest text-primary">
-                  Gestão de usuários
-                </p>
-                <h3 className="mt-1 text-lg font-semibold text-slate-900">Editar usuário</h3>
+            <header className={dialogHeaderClass}>
+              <span className={dialogIconChipClass('primary')}>
+                <i className="fi fi-rr-user-pen flex text-xl" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className={dialogEyebrowClass('primary')}>Gestão de usuários</p>
+                <h2 id="edit-user-dialog-title" className={dialogTitleClass}>
+                  Editar usuário
+                </h2>
               </div>
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
                 aria-label="Fechar"
-                className="cursor-pointer rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
+                className={dialogCloseClass}
               >
-                ✕
+                <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
               </button>
-            </div>
+            </header>
+            <div className={dialogBodyClass}>
             <div className="space-y-3">
               <label className="block text-xs font-semibold text-slate-700">
                 Nome completo
@@ -702,23 +724,20 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                 {actionError}
               </div>
             )}
-            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            </div>
+            <footer className={dialogFooterClass}>
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
-                className="cursor-pointer min-h-10 w-full rounded-lg border border-border px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
+                className={dialogCancelButtonClass}
               >
                 Cancelar
               </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="cursor-pointer min-h-10 w-full rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60 sm:w-auto"
-              >
+              <button type="submit" disabled={saving} className={dialogConfirmButtonClass}>
                 {saving ? 'Salvando…' : 'Salvar alterações'}
               </button>
-            </div>
+            </footer>
           </form>
         </div>
       )}

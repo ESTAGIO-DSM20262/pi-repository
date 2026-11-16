@@ -648,6 +648,13 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   lista só os 6 mais recentes (`RECENT_SEMESTER_LIMIT`, opção "Todos" fixa via `pinnedCount`),
   com a dica "Pesquise para ver os demais". A pesquisa percorre todos os ciclos existentes; um ciclo
   selecionado fora dos 6 continua visível na lista. `limitOptions` em `libs/limit-options.ts`.
+- **Padrão de modais (reunião de 09/11/2026):** `components/ui/dialog-styles.ts` concentra fundo,
+  largura (`sm` 460, `md` 520, `lg` 680), cabeçalho com ícone, eyebrow, botão de fechar, rodapé e
+  botões. `ConfirmationDialog`, `ProjectVerificationPanel`, `ProgressTaskDialog` e o modal de editar
+  usuário usam esse conjunto; `Modal` (aviso centralizado) usa o mesmo fundo e botão de fechar.
+  Tons: `danger` e `primary` usam ícone vermelho claro; `award` usa ícone ciano/verde-azulado (positivo,
+  como o `Modal` de sucesso). O botão de confirmar é sempre o vermelho primário; no celular o rodapé
+  empilha os botões.
 - **Organização em blocos (reunião de 09/11/2026):** `RoleDashboard` agrupa as seções em
   `DashboardBlock` (cabeçalho com ícone e descrição, âncora `#id`) e mostra `DashboardSectionNav`
   (atalhos horizontais) no topo. Admin: `acompanhamento` (indicadores, com os filtros), `graficos`,

@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { primaryButtonClass } from '../../libs/styles'
 import { useRestoreFocus } from '../../libs/useRestoreFocus'
+import {
+  dialogBackdropStyle,
+  dialogCloseClass,
+  dialogOverlayClass,
+  dialogTopLayerClass,
+} from './dialog-styles'
 
 export type ModalVariant = 'success' | 'error' | 'warning' | 'award'
 
@@ -114,18 +120,14 @@ export function Modal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[2147483647] flex items-center justify-center p-4 transition-opacity duration-200 motion-reduce:transition-none ${shown ? 'opacity-100' : 'opacity-0'}`}
+      className={`${dialogOverlayClass} ${dialogTopLayerClass} transition-opacity duration-200 motion-reduce:transition-none ${shown ? 'opacity-100' : 'opacity-0'}`}
     >
       <button
         type="button"
         aria-label="Fechar aviso"
         onClick={() => onCloseRef.current()}
         className="absolute inset-0 h-full w-full cursor-default"
-        style={{
-          backgroundColor: 'rgba(2, 6, 23, 0.72)',
-          backdropFilter: 'blur(1px)',
-          WebkitBackdropFilter: 'blur(1px)',
-        }}
+        style={dialogBackdropStyle}
       />
       <div
         ref={dialogRef}
@@ -133,14 +135,14 @@ export function Modal({
         aria-modal="true"
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
-        className={`relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-[460px] overflow-y-auto rounded-2xl border border-border bg-surface px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-10 sm:pb-8 sm:pt-9 ${shown ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-[460px] overflow-y-auto rounded-2xl border border-border bg-white px-6 pb-6 pt-8 text-center shadow-2xl transition duration-200 motion-reduce:transition-none sm:px-10 sm:pb-8 sm:pt-9 ${shown ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
         {showClose && (
           <button
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="absolute right-3 top-3 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-text-muted transition hover:bg-surface-secondary hover:text-foreground sm:right-4 sm:top-4"
+            className={`${dialogCloseClass} absolute right-3 top-3 sm:right-4 sm:top-4`}
           >
             <i className="fi fi-rr-cross-small flex text-xl leading-none" aria-hidden="true" />
           </button>

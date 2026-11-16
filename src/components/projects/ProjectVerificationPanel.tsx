@@ -7,6 +7,22 @@ import { createPortal } from 'react-dom'
 import { useForm } from 'react-hook-form'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import {
+  dialogBackdropClass,
+  dialogBodyClass,
+  dialogCancelButtonClass,
+  dialogCloseClass,
+  dialogConfirmButtonClass,
+  dialogDescriptionClass,
+  dialogEyebrowClass,
+  dialogFooterClass,
+  dialogHeaderClass,
+  dialogIconChipClass,
+  dialogLayerClass,
+  dialogOverlayClass,
+  dialogPanelClass,
+  dialogTitleClass,
+} from '@/components/ui/dialog-styles'
+import {
   type ProjectVerificationSummary,
   VERIFICATION_CRITERIA,
   type VerificationCriterionId,
@@ -101,12 +117,12 @@ function VerificationDialog({
   })
 
   return createPortal(
-    <div className="fixed inset-0 z-[2147483646] flex items-center justify-center p-3 sm:p-6">
+    <div className={`${dialogOverlayClass} ${dialogLayerClass}`}>
       <button
         type="button"
         aria-label="Fechar modal"
         tabIndex={-1}
-        className="absolute inset-0 cursor-default bg-slate-950/75 backdrop-blur-[1px]"
+        className={dialogBackdropClass}
         onClick={() => {
           if (!saving) onClose()
         }}
@@ -115,23 +131,18 @@ function VerificationDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[640px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
+        className={dialogPanelClass('lg')}
       >
-        <header className="flex items-start gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 sm:px-6 sm:py-5">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-primary">
+        <header className={dialogHeaderClass}>
+          <span className={dialogIconChipClass('award')}>
             <i className="fi fi-rr-shield-check flex text-xl" aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-secondary-hover">
-              Sistema de indicação
-            </p>
-            <h2
-              id={titleId}
-              className="mt-1 text-lg font-bold leading-tight text-slate-900 sm:text-xl"
-            >
+            <p className={dialogEyebrowClass('award')}>Sistema de indicação</p>
+            <h2 id={titleId} className={dialogTitleClass}>
               {alreadyVerified ? 'Atualizar minha indicação' : 'Indicar este projeto'}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+            <p className={dialogDescriptionClass}>
               Ao indicar, você declara estar ciente de que recomenda este projeto como base de
               informações para projetos de alunos futuros.
             </p>
@@ -141,13 +152,13 @@ function VerificationDialog({
             onClick={onClose}
             disabled={saving}
             aria-label="Fechar"
-            className="cursor-pointer flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-200 disabled:opacity-50"
+            className={dialogCloseClass}
           >
             <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
           </button>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        <div className={dialogBodyClass}>
           <fieldset>
             <legend className="mb-3 text-sm font-bold text-slate-900">
               Em quais pontos este projeto é uma boa referência?
@@ -195,12 +206,12 @@ function VerificationDialog({
           )}
         </div>
 
-        <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+        <footer className={dialogFooterClass}>
           <button
             type="button"
             onClick={onClose}
             disabled={saving}
-            className="cursor-pointer inline-flex h-10 items-center justify-center rounded-lg border border-border bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-primary/30 hover:text-primary disabled:opacity-60"
+            className={dialogCancelButtonClass}
           >
             Cancelar
           </button>
@@ -208,7 +219,7 @@ function VerificationDialog({
             type="button"
             onClick={submit}
             disabled={saving}
-            className="cursor-pointer inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover disabled:cursor-wait disabled:opacity-65"
+            className={dialogConfirmButtonClass}
           >
             <i
               className={`fi ${saving ? 'fi-rr-spinner animate-spin' : 'fi-rr-shield-check'} flex`}

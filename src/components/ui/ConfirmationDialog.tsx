@@ -3,6 +3,22 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
+import {
+  dialogBackdropStyle,
+  dialogBodyClass,
+  dialogCancelButtonClass,
+  dialogCloseClass,
+  dialogConfirmButtonClass,
+  dialogEyebrowClass,
+  dialogFooterClass,
+  dialogHeaderClass,
+  dialogIconChipClass,
+  dialogOverlayClass,
+  dialogPanelClass,
+  dialogTitleClass,
+  type DialogTone,
+  dialogTopLayerClass,
+} from './dialog-styles'
 
 interface ConfirmationDialogProps {
   open: boolean
@@ -12,7 +28,8 @@ interface ConfirmationDialogProps {
   confirmLabel: string
   cancelLabel?: string
   icon?: string
-  tone?: 'primary' | 'danger' | 'award'
+  tone?: DialogTone
+  eyebrow?: string
   pending?: boolean
   onConfirm: () => void | Promise<void>
   onCancel: () => void
@@ -27,6 +44,7 @@ export function ConfirmationDialog({
   cancelLabel = 'Cancelar',
   icon = 'fi-rr-triangle-warning',
   tone = 'danger',
+  eyebrow,
   pending = false,
   onConfirm,
   onCancel,
@@ -98,30 +116,15 @@ export function ConfirmationDialog({
 
   if (!open || typeof document === 'undefined') return null
 
-  const buttonTone =
-    tone === 'danger'
-      ? 'bg-primary text-white hover:bg-primary-hover focus-visible:ring-primary'
-      : tone === 'award'
-        ? 'bg-secondary text-white hover:bg-secondary-hover focus-visible:ring-secondary'
-        : 'bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-700'
-  const iconTone =
-    tone === 'award'
-      ? 'border border-accent/40 bg-accent-light text-secondary-hover'
-      : 'bg-primary-light text-primary'
-
   return createPortal(
     <div
-      className={`fixed inset-0 z-[2147483647] flex items-center justify-center p-4 transition-opacity duration-200 motion-reduce:transition-none ${
+      className={`${dialogOverlayClass} ${dialogTopLayerClass} transition-opacity duration-200 motion-reduce:transition-none ${
         shown ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <div
         className="absolute inset-0"
-        style={{
-          backgroundColor: 'rgba(2, 6, 23, 0.72)',
-          backdropFilter: 'blur(1px)',
-          WebkitBackdropFilter: 'blur(1px)',
-        }}
+        style={dialogBackdropStyle}
         aria-hidden="true"
         onMouseDown={() => {
           if (!pendingRef.current) onCancelRef.current()
@@ -137,54 +140,55 @@ export function ConfirmationDialog({
             ? 'confirmation-dialog-description confirmation-dialog-details'
             : 'confirmation-dialog-description'
         }
-        className={`relative overflow-y-auto rounded-2xl border border-border bg-white p-6 shadow-2xl transition duration-200 motion-reduce:transition-none sm:p-7 ${
+        className={`${dialogPanelClass('md')} transition duration-200 motion-reduce:transition-none ${
           shown ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-1 scale-[0.98] opacity-0'
         }`}
-        style={{
-          width: '40vw',
-          minWidth: 'min(320px, calc(100vw - 2rem))',
-          maxWidth: 'min(640px, calc(100vw - 2rem))',
-          maxHeight: 'calc(100dvh - 2rem)',
-          boxSizing: 'border-box',
-        }}
       >
-        <div className="flex items-start gap-4">
-          <span
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${iconTone}`}
-          >
+        <header className={dialogHeaderClass}>
+          <span className={dialogIconChipClass(tone)}>
             <i className={`fi ${icon} flex text-xl`} aria-hidden="true" />
           </span>
-          <div className="min-w-0 flex-1 pt-0.5">
-            <h2
-              id="confirmation-dialog-title"
-              className="text-base font-bold leading-snug text-slate-900 sm:text-lg"
-            >
+          <div className="min-w-0 flex-1">
+            <p className={dialogEyebrowClass(tone)}>{eyebrow ?? 'Confirmação'}</p>
+            <h2 id="confirmation-dialog-title" className={dialogTitleClass}>
               {title}
             </h2>
-            <p
-              id="confirmation-dialog-description"
-              className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-text-secondary"
-            >
-              {description}
-            </p>
-            {details && (
-              <div
-                id="confirmation-dialog-details"
-                className="mt-4 rounded-lg border border-border bg-surface-secondary p-3.5 text-sm leading-relaxed text-slate-800"
-              >
-                {details}
-              </div>
-            )}
           </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            aria-label="Fechar"
+            className={dialogCloseClass}
+          >
+            <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
+          </button>
+        </header>
+
+        <div className={dialogBodyClass}>
+          <p
+            id="confirmation-dialog-description"
+            className="whitespace-pre-line break-words text-sm leading-relaxed text-text-secondary"
+          >
+            {description}
+          </p>
+          {details && (
+            <div
+              id="confirmation-dialog-details"
+              className="mt-4 rounded-lg border border-border bg-surface-secondary p-3.5 text-sm leading-relaxed text-slate-800"
+            >
+              {details}
+            </div>
+          )}
         </div>
 
-        <div className="mt-6 flex flex-wrap justify-end gap-3 border-t border-border-light pt-5">
+        <footer className={dialogFooterClass}>
           <button
             ref={cancelButtonRef}
             type="button"
             disabled={pending}
             onClick={onCancel}
-            className="cursor-pointer inline-flex min-h-11 min-w-[120px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-surface-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+            className={dialogCancelButtonClass}
           >
             {cancelLabel}
           </button>
@@ -194,12 +198,12 @@ export function ConfirmationDialog({
             onClick={() => {
               void onConfirm()
             }}
-            className={`cursor-pointer inline-flex min-h-11 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65 sm:flex-none ${buttonTone}`}
+            className={dialogConfirmButtonClass}
           >
             {pending && <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />}
             {pending ? 'Processando…' : confirmLabel}
           </button>
-        </div>
+        </footer>
       </div>
     </div>,
     document.body,
