@@ -44,6 +44,12 @@ export const auth = betterAuth({
     disableSignUp: true,
     resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
+    onPasswordReset: async ({ user }) => {
+      await db
+        .update(users)
+        .set({ mustChangePassword: false, updatedAt: new Date() })
+        .where(eq(users.id, user.id))
+    },
     sendResetPassword: async ({ user, url }) => {
       const result = await sendPasswordResetEmail.execute({
         email: user.email,
@@ -76,6 +82,12 @@ export const auth = betterAuth({
       registrationNumber: { type: 'string', required: false, input: false },
       course: { type: 'string', required: false, input: false },
       active: { type: 'boolean', required: false, defaultValue: true, input: false },
+      mustChangePassword: {
+        type: 'boolean',
+        required: false,
+        defaultValue: false,
+        input: false,
+      },
       githubUrl: { type: 'string', required: false, input: false },
       linkedinUrl: { type: 'string', required: false, input: false },
     },

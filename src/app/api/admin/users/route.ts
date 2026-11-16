@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { asc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
+import { SendInitialPasswordEmailUseCase } from '@/application/auth/send-initial-password-email'
 import { type CourseRecord, resolveUserCourse } from '@/application/courses/course-rules'
 import {
   isValidStudentRegistrationNumber,
@@ -11,7 +12,10 @@ import { db } from '@/db'
 import { accounts, sessions, users } from '@/db/schema'
 import { isRole, type Role } from '@/domain/enterprise/entities/role'
 import { listCourses } from '@/infrastructure/courses/course-queries'
+import { makeInitialPasswordNotifier } from '@/infrastructure/email/make-initial-password-notifier'
 import { auth } from '@/libs/auth'
+
+const sendInitialPasswordEmail = new SendInitialPasswordEmailUseCase(makeInitialPasswordNotifier())
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 const MAX_IMPORT_ROWS = 500
@@ -28,13 +32,14 @@ type CredentialResult = {
   name: string
   email: string
   role: Role
-  password: string
   registrationNumber: string
   course: string
+  emailSent: true
 }
 
 class UserInputError extends Error {}
 class DuplicateUserError extends Error {}
+class InitialPasswordEmailError extends Error {}
 
 function normalizedString(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number'
@@ -102,11 +107,17 @@ function createTemporaryPassword() {
   return randomBytes(18).toString('base64url')
 }
 
+function resolveLoginUrl(request: Request) {
+  const origin = process.env.BETTER_AUTH_URL?.trim() || new URL(request.url).origin
+  return `${origin.replace(/\/+$/, '')}/login`
+}
+
 async function createUserAccount(
   input: UserInput,
   passwordContext: { hash: (password: string) => Promise<string> },
   courses: CourseRecord[],
-) {
+  loginUrl: string,
+): Promise<CredentialResult> {
   const user = normalizeAndValidate(input, courses)
   const alreadyExists = await db
     .select({ id: users.id })
@@ -132,6 +143,7 @@ async function createUserAccount(
       registrationNumber: user.registrationNumber || null,
       course: user.course || null,
       active: true,
+      mustChangePassword: true,
       createdAt: now,
       updatedAt: now,
     })
@@ -158,20 +170,44 @@ async function createUserAccount(
     throw error
   }
 
+  // A senha inicial só é entregue ao próprio usuário, por e-mail. Se o envio falhar, a conta é
+  // desfeita para não ficar um acesso cuja senha ninguém conhece.
+  const delivery = await sendInitialPasswordEmail.execute({
+    email: user.email,
+    name: user.name,
+    initialPassword: password,
+    loginUrl,
+  })
+  if (delivery.isLeft()) {
+    console.error('Falha ao enviar e-mail de senha inicial:', delivery.value.message)
+    await db
+      .delete(users)
+      .where(eq(users.id, userId))
+      .catch(() => undefined)
+    throw new InitialPasswordEmailError(
+      'Não foi possível enviar o e-mail com a senha inicial, então o usuário não foi criado. Confira o endereço e tente novamente.',
+    )
+  }
+
   return {
     name: user.name,
     email: user.email,
     role: user.role,
-    password,
     registrationNumber: user.registrationNumber,
     course: user.course,
+    emailSent: true,
   }
 }
 
 async function handleSingleCreate(request: Request) {
   const body = (await request.json()) as UserInput
   const context = await auth.$context
-  const credential = await createUserAccount(body, context.password, await listCourses())
+  const credential = await createUserAccount(
+    body,
+    context.password,
+    await listCourses(),
+    resolveLoginUrl(request),
+  )
   return NextResponse.json(
     { credential },
     { status: 201, headers: { 'Cache-Control': 'no-store' } },
@@ -202,6 +238,7 @@ async function handleBulkCreate(request: Request) {
 
   const context = await auth.$context
   const courses = await listCourses()
+  const loginUrl = resolveLoginUrl(request)
   const credentials: CredentialResult[] = []
   const skipped: Array<{ sheet: string; rowNumber: number; email: string; reason: string }> = []
   const errors: Array<{ sheet: string; rowNumber: number; email: string; reason: string }> = []
@@ -230,7 +267,7 @@ async function handleBulkCreate(request: Request) {
     if (email) seenEmails.add(email)
 
     try {
-      credentials.push(await createUserAccount(row, context.password, courses))
+      credentials.push(await createUserAccount(row, context.password, courses, loginUrl))
     } catch (error) {
       const reason =
         error instanceof Error ? error.message : 'Falha inesperada ao cadastrar esta linha.'
@@ -239,7 +276,7 @@ async function handleBulkCreate(request: Request) {
         skipped.push(item)
       } else {
         errors.push(item)
-        if (!(error instanceof UserInputError)) break
+        if (!(error instanceof UserInputError || error instanceof InitialPasswordEmailError)) break
       }
     }
   }
@@ -302,6 +339,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof UserInputError) return jsonError(error.message, 400)
     if (error instanceof DuplicateUserError) return jsonError(error.message, 409)
+    if (error instanceof InitialPasswordEmailError) return jsonError(error.message, 502)
     console.error('Falha ao cadastrar usuário:', error)
     return jsonError(
       'Não foi possível cadastrar o usuário. Confira as tabelas e a migração do banco.',

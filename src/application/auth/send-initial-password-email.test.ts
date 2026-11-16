@@ -1,0 +1,51 @@
+import { describe, expect, it } from 'vitest'
+import { EmailDeliveryError } from '@/domain/enterprise/errors/email-delivery-error'
+import { InvalidEmailError } from '@/domain/enterprise/errors/invalid-email-error'
+import { InMemoryInitialPasswordNotifier } from '@/test/repositories/in-memory-initial-password-notifier'
+import { SendInitialPasswordEmailUseCase } from './send-initial-password-email'
+
+const input = {
+  email: '  Maria@Fatec.SP.gov.br ',
+  name: ' Maria ',
+  initialPassword: 'Senha-Inicial_123',
+  loginUrl: 'http://localhost:3000/login',
+}
+
+describe('SendInitialPasswordEmailUseCase', () => {
+  it('notifica com o e-mail normalizado e a senha inicial', async () => {
+    const notifier = new InMemoryInitialPasswordNotifier()
+    const useCase = new SendInitialPasswordEmailUseCase(notifier)
+
+    const result = await useCase.execute(input)
+
+    expect(result.isRight()).toBe(true)
+    expect(notifier.notifications).toEqual([
+      {
+        to: 'maria@fatec.sp.gov.br',
+        name: 'Maria',
+        initialPassword: 'Senha-Inicial_123',
+        loginUrl: 'http://localhost:3000/login',
+      },
+    ])
+  })
+
+  it('rejeita e-mail inválido sem enviar', async () => {
+    const notifier = new InMemoryInitialPasswordNotifier()
+    const useCase = new SendInitialPasswordEmailUseCase(notifier)
+
+    const result = await useCase.execute({ ...input, email: 'invalido' })
+
+    expect(result.value).toBeInstanceOf(InvalidEmailError)
+    expect(notifier.notifications).toHaveLength(0)
+  })
+
+  it('propaga falha de entrega como EmailDeliveryError', async () => {
+    const notifier = new InMemoryInitialPasswordNotifier()
+    notifier.shouldFail = true
+    const useCase = new SendInitialPasswordEmailUseCase(notifier)
+
+    const result = await useCase.execute(input)
+
+    expect(result.value).toBeInstanceOf(EmailDeliveryError)
+  })
+})

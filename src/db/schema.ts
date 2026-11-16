@@ -43,6 +43,7 @@ export const users = pgTable(
     githubUrl: text('github_url'),
     linkedinUrl: text('linkedin_url'),
     active: boolean('active').default(true).notNull(),
+    mustChangePassword: boolean('must_change_password').default(false).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at')
       .defaultNow()
