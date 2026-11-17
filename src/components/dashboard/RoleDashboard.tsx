@@ -768,9 +768,7 @@ export function RoleDashboard({
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-xs font-semibold text-primary">
-                  Painel institucional
-                </p>
+                <p className="text-xs font-semibold text-primary">Painel institucional</p>
                 <span
                   className={`rounded-full px-2.5 py-1 text-[0.625rem] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-accent-light text-secondary-hover'}`}
                 >

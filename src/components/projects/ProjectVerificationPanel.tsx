@@ -454,9 +454,7 @@ export function ProjectVerificationPanel({
           />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-secondary-hover">
-            Sistema de indicação
-          </p>
+          <p className="text-xs font-semibold text-secondary-hover">Sistema de indicação</p>
           <h2 className="mt-0.5 text-base font-bold leading-tight text-slate-900">
             {summary.complete ? 'Projeto indicado' : 'Indicação do projeto'}
           </h2>
