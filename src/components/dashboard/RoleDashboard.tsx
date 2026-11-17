@@ -536,9 +536,7 @@ function ProjectsSection({
         ).includes(normalized)
       const matchesStatus =
         statusFilter === 'all' ||
-        (statusFilter === 'inactive'
-          ? project.active === false
-          : project.status === statusFilter)
+        (statusFilter === 'inactive' ? project.active === false : project.status === statusFilter)
       const matchesSemester =
         semesterFilter === 'all' || String(project.semester) === semesterFilter
       const matchesCycle = cycleFilter === 'all' || project.cycle === cycleFilter

@@ -20,7 +20,11 @@ export function DashboardBlock({
   children: ReactNode
 }) {
   return (
-    <section id={id} aria-labelledby={`${id}-label`} className="scroll-mt-24 space-y-4 sm:space-y-5">
+    <section
+      id={id}
+      aria-labelledby={`${id}-label`}
+      className="scroll-mt-24 space-y-4 sm:space-y-5"
+    >
       <div className="flex items-center gap-3 border-b border-border pb-3">
         <span
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary"

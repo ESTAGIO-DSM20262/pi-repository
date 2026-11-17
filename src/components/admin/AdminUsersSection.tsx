@@ -611,119 +611,121 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
               </button>
             </header>
             <div className={dialogBodyClass}>
-            <div className="space-y-3">
-              <label className="block text-xs font-semibold text-slate-700">
-                Nome completo
-                <input
-                  required
-                  minLength={3}
-                  maxLength={160}
-                  value={editForm.name}
-                  onChange={(event) =>
-                    setEditForm((current) => ({ ...current, name: event.target.value }))
-                  }
-                  className={inputClass}
-                />
-              </label>
-              <label className="block text-xs font-semibold text-slate-700">
-                E-mail
-                <input
-                  required
-                  type="email"
-                  disabled={editing.id === currentUserId}
-                  value={editForm.email}
-                  onChange={(event) =>
-                    setEditForm((current) => ({ ...current, email: event.target.value }))
-                  }
-                  className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
-                />
-                {editing.id === currentUserId && (
-                  <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                    Por segurança, altere seu e-mail por outro administrador.
-                  </span>
-                )}
-              </label>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-3">
                 <label className="block text-xs font-semibold text-slate-700">
-                  R.A. / Matrícula
+                  Nome completo
                   <input
-                    minLength={
-                      editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
-                    }
-                    maxLength={
-                      editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
-                    }
-                    value={editForm.registrationNumber}
+                    required
+                    minLength={3}
+                    maxLength={160}
+                    value={editForm.name}
                     onChange={(event) =>
-                      setEditForm((current) => ({
-                        ...current,
-                        registrationNumber: event.target.value,
-                      }))
+                      setEditForm((current) => ({ ...current, name: event.target.value }))
                     }
                     className={inputClass}
                   />
-                  {editForm.role === 'student' && (
+                </label>
+                <label className="block text-xs font-semibold text-slate-700">
+                  E-mail
+                  <input
+                    required
+                    type="email"
+                    disabled={editing.id === currentUserId}
+                    value={editForm.email}
+                    onChange={(event) =>
+                      setEditForm((current) => ({ ...current, email: event.target.value }))
+                    }
+                    className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
+                  />
+                  {editing.id === currentUserId && (
                     <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                      O RA do aluno tem {STUDENT_REGISTRATION_LENGTH} caracteres.
+                      Por segurança, altere seu e-mail por outro administrador.
                     </span>
                   )}
                 </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    R.A. / Matrícula
+                    <input
+                      minLength={
+                        editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
+                      }
+                      maxLength={
+                        editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
+                      }
+                      value={editForm.registrationNumber}
+                      onChange={(event) =>
+                        setEditForm((current) => ({
+                          ...current,
+                          registrationNumber: event.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                    {editForm.role === 'student' && (
+                      <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                        O RA do aluno tem {STUDENT_REGISTRATION_LENGTH} caracteres.
+                      </span>
+                    )}
+                  </label>
+                  <div>
+                    <span className="block text-xs font-semibold text-slate-700">Curso</span>
+                    <SelectDropdown
+                      value={editForm.course}
+                      ariaLabel="Curso do usuário"
+                      width="full"
+                      tone="muted"
+                      layer="modal"
+                      className="mt-1.5"
+                      placeholder="Selecione o curso"
+                      options={buildCourseOptions(courses, {
+                        currentValue: editing.course ?? undefined,
+                        allowEmpty: editForm.role !== 'student',
+                      })}
+                      onChange={(value) =>
+                        setEditForm((current) => ({ ...current, course: value }))
+                      }
+                    />
+                  </div>
+                </div>
                 <div>
-                  <span className="block text-xs font-semibold text-slate-700">Curso</span>
-                  <SelectDropdown
-                    value={editForm.course}
-                    ariaLabel="Curso do usuário"
-                    width="full"
-                    tone="muted"
-                    layer="modal"
-                    className="mt-1.5"
-                    placeholder="Selecione o curso"
-                    options={buildCourseOptions(courses, {
-                      currentValue: editing.course ?? undefined,
-                      allowEmpty: editForm.role !== 'student',
-                    })}
-                    onChange={(value) => setEditForm((current) => ({ ...current, course: value }))}
-                  />
+                  <span className="block text-xs font-semibold text-slate-700">Perfil</span>
+                  {editing.id === currentUserId ? (
+                    <div className={`${inputClass} flex items-center bg-slate-100 text-slate-500`}>
+                      {ROLE_LABEL[editForm.role]}
+                    </div>
+                  ) : (
+                    <SelectDropdown
+                      value={editForm.role}
+                      ariaLabel="Perfil do usuário"
+                      width="full"
+                      tone="muted"
+                      className="mt-1.5"
+                      options={[
+                        { value: 'student', label: 'Aluno' },
+                        { value: 'professor', label: 'Professor' },
+                        { value: 'admin', label: 'Administrador' },
+                      ]}
+                      onChange={(value) =>
+                        setEditForm((current) => ({ ...current, role: value as Role }))
+                      }
+                    />
+                  )}
+                  {editing.id === currentUserId && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      Seu próprio perfil não pode ser alterado aqui.
+                    </span>
+                  )}
                 </div>
               </div>
-              <div>
-                <span className="block text-xs font-semibold text-slate-700">Perfil</span>
-                {editing.id === currentUserId ? (
-                  <div className={`${inputClass} flex items-center bg-slate-100 text-slate-500`}>
-                    {ROLE_LABEL[editForm.role]}
-                  </div>
-                ) : (
-                  <SelectDropdown
-                    value={editForm.role}
-                    ariaLabel="Perfil do usuário"
-                    width="full"
-                    tone="muted"
-                    className="mt-1.5"
-                    options={[
-                      { value: 'student', label: 'Aluno' },
-                      { value: 'professor', label: 'Professor' },
-                      { value: 'admin', label: 'Administrador' },
-                    ]}
-                    onChange={(value) =>
-                      setEditForm((current) => ({ ...current, role: value as Role }))
-                    }
-                  />
-                )}
-                {editing.id === currentUserId && (
-                  <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                    Seu próprio perfil não pode ser alterado aqui.
-                  </span>
-                )}
-              </div>
-            </div>
-            {actionError && (
-              <div
-                role="alert"
-                className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900"
-              >
-                {actionError}
-              </div>
-            )}
+              {actionError && (
+                <div
+                  role="alert"
+                  className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900"
+                >
+                  {actionError}
+                </div>
+              )}
             </div>
             <footer className={dialogFooterClass}>
               <button

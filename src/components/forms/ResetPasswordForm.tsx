@@ -53,16 +53,11 @@ export interface InviteAccount {
 const INVITE_SUCCESS_NOTICE: Notice = {
   variant: 'success',
   title: 'Senha definida',
-  description: 'Sua senha foi criada com sucesso. Entre no sistema usando seu e-mail e a nova senha.',
+  description:
+    'Sua senha foi criada com sucesso. Entre no sistema usando seu e-mail e a nova senha.',
 }
 
-export function ResetPasswordFields({
-  token,
-  invite,
-}: {
-  token: string
-  invite?: InviteAccount
-}) {
+export function ResetPasswordFields({ token, invite }: { token: string; invite?: InviteAccount }) {
   const router = useRouter()
   const { resetPassword } = useAuth()
   const [notice, setNotice] = useState<Notice | null>(null)

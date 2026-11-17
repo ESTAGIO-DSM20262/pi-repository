@@ -94,8 +94,8 @@ export function AccountInviteEmail({ name, inviteUrl }: AccountInviteEmailProps)
 
             <Section className="bg-surface-secondary px-8 pb-7 pt-5">
               <Text className="m-0 mb-2 text-xs leading-[18px] text-text-muted">
-                Não encaminhe este e-mail: quem tiver o link poderá definir a senha da sua conta. Se o
-                link expirar, use a opção “Esqueci minha senha” na tela de login. Se você não
+                Não encaminhe este e-mail: quem tiver o link poderá definir a senha da sua conta. Se
+                o link expirar, use a opção “Esqueci minha senha” na tela de login. Se você não
                 esperava esta mensagem, ignore-a e avise a secretaria.
               </Text>
               <Text className="m-0 text-[11px] leading-4 text-text-muted">

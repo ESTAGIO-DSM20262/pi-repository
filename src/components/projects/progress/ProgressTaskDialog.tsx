@@ -378,11 +378,7 @@ export function ProgressTaskDialog({
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className={dialogConfirmButtonClass}
-            >
+            <button type="submit" disabled={saving} className={dialogConfirmButtonClass}>
               {saving ? (
                 <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />
               ) : (

@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
 import {
+  type DialogTone,
   dialogBackdropStyle,
   dialogBodyClass,
   dialogCancelButtonClass,
@@ -16,7 +17,6 @@ import {
   dialogOverlayClass,
   dialogPanelClass,
   dialogTitleClass,
-  type DialogTone,
   dialogTopLayerClass,
 } from './dialog-styles'
 

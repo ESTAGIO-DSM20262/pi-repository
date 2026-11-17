@@ -79,7 +79,6 @@ function Feedback({ kind, children }: { kind: 'success' | 'error' | 'info'; chil
   )
 }
 
-
 export function UserRegistrationPage() {
   const [role, setRole] = useState<Role>('student')
   const [form, setForm] = useState<UserForm>({
