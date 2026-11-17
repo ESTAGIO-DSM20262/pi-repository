@@ -23,8 +23,10 @@
   --border: #dadada;
   --border-light: #e6e6e6;
 
-  --shadow-1: 0 0 10px 0 rgba(0, 0, 0, 0.15);
-  --shadow-2: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+  /* Escala de sombras: 1 = cards e botões, 3 = card em destaque (hover), 2 = menus, listas e modais. */
+  --shadow-1: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 2px 8px 0 rgba(15, 23, 42, 0.06);
+  --shadow-3: 0 2px 6px 0 rgba(15, 23, 42, 0.07), 0 8px 20px 0 rgba(15, 23, 42, 0.1);
+  --shadow-2: 0 4px 12px 0 rgba(15, 23, 42, 0.08), 0 14px 34px 0 rgba(15, 23, 42, 0.14);
 
   --header-height: 48px;
   --footer-height: 32px;
@@ -58,8 +60,10 @@
   --color-border-light: var(--border-light);
 
   --shadow-sm: var(--shadow-1);
-  --shadow-md: var(--shadow-1);
+  --shadow-md: var(--shadow-3);
   --shadow-lg: var(--shadow-2);
+  --shadow-xl: var(--shadow-2);
+  --shadow-2xl: var(--shadow-2);
 
   --font-sans: var(--font-roboto), Roboto, Arial, Helvetica, sans-serif;
   --font-slab: var(--font-roboto-slab), "Roboto Slab", Georgia, serif;

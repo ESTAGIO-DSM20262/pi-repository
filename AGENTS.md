@@ -648,6 +648,10 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   lista só os 6 mais recentes (`RECENT_SEMESTER_LIMIT`, opção "Todos" fixa via `pinnedCount`),
   com a dica "Pesquise para ver os demais". A pesquisa percorre todos os ciclos existentes; um ciclo
   selecionado fora dos 6 continua visível na lista. `limitOptions` em `libs/limit-options.ts`.
+- **Sombras:** a escala fica em `globals.css` (e é redefinida em `accessibility-tokens.css` para o
+  tema escuro e o alto contraste): `--shadow-1` (`shadow-sm`: cards e botões), `--shadow-3`
+  (`shadow-md`: card em destaque no hover) e `--shadow-2` (`shadow-lg`/`xl`/`2xl`: menus, listas
+  suspensas e modais). Não usar `shadow-[...]` com valores soltos; escolher um degrau da escala.
 - **Padrão de modais (reunião de 09/11/2026):** `components/ui/dialog-styles.ts` concentra fundo,
   largura (`sm` 460, `md` 520, `lg` 680), cabeçalho com ícone, eyebrow, botão de fechar, rodapé e
   botões. `ConfirmationDialog`, `ProjectVerificationPanel`, `ProgressTaskDialog` e o modal de editar

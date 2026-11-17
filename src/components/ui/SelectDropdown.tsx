@@ -291,7 +291,7 @@ export function SelectDropdown({
             aria-hidden={!isOpen}
             inert={!isOpen}
             style={menuStyle}
-            className={`flex flex-col overflow-hidden rounded-xl border border-border/90 bg-white shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
+            className={`flex flex-col overflow-hidden rounded-xl border border-border/90 bg-white shadow-lg ring-1 ring-black/5 transition-[opacity,transform,visibility] duration-150 ease-out ${
               isOpen
                 ? 'visible translate-y-0 scale-100 opacity-100'
                 : 'invisible -translate-y-1 scale-[0.98] opacity-0'

@@ -114,7 +114,7 @@ function AccountMenu({
               role="dialog"
               aria-modal="true"
               aria-label="Menu da conta"
-              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[80] overflow-hidden rounded-2xl border border-border bg-white shadow-[0_18px_45px_rgba(31,31,31,0.24)] sm:hidden"
+              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-[80] overflow-hidden rounded-2xl border border-border bg-white shadow-lg sm:hidden"
             >
               <div className="flex items-start gap-3 border-b border-border-light bg-surface-secondary/70 p-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
@@ -207,7 +207,7 @@ function AccountMenu({
           <div
             id={menuId}
             ref={panelRef}
-            className="absolute right-0 top-[calc(100%+10px)] z-50 hidden w-[min(300px,calc(100vw-24px))] overflow-hidden rounded-xl border border-border bg-white shadow-[0_18px_45px_rgba(31,31,31,0.16)] animate-in fade-in slide-in-from-top-1 duration-150 sm:block"
+            className="absolute right-0 top-[calc(100%+10px)] z-50 hidden w-[min(300px,calc(100vw-24px))] overflow-hidden rounded-xl border border-border bg-white shadow-lg animate-in fade-in slide-in-from-top-1 duration-150 sm:block"
           >
             <div className="flex items-center gap-3 border-b border-border-light bg-surface-secondary/70 p-4">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
