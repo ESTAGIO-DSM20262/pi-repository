@@ -223,9 +223,7 @@ export function UserRegistrationPage() {
           <div className="flex min-w-0 items-start gap-3">
             <BackButton href="/admin" label="Voltar ao painel administrativo" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-primary">
-                Painel administrativo
-              </p>
+              <p className="text-xs font-semibold text-primary">Painel administrativo</p>
               <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Cadastro de Usuários
               </h1>
@@ -243,9 +241,7 @@ export function UserRegistrationPage() {
               <div className="max-w-xl">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <i className="fi fi-rr-user-add flex text-lg" aria-hidden="true" />
-                  <span className="text-xs font-semibold">
-                    Novo registro
-                  </span>
+                  <span className="text-xs font-semibold">Novo registro</span>
                 </div>
                 <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                   Cadastro individual de usuário
@@ -327,13 +323,13 @@ export function UserRegistrationPage() {
                     }
                   />
                   {role === 'student' && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      O RA deve ter {STUDENT_REGISTRATION_LENGTH} caracteres.
+                    </span>
+                  )}
                   {role === 'professor' && (
                     <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
                       A matrícula deve ter no máximo {PROFESSOR_REGISTRATION_MAX_LENGTH} caracteres.
-                    </span>
-                  )}
-                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                      O RA deve ter {STUDENT_REGISTRATION_LENGTH} caracteres.
                     </span>
                   )}
                 </label>
@@ -430,9 +426,7 @@ export function UserRegistrationPage() {
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2 text-emerald-800">
                 <i className="fi fi-rr-file-spreadsheet flex text-lg" aria-hidden="true" />
-                <span className="text-xs font-semibold">
-                  Importação em lote
-                </span>
+                <span className="text-xs font-semibold">Importação em lote</span>
               </div>
               <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 Importar planilha do SIGA
@@ -454,7 +448,7 @@ export function UserRegistrationPage() {
                 onDrop={handleDrop}
                 className={`flex min-h-[190px] flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${dragging ? 'border-primary bg-primary-light/50' : 'border-border bg-[#f2f3f4] hover:border-primary/40'}`}
               >
-                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-white text-primary shadow-sm">
                   <i className="fi fi-rr-file-upload flex text-xl" aria-hidden="true" />
                 </span>
                 {file ? (

@@ -96,7 +96,7 @@ function HowItWorks() {
 function PublicationNotice() {
   return (
     <div className="mt-4 flex items-start gap-3 rounded-xl border border-accent/40 bg-accent-light px-4 py-3.5">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-secondary-hover">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-white text-secondary-hover">
         <i className="fi fi-rr-globe flex text-base" aria-hidden="true" />
       </span>
       <div className="min-w-0">

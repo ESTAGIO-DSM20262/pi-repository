@@ -27,7 +27,7 @@ export function DashboardBlock({
     >
       <div className="flex items-center gap-3 border-b border-border pb-3.5">
         <span
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary-light text-primary"
           aria-hidden="true"
         >
           <i className={`fi ${icon} flex text-lg`} />

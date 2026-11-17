@@ -111,7 +111,7 @@ export function ResetPasswordFields({ token, invite }: { token: string; invite?:
       {invite && (
         <div className={`mt-5 flex items-center gap-3 p-3 sm:p-4 ${infoBoxClass}`}>
           <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary-light text-primary"
             aria-hidden="true"
           >
             <i className="fi fi-rr-envelope flex text-base" />

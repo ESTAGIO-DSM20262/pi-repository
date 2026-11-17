@@ -227,7 +227,7 @@ export function ProjectProgressSection({
         </div>
       ) : !error && tasks.length === 0 ? (
         <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-5 py-9 text-center">
-          <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+          <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-border bg-white text-primary shadow-sm">
             <i className="fi fi-rr-clipboard-list flex text-xl" aria-hidden="true" />
           </span>
           <h3 className="mt-3 text-sm font-bold text-slate-900">

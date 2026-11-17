@@ -208,7 +208,7 @@ function About({ role }: { role: Role | null }) {
               key={item.title}
               className="rounded-xl border border-border bg-white p-5 shadow-sm"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-light text-secondary">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-secondary">
                 <i className={`fi ${item.icon} flex text-base`} aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900">{item.title}</h3>
@@ -277,7 +277,7 @@ function About({ role }: { role: Role | null }) {
               key={item.title}
               className="rounded-xl border border-border bg-white p-5 shadow-sm"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md border border-primary/25 bg-primary-light text-primary">
                 <i className={`fi ${item.icon} flex text-base`} aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900">{item.title}</h3>
@@ -443,7 +443,7 @@ function AccessibilitySection() {
             key={feature.title}
             className="flex gap-4 rounded-xl border border-border bg-white p-5 shadow-sm"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-light text-secondary">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-secondary">
               <i className={`fi ${feature.icon} flex text-base`} aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -572,7 +572,7 @@ function RoleView({
               key={ability.title}
               className="flex gap-4 rounded-xl border border-border bg-white p-5 shadow-sm"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-light text-secondary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-secondary">
                 <i className={`fi ${ability.icon} flex text-base`} aria-hidden="true" />
               </span>
               <div className="min-w-0">

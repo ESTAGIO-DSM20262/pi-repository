@@ -20,21 +20,25 @@ export interface Notice {
 }
 
 const VARIANT: Record<ModalVariant, { icon: string; halo: string; core: string }> = {
-  success: { icon: 'fi-rr-check', halo: 'bg-emerald-50', core: 'bg-emerald-100 text-emerald-700' },
+  success: {
+    icon: 'fi-rr-check',
+    halo: 'border border-emerald-200/80 bg-emerald-50',
+    core: 'border border-emerald-200 bg-emerald-100 text-emerald-700',
+  },
   error: {
     icon: 'fi-rr-exclamation',
-    halo: 'bg-primary-light/60',
-    core: 'bg-primary-light text-primary',
+    halo: 'border border-primary/15 bg-primary-light/60',
+    core: 'border border-primary/25 bg-primary-light text-primary',
   },
   award: {
     icon: 'fi-rr-trophy',
-    halo: 'bg-accent-light/60',
-    core: 'bg-accent-light text-secondary-hover',
+    halo: 'border border-accent/25 bg-accent-light/60',
+    core: 'border border-accent/40 bg-accent-light text-secondary-hover',
   },
   warning: {
     icon: 'fi-rr-triangle-warning',
-    halo: 'bg-primary-light/60',
-    core: 'bg-primary-light text-primary',
+    halo: 'border border-primary/15 bg-primary-light/60',
+    core: 'border border-primary/25 bg-primary-light text-primary',
   },
 }
 

@@ -23,7 +23,7 @@ export function FormSection({
     <section className={sectionClass}>
       <div className="mb-6 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary-light text-primary">
             <i className={`fi ${icon} flex text-lg`} aria-hidden="true" />
           </span>
           <div className="min-w-0">

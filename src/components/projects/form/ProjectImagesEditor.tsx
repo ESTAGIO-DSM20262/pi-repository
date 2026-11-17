@@ -105,7 +105,7 @@ export function ProjectImagesEditor({ images, onChange }: ProjectImagesEditorPro
             : 'cursor-not-allowed opacity-70'
         }`}
       >
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-primary shadow-sm">
+        <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-white text-primary shadow-sm">
           <i className="fi fi-rr-picture flex text-xl" aria-hidden="true" />
         </span>
         <span className="mt-1 text-sm font-semibold text-slate-900">

@@ -50,7 +50,7 @@ export function AuthActionOverlay({ message }: AuthActionOverlayProps) {
         }}
       />
       <div className="relative z-10 flex w-full max-w-[380px] flex-col items-center rounded-2xl border border-slate-200 bg-white px-7 py-8 text-center shadow-2xl sm:px-9">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-primary">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/25 bg-primary-light text-primary">
           <i className="fi fi-rr-spinner flex animate-spin text-2xl" aria-hidden="true" />
         </span>
         <h2 className="mt-5 text-lg font-bold text-slate-900">Aguarde um instante</h2>

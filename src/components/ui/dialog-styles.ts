@@ -50,8 +50,8 @@ export const dialogConfirmButtonClass =
   'cursor-pointer inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65 sm:min-w-[120px]'
 
 const ICON_CHIP: Record<DialogTone, string> = {
-  primary: 'bg-primary-light text-primary',
-  danger: 'bg-primary-light text-primary',
+  primary: 'border border-primary/25 bg-primary-light text-primary',
+  danger: 'border border-primary/25 bg-primary-light text-primary',
   award: 'border border-accent/40 bg-accent-light text-secondary-hover',
 }
 
