@@ -74,31 +74,31 @@ const RAIL = [
     icon: 'fi-rr-shield-check',
     title: 'Indicação',
     active: (f: Filters) => f.verified,
-    on: 'bg-emerald-50 text-emerald-700',
+    on: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   },
   {
     icon: 'fi-rr-trophy',
     title: 'Melhor PI do semestre',
     active: (f: Filters) => f.bestOfSemester,
-    on: 'bg-secondary/15 text-secondary',
+    on: 'border-secondary/30 bg-secondary/15 text-secondary',
   },
   {
     icon: 'fi-rr-calendar',
     title: 'Semestre letivo',
     active: (f: Filters) => f.cycle !== '',
-    on: 'bg-primary-light text-primary',
+    on: 'border-primary/25 bg-primary-light text-primary',
   },
   {
     icon: 'fi-rr-layers',
     title: 'Semestre DSM',
     active: (f: Filters) => f.semesters.length > 0,
-    on: 'bg-primary-light text-primary',
+    on: 'border-primary/25 bg-primary-light text-primary',
   },
   {
     icon: 'fi-rr-code-simple',
     title: 'Tecnologias',
     active: (f: Filters) => f.stack.length > 0 || f.languages.length > 0,
-    on: 'bg-primary-light text-primary',
+    on: 'border-primary/25 bg-primary-light text-primary',
   },
 ]
 
@@ -369,7 +369,7 @@ export function FilterPanel({
       </div>
 
       <div
-        className={`relative hidden min-h-[440px] shrink-0 overflow-visible transition-[width] duration-300 ease-out xl:block ${
+        className={`relative hidden min-h-[34rem] shrink-0 overflow-visible transition-[width] duration-300 ease-out xl:block ${
           open ? 'w-[300px]' : 'w-16'
         }`}
       >
@@ -400,13 +400,13 @@ export function FilterPanel({
         <div
           aria-hidden={open}
           inert={open}
-          className={`flex min-h-[460px] w-16 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition-[opacity,transform] duration-200 ease-out ${
+          className={`flex min-h-[34rem] w-16 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition-[opacity,transform] duration-200 ease-out ${
             open
               ? 'pointer-events-none absolute left-0 top-0 -translate-x-2 opacity-0'
               : 'relative translate-x-0 opacity-100'
           }`}
         >
-          <div className="flex flex-1 flex-col items-center gap-3 px-3 pt-4">
+          <div className="flex shrink-0 flex-col items-center gap-3 px-3 pt-4">
             <button
               type="button"
               onClick={onToggle}
@@ -425,17 +425,19 @@ export function FilterPanel({
                 onClick={onToggle}
                 title={item.title}
                 aria-label={item.title}
-                className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-primary-light hover:text-primary ${
+                className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border transition-colors hover:border-primary/40 hover:bg-primary-light hover:text-primary ${
                   item.active(filters ?? EMPTY_FILTERS)
                     ? item.on
-                    : 'bg-surface-secondary text-slate-500'
+                    : 'border-border bg-surface-secondary text-slate-500'
                 }`}
               >
                 <i className={`fi ${item.icon} flex text-sm`} aria-hidden="true" />
               </button>
             ))}
+          </div>
 
-            <span className="mt-3 rotate-180 text-[0.6875rem] font-semibold uppercase tracking-widest text-text-muted [writing-mode:vertical-rl]">
+          <div className="flex min-h-0 flex-1 items-center justify-center px-3 py-6">
+            <span className="rotate-180 whitespace-nowrap text-[0.6875rem] font-semibold uppercase tracking-widest text-text-muted [writing-mode:vertical-rl]">
               Filtros ocultos
             </span>
           </div>
