@@ -466,8 +466,13 @@ documente aqui.
   `SelectDropdown` de seleção única montado a partir dos semestres letivos existentes na lista,
   com a contagem de projetos em cada opção (`Filters.cycle`, `presentation/projects/project-filters.ts`). A lista de usuários do
   administrador ganhou o filtro de status (ativo/inativo), ao lado do filtro de perfil.
+- **Ícones em caixas:** todo contêiner decorativo de ícone (modais, blocos do painel, "Como
+  funciona", formulários) tem borda na cor do fundo (`border-primary/25`, `border-accent/40`,
+  `border-border`), para não se misturar ao fundo do modal. `dialogIconChipClass` e `Modal` já
+  trazem a borda.
 - **Dropdowns:** todo seletor usa `components/ui/SelectDropdown`. Dentro de modais, use
-  `layer="modal"` para o menu ficar acima do diálogo.
+  `layer="modal"` apenas se precisar forçar; por padrão (`layer="auto"`) o menu detecta um
+  ancestral `[role="dialog"][aria-modal="true"]` e sobe de camada sozinho.
 
 ## 17. Edição de projetos e artefatos
 
@@ -526,6 +531,13 @@ documente aqui.
   (`canManageProgress`); orientadores adicionais (satélites) apenas acompanham o cronograma e não
   editam nem as tarefas que criaram antes da mudança. `createdByName` continua exibido em cada
   tarefa.
+- **Quem vê o cronograma:** administrador e qualquer professor veem as tarefas e o histórico de
+  todos os projetos ativos (`canViewProgress`, `canViewAllProgressTasks`); o administrador também vê
+  os desativados. Aluno vê apenas o projeto da própria equipe, com as tarefas da equipe e as
+  atribuídas a ele. A edição não mudou: `POST` e `PATCH` devolvem 403 para aluno e para professor que
+  não é o orientador principal do projeto (`isPrincipalAdvisorOf`), e o histórico continua
+  registrando quem alterou o quê (`changedByName`). O painel do professor (`DashboardPage`)
+  continua considerando só os projetos em que ele é orientador principal.
 
 ## 19. Indicação de projetos
 
@@ -638,6 +650,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   `AdminInsights` adiciona projetos por situação e por semestre, tarefas do sistema, projetos que
   precisam de atenção (atrasados, parados ou sem tarefas), pendências (concluídos sem indicação,
   em andamento sem tarefas, alunos e professores sem projeto, desativados), carga dos orientadores
+  (tabela com colunas Em andamento, Concluídos e Atrasadas, linhas separadas por traço fino e barra
+  proporcional ao orientador com mais projetos; vermelha com tarefas atrasadas)
   e usuários por perfil com novos cadastros dos últimos 6 meses (o mês de cada cadastro é calculado
   em `America/Sao_Paulo`, tanto na janela quanto no `to_char` da consulta).
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
@@ -681,8 +695,10 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   inline: 100 por padrão e `2147483647` com `layer="modal"`, acima dos modais (`2147483646`, como
   `ProgressTaskDialog` e `ProjectVerificationPanel`). A classe Tailwind arbitrária com variável CSS
   (`z-[var(--z-modal-dropdown)]`) foi removida porque o menu ficava atrás do modal e as opções (por
-  exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Todo dropdown usado
-  dentro de um modal deve passar `layer="modal"`.
+  exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Com `layer="auto"`
+  (padrão), `updatePosition` usa `closest('[role="dialog"][aria-modal="true"]')` no gatilho e aplica
+  `2147483647` quando há modal, então nenhum dropdown novo precisa pedir a camada (o seletor
+  "Perfil" do modal de editar usuário ficava atrás por não passar `layer="modal"`).
 
 ## 23. Identidade visual (Centro Paula Souza / Fatec)
 
@@ -789,6 +805,14 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - RA do aluno: exatamente 13 caracteres (`src/application/users/registration-number.ts`), validado
   no cadastro, na importação e na edição. Na edição, RA antigo fora do padrão só é exigido se for
   alterado ou se o usuário passar a ser aluno.
+- Matrícula do professor: no máximo 5 caracteres (`PROFESSOR_REGISTRATION_MAX_LENGTH`), com a mesma
+  regra do aluno no cadastro, na importação e na edição (matrícula antiga só é exigida se for
+  alterada ou se o usuário passar a ser professor). Os campos têm `maxLength={5}`.
+- Nomes importados: `parseUserWorkbook` aplica `formatPersonName`
+  (`src/application/users/person-name.ts`) a cada nome, porque a Fatec exporta tudo em caixa alta.
+  Só a primeira letra de cada nome fica maiúscula; "de", "da", "do", "das", "dos", "e", "di", "du" e
+  "del" ficam minúsculos fora da primeira palavra; hífen e apóstrofo reiniciam a capitalização
+  (`Ana-Clara`, `D'Ávila`). O cadastro individual não altera o que o administrador digita.
 - Fora do escopo: o campo "Curso superior de graduação" do formulário de projeto continua fixo e
   somente leitura (projetos não guardam curso).
 
