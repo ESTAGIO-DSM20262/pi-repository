@@ -71,11 +71,16 @@ export function ResultsBar({
               className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-[0.8125rem] ${
                 c.verified
                   ? 'border-accent/40 bg-accent-light font-medium text-secondary-hover'
-                  : 'border-border bg-surface-secondary text-slate-800'
+                  : c.bestOfSemester
+                    ? 'border-secondary/40 bg-secondary/10 font-medium text-secondary-hover'
+                    : 'border-border bg-surface-secondary text-slate-800'
               }`}
             >
               {c.verified && (
                 <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" />
+              )}
+              {c.bestOfSemester && (
+                <i className="fi fi-rr-trophy flex text-secondary" aria-hidden="true" />
               )}
               {c.label}
               <button

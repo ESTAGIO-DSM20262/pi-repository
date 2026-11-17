@@ -55,3 +55,30 @@ describe('filtro de semestre letivo', () => {
     expect(removeChip(filters, 'cycle').cycle).toBe('')
   })
 })
+
+describe('filtro de melhor PI do semestre', () => {
+  const list = [
+    makeProject('a', { bestOfSemester: true }),
+    makeProject('b', { verified: true }),
+    makeProject('c', { bestOfSemester: true, verified: true }),
+    makeProject('d'),
+  ]
+
+  it('mostra só os melhores PIs do semestre quando o filtro está ligado', () => {
+    const result = applyFilters(list, { ...EMPTY_FILTERS, bestOfSemester: true })
+    expect(result.map((project) => project.id)).toEqual(['a', 'c'])
+  })
+
+  it('combina com o filtro de PIs indicados', () => {
+    const result = applyFilters(list, { ...EMPTY_FILTERS, bestOfSemester: true, verified: true })
+    expect(result.map((project) => project.id)).toEqual(['c'])
+  })
+
+  it('gera o chip e permite removê-lo', () => {
+    const filters = { ...EMPTY_FILTERS, bestOfSemester: true }
+    const chips = getChips(filters, [])
+
+    expect(chips).toEqual([{ id: 'best', label: 'Melhor PI do semestre', bestOfSemester: true }])
+    expect(removeChip(filters, 'best').bestOfSemester).toBe(false)
+  })
+})
