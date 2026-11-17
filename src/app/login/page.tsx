@@ -70,11 +70,11 @@ export default function LoginPage() {
         <section className="flex flex-col p-6 sm:p-10">
           <div className="flex items-center gap-4 border-b border-border-light pb-5">
             <Image
-              src="/brand/fatec-itaquera-cor.png"
+              src="/brand/logo_fatec_itaquera.png"
               alt="Fatec Itaquera — Prof. Miguel Reale"
               width={841}
               height={450}
-              className="h-14 w-auto shrink-0"
+              className="h-15 w-auto shrink-0"
             />
             <span className="h-10 w-px bg-border" aria-hidden="true" />
             <div className="leading-tight">

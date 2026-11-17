@@ -326,11 +326,11 @@ export function Header() {
         {focusMode ? (
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <Image
-              src="/brand/fatec-itaquera-cor.png"
+              src="/brand/logo_fatec_itaquera.png"
               alt="Fatec Itaquera — Prof. Miguel Reale"
               width={841}
               height={450}
-              className="h-9 w-auto shrink-0 sm:h-12"
+              className="h-9 w-auto shrink-0 sm:h-13"
             />
             <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
             <span className="hidden min-w-0 leading-none md:block">
@@ -349,11 +349,11 @@ export function Header() {
             aria-label="Acervo Acadêmico — início"
           >
             <Image
-              src="/brand/fatec-itaquera-cor.png"
+              src="/brand/logo_fatec_itaquera.png"
               alt="Fatec Itaquera — Prof. Miguel Reale"
               width={841}
               height={450}
-              className="h-9 w-auto shrink-0 sm:h-12"
+              className="h-9 w-auto shrink-0 sm:h-13"
             />
             <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
             <span className="hidden min-w-0 leading-none md:block">
@@ -417,7 +417,7 @@ export function Header() {
             alt="Centro Paula Souza"
             width={254}
             height={167}
-            className="h-9 w-auto sm:h-12"
+            className="h-8 w-auto sm:h-11"
           />
         </div>
       </div>
