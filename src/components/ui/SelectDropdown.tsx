@@ -20,7 +20,7 @@ interface SelectDropdownProps {
   size?: 'default' | 'compact'
   width?: 'full' | 'auto'
   tone?: 'surface' | 'muted'
-  layer?: 'default' | 'modal'
+  layer?: 'auto' | 'default' | 'modal'
   className?: string
   searchable?: boolean
   searchPlaceholder?: string
@@ -52,7 +52,7 @@ export function SelectDropdown({
   size = 'default',
   width = 'full',
   tone = 'surface',
-  layer = 'default',
+  layer = 'auto',
   className = '',
   searchable = false,
   searchPlaceholder = 'Pesquisar...',
@@ -110,9 +110,14 @@ export function SelectDropdown({
       : Math.min(rect.bottom + 8, viewportHeight - estimatedHeight - padding)
     const left = Math.max(padding, Math.min(rect.left, viewportWidth - menuWidth - padding))
 
+    const insideModal =
+      layer === 'modal' ||
+      (layer === 'auto' &&
+        triggerRef.current?.closest('[role="dialog"][aria-modal="true"]') != null)
+
     setMenuStyle({
       position: 'fixed',
-      zIndex: layer === 'modal' ? MODAL_DROPDOWN_Z_INDEX : DEFAULT_DROPDOWN_Z_INDEX,
+      zIndex: insideModal ? MODAL_DROPDOWN_Z_INDEX : DEFAULT_DROPDOWN_Z_INDEX,
       top,
       left,
       width: menuWidth,

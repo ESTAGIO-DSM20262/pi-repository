@@ -296,7 +296,6 @@ export function ProgressTaskDialog({
                   searchPlaceholder="Pesquisar pelo nome..."
                   ariaLabel="Responsável pela entrega"
                   width="full"
-                  layer="modal"
                   className="mt-1.5 min-h-11"
                   options={[
                     { value: '', label: 'Todo o grupo' },
@@ -335,7 +334,6 @@ export function ProgressTaskDialog({
                   value={status}
                   ariaLabel="Situação da entrega"
                   width="full"
-                  layer="modal"
                   className="mt-1.5 min-h-11"
                   options={STATUS_OPTIONS}
                   onChange={(value) => setStatus(value as ProjectProgressTaskStatus)}

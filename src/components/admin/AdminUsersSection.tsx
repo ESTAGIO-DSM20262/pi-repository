@@ -675,7 +675,6 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                       ariaLabel="Curso do usuário"
                       width="full"
                       tone="muted"
-                      layer="modal"
                       className="mt-1.5"
                       placeholder="Selecione o curso"
                       options={buildCourseOptions(courses, {
