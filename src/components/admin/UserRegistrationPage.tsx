@@ -395,7 +395,8 @@ export function UserRegistrationPage() {
 
               <div className="flex flex-col-reverse gap-3 border-t border-border-light pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-sm text-[0.6875rem] leading-relaxed text-text-secondary">
-                  O usuário recebe por e-mail um convite para definir a própria senha; nenhuma senha é gerada para o administrador.
+                  O usuário recebe por e-mail um convite para definir a própria senha; nenhuma senha
+                  é gerada para o administrador.
                 </p>
                 <button
                   type="submit"
@@ -514,9 +515,9 @@ export function UserRegistrationPage() {
               </div>
 
               <Feedback kind="info">
-                Os e-mails existentes serão ignorados para evitar duplicidade. Cada novo usuário recebe um
-                convite por e-mail para definir a própria senha; linhas cujo e-mail não puder ser
-                enviado não criam a conta.
+                Os e-mails existentes serão ignorados para evitar duplicidade. Cada novo usuário
+                recebe um convite por e-mail para definir a própria senha; linhas cujo e-mail não
+                puder ser enviado não criam a conta.
               </Feedback>
               {batchError && <Feedback kind="error">{batchError}</Feedback>}
 

@@ -13,11 +13,7 @@ import { accounts, sessions, users, verifications } from '@/db/schema'
 import { isRole, type Role } from '@/domain/enterprise/entities/role'
 import { listCourses } from '@/infrastructure/courses/course-queries'
 import { makeAccountInviteNotifier } from '@/infrastructure/email/make-account-invite-notifier'
-import {
-  ACCOUNT_INVITE_TTL_MS,
-  buildInviteUrl,
-  inviteTokenIdentifier,
-} from '@/libs/account-invite'
+import { ACCOUNT_INVITE_TTL_MS, buildInviteUrl, inviteTokenIdentifier } from '@/libs/account-invite'
 import { auth } from '@/libs/auth'
 
 const sendAccountInviteEmail = new SendAccountInviteEmailUseCase(makeAccountInviteNotifier())

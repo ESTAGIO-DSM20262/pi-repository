@@ -189,10 +189,7 @@ export async function POST(request: Request, context: RouteContext) {
         !access.canManage &&
         access.project.status === 'em_andamento')
     ) {
-      return jsonError(
-        'Somente o orientador principal ou o administrador pode criar tarefas.',
-        403,
-      )
+      return jsonError('Somente o orientador principal ou o administrador pode criar tarefas.', 403)
     }
     if (access.project.status !== 'em_andamento') {
       return jsonError(

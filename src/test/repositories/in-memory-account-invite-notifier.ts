@@ -9,9 +9,7 @@ export class InMemoryAccountInviteNotifier implements AccountInviteNotifier {
   notifications: AccountInviteNotification[] = []
   shouldFail = false
 
-  async notify(
-    notification: AccountInviteNotification,
-  ): Promise<Either<EmailDeliveryError, void>> {
+  async notify(notification: AccountInviteNotification): Promise<Either<EmailDeliveryError, void>> {
     if (this.shouldFail) return left(new EmailDeliveryError())
     this.notifications.push(notification)
     return right(undefined)

@@ -103,7 +103,8 @@ export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
     try {
       const professorEmail = user.emailAddress.trim().toLowerCase()
       const followed = projects.filter(
-        (project) => project.related && project.advisor.email.trim().toLowerCase() === professorEmail,
+        (project) =>
+          project.related && project.advisor.email.trim().toLowerCase() === professorEmail,
       )
       const [tasks, indicatedProjectIds] = await Promise.all([
         loadProgressTasks(followed.map((project) => project.id)),
