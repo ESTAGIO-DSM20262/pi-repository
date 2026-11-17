@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { and, eq, sql } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
-import { canEditProgressTask } from '@/application/projects/project-permissions'
+import {
+  canEditProgressTask,
+  isPrincipalAdvisorOf,
+} from '@/application/projects/project-permissions'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks } from '@/db/schema'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
@@ -37,9 +40,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (!access.ok) return jsonError(access.message, access.status)
     if (
       access.user.role === 'student' ||
-      (access.user.role === 'professor' &&
-        !access.canManage &&
-        access.project.status === 'em_andamento')
+      (access.user.role === 'professor' && !isPrincipalAdvisorOf(access.project, access.user))
     ) {
       return jsonError(
         'Somente o orientador principal ou o administrador pode editar tarefas.',

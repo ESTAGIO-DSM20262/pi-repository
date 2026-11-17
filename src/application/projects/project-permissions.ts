@@ -74,6 +74,19 @@ export function canEditProgressTask(
   return task.createdByUserId === viewer.id
 }
 
+export function canViewProgress(
+  project: ProjectSubject,
+  viewer: Pick<ProjectViewer, 'role' | 'email'>,
+) {
+  if (viewer.role === 'admin') return true
+  if (!isProjectActive(project)) return false
+  return viewer.role === 'professor' || isMemberOf(project, viewer)
+}
+
+export function canViewAllProgressTasks(viewer: Pick<ProjectViewer, 'role'>) {
+  return viewer.role === 'admin' || viewer.role === 'professor'
+}
+
 export function canVerifyProject(
   project: ProjectSubject,
   viewer: Pick<ProjectViewer, 'role' | 'email'>,

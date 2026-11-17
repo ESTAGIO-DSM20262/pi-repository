@@ -1,13 +1,12 @@
 import { eq } from 'drizzle-orm'
 import {
   canManageProgress,
-  isAdvisorOf,
-  isMemberOf,
+  canViewAllProgressTasks,
+  canViewProgress,
 } from '@/application/projects/project-permissions'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Project } from '@/domain/enterprise/entities/project'
-import { isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 
@@ -62,15 +61,12 @@ export async function resolveProjectProgressAccess(
 
   const email = user.email.trim().toLowerCase()
   const viewer = { email, role: user.role }
-  const isAdmin = user.role === 'admin'
-  const isAdvisor = isAdvisorOf(project, viewer)
-  const isMember = isMemberOf(project, viewer)
 
-  if (!isAdmin && (!isProjectActive(project) || (!isAdvisor && !isMember))) {
+  if (!canViewProgress(project, viewer)) {
     return { ok: false, status: 404, message: 'O projeto não foi encontrado.' }
   }
 
-  const canViewAllTasks = isAdmin || isAdvisor
+  const canViewAllTasks = canViewAllProgressTasks(viewer)
   const canManage = canManageProgress(project, viewer)
 
   return {

@@ -8,9 +8,8 @@ import {
   canManageActivation,
   canManageProgress as canManageProjectProgress,
   canVerifyProject,
+  canViewProgress,
   canViewProject,
-  isAdvisorOf,
-  isMemberOf,
   resolveProjectEditScope,
 } from '@/application/projects/project-permissions'
 import { canChooseSemesterAward } from '@/application/projects/semester-awards'
@@ -152,9 +151,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   if (!canViewProject(foundProject, viewer)) notFound()
   const project = await addRegisteredSocialProfiles(foundProject)
 
-  const isInvolved =
-    viewer !== null &&
-    (viewer.role === 'admin' || isAdvisorOf(project, viewer) || isMemberOf(project, viewer))
+  const canViewProjectProgress = viewer !== null && canViewProgress(project, viewer)
   const isExampleProject = Boolean(await new MockProjectRepository().findById(project.id))
   const canEditProject =
     viewer !== null &&
@@ -179,7 +176,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       project={project}
       isAuthenticated={Boolean(session)}
       canManageProgress={canManageProgress}
-      showProjectProgress={isInvolved}
+      showProjectProgress={canViewProjectProgress}
       canEditProject={canEditProject}
       canVerify={canVerify}
       canManageSemesterAward={

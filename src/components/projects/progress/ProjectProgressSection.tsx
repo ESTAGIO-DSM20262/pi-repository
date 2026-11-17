@@ -171,7 +171,7 @@ export function ProjectProgressSection({
               ? 'Histórico das tarefas e orientações registradas durante o desenvolvimento deste projeto.'
               : canManage
                 ? 'Organize entregas, atribua responsáveis e mantenha um histórico de cada revisão.'
-                : 'Acompanhe as orientações do professor, os prazos e a evolução das entregas do seu grupo.'}
+                : 'Acompanhe as orientações, os prazos e a evolução das entregas deste projeto.'}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -238,7 +238,7 @@ export function ProjectProgressSection({
               ? 'Nenhuma tarefa foi registrada para este projeto durante o desenvolvimento.'
               : canManage
                 ? 'Crie a primeira entrega para começar a acompanhar as versões e os prazos deste projeto.'
-                : 'O professor ainda não adicionou tarefas para este projeto.'}
+                : 'O orientador ainda não adicionou tarefas para este projeto.'}
           </p>
           {canManage && (
             <button
