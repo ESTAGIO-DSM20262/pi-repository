@@ -105,7 +105,7 @@ function AccountMenu({
               type="button"
               aria-hidden="true"
               tabIndex={-1}
-              className="fixed inset-0 z-[70] cursor-default bg-slate-950/50 backdrop-blur-[1px]"
+              className="fixed inset-0 z-[70] cursor-default bg-slate-950/50"
               onClick={() => setOpen(false)}
             />
             <div

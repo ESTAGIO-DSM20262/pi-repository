@@ -25,22 +25,22 @@ export function DashboardBlock({
       aria-labelledby={`${id}-label`}
       className="scroll-mt-24 space-y-4 sm:space-y-5"
     >
-      <div className="flex items-center gap-3 border-b border-border pb-3">
+      <div className="flex items-center gap-3 border-b border-border pb-3.5">
         <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-light text-primary"
           aria-hidden="true"
         >
-          <i className={`fi ${icon} flex text-base`} />
+          <i className={`fi ${icon} flex text-lg`} />
         </span>
         <div className="min-w-0">
-          <p
+          <h2
             id={`${id}-label`}
-            className="text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-primary"
+            className="text-lg font-bold leading-tight tracking-tight text-slate-900 sm:text-xl"
           >
             {title}
-          </p>
+          </h2>
           {description && (
-            <p className="mt-0.5 text-xs text-text-secondary sm:text-[0.8125rem]">{description}</p>
+            <p className="mt-0.5 text-[0.8125rem] text-text-secondary sm:text-sm">{description}</p>
           )}
         </div>
       </div>
@@ -52,9 +52,7 @@ export function DashboardBlock({
 export function DashboardGroupLabel({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-3 pt-1">
-      <p className="shrink-0 text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-text-secondary">
-        {children}
-      </p>
+      <p className="shrink-0 text-sm font-semibold text-slate-700">{children}</p>
       <span className="h-px flex-1 bg-border" aria-hidden="true" />
     </div>
   )

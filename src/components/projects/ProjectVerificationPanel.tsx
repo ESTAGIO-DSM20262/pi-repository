@@ -299,7 +299,7 @@ function CriteriaTags({ summary }: { summary: ProjectVerificationSummary }) {
         <section
           id={cardId}
           aria-label={`Detalhes da indicação: ${definition.label}`}
-          className="mt-3 max-w-xl rounded-lg border border-border border-l-4 border-l-primary bg-surface-secondary p-3.5"
+          className="mt-3 max-w-xl rounded-lg border border-border bg-surface-secondary p-3.5"
         >
           <div className="flex items-start justify-between gap-3">
             <p className="text-sm font-bold text-slate-900">{definition.label}</p>
@@ -454,7 +454,7 @@ export function ProjectVerificationPanel({
           />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-secondary-hover">
+          <p className="text-xs font-semibold text-secondary-hover">
             Sistema de indicação
           </p>
           <h2 className="mt-0.5 text-base font-bold leading-tight text-slate-900">

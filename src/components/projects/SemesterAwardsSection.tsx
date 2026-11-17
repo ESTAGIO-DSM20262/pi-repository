@@ -124,8 +124,8 @@ function AwardCard({
 
   return (
     <article
-      className={`flex min-w-0 flex-col rounded-xl border border-l-4 p-4 shadow-sm ${
-        item.selected ? 'border-secondary bg-accent-light/40' : 'border-border border-l-border'
+      className={`flex min-w-0 flex-col rounded-xl border p-4 shadow-sm ${
+        item.selected ? 'border-secondary bg-accent-light/40' : 'border-border'
       } ${eligible ? (item.selected ? '' : 'bg-white') : 'bg-surface-secondary/60'}`}
     >
       <div className="flex flex-wrap items-center gap-1.5">

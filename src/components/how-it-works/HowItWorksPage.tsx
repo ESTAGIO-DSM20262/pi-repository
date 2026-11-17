@@ -81,15 +81,8 @@ const LIFECYCLE = [
 function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div>
-      <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
-        {eyebrow}
-      </p>
+      <p className="text-xs font-semibold text-primary sm:text-[0.8125rem]">{eyebrow}</p>
       <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{title}</h2>
-      <div className="mt-2.5 flex h-1 w-12 gap-0.5" aria-hidden="true">
-        <span className="flex-[3] bg-primary" />
-        <span className="flex-[2] bg-secondary" />
-        <span className="flex-1 bg-accent" />
-      </div>
     </div>
   )
 }
@@ -296,7 +289,7 @@ function About({ role }: { role: Role | null }) {
         </div>
       </section>
 
-      <PermissionMatrix role={role} />
+      {role === 'admin' && <PermissionMatrix role={role} />}
 
       <AccessibilitySection />
     </div>

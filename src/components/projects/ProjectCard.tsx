@@ -4,9 +4,9 @@ import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisor
 import { FavoriteButton } from './FavoriteButton'
 
 const TONE = {
-  blue: 'from-slate-200 via-slate-100 to-blue-50',
-  red: 'from-rose-100 via-rose-50 to-white',
-  slate: 'from-slate-200 to-slate-100',
+  blue: 'bg-blue-50',
+  red: 'bg-rose-50',
+  slate: 'bg-slate-100',
 }
 
 interface ProjectCardProps {
@@ -51,12 +51,12 @@ export function ProjectCard({
         </div>
       )}
       <div
-        className={`relative flex h-28 flex-col sm:h-[150px] items-center justify-center gap-2 bg-linear-to-br ${TONE[p.cover.tone]} ${
+        className={`relative flex h-28 flex-col sm:h-[150px] items-center justify-center gap-2 ${TONE[p.cover.tone]} ${
           inactive ? 'opacity-50 grayscale' : ''
         }`}
       >
         <i className={`fi ${p.cover.icon} flex text-3xl text-slate-700`} aria-hidden="true" />
-        <span className="px-3 text-center text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-slate-600">
+        <span className="px-3 text-center text-xs font-semibold text-slate-600">
           {p.cover.label}
         </span>
 

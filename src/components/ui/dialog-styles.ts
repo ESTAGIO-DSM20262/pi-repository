@@ -4,13 +4,10 @@ export const dialogLayerClass = 'z-[2147483646]'
 
 export const dialogTopLayerClass = 'z-[2147483647]'
 
-export const dialogBackdropClass =
-  'absolute inset-0 cursor-default bg-slate-950/75 backdrop-blur-[1px]'
+export const dialogBackdropClass = 'absolute inset-0 cursor-default bg-slate-950/70'
 
 export const dialogBackdropStyle = {
-  backgroundColor: 'rgba(2, 6, 23, 0.72)',
-  backdropFilter: 'blur(1px)',
-  WebkitBackdropFilter: 'blur(1px)',
+  backgroundColor: 'rgba(2, 6, 23, 0.7)',
 } as const
 
 export type DialogSize = 'sm' | 'md' | 'lg'
@@ -69,5 +66,5 @@ export function dialogIconChipClass(tone: DialogTone) {
 }
 
 export function dialogEyebrowClass(tone: DialogTone) {
-  return `text-[0.625rem] font-bold uppercase tracking-[0.14em] ${EYEBROW[tone]}`
+  return `text-xs font-semibold ${EYEBROW[tone]}`
 }

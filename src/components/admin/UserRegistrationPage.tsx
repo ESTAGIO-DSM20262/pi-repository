@@ -220,7 +220,7 @@ export function UserRegistrationPage() {
           <div className="flex min-w-0 items-start gap-3">
             <BackButton href="/admin" label="Voltar ao painel administrativo" />
             <div className="min-w-0 flex-1">
-              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
+              <p className="text-xs font-semibold text-primary">
                 Painel administrativo
               </p>
               <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -240,7 +240,7 @@ export function UserRegistrationPage() {
               <div className="max-w-xl">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <i className="fi fi-rr-user-add flex text-lg" aria-hidden="true" />
-                  <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
+                  <span className="text-xs font-semibold">
                     Novo registro
                   </span>
                 </div>
@@ -416,7 +416,7 @@ export function UserRegistrationPage() {
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2 text-emerald-800">
                 <i className="fi fi-rr-file-spreadsheet flex text-lg" aria-hidden="true" />
-                <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
+                <span className="text-xs font-semibold">
                   Importação em lote
                 </span>
               </div>
