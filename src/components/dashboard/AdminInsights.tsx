@@ -82,19 +82,87 @@ function AdvisorLoadList({ rows }: { rows: AdminDashboardMetrics['advisorLoad'] 
     return <EmptyPanelState icon="fi-rr-chalkboard-user" text="Nenhum orientador com projetos." />
   }
 
+  const maxOngoing = Math.max(1, ...rows.map((row) => row.ongoing))
+  const columnClass = 'w-[5.5rem] px-3 py-3 text-center'
+
   return (
-    <ul className="space-y-2.5">
-      {rows.map((row) => (
-        <li key={row.email} className="flex items-center justify-between gap-3">
-          <p className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-900">{row.name}</p>
-          <div className="flex shrink-0 items-center gap-1.5">
-            {row.overdue > 0 && <Badge tone="alert">{row.overdue} atrasada(s)</Badge>}
-            <Badge tone={row.ongoing > 0 ? 'warning' : 'pending'}>{row.ongoing} em andamento</Badge>
-            <Badge tone={row.completed > 0 ? 'done' : 'pending'}>{row.completed} concluídos</Badge>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <>
+      <div className="overflow-x-auto rounded-lg border border-border-light">
+        <table className="w-full min-w-[460px] border-collapse text-left">
+          <caption className="sr-only">
+            Projetos em andamento, concluídos e tarefas atrasadas por orientador
+          </caption>
+          <thead>
+            <tr className="border-b border-border-light bg-surface-secondary/70 text-[0.625rem] font-semibold uppercase tracking-wide text-text-secondary">
+              <th scope="col" className="px-4 py-2.5">
+                Orientador
+              </th>
+              <th scope="col" className={`${columnClass} py-2.5`}>
+                Em andamento
+              </th>
+              <th scope="col" className={`${columnClass} py-2.5`}>
+                Concluídos
+              </th>
+              <th scope="col" className={`${columnClass} py-2.5`}>
+                Atrasadas
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border-light">
+            {rows.map((row, index) => (
+              <tr key={row.email} className="transition-colors hover:bg-surface-secondary/50">
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border-light bg-surface-secondary text-[0.6875rem] font-semibold tabular-nums text-text-secondary"
+                      aria-hidden="true"
+                    >
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-semibold text-slate-900">{row.name}</p>
+                      <div className="mt-1.5 max-w-[220px]">
+                        <ProgressBar
+                          percent={(row.ongoing / maxOngoing) * 100}
+                          tone={row.overdue > 0 ? 'alert' : 'ongoing'}
+                          label={`Carga de ${row.name} em relação ao orientador com mais projetos`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td className={`${columnClass} text-sm font-bold tabular-nums text-slate-900`}>
+                  {row.ongoing}
+                </td>
+                <td
+                  className={`${columnClass} text-sm tabular-nums ${row.completed > 0 ? 'font-semibold text-tone-done-ink' : 'text-text-muted'}`}
+                >
+                  {row.completed}
+                </td>
+                <td className={columnClass}>
+                  {row.overdue > 0 ? (
+                    <Badge tone="alert">{row.overdue}</Badge>
+                  ) : (
+                    <>
+                      <span className="text-sm text-text-muted" aria-hidden="true">
+                        —
+                      </span>
+                      <span className="sr-only">Nenhuma atrasada</span>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ToneLegend
+        items={[
+          { tone: 'ongoing', label: 'Barra: carga em andamento' },
+          { tone: 'alert', label: 'Barra: com tarefas atrasadas' },
+        ]}
+      />
+    </>
   )
 }
 
@@ -114,7 +182,7 @@ function PendingItem({
   return (
     <li className="flex items-center gap-3 rounded-lg border border-border bg-white p-3">
       <span
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${alert ? 'bg-tone-warning-soft text-tone-warning-ink' : 'bg-tone-pending-soft text-tone-pending-ink'}`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${alert ? 'border-tone-warning/40 bg-tone-warning-soft text-tone-warning-ink' : 'border-tone-pending/60 bg-tone-pending-soft text-tone-pending-ink'}`}
       >
         <i className={`fi ${icon} flex`} aria-hidden="true" />
       </span>
