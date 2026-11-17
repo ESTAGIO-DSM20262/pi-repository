@@ -30,6 +30,7 @@ import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+import { UserHistoryModal } from './UserHistoryModal'
 
 interface AdminUserRecord {
   id: string
@@ -84,6 +85,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
   const [saving, setSaving] = useState(false)
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
+  const [historyUser, setHistoryUser] = useState<{ id: string; name: string } | null>(null)
   const [pendingDeactivation, setPendingDeactivation] = useState<AdminUserRecord | null>(null)
   const [pendingActivation, setPendingActivation] = useState<AdminUserRecord | null>(null)
   const [changingStatus, setChangingStatus] = useState(false)
@@ -394,7 +396,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNotice('O histórico de auditoria ainda não está implementado.')}
+                  onClick={() => setHistoryUser({ id: user.id, name: user.name })}
                   aria-label={`Ver histórico de ${user.name}`}
                   className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-secondary px-1.5 text-[0.625rem] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
                 >
@@ -513,9 +515,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                       </button>
                       <button
                         type="button"
-                        onClick={() =>
-                          setNotice('O histórico de auditoria ainda não está implementado.')
-                        }
+                        onClick={() => setHistoryUser({ id: user.id, name: user.name })}
                         title="Ver histórico"
                         aria-label={`Ver histórico de ${user.name}`}
                         className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary"
@@ -743,6 +743,8 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           </form>
         </div>
       )}
+
+      <UserHistoryModal user={historyUser} onClose={() => setHistoryUser(null)} />
 
       <ConfirmationDialog
         open={pendingDeactivation !== null}

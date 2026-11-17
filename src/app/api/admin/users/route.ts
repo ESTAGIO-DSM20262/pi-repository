@@ -7,12 +7,20 @@ import {
   isValidStudentRegistrationNumber,
   STUDENT_REGISTRATION_ERROR,
 } from '@/application/users/registration-number'
+import {
+  buildUserCreationAudit,
+  buildUserUpdateAudit,
+  type UserAuditDraft,
+  type UserAuditSnapshot,
+  type UserCreationSource,
+} from '@/application/users/user-audit'
 import { type ImportedUserRow, parseUserWorkbook } from '@/application/users/user-import'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
 import { isRole, type Role } from '@/domain/enterprise/entities/role'
 import { listCourses } from '@/infrastructure/courses/course-queries'
 import { makeAccountInviteNotifier } from '@/infrastructure/email/make-account-invite-notifier'
+import { recordUserAuditEvent } from '@/infrastructure/users/user-audit-repository'
 import { ACCOUNT_INVITE_TTL_MS, buildInviteUrl, inviteTokenIdentifier } from '@/libs/account-invite'
 import { auth } from '@/libs/auth'
 
@@ -43,6 +51,31 @@ class DuplicateUserError extends Error {}
 class AccountInviteEmailError extends Error {}
 
 type AuthContext = Awaited<typeof auth.$context>
+
+type AuditActor = { id: string; name: string }
+
+function actorOf(session: { user: { id: unknown; name: string } }): AuditActor {
+  return { id: String(session.user.id), name: session.user.name }
+}
+
+function toAuditSnapshot(row: UserAuditSnapshot): UserAuditSnapshot {
+  return {
+    name: row.name,
+    email: row.email,
+    role: row.role,
+    registrationNumber: row.registrationNumber,
+    course: row.course,
+    active: row.active,
+  }
+}
+
+async function recordAudit(userId: string, actor: AuditActor, draft: UserAuditDraft) {
+  try {
+    await recordUserAuditEvent({ userId, actor, ...draft })
+  } catch (error) {
+    console.error('Falha ao registrar o histórico do usuário:', error)
+  }
+}
 
 function normalizedString(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number'
@@ -151,6 +184,7 @@ async function createUserAccount(
   context: AuthContext,
   courses: CourseRecord[],
   appUrl: string,
+  audit: { actor: AuditActor; source: UserCreationSource },
 ): Promise<CredentialResult> {
   const user = normalizeAndValidate(input, courses)
   const alreadyExists = await db
@@ -230,6 +264,12 @@ async function createUserAccount(
     )
   }
 
+  await recordAudit(
+    userId,
+    audit.actor,
+    buildUserCreationAudit({ ...user, active: true }, audit.source),
+  )
+
   return {
     name: user.name,
     email: user.email,
@@ -240,7 +280,7 @@ async function createUserAccount(
   }
 }
 
-async function handleSingleCreate(request: Request) {
+async function handleSingleCreate(request: Request, actor: AuditActor) {
   const body = (await request.json()) as UserInput
   const context = await auth.$context
   const credential = await createUserAccount(
@@ -248,6 +288,7 @@ async function handleSingleCreate(request: Request) {
     context,
     await listCourses(),
     resolveAppUrl(request),
+    { actor, source: 'individual' },
   )
   return NextResponse.json(
     { credential },
@@ -255,7 +296,7 @@ async function handleSingleCreate(request: Request) {
   )
 }
 
-async function handleBulkCreate(request: Request) {
+async function handleBulkCreate(request: Request, actor: AuditActor) {
   const formData = await request.formData()
   const file = formData.get('file')
   if (!(file instanceof File)) return jsonError('Selecione uma planilha para importar.', 400)
@@ -308,7 +349,9 @@ async function handleBulkCreate(request: Request) {
     if (email) seenEmails.add(email)
 
     try {
-      credentials.push(await createUserAccount(row, context, courses, appUrl))
+      credentials.push(
+        await createUserAccount(row, context, courses, appUrl, { actor, source: 'planilha' }),
+      )
     } catch (error) {
       const reason =
         error instanceof Error ? error.message : 'Falha inesperada ao cadastrar esta linha.'
@@ -375,8 +418,9 @@ export async function POST(request: Request) {
 
   try {
     const contentType = request.headers.get('content-type') ?? ''
-    if (contentType.includes('multipart/form-data')) return await handleBulkCreate(request)
-    return await handleSingleCreate(request)
+    const actor = actorOf(access.session)
+    if (contentType.includes('multipart/form-data')) return await handleBulkCreate(request, actor)
+    return await handleSingleCreate(request, actor)
   } catch (error) {
     if (error instanceof UserInputError) return jsonError(error.message, 400)
     if (error instanceof DuplicateUserError) return jsonError(error.message, 409)
@@ -476,6 +520,9 @@ export async function PATCH(request: Request) {
         active: users.active,
         createdAt: users.createdAt,
       })
+
+    const audit = buildUserUpdateAudit(toAuditSnapshot(current), toAuditSnapshot(updated[0]))
+    if (audit) await recordAudit(id, actorOf(access.session), audit)
 
     if (!nextActive || nextRole !== current.role || nextEmail !== current.email) {
       await db.delete(sessions).where(eq(sessions.userId, id))

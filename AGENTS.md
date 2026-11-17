@@ -652,6 +652,14 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   tema escuro e o alto contraste): `--shadow-1` (`shadow-sm`: cards e botões), `--shadow-3`
   (`shadow-md`: card em destaque no hover) e `--shadow-2` (`shadow-lg`/`xl`/`2xl`: menus, listas
   suspensas e modais). Não usar `shadow-[...]` com valores soltos; escolher um degrau da escala.
+- **Histórico de ações do usuário:** a tabela `user_audit_events` (migration
+  `20261117_user_audit_events.sql`) guarda, para cada usuário, quem fez o quê e quando. O cadastro
+  individual ou por planilha e a edição/ativação/desativação em `app/api/admin/users/route.ts`
+  chamam `buildUserCreationAudit`/`buildUserUpdateAudit` (`application/users/user-audit.ts`, que
+  compara antes e depois e monta resumo e detalhes) e gravam com `recordUserAuditEvent`; uma falha
+  ao gravar o histórico é logada e não desfaz a ação. `GET /api/admin/users/[id]/history` (só
+  admin) alimenta o `UserHistoryModal`, aberto pelo botão Histórico da lista de usuários.
+  Ações anteriores à migration não têm histórico.
 - **Padrão de modais (reunião de 09/11/2026):** `components/ui/dialog-styles.ts` concentra fundo,
   largura (`sm` 460, `md` 520, `lg` 680), cabeçalho com ícone, eyebrow, botão de fechar, rodapé e
   botões. `ConfirmationDialog`, `ProjectVerificationPanel`, `ProgressTaskDialog` e o modal de editar
