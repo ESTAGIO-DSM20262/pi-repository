@@ -2,7 +2,10 @@
 
 import Link from 'next/link'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
+import {
+  PROFESSOR_REGISTRATION_MAX_LENGTH,
+  STUDENT_REGISTRATION_LENGTH,
+} from '@/application/users/registration-number'
 import {
   buildCourseOptions,
   formatUserCourse,
@@ -651,7 +654,11 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                         editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
                       }
                       maxLength={
-                        editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
+                        editForm.role === 'student'
+                          ? STUDENT_REGISTRATION_LENGTH
+                          : editForm.role === 'professor'
+                            ? PROFESSOR_REGISTRATION_MAX_LENGTH
+                            : undefined
                       }
                       value={editForm.registrationNumber}
                       onChange={(event) =>
@@ -665,6 +672,12 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                     {editForm.role === 'student' && (
                       <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
                         O RA do aluno tem {STUDENT_REGISTRATION_LENGTH} caracteres.
+                      </span>
+                    )}
+                    {editForm.role === 'professor' && (
+                      <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                        A matrícula do professor tem no máximo {PROFESSOR_REGISTRATION_MAX_LENGTH}{' '}
+                        caracteres.
                       </span>
                     )}
                   </label>

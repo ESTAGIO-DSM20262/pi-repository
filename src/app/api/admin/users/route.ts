@@ -4,7 +4,9 @@ import { NextResponse } from 'next/server'
 import { SendAccountInviteEmailUseCase } from '@/application/auth/send-account-invite-email'
 import { type CourseRecord, resolveUserCourse } from '@/application/courses/course-rules'
 import {
+  isValidProfessorRegistrationNumber,
   isValidStudentRegistrationNumber,
+  PROFESSOR_REGISTRATION_ERROR,
   STUDENT_REGISTRATION_ERROR,
 } from '@/application/users/registration-number'
 import {
@@ -128,6 +130,8 @@ function normalizeAndValidate(
   }
   if (role === 'student' && !isValidStudentRegistrationNumber(registrationNumber))
     throw new UserInputError(STUDENT_REGISTRATION_ERROR)
+  if (role === 'professor' && !isValidProfessorRegistrationNumber(registrationNumber))
+    throw new UserInputError(PROFESSOR_REGISTRATION_ERROR)
 
   const resolvedCourse = resolveUserCourse({
     input: input.course,
@@ -485,6 +489,12 @@ export async function PATCH(request: Request) {
       !isValidStudentRegistrationNumber(String(nextRegistration ?? ''))
     )
       return jsonError(STUDENT_REGISTRATION_ERROR, 400)
+    if (
+      nextRole === 'professor' &&
+      (nextRegistration !== current.registrationNumber || current.role !== 'professor') &&
+      !isValidProfessorRegistrationNumber(String(nextRegistration ?? ''))
+    )
+      return jsonError(PROFESSOR_REGISTRATION_ERROR, 400)
 
     let nextCourse = current.course
     if (body.course !== undefined || nextRole === 'student') {

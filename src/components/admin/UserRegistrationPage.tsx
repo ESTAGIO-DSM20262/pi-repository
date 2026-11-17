@@ -2,7 +2,10 @@
 
 import Link from 'next/link'
 import { type DragEvent, type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
-import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
+import {
+  PROFESSOR_REGISTRATION_MAX_LENGTH,
+  STUDENT_REGISTRATION_LENGTH,
+} from '@/application/users/registration-number'
 import { buildCourseOptions, useAdminCourses } from '@/components/admin/use-admin-courses'
 import { BackButton } from '@/components/ui/BackButton'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
@@ -303,7 +306,13 @@ export function UserRegistrationPage() {
                   <input
                     required={role !== 'admin'}
                     minLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
-                    maxLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
+                    maxLength={
+                      role === 'student'
+                        ? STUDENT_REGISTRATION_LENGTH
+                        : role === 'professor'
+                          ? PROFESSOR_REGISTRATION_MAX_LENGTH
+                          : undefined
+                    }
                     value={form.registrationNumber}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, registrationNumber: event.target.value }))
@@ -318,6 +327,11 @@ export function UserRegistrationPage() {
                     }
                   />
                   {role === 'student' && (
+                  {role === 'professor' && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      A matrícula deve ter no máximo {PROFESSOR_REGISTRATION_MAX_LENGTH} caracteres.
+                    </span>
+                  )}
                     <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
                       O RA deve ter {STUDENT_REGISTRATION_LENGTH} caracteres.
                     </span>
