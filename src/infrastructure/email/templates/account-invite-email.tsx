@@ -15,19 +15,15 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components'
+import { ACCOUNT_INVITE_VALIDITY_DAYS } from '@/libs/account-invite'
 import { emailBrand, emailTailwindConfig } from './brand'
 
-export interface InitialPasswordEmailProps {
+export interface AccountInviteEmailProps {
   name: string
-  initialPassword: string
-  loginUrl: string
+  inviteUrl: string
 }
 
-export function InitialPasswordEmail({
-  name,
-  initialPassword,
-  loginUrl,
-}: InitialPasswordEmailProps) {
+export function AccountInviteEmail({ name, inviteUrl }: AccountInviteEmailProps) {
   const greeting = name.trim() ? `Olá, ${name.trim()}!` : 'Olá!'
 
   return (
@@ -37,7 +33,7 @@ export function InitialPasswordEmail({
           <Font fontFamily="Roboto" fallbackFontFamily={['Arial', 'Helvetica']} />
           <link rel="stylesheet" href={emailBrand.fontStylesheet} />
         </Head>
-        <Preview>Sua conta no {emailBrand.name} foi criada. Veja sua senha inicial.</Preview>
+        <Preview>Sua conta no {emailBrand.name} foi criada. Defina sua senha para entrar.</Preview>
         <Body className="m-0 bg-background px-4 py-8 font-sans text-foreground">
           <Container className="mx-auto max-w-[520px] overflow-hidden rounded-lg border border-solid border-border bg-surface">
             <Section className="border-0 border-b border-solid border-border-light bg-surface px-8 py-5">
@@ -60,37 +56,27 @@ export function InitialPasswordEmail({
 
             <Section className="p-8">
               <Text className="m-0 mb-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-primary">
-                Primeiro acesso
+                Segurança da conta
               </Text>
               <Heading as="h1" className="m-0 mb-5 text-[22px] font-bold leading-7 text-foreground">
-                Sua conta foi criada
+                Bem-vindo ao {emailBrand.name}
               </Heading>
               <Text className="m-0 mb-4 text-sm leading-[22px] text-foreground">{greeting}</Text>
               <Text className="m-0 mb-4 text-sm leading-[22px] text-foreground">
-                Uma conta foi criada para você no {emailBrand.name}. Use o e-mail que recebeu esta
-                mensagem e a senha inicial abaixo para entrar.
+                Uma conta foi criada para você no {emailBrand.name}. Para começar a usar o sistema,
+                defina a sua senha de acesso clicando no botão abaixo.
               </Text>
-
-              <Section className="rounded-md border border-solid border-border bg-surface-secondary px-4 py-4 text-center">
-                <Text className="m-0 mb-1.5 text-[11px] font-bold uppercase tracking-[1.5px] text-text-secondary">
-                  Senha inicial
-                </Text>
-                <Text className="m-0 break-all font-mono text-lg font-bold leading-7 text-foreground">
-                  {initialPassword}
-                </Text>
-              </Section>
-
-              <Text className="m-0 mb-4 mt-5 text-sm leading-[22px] text-foreground">
-                Essa é uma senha temporária. No primeiro acesso, você será levado a uma tela para
-                criar uma senha pessoal; a senha inicial deixa de funcionar depois disso.
+              <Text className="m-0 text-sm leading-[22px] text-foreground">
+                O link é pessoal, vale por {ACCOUNT_INVITE_VALIDITY_DAYS} dias e só pode ser usado
+                uma vez. Você entrará direto na tela de criação da senha.
               </Text>
 
               <Section className="my-7">
                 <Button
-                  href={loginUrl}
+                  href={inviteUrl}
                   className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-white no-underline"
                 >
-                  Acessar o sistema
+                  Definir minha senha
                 </Button>
               </Section>
 
@@ -98,8 +84,8 @@ export function InitialPasswordEmail({
                 <Text className="m-0 mb-1.5 text-xs leading-[18px] text-text-secondary">
                   Se o botão não funcionar, copie e cole este endereço no navegador:
                 </Text>
-                <Link href={loginUrl} className="break-all text-xs leading-[18px] text-primary">
-                  {loginUrl}
+                <Link href={inviteUrl} className="break-all text-xs leading-[18px] text-primary">
+                  {inviteUrl}
                 </Link>
               </Section>
             </Section>
@@ -108,8 +94,9 @@ export function InitialPasswordEmail({
 
             <Section className="bg-surface-secondary px-8 pb-7 pt-5">
               <Text className="m-0 mb-2 text-xs leading-[18px] text-text-muted">
-                Não compartilhe esta senha com ninguém e apague este e-mail depois de criar sua
-                senha pessoal. Se você não esperava esta mensagem, ignore-a e avise a secretaria.
+                Não encaminhe este e-mail: quem tiver o link poderá definir a senha da sua conta. Se o
+                link expirar, use a opção “Esqueci minha senha” na tela de login. Se você não
+                esperava esta mensagem, ignore-a e avise a secretaria.
               </Text>
               <Text className="m-0 text-[11px] leading-4 text-text-muted">
                 {emailBrand.name} • {emailBrand.institution}
@@ -122,10 +109,9 @@ export function InitialPasswordEmail({
   )
 }
 
-InitialPasswordEmail.PreviewProps = {
+AccountInviteEmail.PreviewProps = {
   name: 'Maria',
-  initialPassword: 'Ab3dE-fGh1Jk_lMn',
-  loginUrl: 'http://localhost:3000/login',
-} satisfies InitialPasswordEmailProps
+  inviteUrl: 'http://localhost:3000/definir-senha?token=Ab3dEfGh1JklMnOpQrStUvWx',
+} satisfies AccountInviteEmailProps
 
-export default InitialPasswordEmail
+export default AccountInviteEmail

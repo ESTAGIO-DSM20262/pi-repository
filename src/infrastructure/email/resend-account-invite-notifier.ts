@@ -2,21 +2,21 @@ import { Resend } from 'resend'
 import { type Either, left, right } from '@/core/either'
 import { EmailDeliveryError } from '@/domain/enterprise/errors/email-delivery-error'
 import type {
-  InitialPasswordNotification,
-  InitialPasswordNotifier,
-} from '@/domain/enterprise/repositories/initial-password-notifier'
-import { renderInitialPasswordEmail } from './templates/render-initial-password-email'
+  AccountInviteNotification,
+  AccountInviteNotifier,
+} from '@/domain/enterprise/repositories/account-invite-notifier'
+import { renderAccountInviteEmail } from './templates/render-account-invite-email'
 
-interface ResendInitialPasswordNotifierConfig {
+interface ResendAccountInviteNotifierConfig {
   apiKey: string
   from: string
 }
 
-export class ResendInitialPasswordNotifier implements InitialPasswordNotifier {
+export class ResendAccountInviteNotifier implements AccountInviteNotifier {
   private readonly resend: Resend
   private readonly from: string
 
-  constructor({ apiKey, from }: ResendInitialPasswordNotifierConfig) {
+  constructor({ apiKey, from }: ResendAccountInviteNotifierConfig) {
     this.resend = new Resend(apiKey)
     this.from = from
   }
@@ -24,15 +24,10 @@ export class ResendInitialPasswordNotifier implements InitialPasswordNotifier {
   async notify({
     to,
     name,
-    initialPassword,
-    loginUrl,
-  }: InitialPasswordNotification): Promise<Either<EmailDeliveryError, void>> {
+    inviteUrl,
+  }: AccountInviteNotification): Promise<Either<EmailDeliveryError, void>> {
     try {
-      const { subject, html, text } = await renderInitialPasswordEmail({
-        name,
-        initialPassword,
-        loginUrl,
-      })
+      const { subject, html, text } = await renderAccountInviteEmail({ name, inviteUrl })
       const { error } = await this.resend.emails.send({ from: this.from, to, subject, html, text })
       if (error) return left(new EmailDeliveryError(`Resend: ${error.message}`))
       return right(undefined)

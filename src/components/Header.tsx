@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import type { Role } from '@/domain/enterprise/entities/role'
+import { INVITE_PATH } from '@/libs/account-invite'
 import { getNameInitials } from '@/libs/initials'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
 import { useAuth } from '@/presentation/auth/auth-context'
@@ -30,12 +31,14 @@ function AccountMenu({
   role,
   onSignOut,
   variant,
+  signOutOnly = false,
 }: {
   name: string
   email: string
   role: Role
   onSignOut: () => void
   variant: AccountMenuVariant
+  signOutOnly?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -134,19 +137,21 @@ function AccountMenu({
                 </button>
               </div>
               <div className="grid gap-2 p-3">
-                <Link
-                  ref={firstActionRef}
-                  href="/perfil"
-                  onClick={() => setOpen(false)}
-                  className="flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-slate-800 transition hover:border-primary/40 hover:bg-primary-light hover:text-primary"
-                >
-                  <i className="fi fi-rr-id-badge flex text-lg text-primary" aria-hidden="true" />
-                  Acessar perfil
-                  <i
-                    className="fi fi-rr-angle-small-right ml-auto flex text-lg"
-                    aria-hidden="true"
-                  />
-                </Link>
+                {!signOutOnly && (
+                  <Link
+                    ref={firstActionRef}
+                    href="/perfil"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-slate-800 transition hover:border-primary/40 hover:bg-primary-light hover:text-primary"
+                  >
+                    <i className="fi fi-rr-id-badge flex text-lg text-primary" aria-hidden="true" />
+                    Acessar perfil
+                    <i
+                      className="fi fi-rr-angle-small-right ml-auto flex text-lg"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={() => {
@@ -216,21 +221,23 @@ function AccountMenu({
                 </p>
               </div>
             </div>
-            <Link
-              href="/perfil"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 px-4 py-3 text-sm text-slate-700 transition hover:bg-surface-secondary hover:text-primary"
-            >
-              <i className="fi fi-rr-id-badge flex text-base text-primary" aria-hidden="true" />
-              Acessar Perfil
-            </Link>
+            {!signOutOnly && (
+              <Link
+                href="/perfil"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-4 py-3 text-sm text-slate-700 transition hover:bg-surface-secondary hover:text-primary"
+              >
+                <i className="fi fi-rr-id-badge flex text-base text-primary" aria-hidden="true" />
+                Acessar Perfil
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => {
                 setOpen(false)
                 onSignOut()
               }}
-              className="flex w-full cursor-pointer items-center gap-2.5 border-t border-border-light px-4 py-3 text-sm font-medium text-primary transition hover:bg-primary-light/60"
+              className={`flex w-full cursor-pointer items-center gap-2.5 px-4 py-3 text-sm font-medium text-primary transition hover:bg-primary-light/60 ${signOutOnly ? '' : 'border-t border-border-light'}`}
             >
               <i className="fi fi-rr-exit flex text-base" aria-hidden="true" />
               Sair
@@ -263,6 +270,9 @@ export function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut, loading, showAuthAction, clearAuthAction } = useAuth()
+  // Na tela de definir a senha do convite o cabeçalho não leva a nenhuma outra página; sobra só o
+  // menu da conta com a opção de sair.
+  const focusMode = pathname === INVITE_PATH || pathname.startsWith(`${INVITE_PATH}/`)
 
   async function handleSignOut() {
     showAuthAction('Estamos encerrando sua sessão com segurança…')
@@ -313,44 +323,94 @@ export function Header() {
         <span className="w-1/6 bg-accent sm:w-1/5" />
       </div>
       <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between gap-3 px-3 sm:h-[72px] sm:gap-4 sm:px-6">
-        <Link
-          href="/"
-          className="flex min-w-0 items-center gap-3 sm:gap-4"
-          aria-label="Acervo Acadêmico — início"
-        >
-          <Image
-            src="/brand/fatec-itaquera-cor.png"
-            alt="Fatec Itaquera — Prof. Miguel Reale"
-            width={841}
-            height={450}
-            className="h-9 w-auto shrink-0 sm:h-12"
-          />
-          <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
-          <span className="hidden min-w-0 leading-none md:block">
-            <span className="block font-slab text-base font-medium text-foreground">
-              Acervo Acadêmico
+        {focusMode ? (
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <Image
+              src="/brand/fatec-itaquera-cor.png"
+              alt="Fatec Itaquera — Prof. Miguel Reale"
+              width={841}
+              height={450}
+              className="h-9 w-auto shrink-0 sm:h-12"
+            />
+            <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
+            <span className="hidden min-w-0 leading-none md:block">
+              <span className="block font-slab text-base font-medium text-foreground">
+                Acervo Acadêmico
+              </span>
+              <span className="mt-1 block text-[0.6875rem] text-foreground">
+                Projetos Integradores
+              </span>
             </span>
-            <span className="mt-1 block text-[0.6875rem] text-foreground">
-              Projetos Integradores
+          </div>
+        ) : (
+          <Link
+            href="/"
+            className="flex min-w-0 items-center gap-3 sm:gap-4"
+            aria-label="Acervo Acadêmico — início"
+          >
+            <Image
+              src="/brand/fatec-itaquera-cor.png"
+              alt="Fatec Itaquera — Prof. Miguel Reale"
+              width={841}
+              height={450}
+              className="h-9 w-auto shrink-0 sm:h-12"
+            />
+            <span className="hidden h-10 w-px bg-border md:block" aria-hidden="true" />
+            <span className="hidden min-w-0 leading-none md:block">
+              <span className="block font-slab text-base font-medium text-foreground">
+                Acervo Acadêmico
+              </span>
+              <span className="mt-1 block text-[0.6875rem] text-foreground">
+                Projetos Integradores
+              </span>
             </span>
-          </span>
-        </Link>
+          </Link>
+        )}
 
         <div className="flex shrink-0 items-center gap-3 sm:gap-6">
-          <nav aria-label="Menu principal" className="hidden items-center gap-6 sm:flex">
-            <NavLink href="/" pathname={pathname}>
-              Início
-            </NavLink>
-            <NavLink href="/como-funciona" pathname={pathname}>
-              Como Funciona
-            </NavLink>
-            {user && (
-              <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
-                Painel
+          {focusMode ? (
+            <div className="flex items-center">
+              {user && (
+                <>
+                  <div className="hidden sm:block">
+                    <AccountMenu
+                      name={user.name}
+                      email={user.emailAddress}
+                      role={user.role}
+                      onSignOut={handleSignOut}
+                      variant="desktop"
+                      signOutOnly
+                    />
+                  </div>
+                  <div className="sm:hidden">
+                    <AccountMenu
+                      name={user.name}
+                      email={user.emailAddress}
+                      role={user.role}
+                      onSignOut={handleSignOut}
+                      variant="mobile"
+                      signOutOnly
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <nav aria-label="Menu principal" className="hidden items-center gap-6 sm:flex">
+              <NavLink href="/" pathname={pathname}>
+                Início
               </NavLink>
-            )}
-            {desktopAuthItem}
-          </nav>
+              <NavLink href="/como-funciona" pathname={pathname}>
+                Como Funciona
+              </NavLink>
+              {user && (
+                <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
+                  Painel
+                </NavLink>
+              )}
+              {desktopAuthItem}
+            </nav>
+          )}
           <span className="hidden h-10 w-px bg-border sm:block" aria-hidden="true" />
           <Image
             src="/brand/cps-cor.png"
@@ -362,23 +422,25 @@ export function Header() {
         </div>
       </div>
 
-      <nav
-        aria-label="Menu principal"
-        className="flex min-h-11 flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-border-light px-3 py-2 sm:hidden"
-      >
-        <NavLink href="/" pathname={pathname}>
-          Início
-        </NavLink>
-        <NavLink href="/como-funciona" pathname={pathname}>
-          Como Funciona
-        </NavLink>
-        {user && (
-          <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
-            Painel
+      {!focusMode && (
+        <nav
+          aria-label="Menu principal"
+          className="flex min-h-11 flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-border-light px-3 py-2 sm:hidden"
+        >
+          <NavLink href="/" pathname={pathname}>
+            Início
           </NavLink>
-        )}
-        {mobileAuthItem}
-      </nav>
+          <NavLink href="/como-funciona" pathname={pathname}>
+            Como Funciona
+          </NavLink>
+          {user && (
+            <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
+              Painel
+            </NavLink>
+          )}
+          {mobileAuthItem}
+        </nav>
+      )}
     </header>
   )
 }

@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from 'node:crypto'
 import { asc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
-import { SendInitialPasswordEmailUseCase } from '@/application/auth/send-initial-password-email'
+import { SendAccountInviteEmailUseCase } from '@/application/auth/send-account-invite-email'
 import { type CourseRecord, resolveUserCourse } from '@/application/courses/course-rules'
 import {
   isValidStudentRegistrationNumber,
@@ -9,13 +9,18 @@ import {
 } from '@/application/users/registration-number'
 import { type ImportedUserRow, parseUserWorkbook } from '@/application/users/user-import'
 import { db } from '@/db'
-import { accounts, sessions, users } from '@/db/schema'
+import { accounts, sessions, users, verifications } from '@/db/schema'
 import { isRole, type Role } from '@/domain/enterprise/entities/role'
 import { listCourses } from '@/infrastructure/courses/course-queries'
-import { makeInitialPasswordNotifier } from '@/infrastructure/email/make-initial-password-notifier'
+import { makeAccountInviteNotifier } from '@/infrastructure/email/make-account-invite-notifier'
+import {
+  ACCOUNT_INVITE_TTL_MS,
+  buildInviteUrl,
+  inviteTokenIdentifier,
+} from '@/libs/account-invite'
 import { auth } from '@/libs/auth'
 
-const sendInitialPasswordEmail = new SendInitialPasswordEmailUseCase(makeInitialPasswordNotifier())
+const sendAccountInviteEmail = new SendAccountInviteEmailUseCase(makeAccountInviteNotifier())
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 const MAX_IMPORT_ROWS = 500
@@ -39,7 +44,9 @@ type CredentialResult = {
 
 class UserInputError extends Error {}
 class DuplicateUserError extends Error {}
-class InitialPasswordEmailError extends Error {}
+class AccountInviteEmailError extends Error {}
+
+type AuthContext = Awaited<typeof auth.$context>
 
 function normalizedString(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number'
@@ -107,16 +114,47 @@ function createTemporaryPassword() {
   return randomBytes(18).toString('base64url')
 }
 
-function resolveLoginUrl(request: Request) {
-  const origin = process.env.BETTER_AUTH_URL?.trim() || new URL(request.url).origin
-  return `${origin.replace(/\/+$/, '')}/login`
+function resolveAppUrl(request: Request) {
+  return process.env.BETTER_AUTH_URL?.trim() || new URL(request.url).origin
+}
+
+async function createAndSendInvite({
+  context,
+  userId,
+  token,
+  email,
+  name,
+  appUrl,
+}: {
+  context: AuthContext
+  userId: string
+  token: string
+  email: string
+  name: string
+  appUrl: string
+}): Promise<string | null> {
+  try {
+    await context.internalAdapter.createVerificationValue({
+      value: userId,
+      identifier: inviteTokenIdentifier(token),
+      expiresAt: new Date(Date.now() + ACCOUNT_INVITE_TTL_MS),
+    })
+    const result = await sendAccountInviteEmail.execute({
+      email,
+      name,
+      inviteUrl: buildInviteUrl(appUrl, token),
+    })
+    return result.isLeft() ? result.value.message : null
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error)
+  }
 }
 
 async function createUserAccount(
   input: UserInput,
-  passwordContext: { hash: (password: string) => Promise<string> },
+  context: AuthContext,
   courses: CourseRecord[],
-  loginUrl: string,
+  appUrl: string,
 ): Promise<CredentialResult> {
   const user = normalizeAndValidate(input, courses)
   const alreadyExists = await db
@@ -126,8 +164,9 @@ async function createUserAccount(
     .limit(1)
   if (alreadyExists.length > 0) throw new DuplicateUserError('Este e-mail já está cadastrado.')
 
-  const password = createTemporaryPassword()
-  const passwordHash = await passwordContext.hash(password)
+  // Senha aleatória que ninguém conhece: a conta só passa a ter uma senha de verdade quando o
+  // próprio usuário a define pelo link do convite.
+  const passwordHash = await context.password.hash(createTemporaryPassword())
   const userId = randomUUID()
   const now = new Date()
 
@@ -143,7 +182,6 @@ async function createUserAccount(
       registrationNumber: user.registrationNumber || null,
       course: user.course || null,
       active: true,
-      mustChangePassword: true,
       createdAt: now,
       updatedAt: now,
     })
@@ -170,22 +208,29 @@ async function createUserAccount(
     throw error
   }
 
-  // A senha inicial só é entregue ao próprio usuário, por e-mail. Se o envio falhar, a conta é
-  // desfeita para não ficar um acesso cuja senha ninguém conhece.
-  const delivery = await sendInitialPasswordEmail.execute({
+  // O convite é um token de redefinição de senha com validade maior. Se o envio falhar, a conta é
+  // desfeita para não ficar um usuário que nunca conseguirá definir a senha.
+  const token = randomBytes(32).toString('base64url')
+  const delivery = await createAndSendInvite({
+    context,
+    userId,
+    token,
     email: user.email,
     name: user.name,
-    initialPassword: password,
-    loginUrl,
+    appUrl,
   })
-  if (delivery.isLeft()) {
-    console.error('Falha ao enviar e-mail de senha inicial:', delivery.value.message)
+  if (delivery !== null) {
+    console.error('Falha ao enviar o e-mail de convite:', delivery)
+    await db
+      .delete(verifications)
+      .where(eq(verifications.value, userId))
+      .catch(() => undefined)
     await db
       .delete(users)
       .where(eq(users.id, userId))
       .catch(() => undefined)
-    throw new InitialPasswordEmailError(
-      'Não foi possível enviar o e-mail com a senha inicial, então o usuário não foi criado. Confira o endereço e tente novamente.',
+    throw new AccountInviteEmailError(
+      'Não foi possível enviar o e-mail de convite, então o usuário não foi criado. Confira o endereço e tente novamente.',
     )
   }
 
@@ -204,9 +249,9 @@ async function handleSingleCreate(request: Request) {
   const context = await auth.$context
   const credential = await createUserAccount(
     body,
-    context.password,
+    context,
     await listCourses(),
-    resolveLoginUrl(request),
+    resolveAppUrl(request),
   )
   return NextResponse.json(
     { credential },
@@ -238,7 +283,7 @@ async function handleBulkCreate(request: Request) {
 
   const context = await auth.$context
   const courses = await listCourses()
-  const loginUrl = resolveLoginUrl(request)
+  const appUrl = resolveAppUrl(request)
   const credentials: CredentialResult[] = []
   const skipped: Array<{ sheet: string; rowNumber: number; email: string; reason: string }> = []
   const errors: Array<{ sheet: string; rowNumber: number; email: string; reason: string }> = []
@@ -267,7 +312,7 @@ async function handleBulkCreate(request: Request) {
     if (email) seenEmails.add(email)
 
     try {
-      credentials.push(await createUserAccount(row, context.password, courses, loginUrl))
+      credentials.push(await createUserAccount(row, context, courses, appUrl))
     } catch (error) {
       const reason =
         error instanceof Error ? error.message : 'Falha inesperada ao cadastrar esta linha.'
@@ -276,7 +321,7 @@ async function handleBulkCreate(request: Request) {
         skipped.push(item)
       } else {
         errors.push(item)
-        if (!(error instanceof UserInputError || error instanceof InitialPasswordEmailError)) break
+        if (!(error instanceof UserInputError || error instanceof AccountInviteEmailError)) break
       }
     }
   }
@@ -339,7 +384,7 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof UserInputError) return jsonError(error.message, 400)
     if (error instanceof DuplicateUserError) return jsonError(error.message, 409)
-    if (error instanceof InitialPasswordEmailError) return jsonError(error.message, 502)
+    if (error instanceof AccountInviteEmailError) return jsonError(error.message, 502)
     console.error('Falha ao cadastrar usuário:', error)
     return jsonError(
       'Não foi possível cadastrar o usuário. Confira as tabelas e a migração do banco.',

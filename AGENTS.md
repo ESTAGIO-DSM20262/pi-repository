@@ -698,26 +698,24 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **E-mail:** `src/infrastructure/email/templates/brand.ts` espelha os mesmos tokens.
 
 
-### Primeiro acesso e senha inicial (reunião de 09/11/2026)
+### Convite para definir a senha (reunião de 09/11/2026)
 
-1. Ao cadastrar um usuário (individual ou em lote), `app/api/admin/users/route.ts` gera a senha
-   inicial, grava `users.must_change_password = true` e a envia **só por e-mail** ao usuário
-   (`SendInitialPasswordEmailUseCase` → porta `InitialPasswordNotifier` → Resend; sem
-   `RESEND_API_KEY` em desenvolvimento, `ConsoleInitialPasswordNotifier` imprime no console; em
-   produção sem configuração o envio falha). O template `initial-password-email.tsx` segue o mesmo
-   padrão do e-mail de redefinição, com a senha, o botão "Acessar o sistema" (`BETTER_AUTH_URL` +
-   `/login`) e o aviso de troca no primeiro acesso. A senha não volta na resposta da API nem aparece
-   para o administrador; a planilha de credenciais foi removida. Se o envio falhar, a conta é
-   desfeita (502 no cadastro individual; linha com erro no lote).
-2. `must_change_password` (migration `20261109_first_access.sql`) chega à sessão como campo
-   adicional do better-auth e à entidade `User.mustChangePassword`. `/painel` redireciona para
-   `/primeiro-acesso` e `FirstAccessGuard` (no `layout.tsx`) faz o mesmo em qualquer rota fora de
-   `/primeiro-acesso` e `/redefinir-senha`.
-3. `/primeiro-acesso` (`FirstAccessForm`) pede nova senha e confirmação com as regras de
-   `passwordRules`. `POST /api/account/first-access` exige sessão com a flag ativa, rejeita senha
-   igual à inicial, grava o novo hash, zera a flag e encerra as outras sessões. Redefinir a senha
-   pelo link do e-mail também zera a flag (`emailAndPassword.onPasswordReset`). O bloqueio é de
-   navegação; as rotas de API não consultam a flag.
+1. Ao cadastrar um usuário (individual ou em lote), `app/api/admin/users/route.ts` cria a conta com
+   uma senha aleatória que ninguém conhece e envia ao usuário um e-mail de convite
+   (`SendAccountInviteEmailUseCase` → porta `AccountInviteNotifier` → Resend; sem `RESEND_API_KEY`
+   em desenvolvimento, `ConsoleAccountInviteNotifier` imprime o link no console; em produção sem
+   configuração o envio falha). Nenhuma senha é enviada, exibida ou devolvida pela API.
+2. O convite é um token de redefinição do better-auth (`reset-password:<token>`, criado com
+   `internalAdapter.createVerificationValue`) com validade de 7 dias (`libs/account-invite.ts`),
+   então `resetPassword` o aceita sem código extra. Se o envio falhar, a conta é desfeita (502 no
+   cadastro individual; linha com erro no lote).
+3. O botão do e-mail (`template account-invite-email.tsx`, textos "Segurança da conta" e
+   "Bem-vindo ao Acervo Acadêmico") abre `/definir-senha?token=...` direto, sem passar pelo login.
+   A página valida o token no servidor e mostra o nome e o e-mail da conta; reutiliza
+   `ResetPasswordFields` com a prop `invite` (título "Defina sua senha inicial"). Token inválido ou
+   expirado mostra `InvalidInviteLink`, que leva a `/esqueci-senha`.
+4. Em `/definir-senha` o `Header` entra em modo foco: logo sem link, sem Início/Como funciona/Painel
+   e, se houver sessão, só o menu da conta com "Sair".
 
 ### Ajustes de cor e rolagem
 

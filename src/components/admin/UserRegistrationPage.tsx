@@ -385,16 +385,17 @@ export function UserRegistrationPage() {
                     </div>
                   </div>
                   <p className="text-[0.6875rem] leading-relaxed text-emerald-900">
-                    A senha inicial foi enviada por e-mail para o próprio usuário, com um botão de
-                    acesso. No primeiro acesso ele precisará criar uma senha pessoal. Ela não é
-                    exibida aqui nem fica disponível para o administrador.
+                    Um e-mail de convite foi enviado ao usuário com um botão para definir a própria
+                    senha. O link é pessoal e vale por 7 dias; se expirar, ele pode usar “Esqueci
+                    minha senha” no login. Nenhuma senha é exibida ou fica disponível para o
+                    administrador.
                   </p>
                 </div>
               )}
 
               <div className="flex flex-col-reverse gap-3 border-t border-border-light pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-sm text-[0.6875rem] leading-relaxed text-text-secondary">
-                  A senha inicial é gerada automaticamente, enviada só ao e-mail do usuário e armazenada apenas em formato hash.
+                  O usuário recebe por e-mail um convite para definir a própria senha; nenhuma senha é gerada para o administrador.
                 </p>
                 <button
                   type="submit"
@@ -513,9 +514,9 @@ export function UserRegistrationPage() {
               </div>
 
               <Feedback kind="info">
-                Os e-mails existentes serão ignorados para evitar duplicidade. Cada novo usuário recebe a
-                senha inicial no próprio e-mail e deverá criá-la de novo no primeiro acesso; linhas
-                cujo e-mail não puder ser enviado não criam a conta.
+                Os e-mails existentes serão ignorados para evitar duplicidade. Cada novo usuário recebe um
+                convite por e-mail para definir a própria senha; linhas cujo e-mail não puder ser
+                enviado não criam a conta.
               </Feedback>
               {batchError && <Feedback kind="error">{batchError}</Feedback>}
 
@@ -629,7 +630,7 @@ export function UserRegistrationPage() {
       <ConfirmationDialog
         open={batchConfirmationOpen}
         title="Confirmar importação em lote?"
-        description={`A planilha “${file?.name ?? 'selecionada'}” será processada agora. Contas novas serão criadas, e e-mails que já existem serão ignorados. O lote pode conter até 500 registros; confira se o arquivo correto foi selecionado. Cada usuário criado receberá a senha inicial no próprio e-mail.`}
+        description={`A planilha “${file?.name ?? 'selecionada'}” será processada agora. Contas novas serão criadas, e e-mails que já existem serão ignorados. O lote pode conter até 500 registros; confira se o arquivo correto foi selecionado. Cada usuário criado receberá um convite por e-mail para definir a senha.`}
         icon="fi-rr-file-import"
         tone="primary"
         confirmLabel="Importar usuários"
