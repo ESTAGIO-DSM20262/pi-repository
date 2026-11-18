@@ -26,7 +26,6 @@ export function useSwipeToClose({ onClose, scrollRef }: SwipeToCloseOptions) {
   function handleTouchStart(event: TouchEvent) {
     const scroller = scrollRef.current
     const insideScroller = scroller?.contains(event.target as Node) ?? false
-    // Dentro da lista, o gesto só vale quando ela está no topo; no cabeçalho e no rodapé vale sempre.
     if (insideScroller && scroller && scroller.scrollTop > 0) {
       startY.current = null
       return

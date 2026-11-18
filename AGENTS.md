@@ -737,6 +737,9 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
    `internalAdapter.createVerificationValue`) com validade de 7 dias (`libs/account-invite.ts`),
    então `resetPassword` o aceita sem código extra. Se o envio falhar, a conta é desfeita (502 no
    cadastro individual; linha com erro no lote).
+   `ResendAccountInviteNotifier` repete o envio até 3 vezes (espera de 1 s × tentativa) quando o
+   Resend responde `rate_limit_exceeded`, para que importações em lote não percam linhas por limite
+   de taxa; outros erros falham na hora.
 3. O botão do e-mail (`template account-invite-email.tsx`, textos "Segurança da conta" e
    "Bem-vindo ao Acervo Acadêmico") abre `/definir-senha?token=...` direto, sem passar pelo login.
    A página valida o token no servidor e mostra o nome e o e-mail da conta; reutiliza
@@ -832,6 +835,7 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Menu da conta no mobile**: `Header.tsx` mantém o dropdown ancorado no desktop e usa um bottom sheet próprio em telas menores, renderizado via portal no `document.body` para escapar de `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de fundo.
 - **Listagem administrativa**: `AdminUsersSection.tsx` mostra cartões com ações acessíveis em telas menores e preserva a tabela com rolagem horizontal a partir do breakpoint `sm`.
 - **Filtros do catálogo**: tecnologias selecionadas usam o fundo `bg-primary` e texto branco, seguindo a mesma cor ativa dos demais filtros.
+- **Arrastar para fechar**: `useSwipeToClose` (`src/libs/useSwipeToClose.ts`) fecha as folhas inferiores no celular. Dentro da área rolável (`scrollRef`) o gesto só começa quando ela está no topo; no cabeçalho e no rodapé da folha vale sempre.
 
 ## Tela "Como funciona" (`/como-funciona`)
 

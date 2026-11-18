@@ -23,7 +23,6 @@
   --border: #dadada;
   --border-light: #e6e6e6;
 
-  /* Escala de sombras: 1 = cards e botões, 3 = card em destaque (hover), 2 = menus, listas e modais. */
   --shadow-1: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
   --shadow-3: 0 2px 8px 0 rgba(15, 23, 42, 0.08);
   --shadow-2: 0 8px 24px 0 rgba(15, 23, 42, 0.12);

@@ -198,8 +198,6 @@ async function createUserAccount(
     .limit(1)
   if (alreadyExists.length > 0) throw new DuplicateUserError('Este e-mail já está cadastrado.')
 
-  // Senha aleatória que ninguém conhece: a conta só passa a ter uma senha de verdade quando o
-  // próprio usuário a define pelo link do convite.
   const passwordHash = await context.password.hash(createTemporaryPassword())
   const userId = randomUUID()
   const now = new Date()
@@ -242,8 +240,6 @@ async function createUserAccount(
     throw error
   }
 
-  // O convite é um token de redefinição de senha com validade maior. Se o envio falhar, a conta é
-  // desfeita para não ficar um usuário que nunca conseguirá definir a senha.
   const token = randomBytes(32).toString('base64url')
   const delivery = await createAndSendInvite({
     context,
@@ -482,7 +478,6 @@ export async function PATCH(request: Request) {
 
     if (nextRole !== 'admin' && !String(nextRegistration ?? '').trim())
       return jsonError('RA/matrícula é obrigatório para alunos e professores.', 400)
-    // RA antigo fora do padrão continua editável: a regra vale só para RA novo ou alterado.
     if (
       nextRole === 'student' &&
       (nextRegistration !== current.registrationNumber || current.role !== 'student') &&

@@ -270,8 +270,6 @@ export function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const { user, signOut, loading, showAuthAction, clearAuthAction } = useAuth()
-  // Na tela de definir a senha do convite o cabeçalho não leva a nenhuma outra página; sobra só o
-  // menu da conta com a opção de sair.
   const focusMode = pathname === INVITE_PATH || pathname.startsWith(`${INVITE_PATH}/`)
 
   async function handleSignOut() {
