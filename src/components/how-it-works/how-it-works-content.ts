@@ -145,7 +145,7 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
         cells: {
           visitor: no(),
           student: yes('Do seu projeto, só para consulta'),
-          professor: yes('Dos projetos que orienta'),
+          professor: yes('De todos os projetos ativos, só para consulta nos que não orienta'),
           admin: yes('De todos os projetos'),
         },
       },
@@ -154,7 +154,7 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
         cells: {
           visitor: no(),
           student: no(),
-          professor: yes('Em projetos em andamento que orienta'),
+          professor: partial('Só o orientador principal, em projetos em andamento'),
           admin: yes('Em projetos em andamento'),
         },
       },
@@ -163,7 +163,7 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
         cells: {
           visitor: no(),
           student: no(),
-          professor: partial('Só as que ele mesmo criou'),
+          professor: partial('Só o orientador principal, nas que ele mesmo criou'),
           admin: yes('Qualquer tarefa'),
         },
       },
@@ -348,7 +348,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-list-check',
         title: 'Gerenciar o cronograma',
-        text: 'Cadastre tarefas, para a equipe toda ou para um aluno e com prazo, nos projetos em andamento, e atualize as que você criou. Projetos concluídos ficam só para consulta.',
+        text: 'Como orientador principal, cadastre tarefas, para a equipe toda ou para um aluno e com prazo, nos projetos em andamento, e atualize as que você criou. Você também acompanha as tarefas dos demais projetos ativos, só para consulta. Orientadores adicionais só acompanham o cronograma. Projetos concluídos ficam só para consulta.',
         where: 'Página do projeto em andamento',
       },
       {
@@ -397,12 +397,12 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
     flow: [
       'Entre com a conta institucional criada pela administração. Se esquecer a senha, use Esqueci minha senha na tela de login.',
       'Cadastre o PI da turma e informe os alunos e os co-orientadores, se houver.',
-      'Crie as tarefas do cronograma e acompanhe o andamento no seu painel.',
+      'Como orientador principal, crie as tarefas do cronograma e acompanhe o andamento no seu painel.',
       'Ao finalizar, conclua o projeto e indique-o como referência junto com os demais orientadores. Sendo o orientador principal, escolha o Melhor PI do semestre.',
     ],
     limits: [
       'Você edita apenas os projetos que orienta ou co-orienta, e só enquanto estão ativos.',
-      'Você altera somente as tarefas do cronograma que você mesmo criou.',
+      'Você vê as tarefas de todos os projetos ativos, mas somente o orientador principal cria e altera tarefas do cronograma, e apenas as que ele mesmo criou. Co-orientadores acompanham o cronograma.',
       'Desativar, reativar e escolher o Melhor PI do semestre cabem ao orientador principal. Co-orientadores indicam critérios, mas não decidem.',
       'Cadastrar usuários, gerenciar cursos e excluir projetos é função da administração.',
     ],

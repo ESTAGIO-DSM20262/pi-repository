@@ -150,7 +150,7 @@ export function SearchSelect({
           id={listboxId}
           role="listbox"
           aria-label={ariaLabel}
-          className="absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-xl border border-border/90 bg-white p-1.5 shadow-[0_16px_40px_rgba(24,24,27,0.16)] ring-1 ring-black/5"
+          className="absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-xl border border-border/90 bg-white p-1.5 shadow-lg ring-1 ring-black/5"
         >
           <button
             type="button"

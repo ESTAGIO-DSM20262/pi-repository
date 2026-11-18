@@ -12,8 +12,9 @@ html[data-a11y-theme="dark"] {
   --primary-light: #48272b;
   --accent-light: #123e49;
   --secondary-hover: #073b47;
-  --shadow-1: 0 0 10px 0 rgba(0, 0, 0, 0.45);
-  --shadow-2: 0 4px 20px 0 rgba(0, 0, 0, 0.6);
+  --shadow-1: 0 1px 2px 0 rgba(0, 0, 0, 0.4), 0 2px 8px 0 rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 2px 6px 0 rgba(0, 0, 0, 0.45), 0 8px 20px 0 rgba(0, 0, 0, 0.45);
+  --shadow-2: 0 4px 12px 0 rgba(0, 0, 0, 0.5), 0 14px 34px 0 rgba(0, 0, 0, 0.6);
   --color-tone-done-soft: #1d3940;
   --color-tone-done-ink: #b6e0e8;
   --color-tone-ongoing-soft: #1d3440;
@@ -1409,6 +1410,7 @@ html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"]) {
   --border: #000000;
   --border-light: #404040;
   --shadow-1: 0 0 0 1px #000000;
+  --shadow-3: 0 0 0 1px #000000;
   --shadow-2: 0 0 0 2px #000000;
   --color-slate-50: #f2f2f2;
   --color-slate-100: #ececec;

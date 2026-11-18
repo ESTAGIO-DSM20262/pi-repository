@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { type DragEvent, type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
-import * as XLSX from 'xlsx'
-import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
+import {
+  PROFESSOR_REGISTRATION_MAX_LENGTH,
+  STUDENT_REGISTRATION_LENGTH,
+} from '@/application/users/registration-number'
 import { buildCourseOptions, useAdminCourses } from '@/components/admin/use-admin-courses'
 import { BackButton } from '@/components/ui/BackButton'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
@@ -22,9 +24,9 @@ interface Credential {
   name: string
   email: string
   role: Role
-  password: string
   registrationNumber: string
   course: string
+  emailSent: boolean
 }
 
 interface BatchResult {
@@ -80,61 +82,6 @@ function Feedback({ kind, children }: { kind: 'success' | 'error' | 'info'; chil
   )
 }
 
-async function downloadCredentials(credentials: Credential[]) {
-  const response = await fetch('/modelo-cadastro-usuarios-acervo.xlsx')
-  if (!response.ok)
-    throw new Error('Não foi possível carregar a planilha modelo para gerar as credenciais.')
-
-  const workbook = XLSX.read(await response.arrayBuffer(), { type: 'array', cellStyles: true })
-  const studentsSheet = workbook.Sheets.Alunos
-  const professorsSheet = workbook.Sheets.Professores
-  if (!studentsSheet || !professorsSheet) {
-    throw new Error('O arquivo modelo não contém as abas Alunos e Professores esperadas.')
-  }
-
-  const studentHeader = studentsSheet.D1
-  studentsSheet.E1 = { ...(studentHeader ?? {}), v: 'Senha temporária', t: 's' }
-  studentsSheet['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 0, c: 4 } })
-  const studentColumns = [...(studentsSheet['!cols'] ?? [])]
-  studentColumns[4] = { ...(studentColumns[4] ?? {}), wch: 24 }
-  studentsSheet['!cols'] = studentColumns
-
-  const professorHeader = professorsSheet.C1
-  professorsSheet.D1 = { ...(professorHeader ?? {}), v: 'Senha temporária', t: 's' }
-  professorsSheet['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } })
-  const professorColumns = [...(professorsSheet['!cols'] ?? [])]
-  professorColumns[3] = { ...(professorColumns[3] ?? {}), wch: 24 }
-  professorsSheet['!cols'] = professorColumns
-
-  const studentRows = credentials
-    .filter((credential) => credential.role === 'student')
-    .map((credential) => [
-      credential.course,
-      credential.registrationNumber,
-      credential.name,
-      credential.email,
-      credential.password,
-    ])
-  const professorRows = credentials
-    .filter((credential) => credential.role === 'professor')
-    .map((credential) => [
-      credential.registrationNumber,
-      credential.name,
-      credential.email,
-      credential.password,
-    ])
-
-  if (studentRows.length > 0) {
-    XLSX.utils.sheet_add_aoa(studentsSheet, studentRows, { origin: 'A2' })
-  }
-  if (professorRows.length > 0) {
-    XLSX.utils.sheet_add_aoa(professorsSheet, professorRows, { origin: 'A2' })
-  }
-
-  delete workbook.Sheets.Instruções
-  workbook.SheetNames = ['Alunos', 'Professores']
-  XLSX.writeFile(workbook, 'credenciais-provisorias-acervo.xlsx', { cellStyles: true })
-}
 export function UserRegistrationPage() {
   const [role, setRole] = useState<Role>('student')
   const [form, setForm] = useState<UserForm>({
@@ -276,9 +223,7 @@ export function UserRegistrationPage() {
           <div className="flex min-w-0 items-start gap-3">
             <BackButton href="/admin" label="Voltar ao painel administrativo" />
             <div className="min-w-0 flex-1">
-              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
-                Painel administrativo
-              </p>
+              <p className="text-xs font-semibold text-primary">Painel administrativo</p>
               <h1 className="mt-1 break-words text-xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                 Cadastro de Usuários
               </h1>
@@ -296,9 +241,7 @@ export function UserRegistrationPage() {
               <div className="max-w-xl">
                 <div className="mb-2 flex items-center gap-2 text-primary">
                   <i className="fi fi-rr-user-add flex text-lg" aria-hidden="true" />
-                  <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
-                    Novo registro
-                  </span>
+                  <span className="text-xs font-semibold">Novo registro</span>
                 </div>
                 <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                   Cadastro individual de usuário
@@ -359,7 +302,13 @@ export function UserRegistrationPage() {
                   <input
                     required={role !== 'admin'}
                     minLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
-                    maxLength={role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined}
+                    maxLength={
+                      role === 'student'
+                        ? STUDENT_REGISTRATION_LENGTH
+                        : role === 'professor'
+                          ? PROFESSOR_REGISTRATION_MAX_LENGTH
+                          : undefined
+                    }
                     value={form.registrationNumber}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, registrationNumber: event.target.value }))
@@ -376,6 +325,11 @@ export function UserRegistrationPage() {
                   {role === 'student' && (
                     <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
                       O RA deve ter {STUDENT_REGISTRATION_LENGTH} caracteres.
+                    </span>
+                  )}
+                  {role === 'professor' && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      A matrícula deve ter no máximo {PROFESSOR_REGISTRATION_MAX_LENGTH} caracteres.
                     </span>
                   )}
                 </label>
@@ -439,55 +393,19 @@ export function UserRegistrationPage() {
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 rounded-lg border border-emerald-200/80 bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="text-[0.625rem] font-bold uppercase tracking-wide text-text-secondary">
-                        Senha temporária
-                      </p>
-                      <code className="mt-1 block break-all text-sm font-semibold text-slate-900">
-                        {singleCredential.password}
-                      </code>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void navigator.clipboard.writeText(singleCredential.password)
-                        }
-                        className="cursor-pointer inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-border px-3 text-xs font-semibold text-slate-700 transition hover:bg-surface-secondary"
-                      >
-                        <i className="fi fi-rr-copy flex" aria-hidden="true" /> Copiar senha
-                      </button>
-                      {singleCredential.role !== 'admin' && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void downloadCredentials([singleCredential]).catch((error: unknown) => {
-                              setSingleError(
-                                error instanceof Error
-                                  ? error.message
-                                  : 'Não foi possível gerar a planilha de credenciais.',
-                              )
-                            })
-                          }}
-                          className="cursor-pointer inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white transition hover:bg-primary-hover"
-                        >
-                          <i className="fi fi-rr-download flex" aria-hidden="true" /> Baixar .xlsx
-                        </button>
-                      )}
-                    </div>
-                  </div>
                   <p className="text-[0.6875rem] leading-relaxed text-emerald-900">
-                    Copie e entregue a senha ao usuário por um canal seguro. O sistema ainda não tem
-                    envio de e-mail configurado e esta senha não será exibida novamente após sair
-                    desta tela.
+                    Um e-mail de convite foi enviado ao usuário com um botão para definir a própria
+                    senha. O link é pessoal e vale por 7 dias; se expirar, ele pode usar “Esqueci
+                    minha senha” no login. Nenhuma senha é exibida ou fica disponível para o
+                    administrador.
                   </p>
                 </div>
               )}
 
               <div className="flex flex-col-reverse gap-3 border-t border-border-light pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-sm text-[0.6875rem] leading-relaxed text-text-secondary">
-                  A senha temporária é gerada automaticamente e armazenada apenas em formato hash.
+                  O usuário recebe por e-mail um convite para definir a própria senha; nenhuma senha
+                  é gerada para o administrador.
                 </p>
                 <button
                   type="submit"
@@ -508,9 +426,7 @@ export function UserRegistrationPage() {
             <div className="mb-6">
               <div className="mb-2 flex items-center gap-2 text-emerald-800">
                 <i className="fi fi-rr-file-spreadsheet flex text-lg" aria-hidden="true" />
-                <span className="text-[0.625rem] font-bold uppercase tracking-[0.16em]">
-                  Importação em lote
-                </span>
+                <span className="text-xs font-semibold">Importação em lote</span>
               </div>
               <h2 className="text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
                 Importar planilha do SIGA
@@ -532,7 +448,7 @@ export function UserRegistrationPage() {
                 onDrop={handleDrop}
                 className={`flex min-h-[190px] flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-colors ${dragging ? 'border-primary bg-primary-light/50' : 'border-border bg-[#f2f3f4] hover:border-primary/40'}`}
               >
-                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+                <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-white text-primary shadow-sm">
                   <i className="fi fi-rr-file-upload flex text-xl" aria-hidden="true" />
                 </span>
                 {file ? (
@@ -606,9 +522,9 @@ export function UserRegistrationPage() {
               </div>
 
               <Feedback kind="info">
-                Os e-mails existentes serão ignorados para evitar duplicidade. As senhas temporárias
-                dos novos usuários ficam disponíveis para baixar ao final; o sistema ainda não envia
-                e-mails automaticamente.
+                Os e-mails existentes serão ignorados para evitar duplicidade. Cada novo usuário
+                recebe um convite por e-mail para definir a própria senha; linhas cujo e-mail não
+                puder ser enviado não criam a conta.
               </Feedback>
               {batchError && <Feedback kind="error">{batchError}</Feedback>}
 
@@ -641,26 +557,6 @@ export function UserRegistrationPage() {
                       <p className="text-[0.625rem] text-rose-900">Inválidos</p>
                     </div>
                   </div>
-                  {batchResult.credentials.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void downloadCredentials(batchResult.credentials).catch(
-                          (error: unknown) => {
-                            setBatchError(
-                              error instanceof Error
-                                ? error.message
-                                : 'Não foi possível gerar a planilha de credenciais.',
-                            )
-                          },
-                        )
-                      }}
-                      className="cursor-pointer inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white transition hover:bg-primary-hover"
-                    >
-                      <i className="fi fi-rr-download flex" aria-hidden="true" /> Baixar{' '}
-                      {batchResult.credentials.length} credenciais (.xlsx)
-                    </button>
-                  )}
                   {batchResult.credentials.length > 0 && (
                     <details className="rounded-lg border border-emerald-100 bg-emerald-50/60 p-3">
                       <summary className="cursor-pointer text-xs font-semibold text-emerald-900">
@@ -742,7 +638,7 @@ export function UserRegistrationPage() {
       <ConfirmationDialog
         open={batchConfirmationOpen}
         title="Confirmar importação em lote?"
-        description={`A planilha “${file?.name ?? 'selecionada'}” será processada agora. Contas novas serão criadas, e e-mails que já existem serão ignorados. O lote pode conter até 500 registros; confira se o arquivo correto foi selecionado. As senhas temporárias dos usuários criados precisarão ser guardadas e entregues por um canal seguro.`}
+        description={`A planilha “${file?.name ?? 'selecionada'}” será processada agora. Contas novas serão criadas, e e-mails que já existem serão ignorados. O lote pode conter até 500 registros; confira se o arquivo correto foi selecionado. Cada usuário criado receberá um convite por e-mail para definir a senha.`}
         icon="fi-rr-file-import"
         tone="primary"
         confirmLabel="Importar usuários"

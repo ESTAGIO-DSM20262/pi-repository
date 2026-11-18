@@ -5,7 +5,10 @@ export function jsonError(message: string, status: number) {
   return NextResponse.json({ error: message }, { status, headers: { 'Cache-Control': 'no-store' } })
 }
 
-export async function requireAdmin(request: Request) {
+export async function requireAdmin(
+  request: Request,
+  forbiddenMessage = 'Somente administradores podem gerenciar cursos.',
+) {
   const session = await auth.api.getSession({ headers: request.headers })
   if (!session)
     return { ok: false as const, response: jsonError('É necessário entrar no sistema.', 401) }
@@ -13,7 +16,7 @@ export async function requireAdmin(request: Request) {
   if (role !== 'admin')
     return {
       ok: false as const,
-      response: jsonError('Somente administradores podem gerenciar cursos.', 403),
+      response: jsonError(forbiddenMessage, 403),
     }
   return { ok: true as const, session }
 }

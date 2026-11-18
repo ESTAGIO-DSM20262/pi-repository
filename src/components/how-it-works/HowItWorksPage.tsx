@@ -81,15 +81,8 @@ const LIFECYCLE = [
 function SectionTitle({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div>
-      <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-primary sm:text-xs">
-        {eyebrow}
-      </p>
+      <p className="text-xs font-semibold text-primary sm:text-[0.8125rem]">{eyebrow}</p>
       <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">{title}</h2>
-      <div className="mt-2.5 flex h-1 w-12 gap-0.5" aria-hidden="true">
-        <span className="flex-[3] bg-primary" />
-        <span className="flex-[2] bg-secondary" />
-        <span className="flex-1 bg-accent" />
-      </div>
     </div>
   )
 }
@@ -215,7 +208,7 @@ function About({ role }: { role: Role | null }) {
               key={item.title}
               className="rounded-xl border border-border bg-white p-5 shadow-sm"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-accent-light text-secondary">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-secondary">
                 <i className={`fi ${item.icon} flex text-base`} aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900">{item.title}</h3>
@@ -284,7 +277,7 @@ function About({ role }: { role: Role | null }) {
               key={item.title}
               className="rounded-xl border border-border bg-white p-5 shadow-sm"
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary-light text-primary">
+              <span className="flex h-10 w-10 items-center justify-center rounded-md border border-primary/25 bg-primary-light text-primary">
                 <i className={`fi ${item.icon} flex text-base`} aria-hidden="true" />
               </span>
               <h3 className="mt-3 text-base font-bold text-slate-900">{item.title}</h3>
@@ -296,7 +289,7 @@ function About({ role }: { role: Role | null }) {
         </div>
       </section>
 
-      <PermissionMatrix role={role} />
+      {role === 'admin' && <PermissionMatrix role={role} />}
 
       <AccessibilitySection />
     </div>
@@ -450,7 +443,7 @@ function AccessibilitySection() {
             key={feature.title}
             className="flex gap-4 rounded-xl border border-border bg-white p-5 shadow-sm"
           >
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-light text-secondary">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-secondary">
               <i className={`fi ${feature.icon} flex text-base`} aria-hidden="true" />
             </span>
             <div className="min-w-0">
@@ -579,7 +572,7 @@ function RoleView({
               key={ability.title}
               className="flex gap-4 rounded-xl border border-border bg-white p-5 shadow-sm"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-accent-light text-secondary">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-accent/40 bg-accent-light text-secondary">
                 <i className={`fi ${ability.icon} flex text-base`} aria-hidden="true" />
               </span>
               <div className="min-w-0">

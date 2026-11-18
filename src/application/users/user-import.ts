@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx'
 import type { Role } from '@/domain/enterprise/entities/role'
+import { formatPersonName } from './person-name'
 
 export interface ImportedUserRow {
   name: string
@@ -115,7 +116,7 @@ export function parseUserWorkbook(bytes: Uint8Array): ImportParseResult {
       const row = grid[index]
       if (!row || row.every((cell) => cellText(cell) === '')) continue
 
-      const name = cellText(row[nameIndex])
+      const name = formatPersonName(cellText(row[nameIndex]))
       const email = cellText(row[emailIndex]).toLowerCase()
       const roleValue = roleIndex >= 0 ? cellText(row[roleIndex]) : ''
       const role = parseRole(roleValue, sheetName)

@@ -162,8 +162,7 @@ export function ProjectAdvisorsSection({
           )}
           <p className={hintClass}>
             Use para professores de matérias satélites que precisam acompanhar o PI. Eles podem
-            editar o projeto, criar tarefas e indicar o projeto, e editam apenas as tarefas que eles
-            mesmos criaram.
+            editar o projeto e indicá-lo, mas somente o orientador principal cria e edita tarefas.
           </p>
         </div>
       </div>

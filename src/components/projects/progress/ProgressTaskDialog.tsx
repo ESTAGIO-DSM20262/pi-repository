@@ -2,6 +2,22 @@
 
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import {
+  dialogBackdropClass,
+  dialogBodyClass,
+  dialogCancelButtonClass,
+  dialogCloseClass,
+  dialogConfirmButtonClass,
+  dialogDescriptionClass,
+  dialogEyebrowClass,
+  dialogFormFooterClass,
+  dialogHeaderClass,
+  dialogIconChipClass,
+  dialogLayerClass,
+  dialogOverlayClass,
+  dialogPanelClass,
+  dialogTitleClass,
+} from '@/components/ui/dialog-styles'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
 import { formatPersonName } from '@/libs/initials'
@@ -176,12 +192,12 @@ export function ProgressTaskDialog({
     : `v${nextVersionMajor}.0`
 
   return createPortal(
-    <div className="fixed inset-0 z-[2147483646] flex items-center justify-center p-3 sm:p-6">
+    <div className={`${dialogOverlayClass} ${dialogLayerClass}`}>
       <button
         type="button"
         aria-label="Fechar modal"
         tabIndex={-1}
-        className="absolute inset-0 cursor-default bg-slate-950/75 backdrop-blur-[1px]"
+        className={dialogBackdropClass}
         onClick={() => {
           if (!saving) onClose()
         }}
@@ -190,26 +206,21 @@ export function ProgressTaskDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="progress-task-dialog-title"
-        className="relative z-10 flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[680px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl sm:max-h-[calc(100dvh-3rem)]"
+        className={dialogPanelClass('lg')}
       >
-        <header className="flex items-start gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 sm:px-6 sm:py-5">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-light text-primary">
+        <header className={dialogHeaderClass}>
+          <span className={dialogIconChipClass('primary')}>
             <i
               className={`fi ${task ? 'fi-rr-edit' : 'fi-rr-document'} flex text-xl`}
               aria-hidden="true"
             />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-primary">
-              Progresso do projeto
-            </p>
-            <h2
-              id="progress-task-dialog-title"
-              className="mt-1 text-lg font-bold leading-tight text-slate-900 sm:text-xl"
-            >
+            <p className={dialogEyebrowClass('primary')}>Progresso do projeto</p>
+            <h2 id="progress-task-dialog-title" className={dialogTitleClass}>
               {task ? 'Editar tarefa' : 'Adicionar nova tarefa'}
             </h2>
-            <p className="mt-1 text-xs leading-relaxed text-slate-600">
+            <p className={dialogDescriptionClass}>
               {task
                 ? 'As alterações criam uma nova revisão e preservam o histórico anterior.'
                 : 'Defina a entrega, para quem ela é direcionada e o prazo esperado.'}
@@ -220,16 +231,13 @@ export function ProgressTaskDialog({
             onClick={onClose}
             disabled={saving}
             aria-label="Fechar"
-            className="cursor-pointer flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 disabled:opacity-50"
+            className={dialogCloseClass}
           >
             <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
           </button>
         </header>
 
-        <form
-          onSubmit={submit}
-          className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6"
-        >
+        <form onSubmit={submit} className={dialogBodyClass}>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/15 bg-primary-light/35 px-3.5 py-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
               <i className="fi fi-rr-code-branch flex text-primary" aria-hidden="true" />
@@ -288,7 +296,6 @@ export function ProgressTaskDialog({
                   searchPlaceholder="Pesquisar pelo nome..."
                   ariaLabel="Responsável pela entrega"
                   width="full"
-                  layer="modal"
                   className="mt-1.5 min-h-11"
                   options={[
                     { value: '', label: 'Todo o grupo' },
@@ -327,7 +334,6 @@ export function ProgressTaskDialog({
                   value={status}
                   ariaLabel="Situação da entrega"
                   width="full"
-                  layer="modal"
                   className="mt-1.5 min-h-11"
                   options={STATUS_OPTIONS}
                   onChange={(value) => setStatus(value as ProjectProgressTaskStatus)}
@@ -361,20 +367,16 @@ export function ProgressTaskDialog({
             </p>
           )}
 
-          <footer className="mt-6 flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+          <footer className={dialogFormFooterClass}>
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="cursor-pointer inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className={dialogCancelButtonClass}
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="cursor-pointer inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-65"
-            >
+            <button type="submit" disabled={saving} className={dialogConfirmButtonClass}>
               {saving ? (
                 <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />
               ) : (

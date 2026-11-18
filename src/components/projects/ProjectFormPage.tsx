@@ -484,9 +484,7 @@ export function ProjectFormPage({
               label={isEdit ? 'Voltar ao projeto' : 'Voltar ao painel'}
             />
             <div className="min-w-0 flex-1">
-              <p className="text-[0.625rem] font-bold uppercase tracking-[0.18em] text-primary">
-                Projeto Integrador
-              </p>
+              <p className="text-xs font-semibold text-primary">Projeto Integrador</p>
               <h1 className="mt-1 break-words text-lg font-bold leading-tight tracking-tight text-slate-900 sm:text-3xl">
                 {pageTitle}
               </h1>

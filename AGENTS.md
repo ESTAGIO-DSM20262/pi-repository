@@ -24,6 +24,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - `canManageActivation(project, viewer)` vale para o administrador e para o orientador principal (`project.advisor`); orientadores adicionais, outros professores e alunos não ativam nem desativam. `canDeleteProject` continua exclusivo do administrador, e só projeto desativado pode ser excluído.
 - `canViewProject` mostra projeto desativado ao administrador e a todos os orientadores do projeto (principal e adicionais), que o encontram na página inicial e no painel com a etiqueta "Desativado" e podem reativá-lo pelo orientador principal. Desativar retira a escolha de melhor PI (gatilho do banco). Orientador não edita projeto desativado; só o administrador.
+- Projeto desativado aparece apagado (cinza, opacidade reduzida e borda tracejada) com o selo "Desativado" no `ProjectCard` da home (selo centralizado sobre a capa) e no `DashboardProjectCard` do painel. No painel do administrador, o filtro de situação da lista "Projetos Cadastrados" tem a opção "Desativados" (`includeInactiveFilter`); professores e alunos não veem essa opção.
 
 Este documento descreve como o código está organizado depois da adoção de **DDD +
 Clean Architecture** (feature de autenticação), *o que* foi feito e *como*.
@@ -465,8 +466,13 @@ documente aqui.
   `SelectDropdown` de seleção única montado a partir dos semestres letivos existentes na lista,
   com a contagem de projetos em cada opção (`Filters.cycle`, `presentation/projects/project-filters.ts`). A lista de usuários do
   administrador ganhou o filtro de status (ativo/inativo), ao lado do filtro de perfil.
+- **Ícones em caixas:** todo contêiner decorativo de ícone (modais, blocos do painel, "Como
+  funciona", formulários) tem borda na cor do fundo (`border-primary/25`, `border-accent/40`,
+  `border-border`), para não se misturar ao fundo do modal. `dialogIconChipClass` e `Modal` já
+  trazem a borda.
 - **Dropdowns:** todo seletor usa `components/ui/SelectDropdown`. Dentro de modais, use
-  `layer="modal"` para o menu ficar acima do diálogo.
+  `layer="modal"` apenas se precisar forçar; por padrão (`layer="auto"`) o menu detecta um
+  ancestral `[role="dialog"][aria-modal="true"]` e sobe de camada sozinho.
 
 ## 17. Edição de projetos e artefatos
 
@@ -520,8 +526,18 @@ documente aqui.
   `lastEditedByName`, `lastEditedAt` e `canEdit` por tarefa, e `changedByName` nas revisões. O
   professor só edita as tarefas que ele mesmo criou (`canEditProgressTask`, 403 no `PATCH` caso
   contrário); o administrador edita qualquer uma. Tarefas criadas por um administrador (por exemplo,
-  as iniciais de um projeto criado por ele) só o administrador edita. A criação continua liberada a
-  todos os orientadores.
+  as iniciais de um projeto criado por ele) só o administrador edita. Desde a reunião de 09/11/2026
+  só o orientador principal (`project.advisor`) e o administrador criam e editam tarefas
+  (`canManageProgress`); orientadores adicionais (satélites) apenas acompanham o cronograma e não
+  editam nem as tarefas que criaram antes da mudança. `createdByName` continua exibido em cada
+  tarefa.
+- **Quem vê o cronograma:** administrador e qualquer professor veem as tarefas e o histórico de
+  todos os projetos ativos (`canViewProgress`, `canViewAllProgressTasks`); o administrador também vê
+  os desativados. Aluno vê apenas o projeto da própria equipe, com as tarefas da equipe e as
+  atribuídas a ele. A edição não mudou: `POST` e `PATCH` devolvem 403 para aluno e para professor que
+  não é o orientador principal do projeto (`isPrincipalAdvisorOf`), e o histórico continua
+  registrando quem alterou o quê (`changedByName`). O painel do professor (`DashboardPage`)
+  continua considerando só os projetos em que ele é orientador principal.
 
 ## 19. Indicação de projetos
 
@@ -625,16 +641,53 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   urgência; gráficos de tarefas por situação, projetos por semestre e situação/indicação; carga por
   aluno (tarefas atribuídas a cada um); projetos concluídos que o professor ainda não indicou. Só
   entram projetos ativos em que ele é orientador ou coorientador (`related`).
+  As tarefas, prazos, carga de alunos, progresso por projeto e os alertas de parado/sem tarefas consideram só os projetos em que ele é orientador principal
+  (`advisorEmail` em `buildProfessorDashboardMetrics`; `DashboardPage` também só carrega tarefas
+  desses projetos); projetos em que ele é adicional continuam nas contagens de projetos e na lista
+  de indicação, sem tarefas.
 - **Administrador:** os cartões agora contam apenas projetos **ativos** (desativados aparecem na
   nota do primeiro cartão e em "Pendências"); "Projetos Indicados" é proporcional aos concluídos.
   `AdminInsights` adiciona projetos por situação e por semestre, tarefas do sistema, projetos que
   precisam de atenção (atrasados, parados ou sem tarefas), pendências (concluídos sem indicação,
   em andamento sem tarefas, alunos e professores sem projeto, desativados), carga dos orientadores
+  (tabela com colunas Em andamento, Concluídos e Atrasadas, linhas separadas por traço fino e barra
+  proporcional ao orientador com mais projetos; vermelha com tarefas atrasadas)
   e usuários por perfil com novos cadastros dos últimos 6 meses (o mês de cada cadastro é calculado
   em `America/Sao_Paulo`, tanto na janela quanto no `to_char` da consulta).
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
   `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
   cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.
+- **Dropdown de semestre letivo (ciclo):** na home (`FilterPanel`), no filtro de ciclo da lista de
+  projetos do painel e na escolha de ciclo da seção Melhor PI, o `SelectDropdown` é `searchable` e
+  lista só os 6 mais recentes (`RECENT_SEMESTER_LIMIT`, opção "Todos" fixa via `pinnedCount`),
+  com a dica "Pesquise para ver os demais". A pesquisa percorre todos os ciclos existentes; um ciclo
+  selecionado fora dos 6 continua visível na lista. `limitOptions` em `libs/limit-options.ts`.
+- **Sombras:** a escala fica em `globals.css` (e é redefinida em `accessibility-tokens.css` para o
+  tema escuro e o alto contraste): `--shadow-1` (`shadow-sm`: cards e botões), `--shadow-3`
+  (`shadow-md`: card em destaque no hover) e `--shadow-2` (`shadow-lg`/`xl`/`2xl`: menus, listas
+  suspensas e modais). Não usar `shadow-[...]` com valores soltos; escolher um degrau da escala.
+- **Histórico de ações do usuário:** a tabela `user_audit_events` (migration
+  `20261117_user_audit_events.sql`) guarda, para cada usuário, quem fez o quê e quando. O cadastro
+  individual ou por planilha e a edição/ativação/desativação em `app/api/admin/users/route.ts`
+  chamam `buildUserCreationAudit`/`buildUserUpdateAudit` (`application/users/user-audit.ts`, que
+  compara antes e depois e monta resumo e detalhes) e gravam com `recordUserAuditEvent`; uma falha
+  ao gravar o histórico é logada e não desfaz a ação. `GET /api/admin/users/[id]/history` (só
+  admin) alimenta o `UserHistoryModal`, aberto pelo botão Histórico da lista de usuários.
+  Ações anteriores à migration não têm histórico.
+- **Padrão de modais (reunião de 09/11/2026):** `components/ui/dialog-styles.ts` concentra fundo,
+  largura (`sm` 460, `md` 520, `lg` 680), cabeçalho com ícone, eyebrow, botão de fechar, rodapé e
+  botões. `ConfirmationDialog`, `ProjectVerificationPanel`, `ProgressTaskDialog` e o modal de editar
+  usuário usam esse conjunto; `Modal` (aviso centralizado) usa o mesmo fundo e botão de fechar.
+  Tons: `danger` e `primary` usam ícone vermelho claro; `award` usa ícone ciano/verde-azulado (positivo,
+  como o `Modal` de sucesso). O botão de confirmar é sempre o vermelho primário; no celular o rodapé
+  empilha os botões.
+- **Organização em blocos (reunião de 09/11/2026):** `RoleDashboard` agrupa as seções em
+  `DashboardBlock` (cabeçalho com ícone e descrição, âncora `#id`) e mostra `DashboardSectionNav`
+  (atalhos horizontais) no topo. Admin: `acompanhamento` (indicadores, com os filtros), `graficos`,
+  `gestao` (usuários e cursos), `melhor-pi` e `projetos` (projetos e favoritos); professor e aluno
+  usam `acompanhamento`, `melhor-pi` (só orientador principal) e `projetos`. `DashboardGroupLabel`
+  separa os painéis dentro de `AdminInsights` e `ProfessorOverview`. Os painéis, indicadores e
+  filtros não mudaram; só o agrupamento.
 
 ## 22. Dropdowns dentro de modais
 
@@ -642,8 +695,10 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   inline: 100 por padrão e `2147483647` com `layer="modal"`, acima dos modais (`2147483646`, como
   `ProgressTaskDialog` e `ProjectVerificationPanel`). A classe Tailwind arbitrária com variável CSS
   (`z-[var(--z-modal-dropdown)]`) foi removida porque o menu ficava atrás do modal e as opções (por
-  exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Todo dropdown usado
-  dentro de um modal deve passar `layer="modal"`.
+  exemplo "Responsável pela entrega" e "Situação da entrega") não apareciam. Com `layer="auto"`
+  (padrão), `updatePosition` usa `closest('[role="dialog"][aria-modal="true"]')` no gatilho e aplica
+  `2147483647` quando há modal, então nenhum dropdown novo precisa pedir a camada (o seletor
+  "Perfil" do modal de editar usuário ficava atrás por não passar `layer="modal"`).
 
 ## 23. Identidade visual (Centro Paula Souza / Fatec)
 
@@ -669,6 +724,29 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Uso:** o manual restringe os logos CPS/Fatec a servidores e unidades de ensino; alunos e
   terceiros precisam de autorização prévia da unidade.
 - **E-mail:** `src/infrastructure/email/templates/brand.ts` espelha os mesmos tokens.
+
+
+### Convite para definir a senha (reunião de 09/11/2026)
+
+1. Ao cadastrar um usuário (individual ou em lote), `app/api/admin/users/route.ts` cria a conta com
+   uma senha aleatória que ninguém conhece e envia ao usuário um e-mail de convite
+   (`SendAccountInviteEmailUseCase` → porta `AccountInviteNotifier` → Resend; sem `RESEND_API_KEY`
+   em desenvolvimento, `ConsoleAccountInviteNotifier` imprime o link no console; em produção sem
+   configuração o envio falha). Nenhuma senha é enviada, exibida ou devolvida pela API.
+2. O convite é um token de redefinição do better-auth (`reset-password:<token>`, criado com
+   `internalAdapter.createVerificationValue`) com validade de 7 dias (`libs/account-invite.ts`),
+   então `resetPassword` o aceita sem código extra. Se o envio falhar, a conta é desfeita (502 no
+   cadastro individual; linha com erro no lote).
+   `ResendAccountInviteNotifier` repete o envio até 3 vezes (espera de 1 s × tentativa) quando o
+   Resend responde `rate_limit_exceeded`, para que importações em lote não percam linhas por limite
+   de taxa; outros erros falham na hora.
+3. O botão do e-mail (`template account-invite-email.tsx`, textos "Segurança da conta" e
+   "Bem-vindo ao Acervo Acadêmico") abre `/definir-senha?token=...` direto, sem passar pelo login.
+   A página valida o token no servidor e mostra o nome e o e-mail da conta; reutiliza
+   `ResetPasswordFields` com a prop `invite` (título "Defina sua senha inicial"). Token inválido ou
+   expirado mostra `InvalidInviteLink`, que leva a `/esqueci-senha`.
+4. Em `/definir-senha` o `Header` entra em modo foco: logo sem link, sem Início/Como funciona/Painel
+   e, se houver sessão, só o menu da conta com "Sair".
 
 ### Ajustes de cor e rolagem
 
@@ -730,6 +808,14 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - RA do aluno: exatamente 13 caracteres (`src/application/users/registration-number.ts`), validado
   no cadastro, na importação e na edição. Na edição, RA antigo fora do padrão só é exigido se for
   alterado ou se o usuário passar a ser aluno.
+- Matrícula do professor: no máximo 5 caracteres (`PROFESSOR_REGISTRATION_MAX_LENGTH`), com a mesma
+  regra do aluno no cadastro, na importação e na edição (matrícula antiga só é exigida se for
+  alterada ou se o usuário passar a ser professor). Os campos têm `maxLength={5}`.
+- Nomes importados: `parseUserWorkbook` aplica `formatPersonName`
+  (`src/application/users/person-name.ts`) a cada nome, porque a Fatec exporta tudo em caixa alta.
+  Só a primeira letra de cada nome fica maiúscula; "de", "da", "do", "das", "dos", "e", "di", "du" e
+  "del" ficam minúsculos fora da primeira palavra; hífen e apóstrofo reiniciam a capitalização
+  (`Ana-Clara`, `D'Ávila`). O cadastro individual não altera o que o administrador digita.
 - Fora do escopo: o campo "Curso superior de graduação" do formulário de projeto continua fixo e
   somente leitura (projetos não guardam curso).
 
@@ -749,10 +835,11 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Menu da conta no mobile**: `Header.tsx` mantém o dropdown ancorado no desktop e usa um bottom sheet próprio em telas menores, renderizado via portal no `document.body` para escapar de `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de fundo.
 - **Listagem administrativa**: `AdminUsersSection.tsx` mostra cartões com ações acessíveis em telas menores e preserva a tabela com rolagem horizontal a partir do breakpoint `sm`.
 - **Filtros do catálogo**: tecnologias selecionadas usam o fundo `bg-primary` e texto branco, seguindo a mesma cor ativa dos demais filtros.
+- **Arrastar para fechar**: `useSwipeToClose` (`src/libs/useSwipeToClose.ts`) fecha as folhas inferiores no celular. Dentro da área rolável (`scrollRef`) o gesto só começa quando ela está no topo; no cabeçalho e no rodapé da folha vale sempre.
 
 ## Tela "Como funciona" (`/como-funciona`)
 
 - `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
-- O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
-- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); orientador edita apenas as tarefas que criou.
+- O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone; só o administrador a vê na página) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

@@ -26,7 +26,12 @@ import type { Role } from '@/domain/enterprise/entities/role'
 import { formatPersonName } from '@/libs/initials'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+import {
+  RECENT_SEMESTER_HINT,
+  RECENT_SEMESTER_LIMIT,
+} from '@/presentation/projects/semester-dropdown'
 import { AdminInsights } from './AdminInsights'
+import { DashboardBlock, DashboardSectionNav } from './DashboardBlock'
 import { DashboardFiltersBar } from './DashboardFiltersBar'
 import { formatMetric, StatCard } from './DashboardWidgets'
 import { ProfessorOverview } from './ProfessorOverview'
@@ -304,22 +309,35 @@ function DashboardProjectCard({
     project.publicDetails?.team?.length ??
     project.memberEmails.length
   const isPublished = project.status === 'publicado'
+  const inactive = project.active === false
 
   return (
-    <article className="group flex min-w-0 gap-2.5 rounded-xl border border-border bg-white p-2.5 shadow-sm transition-colors hover:bg-surface-secondary sm:gap-3 sm:p-3">
+    <article
+      className={`group flex min-w-0 gap-2.5 rounded-xl border p-2.5 shadow-sm transition-colors hover:bg-surface-secondary sm:gap-3 sm:p-3 ${
+        inactive
+          ? 'border-dashed border-slate-300 bg-slate-50 opacity-70 grayscale'
+          : 'border-border bg-white'
+      }`}
+    >
       <DashboardThumbnail label={project.title} />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 py-0.5">
         <div className="flex items-center justify-between gap-2">
           <span className="truncate text-[0.625rem] font-medium text-text-secondary sm:text-[0.6875rem]">
             DSM • {project.semester}º Sem
           </span>
-          <span
-            className={`shrink-0 rounded px-2 py-0.5 text-[0.625rem] font-semibold ${
-              isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
-            }`}
-          >
-            {isPublished ? 'Concluído' : 'Em andamento'}
-          </span>
+          {inactive ? (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded bg-slate-700 px-2 py-0.5 text-[0.625rem] font-semibold text-white">
+              <i className="fi fi-rr-eye-crossed flex" aria-hidden="true" /> Desativado
+            </span>
+          ) : (
+            <span
+              className={`shrink-0 rounded px-2 py-0.5 text-[0.625rem] font-semibold ${
+                isPublished ? 'bg-primary text-white' : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {isPublished ? 'Concluído' : 'Em andamento'}
+            </span>
+          )}
         </div>
         <Link
           href={`/projetos/${project.id}`}
@@ -354,7 +372,7 @@ function DashboardProjectCard({
   )
 }
 
-type ProjectStatusFilter = 'all' | 'em_andamento' | 'publicado'
+type ProjectStatusFilter = 'all' | 'em_andamento' | 'publicado' | 'inactive'
 
 function normalizeText(value: string) {
   return value.trim().toLocaleLowerCase('pt-BR')
@@ -385,6 +403,7 @@ function ProjectFilters({
   cycle,
   onCycleChange,
   cycleOptions,
+  includeInactive,
   onClear,
 }: {
   query: string
@@ -396,6 +415,7 @@ function ProjectFilters({
   cycle: string
   onCycleChange: (value: string) => void
   cycleOptions: Array<{ value: string; label: string; count: number }>
+  includeInactive: boolean
   onClear: () => void
 }) {
   return (
@@ -424,6 +444,7 @@ function ProjectFilters({
             { value: 'all', label: 'Todas as situações' },
             { value: 'em_andamento', label: 'Em andamento' },
             { value: 'publicado', label: 'Concluído' },
+            ...(includeInactive ? [{ value: 'inactive', label: 'Desativados' }] : []),
           ]}
           onChange={(value) => onStatusChange(value as ProjectStatusFilter)}
         />
@@ -446,6 +467,11 @@ function ProjectFilters({
           size="compact"
           tone="muted"
           width="full"
+          searchable
+          searchPlaceholder="Pesquisar semestre..."
+          visibleLimit={RECENT_SEMESTER_LIMIT}
+          pinnedCount={1}
+          limitHint={RECENT_SEMESTER_HINT}
           options={[{ value: 'all', label: 'Todos os ciclos' }, ...cycleOptions]}
           onChange={onCycleChange}
         />
@@ -473,6 +499,7 @@ function ProjectsSection({
   action,
   emptyText,
   filterable = false,
+  includeInactiveFilter = false,
 }: {
   title: string
   subtitle: string
@@ -483,6 +510,7 @@ function ProjectsSection({
   action?: React.ReactNode
   emptyText: string
   filterable?: boolean
+  includeInactiveFilter?: boolean
 }) {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
@@ -506,7 +534,9 @@ function ProjectsSection({
         normalizeText(
           `${project.title} ${project.advisor.name} ${project.theme} ${project.summary} ${projectStudentNames(project)}`,
         ).includes(normalized)
-      const matchesStatus = statusFilter === 'all' || project.status === statusFilter
+      const matchesStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'inactive' ? project.active === false : project.status === statusFilter)
       const matchesSemester =
         semesterFilter === 'all' || String(project.semester) === semesterFilter
       const matchesCycle = cycleFilter === 'all' || project.cycle === cycleFilter
@@ -548,6 +578,7 @@ function ProjectsSection({
             cycle={cycleFilter}
             onCycleChange={setCycleFilter}
             cycleOptions={cycleOptions}
+            includeInactive={includeInactiveFilter}
             onClear={clearFilters}
           />
           <p className="mb-3 text-[0.6875rem] text-text-secondary" role="status">
@@ -651,8 +682,9 @@ export function RoleDashboard({
       indicatedProjectIds: professorData.indicatedProjectIds,
       today: professorData.today,
       now: new Date(professorData.nowIso),
+      advisorEmail: email,
     })
-  }, [role, professorData, filteredProjects])
+  }, [role, professorData, filteredProjects, email])
   const studentMetrics = useMemo(() => {
     if (role !== 'student' || !studentData) return undefined
     return buildStudentDashboardMetrics({
@@ -684,6 +716,35 @@ export function RoleDashboard({
   } = useProjectFavorites(true)
   const favoriteProjects = publishedProjects.filter((project) => favoriteIds.includes(project.id))
 
+  const monitoringVisible =
+    (role === 'professor' && Boolean(professorMetrics)) ||
+    (role === 'student' && Boolean(studentMetrics))
+  const showAwards =
+    role === 'admin' ||
+    (role === 'professor' &&
+      projects.some(
+        (project) => project.advisor.email.trim().toLowerCase() === email.trim().toLowerCase(),
+      ))
+  const blockLinks = [
+    ...(showFilters || role === 'admin' || monitoringVisible
+      ? [
+          {
+            id: 'acompanhamento',
+            label: role === 'admin' ? 'Indicadores' : 'Acompanhamento',
+            icon: 'fi-rr-chart-histogram',
+          },
+        ]
+      : []),
+    ...(role === 'admin' && adminMetrics
+      ? [{ id: 'graficos', label: 'Gráficos e pendências', icon: 'fi-rr-chart-pie-alt' }]
+      : []),
+    ...(role === 'admin'
+      ? [{ id: 'gestao', label: 'Usuários e cursos', icon: 'fi-rr-users' }]
+      : []),
+    ...(showAwards ? [{ id: 'melhor-pi', label: 'Melhor PI', icon: 'fi-rr-badge-check' }] : []),
+    { id: 'projetos', label: 'Projetos e favoritos', icon: 'fi-rr-folder-open' },
+  ]
+
   const newProjectAction =
     role !== 'student' ? (
       <Link
@@ -707,9 +768,7 @@ export function RoleDashboard({
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-[0.625rem] font-bold uppercase tracking-[0.16em] text-primary sm:text-[0.6875rem]">
-                  Painel institucional
-                </p>
+                <p className="text-xs font-semibold text-primary">Painel institucional</p>
                 <span
                   className={`rounded-full px-2.5 py-1 text-[0.625rem] font-semibold ${role === 'admin' ? 'bg-slate-200 text-slate-800' : role === 'professor' ? 'bg-primary-light text-primary-hover' : 'bg-accent-light text-secondary-hover'}`}
                 >
@@ -725,88 +784,140 @@ export function RoleDashboard({
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:space-y-6 sm:px-6 sm:py-8 lg:px-8">
-        {showFilters && (
-          <DashboardFiltersBar
-            filters={filters}
-            onChange={setFilters}
-            onClear={() => setFilters(EMPTY_DASHBOARD_FILTERS)}
-            semesterOptions={semesterOptions}
-            projectOptions={projectOptions}
-            advisorOptions={advisorOptions}
-            shown={filteredProjects.length}
-            total={filterBase.length}
-            scopeNote={
-              role === 'admin'
-                ? 'Vale para os indicadores de projetos e tarefas e para os gráficos. Dados de usuários e de pessoas sem projeto consideram todo o sistema.'
-                : 'Vale para os indicadores, prazos, gráficos e listas de acompanhamento abaixo.'
-            }
-          />
-        )}
-        {role === 'admin' && (
-          <AdminOverviewCards
-            projects={filteredProjects}
-            userMetrics={adminUserMetrics}
-            ongoingWithTasks={adminMetrics?.projects.ongoingWithTasks}
-          />
-        )}
-        {role === 'admin' && adminMetrics && (
-          <AdminInsights
-            metrics={adminMetrics}
-            registrations={registrations}
-            userMetrics={adminUserMetrics}
-          />
-        )}
-        {role === 'admin' && <AdminUsersSection currentUserId={currentUserId} />}
-        {role === 'admin' && <AdminCoursesSection />}
-        {role === 'professor' && professorMetrics && (
-          <ProfessorOverview metrics={professorMetrics} />
-        )}
-        {role === 'student' && studentMetrics && <StudentOverview metrics={studentMetrics} />}
-        {(role === 'admin' ||
-          (role === 'professor' &&
-            projects.some(
-              (project) =>
-                project.advisor.email.trim().toLowerCase() === email.trim().toLowerCase(),
-            ))) && <SemesterAwardsSection />}
+      <div className="mx-auto w-full max-w-[1400px] space-y-8 px-4 py-6 sm:space-y-10 sm:px-6 sm:py-8 lg:px-8">
+        <DashboardSectionNav links={blockLinks} />
 
-        <ProjectsSection
-          title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}
-          subtitle={
+        {(showFilters || role === 'admin' || monitoringVisible) && (
+          <DashboardBlock
+            id="acompanhamento"
+            title={role === 'admin' ? 'Indicadores' : 'Acompanhamento'}
+            description={
+              role === 'admin'
+                ? 'Números gerais do sistema e dos projetos'
+                : role === 'professor'
+                  ? 'Tarefas, prazos e andamento dos seus projetos'
+                  : 'Tarefas, prazos e andamento do seu PI'
+            }
+            icon="fi-rr-chart-histogram"
+          >
+            {showFilters && (
+              <DashboardFiltersBar
+                filters={filters}
+                onChange={setFilters}
+                onClear={() => setFilters(EMPTY_DASHBOARD_FILTERS)}
+                semesterOptions={semesterOptions}
+                projectOptions={projectOptions}
+                advisorOptions={advisorOptions}
+                shown={filteredProjects.length}
+                total={filterBase.length}
+                scopeNote={
+                  role === 'admin'
+                    ? 'Vale para os indicadores de projetos e tarefas e para os gráficos. Dados de usuários e de pessoas sem projeto consideram todo o sistema.'
+                    : 'Vale para os indicadores, prazos, gráficos e listas de acompanhamento abaixo.'
+                }
+              />
+            )}
+            {role === 'admin' && (
+              <AdminOverviewCards
+                projects={filteredProjects}
+                userMetrics={adminUserMetrics}
+                ongoingWithTasks={adminMetrics?.projects.ongoingWithTasks}
+              />
+            )}
+            {role === 'professor' && professorMetrics && (
+              <ProfessorOverview metrics={professorMetrics} />
+            )}
+            {role === 'student' && studentMetrics && <StudentOverview metrics={studentMetrics} />}
+          </DashboardBlock>
+        )}
+
+        {role === 'admin' && adminMetrics && (
+          <DashboardBlock
+            id="graficos"
+            title="Gráficos e pendências"
+            description="Situação dos projetos, atenção necessária e pendências da administração"
+            icon="fi-rr-chart-pie-alt"
+          >
+            <AdminInsights
+              metrics={adminMetrics}
+              registrations={registrations}
+              userMetrics={adminUserMetrics}
+            />
+          </DashboardBlock>
+        )}
+
+        {role === 'admin' && (
+          <DashboardBlock
+            id="gestao"
+            title="Usuários e cursos"
+            description="Cadastro e manutenção das contas e dos cursos do sistema"
+            icon="fi-rr-users"
+          >
+            <AdminUsersSection currentUserId={currentUserId} />
+            <AdminCoursesSection />
+          </DashboardBlock>
+        )}
+
+        {showAwards && (
+          <DashboardBlock
+            id="melhor-pi"
+            title="Melhor PI do semestre"
+            description="Escolha dos projetos de destaque de cada ciclo e semestre"
+            icon="fi-rr-badge-check"
+          >
+            <SemesterAwardsSection />
+          </DashboardBlock>
+        )}
+
+        <DashboardBlock
+          id="projetos"
+          title="Projetos e favoritos"
+          description={
             role === 'admin'
-              ? 'Projetos registrados no sistema'
-              : role === 'professor'
-                ? 'Projetos onde você é orientador ou colaborador'
-                : 'Projetos onde você é um colaborador'
+              ? 'Todos os projetos do acervo e os que você salvou'
+              : 'Os projetos da sua conta e os que você salvou'
           }
           icon="fi-rr-folder-open"
-          projects={displayedProjects}
-          favoriteIds={favoriteIds}
-          onToggleFavorite={toggleFavorite}
-          action={newProjectAction}
-          filterable={role !== 'student'}
-          emptyText={
-            role === 'admin'
-              ? 'Ainda não há projetos cadastrados no acervo.'
-              : 'Nenhum projeto está vinculado a esta conta ainda.'
-          }
-        />
+        >
+          <ProjectsSection
+            title={role === 'admin' ? 'Projetos Cadastrados' : 'Seus Projetos'}
+            subtitle={
+              role === 'admin'
+                ? 'Projetos registrados no sistema'
+                : role === 'professor'
+                  ? 'Projetos onde você é orientador ou colaborador'
+                  : 'Projetos onde você é um colaborador'
+            }
+            icon="fi-rr-folder-open"
+            projects={displayedProjects}
+            favoriteIds={favoriteIds}
+            onToggleFavorite={toggleFavorite}
+            action={newProjectAction}
+            filterable={role !== 'student'}
+            includeInactiveFilter={role === 'admin'}
+            emptyText={
+              role === 'admin'
+                ? 'Ainda não há projetos cadastrados no acervo.'
+                : 'Nenhum projeto está vinculado a esta conta ainda.'
+            }
+          />
 
-        <ProjectsSection
-          title="Favoritos"
-          subtitle="Projetos que você salvou na sua conta"
-          icon="fi-rr-star"
-          projects={favoriteProjects}
-          favoriteIds={favoriteIds}
-          onToggleFavorite={toggleFavorite}
-          emptyText={
-            favoritesLoading
-              ? 'Carregando seus favoritos...'
-              : favoritesLoadError
-                ? `Não foi possível carregar seus favoritos: ${favoritesLoadError}`
-                : 'Você ainda não marcou projetos como favoritos. Use a estrela nos cards para guardar referências.'
-          }
-        />
+          <ProjectsSection
+            title="Favoritos"
+            subtitle="Projetos que você salvou na sua conta"
+            icon="fi-rr-star"
+            projects={favoriteProjects}
+            favoriteIds={favoriteIds}
+            onToggleFavorite={toggleFavorite}
+            emptyText={
+              favoritesLoading
+                ? 'Carregando seus favoritos...'
+                : favoritesLoadError
+                  ? `Não foi possível carregar seus favoritos: ${favoritesLoadError}`
+                  : 'Você ainda não marcou projetos como favoritos. Use a estrela nos cards para guardar referências.'
+            }
+          />
+        </DashboardBlock>
 
         {role === 'admin' && (
           <p className="rounded-xl border border-border bg-white px-4 py-3 text-center text-[0.625rem] text-text-muted shadow-sm">

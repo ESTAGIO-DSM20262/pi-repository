@@ -20,11 +20,11 @@ export function AuthCardHeader({ title, description }: { title: string; descript
   return (
     <div className="text-center">
       <Image
-        src="/brand/fatec-itaquera-cor.png"
+        src="/brand/logo_fatec_itaquera.png"
         alt="Fatec Itaquera — Prof. Miguel Reale"
         width={841}
         height={450}
-        className="mx-auto h-14 w-auto"
+        className="mx-auto h-16 w-auto"
       />
       <h1 className={`mt-4 ${titleClass}`}>{title}</h1>
       <p className={`mx-auto mt-1 max-w-[300px] sm:max-w-[340px] ${descriptionClass}`}>

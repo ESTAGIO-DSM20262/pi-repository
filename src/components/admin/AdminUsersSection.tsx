@@ -2,7 +2,10 @@
 
 import Link from 'next/link'
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { STUDENT_REGISTRATION_LENGTH } from '@/application/users/registration-number'
+import {
+  PROFESSOR_REGISTRATION_MAX_LENGTH,
+  STUDENT_REGISTRATION_LENGTH,
+} from '@/application/users/registration-number'
 import {
   buildCourseOptions,
   formatUserCourse,
@@ -11,10 +14,26 @@ import {
 } from '@/components/admin/use-admin-courses'
 import { Pagination } from '@/components/projects/Pagination'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
+import {
+  dialogBackdropClass,
+  dialogBodyClass,
+  dialogCancelButtonClass,
+  dialogCloseClass,
+  dialogConfirmButtonClass,
+  dialogEyebrowClass,
+  dialogFooterClass,
+  dialogHeaderClass,
+  dialogIconChipClass,
+  dialogLayerClass,
+  dialogOverlayClass,
+  dialogPanelClass,
+  dialogTitleClass,
+} from '@/components/ui/dialog-styles'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { getNameInitials } from '@/libs/initials'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+import { UserHistoryModal } from './UserHistoryModal'
 
 interface AdminUserRecord {
   id: string
@@ -69,6 +88,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
   const [saving, setSaving] = useState(false)
   const [actionError, setActionError] = useState('')
   const [notice, setNotice] = useState('')
+  const [historyUser, setHistoryUser] = useState<{ id: string; name: string } | null>(null)
   const [pendingDeactivation, setPendingDeactivation] = useState<AdminUserRecord | null>(null)
   const [pendingActivation, setPendingActivation] = useState<AdminUserRecord | null>(null)
   const [changingStatus, setChangingStatus] = useState(false)
@@ -379,7 +399,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                 </button>
                 <button
                   type="button"
-                  onClick={() => setNotice('O histórico de auditoria ainda não está implementado.')}
+                  onClick={() => setHistoryUser({ id: user.id, name: user.name })}
                   aria-label={`Ver histórico de ${user.name}`}
                   className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-lg border border-border bg-surface-secondary px-1.5 text-[0.625rem] font-semibold text-slate-700 transition hover:border-primary/40 hover:text-primary"
                 >
@@ -498,9 +518,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                       </button>
                       <button
                         type="button"
-                        onClick={() =>
-                          setNotice('O histórico de auditoria ainda não está implementado.')
-                        }
+                        onClick={() => setHistoryUser({ id: user.id, name: user.name })}
                         title="Ver histórico"
                         aria-label={`Ver histórico de ${user.name}`}
                         className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-md transition hover:bg-primary-light hover:text-primary"
@@ -555,12 +573,12 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">
+        <div className={`${dialogOverlayClass} ${dialogLayerClass}`}>
           <button
             type="button"
             tabIndex={-1}
             aria-label="Fechar edição de usuário"
-            className="absolute inset-0 cursor-default"
+            className={dialogBackdropClass}
             onMouseDown={() => {
               if (!saving) setEditing(null)
             }}
@@ -570,158 +588,175 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
           />
           <form
             onSubmit={saveEdit}
-            className="relative z-10 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-white p-5 shadow-2xl sm:p-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-user-dialog-title"
+            className={dialogPanelClass('md')}
           >
-            <div className="mb-5 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-[0.625rem] font-bold uppercase tracking-widest text-primary">
-                  Gestão de usuários
-                </p>
-                <h3 className="mt-1 text-lg font-semibold text-slate-900">Editar usuário</h3>
+            <header className={dialogHeaderClass}>
+              <span className={dialogIconChipClass('primary')}>
+                <i className="fi fi-rr-user-pen flex text-xl" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className={dialogEyebrowClass('primary')}>Gestão de usuários</p>
+                <h2 id="edit-user-dialog-title" className={dialogTitleClass}>
+                  Editar usuário
+                </h2>
               </div>
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
                 aria-label="Fechar"
-                className="cursor-pointer rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100"
+                className={dialogCloseClass}
               >
-                ✕
+                <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
               </button>
-            </div>
-            <div className="space-y-3">
-              <label className="block text-xs font-semibold text-slate-700">
-                Nome completo
-                <input
-                  required
-                  minLength={3}
-                  maxLength={160}
-                  value={editForm.name}
-                  onChange={(event) =>
-                    setEditForm((current) => ({ ...current, name: event.target.value }))
-                  }
-                  className={inputClass}
-                />
-              </label>
-              <label className="block text-xs font-semibold text-slate-700">
-                E-mail
-                <input
-                  required
-                  type="email"
-                  disabled={editing.id === currentUserId}
-                  value={editForm.email}
-                  onChange={(event) =>
-                    setEditForm((current) => ({ ...current, email: event.target.value }))
-                  }
-                  className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
-                />
-                {editing.id === currentUserId && (
-                  <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                    Por segurança, altere seu e-mail por outro administrador.
-                  </span>
-                )}
-              </label>
-              <div className="grid gap-3 sm:grid-cols-2">
+            </header>
+            <div className={dialogBodyClass}>
+              <div className="space-y-3">
                 <label className="block text-xs font-semibold text-slate-700">
-                  R.A. / Matrícula
+                  Nome completo
                   <input
-                    minLength={
-                      editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
-                    }
-                    maxLength={
-                      editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
-                    }
-                    value={editForm.registrationNumber}
+                    required
+                    minLength={3}
+                    maxLength={160}
+                    value={editForm.name}
                     onChange={(event) =>
-                      setEditForm((current) => ({
-                        ...current,
-                        registrationNumber: event.target.value,
-                      }))
+                      setEditForm((current) => ({ ...current, name: event.target.value }))
                     }
                     className={inputClass}
                   />
-                  {editForm.role === 'student' && (
+                </label>
+                <label className="block text-xs font-semibold text-slate-700">
+                  E-mail
+                  <input
+                    required
+                    type="email"
+                    disabled={editing.id === currentUserId}
+                    value={editForm.email}
+                    onChange={(event) =>
+                      setEditForm((current) => ({ ...current, email: event.target.value }))
+                    }
+                    className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
+                  />
+                  {editing.id === currentUserId && (
                     <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                      O RA do aluno tem {STUDENT_REGISTRATION_LENGTH} caracteres.
+                      Por segurança, altere seu e-mail por outro administrador.
                     </span>
                   )}
                 </label>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="block text-xs font-semibold text-slate-700">
+                    R.A. / Matrícula
+                    <input
+                      minLength={
+                        editForm.role === 'student' ? STUDENT_REGISTRATION_LENGTH : undefined
+                      }
+                      maxLength={
+                        editForm.role === 'student'
+                          ? STUDENT_REGISTRATION_LENGTH
+                          : editForm.role === 'professor'
+                            ? PROFESSOR_REGISTRATION_MAX_LENGTH
+                            : undefined
+                      }
+                      value={editForm.registrationNumber}
+                      onChange={(event) =>
+                        setEditForm((current) => ({
+                          ...current,
+                          registrationNumber: event.target.value,
+                        }))
+                      }
+                      className={inputClass}
+                    />
+                    {editForm.role === 'student' && (
+                      <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                        O RA do aluno tem {STUDENT_REGISTRATION_LENGTH} caracteres.
+                      </span>
+                    )}
+                    {editForm.role === 'professor' && (
+                      <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                        A matrícula do professor tem no máximo {PROFESSOR_REGISTRATION_MAX_LENGTH}{' '}
+                        caracteres.
+                      </span>
+                    )}
+                  </label>
+                  <div>
+                    <span className="block text-xs font-semibold text-slate-700">Curso</span>
+                    <SelectDropdown
+                      value={editForm.course}
+                      ariaLabel="Curso do usuário"
+                      width="full"
+                      tone="muted"
+                      className="mt-1.5"
+                      placeholder="Selecione o curso"
+                      options={buildCourseOptions(courses, {
+                        currentValue: editing.course ?? undefined,
+                        allowEmpty: editForm.role !== 'student',
+                      })}
+                      onChange={(value) =>
+                        setEditForm((current) => ({ ...current, course: value }))
+                      }
+                    />
+                  </div>
+                </div>
                 <div>
-                  <span className="block text-xs font-semibold text-slate-700">Curso</span>
-                  <SelectDropdown
-                    value={editForm.course}
-                    ariaLabel="Curso do usuário"
-                    width="full"
-                    tone="muted"
-                    layer="modal"
-                    className="mt-1.5"
-                    placeholder="Selecione o curso"
-                    options={buildCourseOptions(courses, {
-                      currentValue: editing.course ?? undefined,
-                      allowEmpty: editForm.role !== 'student',
-                    })}
-                    onChange={(value) => setEditForm((current) => ({ ...current, course: value }))}
-                  />
+                  <span className="block text-xs font-semibold text-slate-700">Perfil</span>
+                  {editing.id === currentUserId ? (
+                    <div className={`${inputClass} flex items-center bg-slate-100 text-slate-500`}>
+                      {ROLE_LABEL[editForm.role]}
+                    </div>
+                  ) : (
+                    <SelectDropdown
+                      value={editForm.role}
+                      ariaLabel="Perfil do usuário"
+                      width="full"
+                      tone="muted"
+                      className="mt-1.5"
+                      options={[
+                        { value: 'student', label: 'Aluno' },
+                        { value: 'professor', label: 'Professor' },
+                        { value: 'admin', label: 'Administrador' },
+                      ]}
+                      onChange={(value) =>
+                        setEditForm((current) => ({ ...current, role: value as Role }))
+                      }
+                    />
+                  )}
+                  {editing.id === currentUserId && (
+                    <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
+                      Seu próprio perfil não pode ser alterado aqui.
+                    </span>
+                  )}
                 </div>
               </div>
-              <div>
-                <span className="block text-xs font-semibold text-slate-700">Perfil</span>
-                {editing.id === currentUserId ? (
-                  <div className={`${inputClass} flex items-center bg-slate-100 text-slate-500`}>
-                    {ROLE_LABEL[editForm.role]}
-                  </div>
-                ) : (
-                  <SelectDropdown
-                    value={editForm.role}
-                    ariaLabel="Perfil do usuário"
-                    width="full"
-                    tone="muted"
-                    className="mt-1.5"
-                    options={[
-                      { value: 'student', label: 'Aluno' },
-                      { value: 'professor', label: 'Professor' },
-                      { value: 'admin', label: 'Administrador' },
-                    ]}
-                    onChange={(value) =>
-                      setEditForm((current) => ({ ...current, role: value as Role }))
-                    }
-                  />
-                )}
-                {editing.id === currentUserId && (
-                  <span className="mt-1 block text-[0.625rem] font-normal text-text-muted">
-                    Seu próprio perfil não pode ser alterado aqui.
-                  </span>
-                )}
-              </div>
+              {actionError && (
+                <div
+                  role="alert"
+                  className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900"
+                >
+                  {actionError}
+                </div>
+              )}
             </div>
-            {actionError && (
-              <div
-                role="alert"
-                className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900"
-              >
-                {actionError}
-              </div>
-            )}
-            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <footer className={dialogFooterClass}>
               <button
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
-                className="cursor-pointer min-h-10 w-full rounded-lg border border-border px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
+                className={dialogCancelButtonClass}
               >
                 Cancelar
               </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="cursor-pointer min-h-10 w-full rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary-hover disabled:opacity-60 sm:w-auto"
-              >
+              <button type="submit" disabled={saving} className={dialogConfirmButtonClass}>
                 {saving ? 'Salvando…' : 'Salvar alterações'}
               </button>
-            </div>
+            </footer>
           </form>
         </div>
       )}
+
+      <UserHistoryModal user={historyUser} onClose={() => setHistoryUser(null)} />
 
       <ConfirmationDialog
         open={pendingDeactivation !== null}

@@ -82,7 +82,7 @@ html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"]) [class*="border"] 
 }
 
 html[data-a11y-contrast="high"]:not([data-a11y-theme="dark"])
-  :where(.shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl) {
+  :where(.shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl) {
   box-shadow: var(--shadow-1);
 }
 

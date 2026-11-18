@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
+import { useSwipeToClose } from '@/libs/useSwipeToClose'
 import {
   type Chip,
   EMPTY_FILTERS,
@@ -10,6 +11,10 @@ import {
   type SortKey,
   toggleValue,
 } from '@/presentation/projects/project-filters'
+import {
+  RECENT_SEMESTER_HINT,
+  RECENT_SEMESTER_LIMIT,
+} from '@/presentation/projects/semester-dropdown'
 
 interface FilterPanelProps {
   facets: Facets
@@ -69,25 +74,31 @@ const RAIL = [
     icon: 'fi-rr-shield-check',
     title: 'Indicação',
     active: (f: Filters) => f.verified,
-    on: 'bg-emerald-50 text-emerald-700',
+    on: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  },
+  {
+    icon: 'fi-rr-trophy',
+    title: 'Melhor PI do semestre',
+    active: (f: Filters) => f.bestOfSemester,
+    on: 'border-secondary/30 bg-secondary/15 text-secondary',
   },
   {
     icon: 'fi-rr-calendar',
     title: 'Semestre letivo',
     active: (f: Filters) => f.cycle !== '',
-    on: 'bg-primary-light text-primary',
+    on: 'border-primary/25 bg-primary-light text-primary',
   },
   {
     icon: 'fi-rr-layers',
     title: 'Semestre DSM',
     active: (f: Filters) => f.semesters.length > 0,
-    on: 'bg-primary-light text-primary',
+    on: 'border-primary/25 bg-primary-light text-primary',
   },
   {
     icon: 'fi-rr-code-simple',
     title: 'Tecnologias',
     active: (f: Filters) => f.stack.length > 0 || f.languages.length > 0,
-    on: 'bg-primary-light text-primary',
+    on: 'border-primary/25 bg-primary-light text-primary',
   },
 ]
 
@@ -105,21 +116,51 @@ function FilterFields({
 }: Pick<FilterPanelProps, 'facets' | 'filters' | 'onChange'>) {
   return (
     <>
-      <div className="mt-5 space-y-3 rounded-lg bg-surface-secondary p-3.5">
-        <label className="flex cursor-pointer items-start gap-2.5">
+      <div className="mt-5 space-y-2.5">
+        <label
+          className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3.5 transition-colors ${
+            filters.verified
+              ? 'border-accent bg-accent-light'
+              : 'border-border-light bg-surface-secondary hover:border-accent'
+          }`}
+        >
           <input
             type="checkbox"
             checked={filters.verified}
             onChange={(e) => onChange({ verified: e.target.checked })}
-            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-secondary"
           />
           <span className="min-w-0">
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-secondary-hover">
               <i className="fi fi-rr-check-circle flex text-primary" aria-hidden="true" />
               Apenas PIs Indicados
             </span>
             <span className="mt-0.5 block text-xs leading-relaxed text-text-secondary">
               Revisados e aprovados como referência técnica.
+            </span>
+          </span>
+        </label>
+
+        <label
+          className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3.5 transition-colors ${
+            filters.bestOfSemester
+              ? 'border-secondary bg-secondary/15'
+              : 'border-border-light bg-surface-secondary hover:border-secondary/60'
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={filters.bestOfSemester}
+            onChange={(e) => onChange({ bestOfSemester: e.target.checked })}
+            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-secondary"
+          />
+          <span className="min-w-0">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-secondary-hover">
+              <i className="fi fi-rr-trophy flex text-secondary" aria-hidden="true" />
+              Melhor PI do semestre
+            </span>
+            <span className="mt-0.5 block text-xs leading-relaxed text-text-secondary">
+              Projetos escolhidos como destaque de cada semestre.
             </span>
           </span>
         </label>
@@ -129,6 +170,9 @@ function FilterFields({
         <SelectDropdown
           searchable
           searchPlaceholder="Pesquisar semestre..."
+          visibleLimit={RECENT_SEMESTER_LIMIT}
+          pinnedCount={1}
+          limitHint={RECENT_SEMESTER_HINT}
           ariaLabel="Semestre letivo"
           value={filters.cycle}
           onChange={(cycle) => onChange({ cycle })}
@@ -241,9 +285,14 @@ export function FilterPanel({
   const filters = filtersProp ?? EMPTY_FILTERS
   const dialogRef = useRef<HTMLElement>(null)
   const onToggleRef = useRef(onToggle)
+  const sheetScrollRef = useRef<HTMLDivElement>(null)
   const dragStartY = useRef<number | null>(null)
   const draggedHandle = useRef(false)
   onToggleRef.current = onToggle
+  const { dragging, sheetStyle, sheetHandlers } = useSwipeToClose({
+    onClose: onToggle,
+    scrollRef: sheetScrollRef,
+  })
 
   useEffect(() => {
     if (!open || window.matchMedia('(min-width: 1280px)').matches) return
@@ -290,7 +339,9 @@ export function FilterPanel({
                 className={`inline-flex h-11 max-w-[220px] shrink-0 items-center gap-1 rounded-md border px-3 text-xs ${
                   chip.verified
                     ? 'border-accent/40 bg-accent-light font-medium text-secondary-hover'
-                    : 'border-border bg-surface text-slate-800'
+                    : chip.bestOfSemester
+                      ? 'border-secondary/40 bg-secondary/10 font-medium text-secondary-hover'
+                      : 'border-border bg-surface text-slate-800'
                 }`}
               >
                 {chip.verified && (
@@ -298,6 +349,9 @@ export function FilterPanel({
                     className="fi fi-rr-check-circle flex shrink-0 text-primary"
                     aria-hidden="true"
                   />
+                )}
+                {chip.bestOfSemester && (
+                  <i className="fi fi-rr-trophy flex shrink-0 text-secondary" aria-hidden="true" />
                 )}
                 <span className="max-w-40 truncate">{chip.label}</span>
                 <button
@@ -315,7 +369,7 @@ export function FilterPanel({
       </div>
 
       <div
-        className={`relative hidden min-h-[440px] shrink-0 overflow-visible transition-[width] duration-300 ease-out xl:block ${
+        className={`relative hidden min-h-[34rem] shrink-0 overflow-visible transition-[width] duration-300 ease-out xl:block ${
           open ? 'w-[300px]' : 'w-16'
         }`}
       >
@@ -346,13 +400,13 @@ export function FilterPanel({
         <div
           aria-hidden={open}
           inert={open}
-          className={`flex min-h-[460px] w-16 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition-[opacity,transform] duration-200 ease-out ${
+          className={`flex min-h-[34rem] w-16 flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-sm transition-[opacity,transform] duration-200 ease-out ${
             open
               ? 'pointer-events-none absolute left-0 top-0 -translate-x-2 opacity-0'
               : 'relative translate-x-0 opacity-100'
           }`}
         >
-          <div className="flex flex-1 flex-col items-center gap-3 px-3 pt-4">
+          <div className="flex shrink-0 flex-col items-center gap-3 px-3 pt-4">
             <button
               type="button"
               onClick={onToggle}
@@ -371,17 +425,19 @@ export function FilterPanel({
                 onClick={onToggle}
                 title={item.title}
                 aria-label={item.title}
-                className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-primary-light hover:text-primary ${
+                className={`flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border transition-colors hover:border-primary/40 hover:bg-primary-light hover:text-primary ${
                   item.active(filters ?? EMPTY_FILTERS)
                     ? item.on
-                    : 'bg-surface-secondary text-slate-500'
+                    : 'border-border bg-surface-secondary text-slate-500'
                 }`}
               >
                 <i className={`fi ${item.icon} flex text-sm`} aria-hidden="true" />
               </button>
             ))}
+          </div>
 
-            <span className="mt-3 rotate-180 text-[0.6875rem] font-semibold uppercase tracking-widest text-text-muted [writing-mode:vertical-rl]">
+          <div className="flex min-h-0 flex-1 items-center justify-center px-3 py-6">
+            <span className="rotate-180 whitespace-nowrap text-[0.6875rem] font-semibold uppercase tracking-widest text-text-muted [writing-mode:vertical-rl]">
               Filtros ocultos
             </span>
           </div>
@@ -409,7 +465,7 @@ export function FilterPanel({
           aria-label="Fechar filtros"
           onClick={onToggle}
           tabIndex={open ? 0 : -1}
-          className={`absolute inset-0 h-full w-full cursor-default bg-slate-950/40 backdrop-blur-[1px] transition-opacity duration-300 ease-out motion-reduce:transition-none ${
+          className={`absolute inset-0 h-full w-full cursor-default bg-slate-950/40 transition-opacity duration-300 ease-out motion-reduce:transition-none ${
             open ? 'opacity-100' : 'opacity-0'
           }`}
         />
@@ -420,9 +476,13 @@ export function FilterPanel({
           aria-modal={open}
           aria-labelledby="mobile-filters-title"
           tabIndex={-1}
-          className={`absolute inset-x-2 bottom-0 top-5 flex min-h-0 flex-col rounded-t-2xl border-x border-t border-border bg-surface outline-none shadow-2xl transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none sm:inset-x-3 ${
-            open ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
-          }`}
+          style={sheetStyle}
+          {...sheetHandlers}
+          className={`absolute inset-x-2 bottom-0 top-5 flex min-h-0 flex-col rounded-t-2xl border-x border-t border-border bg-surface outline-none shadow-2xl ${
+            dragging
+              ? 'transition-none'
+              : 'transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none'
+          } sm:inset-x-3 ${open ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
         >
           <div className="shrink-0 px-4 pt-1.5 sm:px-6">
             <button
@@ -459,7 +519,10 @@ export function FilterPanel({
             </button>
           </div>
 
-          <div className="modal-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+          <div
+            ref={sheetScrollRef}
+            className="modal-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
+          >
             <div className="px-4 pb-6 pt-1 sm:px-6">
               <section aria-labelledby="mobile-sort-title">
                 <h2

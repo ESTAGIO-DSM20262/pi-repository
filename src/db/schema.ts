@@ -28,6 +28,7 @@ import type {
   VerifierRole,
 } from '@/domain/enterprise/entities/project-verification'
 import type { Role } from '@/domain/enterprise/entities/role'
+import type { UserAuditAction, UserAuditDetails } from '@/domain/enterprise/entities/user-audit'
 
 export const users = pgTable(
   'users',
@@ -304,4 +305,21 @@ export const projectVerifications = pgTable(
     ),
     check('project_verifications_criteria_check', sql`jsonb_typeof(${table.criteria}) = 'array'`),
   ],
+)
+
+export const userAuditEvents = pgTable(
+  'user_audit_events',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    actorId: text('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    actorName: text('actor_name').notNull(),
+    action: text('action').$type<UserAuditAction>().notNull(),
+    summary: text('summary').notNull(),
+    details: jsonb('details').$type<UserAuditDetails>().notNull().default({}),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [index('user_audit_events_user_idx').on(table.userId, table.createdAt.desc())],
 )

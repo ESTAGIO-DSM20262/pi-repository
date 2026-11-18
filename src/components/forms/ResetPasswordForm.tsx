@@ -45,7 +45,19 @@ export function ResetPasswordForm() {
   return <ResetPasswordFields token={token} />
 }
 
-function ResetPasswordFields({ token }: { token: string }) {
+export interface InviteAccount {
+  name: string
+  email: string
+}
+
+const INVITE_SUCCESS_NOTICE: Notice = {
+  variant: 'success',
+  title: 'Senha definida',
+  description:
+    'Sua senha foi criada com sucesso. Entre no sistema usando seu e-mail e a nova senha.',
+}
+
+export function ResetPasswordFields({ token, invite }: { token: string; invite?: InviteAccount }) {
   const router = useRouter()
   const { resetPassword } = useAuth()
   const [notice, setNotice] = useState<Notice | null>(null)
@@ -71,7 +83,7 @@ function ResetPasswordFields({ token }: { token: string }) {
     try {
       await resetPassword(token, password)
       reset()
-      setNotice(SUCCESS_NOTICE)
+      setNotice(invite ? INVITE_SUCCESS_NOTICE : SUCCESS_NOTICE)
     } catch (error) {
       setNotice(failureNotice(error))
     }
@@ -88,9 +100,30 @@ function ResetPasswordFields({ token }: { token: string }) {
   return (
     <AuthCard>
       <AuthCardHeader
-        title="Redefinir senha"
-        description="Crie uma nova senha para acessar sua conta."
+        title={invite ? 'Defina sua senha inicial' : 'Redefinir senha'}
+        description={
+          invite
+            ? `Bem-vindo(a), ${invite.name.trim().split(/\s+/)[0]}! Crie a senha que você usará para acessar o sistema.`
+            : 'Crie uma nova senha para acessar sua conta.'
+        }
       />
+
+      {invite && (
+        <div className={`mt-5 flex items-center gap-3 p-3 sm:p-4 ${infoBoxClass}`}>
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary-light text-primary"
+            aria-hidden="true"
+          >
+            <i className="fi fi-rr-envelope flex text-base" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-text-secondary">
+              Conta
+            </p>
+            <p className="break-all text-sm font-semibold text-slate-900">{invite.email}</p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4 sm:mt-7 sm:space-y-5" noValidate>
         <div>
@@ -161,16 +194,24 @@ function ResetPasswordFields({ token }: { token: string }) {
         </div>
 
         <button type="submit" disabled={isSubmitting} className={primaryButtonClass}>
-          {isSubmitting ? 'Redefinindo…' : 'Redefinir senha'}
+          {isSubmitting
+            ? invite
+              ? 'Salvando…'
+              : 'Redefinindo…'
+            : invite
+              ? 'Definir senha'
+              : 'Redefinir senha'}
         </button>
       </form>
 
-      <div className="mt-5 text-center">
-        <Link href="/login" className={mutedLinkClass}>
-          <i className="fi fi-rr-arrow-left flex" aria-hidden="true" />
-          Voltar para o login
-        </Link>
-      </div>
+      {!invite && (
+        <div className="mt-5 text-center">
+          <Link href="/login" className={mutedLinkClass}>
+            <i className="fi fi-rr-arrow-left flex" aria-hidden="true" />
+            Voltar para o login
+          </Link>
+        </div>
+      )}
 
       <Modal
         open={notice !== null}
