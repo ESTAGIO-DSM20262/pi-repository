@@ -143,9 +143,7 @@ export function ProjectFormPage({
       semester: String(initialValues?.semester ?? 1) as ProjectFormValues['semester'],
       theme: initialValues?.theme ?? '',
       status: initialValues?.status ?? 'em_andamento',
-      advisorEmail:
-        initialValues?.advisorEmail ??
-        (role === 'professor' ? currentUserEmail : (professors[0]?.email ?? '')),
+      advisorEmail: initialValues?.advisorEmail ?? (role === 'professor' ? currentUserEmail : ''),
       coAdvisorEmails: initialValues?.coAdvisorEmails ?? [],
       links: (initialValues?.links ?? []).map((link, index) => ({
         key: `initial-link-${index}`,

@@ -450,7 +450,9 @@ documente aqui.
   normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. O formulário usa
   React Hook Form + Zod (`presentation/projects/validation.ts`, `mode: 'onTouched'`) e também valida
   no servidor. Exige título, resumo, ciclo `AAAA/1|2`, semestre 1–6, tema, orientador principal e ao menos um
-  aluno. Orientadores adicionais são opcionais (veja a seção 18). As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
+  aluno. Ao cadastrar como administrador, o campo de orientador principal começa **vazio**
+  (placeholder "Selecione o professor orientador"); o professor sempre entra como orientador
+  principal e o campo fica travado. Orientadores adicionais são opcionais (veja a seção 18). As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
 - **Aplicação e persistência:** `CreateProjectUseCase` (`application/projects/create-project-use-case.ts`)
   valida o papel do usuário, revalida orientador e alunos ativos e monta as tarefas iniciais.
   `ProjectRepository` é a porta de escrita; `DbProjectCommandRepository` grava projeto, tarefas
