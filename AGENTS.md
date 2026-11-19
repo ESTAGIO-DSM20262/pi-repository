@@ -819,6 +819,40 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - Fora do escopo: o campo "Curso superior de graduação" do formulário de projeto continua fixo e
   somente leitura (projetos não guardam curso).
 
+## 25. Cadastro de projetos em massa por planilha
+
+- **Quem usa:** professor e administrador. O botão "Cadastrar em massa" fica ao lado de "Novo Projeto"
+  na seção de projetos do painel e leva a `/projetos/importar` (`ProjectBulkImportPage`, mesmo
+  desenho da tela de cadastro de usuários: área de arrastar arquivo, relatório com criados,
+  ignorados e inválidos, `ConfirmationDialog` antes de enviar). Aluno é redirecionado ao painel.
+- **Modelo:** `public/modelo-cadastro-projetos-acervo.xlsx` tem a aba **Projetos** (uma linha por
+  projeto; cabeçalho vermelho = obrigatória, cinza = opcional; Semestre e Situação com lista na
+  célula; Ciclo em formato texto para o Excel não converter em data) e a aba **Instruções** (não é
+  importada). Colunas: título, resumo, descrição detalhada, ciclo, semestre, tema, situação,
+  orientador principal, orientadores adicionais, e-mails dos alunos, líder do grupo, linguagens,
+  tecnologias e ferramentas e os links de repositório, site, protótipo e vídeo. **Imagens e tarefas
+  não fazem parte da planilha.**
+- **Leitura:** `application/projects/project-import.ts` (`parseProjectGrid` e
+  `parseProjectWorkbook`) reconhece os cabeçalhos sem acento, caixa ou asterisco (os helpers
+  compartilhados com a importação de usuários estão em `application/spreadsheet/sheet-cells.ts`),
+  converte semestre (`3`, `3º semestre`), situação (em branco = em andamento; concluído = publicado),
+  ciclo (`2026-2` vira `2026/2`) e listas separadas por vírgula, ponto e vírgula ou quebra de linha.
+  Links sem `https://` recebem o prefixo. O limite é `MAX_PROJECT_IMPORT_ROWS` (100 projetos) e 5 MB
+  por envio; o limite fica em `project-import-limits.ts` para a tela não carregar a biblioteca
+  `xlsx` no navegador.
+- **Criação:** `BulkCreateProjectsUseCase` consulta uma única vez os alunos e professores ativos do
+  lote, valida cada linha e delega a gravação ao `CreateProjectUseCase`, então valem exatamente as
+  mesmas regras do formulário. O professor é sempre o orientador principal (deixar a coluna em
+  branco; informar outro e-mail é erro de linha). O administrador precisa informar o e-mail do
+  orientador principal em cada linha. O líder precisa estar entre os alunos.
+- **Duplicidade e erros (mesmo modelo da importação de usuários):** projeto com o mesmo título
+  (sem acento, caixa ou espaços repetidos), ciclo e semestre de um já cadastrado, ou repetido na
+  própria planilha, é **ignorado**. Linha com dado inválido (semestre, situação, pessoa inexistente
+  ou inativa, validação do projeto) é **inválida** e traz o motivo; uma linha com problema nunca
+  impede as demais. Não há transação do lote: cada projeto é gravado de forma independente.
+- **API:** `POST /api/projects/bulk` (`multipart/form-data`, campo `file`) devolve
+  `{ summary, created, skipped, errors }`.
+
 ## Acessibilidade (branch `feat/acessibilidade`)
 
 - **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.

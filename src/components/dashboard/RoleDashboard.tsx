@@ -747,12 +747,20 @@ export function RoleDashboard({
 
   const newProjectAction =
     role !== 'student' ? (
-      <Link
-        href="/projetos/novo"
-        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
-      >
-        <i className="fi fi-rr-plus flex" aria-hidden="true" /> Novo Projeto
-      </Link>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href="/projetos/importar"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-primary/30 bg-white px-3.5 text-xs font-semibold text-primary transition hover:bg-primary-light sm:h-10 sm:px-4"
+        >
+          <i className="fi fi-rr-file-import flex" aria-hidden="true" /> Cadastrar em massa
+        </Link>
+        <Link
+          href="/projetos/novo"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
+        >
+          <i className="fi fi-rr-plus flex" aria-hidden="true" /> Novo Projeto
+        </Link>
+      </div>
     ) : undefined
 
   return (

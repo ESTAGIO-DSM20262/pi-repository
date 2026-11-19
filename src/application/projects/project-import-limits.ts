@@ -1,0 +1,1 @@
+export const MAX_PROJECT_IMPORT_ROWS = 100
