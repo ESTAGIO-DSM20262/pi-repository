@@ -103,32 +103,43 @@ function record(email: string, name: string, userId = email) {
 }
 
 describe('UpdateProjectUseCase', () => {
-  it('no escopo do administrador troca o orientador principal e preserva os demais detalhes', async () => {
+  it('o administrador edita todas as informações e troca o orientador principal', async () => {
     const { repository, useCase, existing } = seed()
     const result = await useCase.execute({
       project: existing(),
       viewer: adminViewer,
       scope: 'admin',
       body: {
+        ...fullBody,
+        title: 'Título revisado pelo administrador',
+        overview: 'Nova descrição do projeto.',
+        languages: ['Python'],
+        stack: ['Django'],
         advisorEmail: thirdPerson.email,
         links: [
           { title: 'Repositório', url: 'https://github.com/org/p', icon: 'fi-rr-code-branch' },
         ],
+        teamAssignments: [{ studentEmail: student.email, roleTitle: 'Back-end', isLeader: true }],
       },
     })
 
     expect(result.isRight()).toBe(true)
     const stored = repository.projects.get('project-1')
+    expect(stored?.title).toBe('Título revisado pelo administrador')
+    expect(stored?.languages).toEqual(['Python'])
+    expect(stored?.stack).toEqual(['Django'])
     expect(stored?.advisorEmail).toBe(thirdPerson.email)
     expect(stored?.advisorName).toBe(thirdPerson.name)
     expect(stored?.coAdvisors).toEqual([satellite])
     expect(stored?.publicDetails).toMatchObject({
-      overview: 'Descrição existente',
+      overview: 'Nova descrição do projeto.',
       externalLinks: [
         { label: 'Repositório', url: 'https://github.com/org/p', icon: 'fi-rr-code-branch' },
       ],
     })
-    expect(stored?.teamMembers).toEqual([{ studentEmail: student.email, name: student.name }])
+    expect(stored?.teamMembers).toEqual([
+      { studentEmail: student.email, name: student.name, roleTitle: 'Back-end', isLeader: true },
+    ])
   })
 
   it('o administrador pode remover todos os orientadores adicionais', async () => {
@@ -137,7 +148,7 @@ describe('UpdateProjectUseCase', () => {
       project: existing(),
       viewer: adminViewer,
       scope: 'admin',
-      body: { coAdvisorEmails: [], links: [] },
+      body: { ...fullBody, coAdvisorEmails: [] },
     })
 
     expect(repository.projects.get('project-1')?.coAdvisors).toEqual([])

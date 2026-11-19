@@ -31,7 +31,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     notFound()
   }
 
-  const { project, scope, user } = access
+  const { project, user } = access
   const [activeStudents, professors] = await Promise.all([
     listActiveProjectPeople('student'),
     listActiveProjectPeople('professor'),
@@ -92,7 +92,6 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   return (
     <ProjectFormPage
       mode="edit"
-      scope={scope}
       role={user.role}
       currentUserEmail={user.email}
       students={students}

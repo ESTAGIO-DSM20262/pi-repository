@@ -47,7 +47,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         403,
       )
     }
-    if (access.project.status !== 'em_andamento') {
+    if (access.project.status !== 'em_andamento' && access.user.role !== 'admin') {
       return jsonError(
         'Projetos concluídos são somente para consulta. Não é possível editar tarefas.',
         409,

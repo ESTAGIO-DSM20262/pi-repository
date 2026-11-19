@@ -480,10 +480,13 @@ documente aqui.
   única fonte da regra, usada por `libs/project-edit-access.ts` (`resolveProjectEditAccess`) e pela
   página do projeto. **Qualquer** professor orientador do projeto (principal ou adicional) tem escopo
   `full` (todos os dados, equipe, tecnologias, orientadores adicionais e artefatos). O administrador
-  tem escopo `admin` em qualquer projeto: edita os professores orientadores, os links e as imagens;
-  funções/liderança da equipe e os demais campos do corpo são ignorados. Aluno nunca edita. Projetos
-  demonstrativos (`mock-projects.ts`) não existem na tabela `projects` e por isso não são editáveis.
-  Projeto desativado só pode ser editado por administrador.
+  tem escopo `admin` em qualquer projeto e edita **tudo** o que o escopo `full` edita (título, resumo,
+  descrição, ciclo, semestre, tema, situação, equipe com funções e liderança, tecnologias, links e
+  imagens) e ainda troca o orientador principal. O corpo do `PATCH` é o mesmo nos dois escopos
+  (`parseUpdateProjectInput`); a única diferença é que, no `admin`, `advisorEmail` é aceito.
+  Indicar o projeto continua exclusivo dos orientadores (`canVerifyProject`). Aluno nunca edita.
+  Projetos demonstrativos (`mock-projects.ts`) não existem na tabela `projects` e por isso não são
+  editáveis. Projeto desativado só pode ser editado por administrador.
 - **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
   `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
   mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro.
@@ -525,7 +528,8 @@ documente aqui.
 - **Tarefas por autor:** `GET /api/projects/[id]/progress` devolve `createdByName`,
   `lastEditedByName`, `lastEditedAt` e `canEdit` por tarefa, e `changedByName` nas revisões. O
   professor só edita as tarefas que ele mesmo criou (`canEditProgressTask`, 403 no `PATCH` caso
-  contrário); o administrador edita qualquer uma. Tarefas criadas por um administrador (por exemplo,
+  contrário); o administrador edita qualquer uma, em qualquer projeto (inclusive concluído ou
+  desativado). Tarefas criadas por um administrador (por exemplo,
   as iniciais de um projeto criado por ele) só o administrador edita. Desde a reunião de 09/11/2026
   só o orientador principal (`project.advisor`) e o administrador criam e editam tarefas
   (`canManageProgress`); orientadores adicionais (satélites) apenas acompanham o cronograma e não
@@ -875,5 +879,5 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 
 - `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
 - O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone; só o administrador a vê na página) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
-- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno só consulta tarefas (as da equipe e as atribuídas a ele); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

@@ -7,7 +7,6 @@ import {
   projects,
 } from '@/db/schema'
 import type {
-  ProjectAdministrationUpdateRecord,
   ProjectCreateRecord,
   ProjectFullUpdateRecord,
   ProjectRepository,
@@ -35,13 +34,6 @@ export class DbProjectCommandRepository implements ProjectRepository {
   }
 
   async update(id: string, record: ProjectFullUpdateRecord): Promise<void> {
-    await db.update(projects).set(record).where(eq(projects.id, id))
-  }
-
-  async updateAsAdministrator(
-    id: string,
-    record: ProjectAdministrationUpdateRecord,
-  ): Promise<void> {
     await db.update(projects).set(record).where(eq(projects.id, id))
   }
 

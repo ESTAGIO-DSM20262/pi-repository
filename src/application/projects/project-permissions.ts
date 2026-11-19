@@ -59,9 +59,9 @@ export function canManageProgress(
   project: ProjectSubject,
   viewer: Pick<ProjectViewer, 'role' | 'email'>,
 ) {
-  if (!isProjectActive(project) && viewer.role !== 'admin') return false
-  if (project.status !== 'em_andamento') return false
-  return viewer.role === 'admin' || isPrincipalAdvisorOf(project, viewer)
+  if (viewer.role === 'admin') return true
+  if (!isProjectActive(project) || project.status !== 'em_andamento') return false
+  return isPrincipalAdvisorOf(project, viewer)
 }
 
 export function canEditProgressTask(

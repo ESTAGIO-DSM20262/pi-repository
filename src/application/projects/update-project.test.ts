@@ -19,7 +19,7 @@ describe('parseUpdateProjectInput', () => {
   it('aceita a edição completa feita por um orientador', () => {
     const result = parseUpdateProjectInput(fields, 'full')
     expect(result.isRight()).toBe(true)
-    if (result.isRight() && result.value.scope === 'full') {
+    if (result.isRight()) {
       expect(result.value.fields.status).toBe('publicado')
       expect(result.value.fields.studentEmails).toEqual(['a@aluno.cps.sp.gov.br'])
       expect(result.value.fields.links).toEqual(fields.links)
@@ -44,49 +44,55 @@ describe('parseUpdateProjectInput', () => {
     expect(parseUpdateProjectInput({ ...fields, studentEmails: [] }, 'full').isLeft()).toBe(true)
   })
 
-  it('na edição do administrador valida orientadores, links e imagens e ignora o resto', () => {
+  it('na edição do administrador valida todos os campos e o orientador principal', () => {
     const result = parseUpdateProjectInput(
       {
-        title: 'x',
-        status: 'publicado',
+        ...fields,
         advisorEmail: 'Novo@cps.sp.gov.br',
         coAdvisorEmails: ['satelite@cps.sp.gov.br'],
-        links: [
-          { title: 'Repositório', url: 'https://github.com/org/p', icon: 'fi-rr-code-branch' },
-        ],
         images: [{ title: '', url: 'https://cdn.exemplo.com/a.png', orientation: 'vertical' }],
       },
       'admin',
     )
 
     expect(result.isRight()).toBe(true)
-    if (result.isRight() && result.value.scope === 'admin') {
+    if (result.isRight()) {
+      expect(result.value.scope).toBe('admin')
       expect(result.value.advisors).toEqual({
         advisorEmail: 'novo@cps.sp.gov.br',
         coAdvisorEmails: ['satelite@cps.sp.gov.br'],
       })
-      expect(result.value.links).toHaveLength(1)
-      expect(result.value.images).toHaveLength(1)
-      expect('fields' in result.value).toBe(false)
+      expect(result.value.fields.title).toBe('Projeto Teste')
+      expect(result.value.fields.studentEmails).toEqual(['a@aluno.cps.sp.gov.br'])
+      expect(result.value.fields.images).toHaveLength(1)
     }
   })
 
-  it('ignora atribuições de equipe na edição do administrador', () => {
+  it('mantém as atribuições de equipe na edição do administrador', () => {
     const result = parseUpdateProjectInput(
       {
-        links: [],
+        ...fields,
         teamAssignments: [{ studentEmail: 'a@aluno.cps.sp.gov.br', isLeader: true }],
       },
       'admin',
     )
 
     expect(result.isRight()).toBe(true)
-    if (result.isRight()) expect('teamAssignments' in result.value).toBe(false)
+    if (result.isRight()) {
+      expect(result.value.fields.teamAssignments).toEqual([
+        { studentEmail: 'a@aluno.cps.sp.gov.br', isLeader: true },
+      ])
+    }
+  })
+
+  it('exige os dados do projeto também na edição do administrador', () => {
+    expect(parseUpdateProjectInput({ links: [] }, 'admin').isLeft()).toBe(true)
+    expect(parseUpdateProjectInput({ ...fields, studentEmails: [] }, 'admin').isLeft()).toBe(true)
   })
 
   it('rejeita link inválido na edição do administrador', () => {
     const result = parseUpdateProjectInput(
-      { links: [{ title: 'Site', url: 'http://a.com', icon: 'fi-rr-globe' }] },
+      { ...fields, links: [{ title: 'Site', url: 'http://a.com', icon: 'fi-rr-globe' }] },
       'admin',
     )
     expect(result.isLeft()).toBe(true)

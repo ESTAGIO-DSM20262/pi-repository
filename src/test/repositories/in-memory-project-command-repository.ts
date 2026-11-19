@@ -1,5 +1,4 @@
 import type {
-  ProjectAdministrationUpdateRecord,
   ProjectCreateRecord,
   ProjectFullUpdateRecord,
   ProjectRepository,
@@ -25,11 +24,6 @@ export class InMemoryProjectCommandRepository implements ProjectRepository {
   }
 
   async update(id: string, record: ProjectFullUpdateRecord) {
-    const current = this.projects.get(id)
-    if (current) this.projects.set(id, { ...current, ...record })
-  }
-
-  async updateAsAdministrator(id: string, record: ProjectAdministrationUpdateRecord) {
     const current = this.projects.get(id)
     if (current) this.projects.set(id, { ...current, ...record })
   }

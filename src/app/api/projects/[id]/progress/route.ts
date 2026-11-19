@@ -192,7 +192,7 @@ export async function POST(request: Request, context: RouteContext) {
     ) {
       return jsonError('Somente o orientador principal ou o administrador pode criar tarefas.', 403)
     }
-    if (access.project.status !== 'em_andamento') {
+    if (access.project.status !== 'em_andamento' && access.user.role !== 'admin') {
       return jsonError(
         'Projetos concluídos são somente para consulta. Não é possível adicionar tarefas.',
         409,

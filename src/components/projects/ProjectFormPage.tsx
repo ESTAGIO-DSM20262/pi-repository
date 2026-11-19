@@ -15,7 +15,6 @@ import {
   hintClass,
   labelClass,
   Required,
-  sectionClass,
 } from '@/components/projects/form/ProjectFormPrimitives'
 import type { DraftProjectImage } from '@/components/projects/form/ProjectImagesEditor'
 import type { DraftProjectLink } from '@/components/projects/form/ProjectLinksEditor'
@@ -57,7 +56,6 @@ export interface ProjectFormInitialValues {
 
 interface ProjectFormPageProps {
   mode: 'create' | 'edit'
-  scope?: 'full' | 'admin'
   role: Role
   currentUserEmail: string
   students: ProjectPersonOption[]
@@ -115,7 +113,6 @@ function normalize(value: string) {
 
 export function ProjectFormPage({
   mode,
-  scope = 'full',
   role,
   currentUserEmail,
   students,
@@ -125,9 +122,7 @@ export function ProjectFormPage({
   initialValues,
 }: ProjectFormPageProps) {
   const router = useRouter()
-  const canEditDetails = scope === 'full'
   const isEdit = mode === 'edit'
-  const canEditTeam = canEditDetails
 
   const {
     register,
@@ -336,21 +331,19 @@ export function ProjectFormPage({
   async function submit() {
     clearErrors('root.server')
 
-    if (canEditDetails) {
-      if (selectedEmails.length === 0) {
-        setError('root.server', {
-          type: 'validation',
-          message: 'Atribua pelo menos um aluno ao projeto.',
-        })
-        return
-      }
-      if (!advisorEmail) {
-        setError('root.server', {
-          type: 'validation',
-          message: 'Selecione o professor orientador.',
-        })
-        return
-      }
+    if (selectedEmails.length === 0) {
+      setError('root.server', {
+        type: 'validation',
+        message: 'Atribua pelo menos um aluno ao projeto.',
+      })
+      return
+    }
+    if (!advisorEmail) {
+      setError('root.server', {
+        type: 'validation',
+        message: 'Selecione o professor orientador.',
+      })
+      return
     }
 
     const artifacts = {
@@ -360,31 +353,27 @@ export function ProjectFormPage({
       images: images.map(({ title, url, orientation }) => ({ title, url, orientation })),
     }
 
-    const details = canEditDetails
-      ? {
-          title,
-          summary,
-          overview,
-          cycle,
-          semester: Number(semester),
-          theme,
-          status,
-          languages,
-          stack,
-          studentEmails: selectedStudents.map((student) => student.email),
-        }
-      : {}
+    const details = {
+      title,
+      summary,
+      overview,
+      cycle,
+      semester: Number(semester),
+      theme,
+      status,
+      languages,
+      stack,
+      studentEmails: selectedStudents.map((student) => student.email),
+    }
 
-    const teamAssignments = canEditTeam
-      ? selectedStudents.map((student) => {
-          const email = student.email
-          return {
-            studentEmail: email,
-            roleTitle: memberTitles[email.toLowerCase()] ?? '',
-            isLeader: leaderEmail === email.toLowerCase(),
-          }
-        })
-      : undefined
+    const teamAssignments = selectedStudents.map((student) => {
+      const email = student.email
+      return {
+        studentEmail: email,
+        roleTitle: memberTitles[email.toLowerCase()] ?? '',
+        isLeader: leaderEmail === email.toLowerCase(),
+      }
+    })
 
     const advisorsPayload = {
       coAdvisorEmails,
@@ -414,7 +403,7 @@ export function ProjectFormPage({
             ...details,
             ...artifacts,
             ...advisorsPayload,
-            ...(teamAssignments ? { teamAssignments } : {}),
+            teamAssignments,
             ...creation,
           }),
         },
@@ -469,9 +458,7 @@ export function ProjectFormPage({
   const pageTitle = isEdit ? 'Editar Projeto Integrador' : 'Cadastro de Projeto Integrador'
   const pageDescription = !isEdit
     ? 'Preencha as informações, atribua os alunos e, se quiser, já defina as primeiras tarefas.'
-    : canEditDetails
-      ? 'Atualize as informações do projeto, a equipe, as tecnologias e os artefatos.'
-      : 'Como administrador, você pode atualizar os professores orientadores, os links e as imagens do projeto.'
+    : 'Atualize as informações do projeto, a equipe, as tecnologias e os artefatos.'
 
   return (
     <div className="w-full bg-background px-3 py-4 sm:px-6 sm:py-9 lg:px-8">
@@ -496,403 +483,370 @@ export function ProjectFormPage({
         </div>
 
         <form noValidate onSubmit={handleSubmit(submit)} className="space-y-4 sm:space-y-5">
-          {canEditDetails || (isEdit && role === 'admin') ? (
-            <>
-              {canEditDetails && (
-                <>
-                  <FormSection
-                    icon="fi-rr-graduation-cap"
-                    title="Identificação Acadêmica do PI"
-                    subtitle="Eixos curriculares e delimitação institucional do projeto"
-                    badge={<Badge tone="slate">Obrigatório</Badge>}
-                  >
-                    <div className="space-y-4">
-                      <div>
-                        <label className={labelClass} htmlFor="project-title">
-                          Título completo do projeto integrador <Required />
-                        </label>
-                        <input
-                          id="project-title"
-                          className={fieldClass}
-                          {...register('title')}
-                          minLength={3}
-                          maxLength={160}
-                          placeholder="Ex.: SALA — Sistema de Agendamento de Laboratórios"
-                          required
-                          aria-invalid={Boolean(errors.title)}
-                        />
-                        <FieldError message={errors.title?.message} />
-                        <p className={hintClass}>
-                          Use títulos concisos com acrônimo inicial quando aplicável e objetivo
-                          funcional.
-                        </p>
-                      </div>
+          <FormSection
+            icon="fi-rr-graduation-cap"
+            title="Identificação Acadêmica do PI"
+            subtitle="Eixos curriculares e delimitação institucional do projeto"
+            badge={<Badge tone="slate">Obrigatório</Badge>}
+          >
+            <div className="space-y-4">
+              <div>
+                <label className={labelClass} htmlFor="project-title">
+                  Título completo do projeto integrador <Required />
+                </label>
+                <input
+                  id="project-title"
+                  className={fieldClass}
+                  {...register('title')}
+                  minLength={3}
+                  maxLength={160}
+                  placeholder="Ex.: SALA — Sistema de Agendamento de Laboratórios"
+                  required
+                  aria-invalid={Boolean(errors.title)}
+                />
+                <FieldError message={errors.title?.message} />
+                <p className={hintClass}>
+                  Use títulos concisos com acrônimo inicial quando aplicável e objetivo
+                  funcional.
+                </p>
+              </div>
 
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div>
-                          <label className={labelClass} htmlFor="project-course">
-                            Curso superior de graduação
-                          </label>
-                          <input
-                            id="project-course"
-                            className={fieldClass}
-                            value={COURSE_LABEL}
-                            readOnly
-                          />
-                        </div>
-                        <div>
-                          <span className={labelClass}>
-                            Semestre letivo <Required />
-                          </span>
-                          <SelectDropdown
-                            value={semester}
-                            ariaLabel="Semestre do projeto"
-                            width="full"
-                            tone="muted"
-                            options={SEMESTER_OPTIONS}
-                            onChange={(value) =>
-                              setValue('semester', value as ProjectFormValues['semester'], {
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              })
-                            }
-                          />
-                          <FieldError message={errors.semester?.message} />
-                        </div>
-                      </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className={labelClass} htmlFor="project-course">
+                    Curso superior de graduação
+                  </label>
+                  <input
+                    id="project-course"
+                    className={fieldClass}
+                    value={COURSE_LABEL}
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <span className={labelClass}>
+                    Semestre letivo <Required />
+                  </span>
+                  <SelectDropdown
+                    value={semester}
+                    ariaLabel="Semestre do projeto"
+                    width="full"
+                    tone="muted"
+                    options={SEMESTER_OPTIONS}
+                    onChange={(value) =>
+                      setValue('semester', value as ProjectFormValues['semester'], {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                  <FieldError message={errors.semester?.message} />
+                </div>
+              </div>
 
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                        <div>
-                          <label className={labelClass} htmlFor="project-cycle">
-                            Ciclo <Required />
-                          </label>
-                          <input
-                            id="project-cycle"
-                            className={fieldClass}
-                            {...register('cycle')}
-                            pattern="\d{4}/[12]"
-                            placeholder="2026/2"
-                            required
-                            aria-invalid={Boolean(errors.cycle)}
-                          />
-                          <FieldError message={errors.cycle?.message} />
-                          <p className={hintClass}>Formato AAAA/1 ou AAAA/2.</p>
-                        </div>
-                        <div>
-                          <label className={labelClass} htmlFor="project-theme">
-                            Tema <Required />
-                          </label>
-                          <input
-                            id="project-theme"
-                            className={fieldClass}
-                            {...register('theme')}
-                            list="project-theme-suggestions"
-                            minLength={2}
-                            maxLength={80}
-                            placeholder="Ex.: Gestão & Processos"
-                            required
-                            aria-invalid={Boolean(errors.theme)}
-                          />
-                          <FieldError message={errors.theme?.message} />
-                          <datalist id="project-theme-suggestions">
-                            {THEME_SUGGESTIONS.map((suggestion) => (
-                              <option key={suggestion} value={suggestion} />
-                            ))}
-                          </datalist>
-                        </div>
-                        <div>
-                          <span className={labelClass}>Situação</span>
-                          <SelectDropdown
-                            value={status}
-                            ariaLabel="Situação do projeto"
-                            width="full"
-                            tone="muted"
-                            options={STATUS_OPTIONS}
-                            onChange={(value) =>
-                              setValue('status', value as ProjectFormValues['status'], {
-                                shouldDirty: true,
-                                shouldValidate: true,
-                              })
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </FormSection>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <label className={labelClass} htmlFor="project-cycle">
+                    Ciclo <Required />
+                  </label>
+                  <input
+                    id="project-cycle"
+                    className={fieldClass}
+                    {...register('cycle')}
+                    pattern="\d{4}/[12]"
+                    placeholder="2026/2"
+                    required
+                    aria-invalid={Boolean(errors.cycle)}
+                  />
+                  <FieldError message={errors.cycle?.message} />
+                  <p className={hintClass}>Formato AAAA/1 ou AAAA/2.</p>
+                </div>
+                <div>
+                  <label className={labelClass} htmlFor="project-theme">
+                    Tema <Required />
+                  </label>
+                  <input
+                    id="project-theme"
+                    className={fieldClass}
+                    {...register('theme')}
+                    list="project-theme-suggestions"
+                    minLength={2}
+                    maxLength={80}
+                    placeholder="Ex.: Gestão & Processos"
+                    required
+                    aria-invalid={Boolean(errors.theme)}
+                  />
+                  <FieldError message={errors.theme?.message} />
+                  <datalist id="project-theme-suggestions">
+                    {THEME_SUGGESTIONS.map((suggestion) => (
+                      <option key={suggestion} value={suggestion} />
+                    ))}
+                  </datalist>
+                </div>
+                <div>
+                  <span className={labelClass}>Situação</span>
+                  <SelectDropdown
+                    value={status}
+                    ariaLabel="Situação do projeto"
+                    width="full"
+                    tone="muted"
+                    options={STATUS_OPTIONS}
+                    onChange={(value) =>
+                      setValue('status', value as ProjectFormValues['status'], {
+                        shouldDirty: true,
+                        shouldValidate: true,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </FormSection>
 
-                  {advisorsSection}
+          {advisorsSection}
 
-                  <FormSection
-                    icon="fi-rr-document"
-                    title="Descrição do Projeto"
-                    subtitle="Formalização da problemática, solução técnica e impactos"
-                  >
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex items-end justify-between gap-3">
-                          <label className={labelClass} htmlFor="project-summary">
-                            Resumo <Required />
-                          </label>
-                          <span className="mb-1.5 text-[0.6875rem] font-semibold text-text-secondary">
-                            {summary.length} / 600 caracteres
-                          </span>
-                        </div>
-                        <textarea
-                          id="project-summary"
-                          className={textareaClass}
-                          {...register('summary')}
-                          minLength={10}
-                          maxLength={600}
-                          placeholder="Descreva a problemática e a solução do projeto em poucas linhas."
-                          required
-                          aria-invalid={Boolean(errors.summary)}
-                        />
-                        <FieldError message={errors.summary?.message} />
-                      </div>
-                      <div>
-                        <div className="flex items-end justify-between gap-3">
-                          <label className={labelClass} htmlFor="project-overview">
-                            Descrição detalhada{' '}
-                            <span className="font-normal text-slate-500">(opcional)</span>
-                          </label>
-                          <span className="mb-1.5 text-[0.6875rem] font-semibold text-text-secondary">
-                            {overview.length} / 5000 caracteres
-                          </span>
-                        </div>
-                        <textarea
-                          id="project-overview"
-                          className={`${textareaClass} min-h-36`}
-                          {...register('overview')}
-                          maxLength={5000}
-                          placeholder="Contexto, problema, objetivos e resultados esperados."
-                          aria-invalid={Boolean(errors.overview)}
-                        />
-                        <FieldError message={errors.overview?.message} />
-                      </div>
-                    </div>
-                  </FormSection>
-                </>
-              )}
+          <FormSection
+            icon="fi-rr-document"
+            title="Descrição do Projeto"
+            subtitle="Formalização da problemática, solução técnica e impactos"
+          >
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-end justify-between gap-3">
+                  <label className={labelClass} htmlFor="project-summary">
+                    Resumo <Required />
+                  </label>
+                  <span className="mb-1.5 text-[0.6875rem] font-semibold text-text-secondary">
+                    {summary.length} / 600 caracteres
+                  </span>
+                </div>
+                <textarea
+                  id="project-summary"
+                  className={textareaClass}
+                  {...register('summary')}
+                  minLength={10}
+                  maxLength={600}
+                  placeholder="Descreva a problemática e a solução do projeto em poucas linhas."
+                  required
+                  aria-invalid={Boolean(errors.summary)}
+                />
+                <FieldError message={errors.summary?.message} />
+              </div>
+              <div>
+                <div className="flex items-end justify-between gap-3">
+                  <label className={labelClass} htmlFor="project-overview">
+                    Descrição detalhada{' '}
+                    <span className="font-normal text-slate-500">(opcional)</span>
+                  </label>
+                  <span className="mb-1.5 text-[0.6875rem] font-semibold text-text-secondary">
+                    {overview.length} / 5000 caracteres
+                  </span>
+                </div>
+                <textarea
+                  id="project-overview"
+                  className={`${textareaClass} min-h-36`}
+                  {...register('overview')}
+                  maxLength={5000}
+                  placeholder="Contexto, problema, objetivos e resultados esperados."
+                  aria-invalid={Boolean(errors.overview)}
+                />
+                <FieldError message={errors.overview?.message} />
+              </div>
+            </div>
+          </FormSection>
 
-              {!canEditDetails && advisorsSection}
+          <ProjectTeamSection
+            students={students}
+            selectedStudents={selectedStudents}
+            studentQuery={studentQuery}
+            studentNotice={studentNotice}
+            suggestions={suggestions}
+            memberTitles={memberTitles}
+            leaderEmail={leaderEmail}
+            onStudentQueryChange={(value) => {
+              setStudentQuery(value)
+              setStudentNotice('')
+            }}
+            onStudentKeyDown={handleStudentKeyDown}
+            onAddStudentFromQuery={addStudentFromQuery}
+            onAddStudent={addStudent}
+            onRemoveStudent={removeStudent}
+            onMemberTitleChange={(email, value) =>
+              setMemberTitles((current) => ({ ...current, [email]: value }))
+            }
+            onToggleLeader={(email) =>
+              setLeaderEmail((current) => (current === email ? '' : email))
+            }
+          />
 
-              <ProjectTeamSection
-                canEditDetails={canEditDetails}
-                canEditTeam={canEditTeam}
-                students={students}
-                selectedStudents={selectedStudents}
-                studentQuery={studentQuery}
-                studentNotice={studentNotice}
-                suggestions={suggestions}
-                memberTitles={memberTitles}
-                leaderEmail={leaderEmail}
-                onStudentQueryChange={(value) => {
-                  setStudentQuery(value)
-                  setStudentNotice('')
-                }}
-                onStudentKeyDown={handleStudentKeyDown}
-                onAddStudentFromQuery={addStudentFromQuery}
-                onAddStudent={addStudent}
-                onRemoveStudent={removeStudent}
-                onMemberTitleChange={(email, value) =>
-                  setMemberTitles((current) => ({ ...current, [email]: value }))
-                }
-                onToggleLeader={(email) =>
-                  setLeaderEmail((current) => (current === email ? '' : email))
-                }
+          <FormSection
+            icon="fi-rr-layers"
+            title="Stack Tecnológica"
+            subtitle="Linguagens e ferramentas utilizadas no desenvolvimento"
+          >
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+              <TechnologyPicker
+                id="project-languages"
+                label="Linguagens"
+                placeholder="Ex.: TypeScript, Python"
+                kind="language"
+                values={languages}
+                onChange={setLanguages}
               />
+              <TechnologyPicker
+                id="project-stack"
+                label="Stack e ferramentas"
+                placeholder="Ex.: React, Node.js, PostgreSQL"
+                kind="tool"
+                values={stack}
+                onChange={setStack}
+              />
+            </div>
+          </FormSection>
 
-              {canEditDetails && (
-                <>
-                  <FormSection
-                    icon="fi-rr-layers"
-                    title="Stack Tecnológica"
-                    subtitle="Linguagens e ferramentas utilizadas no desenvolvimento"
+          {isEdit ? (
+            <FormSection
+              icon="fi-rr-list-check"
+              title="Progressão do Projeto"
+              subtitle="Marcos, entregas e responsáveis"
+            >
+              <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-text-secondary">
+                  As tarefas e entregas são gerenciadas na seção de progresso da página do
+                  projeto, com histórico de revisões.
+                </p>
+                {projectId && (
+                  <Link
+                    href={`/projetos/${encodeURIComponent(projectId)}`}
+                    className={`${textActionClass} shrink-0`}
                   >
-                    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                      <TechnologyPicker
-                        id="project-languages"
-                        label="Linguagens"
-                        placeholder="Ex.: TypeScript, Python"
-                        kind="language"
-                        values={languages}
-                        onChange={setLanguages}
-                      />
-                      <TechnologyPicker
-                        id="project-stack"
-                        label="Stack e ferramentas"
-                        placeholder="Ex.: React, Node.js, PostgreSQL"
-                        kind="tool"
-                        values={stack}
-                        onChange={setStack}
-                      />
-                    </div>
-                  </FormSection>
-
-                  {isEdit ? (
-                    <FormSection
-                      icon="fi-rr-list-check"
-                      title="Progressão do Projeto"
-                      subtitle="Marcos, entregas e responsáveis"
+                    Abrir página do projeto{' '}
+                    <i className="fi fi-rr-arrow-right flex" aria-hidden="true" />
+                  </Link>
+                )}
+              </div>
+            </FormSection>
+          ) : (
+            <FormSection
+              icon="fi-rr-list-check"
+              title="Progressão do Projeto"
+              subtitle="Marcos e entregas iniciais. Opcional: você pode adicioná-los depois"
+            >
+              {tasks.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-8 text-center">
+                  <i
+                    className="fi fi-rr-document text-xl text-text-muted"
+                    aria-hidden="true"
+                  />
+                  <p className="mt-2 text-sm text-text-secondary">
+                    O projeto será criado sem tarefas.
+                  </p>
+                </div>
+              ) : (
+                <ol className="space-y-4">
+                  {tasks.map((task, index) => (
+                    <li
+                      key={task.key}
+                      className="rounded-xl bg-surface-secondary p-4 ring-1 ring-border sm:p-5"
                     >
-                      <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-sm text-text-secondary">
-                          As tarefas e entregas são gerenciadas na seção de progresso da página do
-                          projeto, com histórico de revisões.
-                        </p>
-                        {projectId && (
-                          <Link
-                            href={`/projetos/${encodeURIComponent(projectId)}`}
-                            className={`${textActionClass} shrink-0`}
-                          >
-                            Abrir página do projeto{' '}
-                            <i className="fi fi-rr-arrow-right flex" aria-hidden="true" />
-                          </Link>
-                        )}
-                      </div>
-                    </FormSection>
-                  ) : (
-                    <FormSection
-                      icon="fi-rr-list-check"
-                      title="Progressão do Projeto"
-                      subtitle="Marcos e entregas iniciais. Opcional: você pode adicioná-los depois"
-                    >
-                      {tasks.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-8 text-center">
-                          <i
-                            className="fi fi-rr-document text-xl text-text-muted"
-                            aria-hidden="true"
-                          />
-                          <p className="mt-2 text-sm text-text-secondary">
-                            O projeto será criado sem tarefas.
-                          </p>
-                        </div>
-                      ) : (
-                        <ol className="space-y-4">
-                          {tasks.map((task, index) => (
-                            <li
-                              key={task.key}
-                              className="rounded-xl bg-surface-secondary p-4 ring-1 ring-border sm:p-5"
-                            >
-                              <div className="mb-4 flex items-center justify-between gap-2">
-                                <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-900">
-                                  <span className="rounded bg-primary px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
-                                    v{index + 1}.0
-                                  </span>
-                                  Tarefa {index + 1}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => removeTask(task.key)}
-                                  aria-label={`Remover tarefa ${index + 1}`}
-                                  className="cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
-                                >
-                                  <i className="fi fi-rr-trash flex" aria-hidden="true" />
-                                </button>
-                              </div>
-                              <div className="space-y-4">
-                                <div>
-                                  <label className={labelClass} htmlFor={`${task.key}-title`}>
-                                    Título <Required />
-                                  </label>
-                                  <input
-                                    id={`${task.key}-title`}
-                                    className={fieldClass}
-                                    value={task.title}
-                                    onChange={(event) =>
-                                      updateTask(task.key, { title: event.target.value })
-                                    }
-                                    minLength={3}
-                                    maxLength={160}
-                                    placeholder="Ex.: Entregar documentação de requisitos"
-                                    required
-                                  />
-                                </div>
-                                <div>
-                                  <label className={labelClass} htmlFor={`${task.key}-description`}>
-                                    Descrição e critérios de entrega <Required />
-                                  </label>
-                                  <textarea
-                                    id={`${task.key}-description`}
-                                    className={textareaClass}
-                                    value={task.description}
-                                    onChange={(event) =>
-                                      updateTask(task.key, { description: event.target.value })
-                                    }
-                                    minLength={5}
-                                    maxLength={5000}
-                                    placeholder="Explique o que deve ser entregue e como será avaliado."
-                                    required
-                                  />
-                                </div>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                  <div>
-                                    <span className={labelClass}>Responsável pela entrega</span>
-                                    <SelectDropdown
-                                      value={task.targetStudentEmail}
-                                      searchable
-                                      searchPlaceholder="Pesquisar pelo nome..."
-                                      ariaLabel={`Responsável pela tarefa ${index + 1}`}
-                                      width="full"
-                                      tone="muted"
-                                      options={responsibleOptions}
-                                      onChange={(value) =>
-                                        updateTask(task.key, { targetStudentEmail: value })
-                                      }
-                                    />
-                                    <p className={hintClass}>
-                                      Tarefas individuais ficam visíveis apenas ao aluno
-                                      selecionado.
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <label className={labelClass} htmlFor={`${task.key}-due`}>
-                                      Prazo de entrega
-                                    </label>
-                                    <input
-                                      id={`${task.key}-due`}
-                                      type="date"
-                                      className={fieldClass}
-                                      value={task.dueDate}
-                                      onChange={(event) =>
-                                        updateTask(task.key, { dueDate: event.target.value })
-                                      }
-                                    />
-                                    <p className={hintClass}>O prazo pode ser deixado em branco.</p>
-                                  </div>
-                                </div>
-                              </div>
-                            </li>
-                          ))}
-                        </ol>
-                      )}
-                      <div className="mt-4 flex justify-end">
-                        <button type="button" onClick={addTask} className={textActionClass}>
-                          <i className="fi fi-rr-plus flex" aria-hidden="true" /> Adicionar tarefa
+                      <div className="mb-4 flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-2 text-sm font-bold text-slate-900">
+                          <span className="rounded bg-primary px-1.5 py-0.5 text-[0.625rem] font-bold text-white">
+                            v{index + 1}.0
+                          </span>
+                          Tarefa {index + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeTask(task.key)}
+                          aria-label={`Remover tarefa ${index + 1}`}
+                          className="cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
+                        >
+                          <i className="fi fi-rr-trash flex" aria-hidden="true" />
                         </button>
                       </div>
-                    </FormSection>
-                  )}
-                </>
+                      <div className="space-y-4">
+                        <div>
+                          <label className={labelClass} htmlFor={`${task.key}-title`}>
+                            Título <Required />
+                          </label>
+                          <input
+                            id={`${task.key}-title`}
+                            className={fieldClass}
+                            value={task.title}
+                            onChange={(event) =>
+                              updateTask(task.key, { title: event.target.value })
+                            }
+                            minLength={3}
+                            maxLength={160}
+                            placeholder="Ex.: Entregar documentação de requisitos"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className={labelClass} htmlFor={`${task.key}-description`}>
+                            Descrição e critérios de entrega <Required />
+                          </label>
+                          <textarea
+                            id={`${task.key}-description`}
+                            className={textareaClass}
+                            value={task.description}
+                            onChange={(event) =>
+                              updateTask(task.key, { description: event.target.value })
+                            }
+                            minLength={5}
+                            maxLength={5000}
+                            placeholder="Explique o que deve ser entregue e como será avaliado."
+                            required
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div>
+                            <span className={labelClass}>Responsável pela entrega</span>
+                            <SelectDropdown
+                              value={task.targetStudentEmail}
+                              searchable
+                              searchPlaceholder="Pesquisar pelo nome..."
+                              ariaLabel={`Responsável pela tarefa ${index + 1}`}
+                              width="full"
+                              tone="muted"
+                              options={responsibleOptions}
+                              onChange={(value) =>
+                                updateTask(task.key, { targetStudentEmail: value })
+                              }
+                            />
+                            <p className={hintClass}>
+                              Tarefas individuais ficam visíveis apenas ao aluno
+                              selecionado.
+                            </p>
+                          </div>
+                          <div>
+                            <label className={labelClass} htmlFor={`${task.key}-due`}>
+                              Prazo de entrega
+                            </label>
+                            <input
+                              id={`${task.key}-due`}
+                              type="date"
+                              className={fieldClass}
+                              value={task.dueDate}
+                              onChange={(event) =>
+                                updateTask(task.key, { dueDate: event.target.value })
+                              }
+                            />
+                            <p className={hintClass}>O prazo pode ser deixado em branco.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
               )}
-            </>
-          ) : (
-            <section className={sectionClass}>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge tone="slate">Somente leitura</Badge>
-                <span className="text-xs text-text-secondary">
-                  {initialValues?.semester}º semestre · ciclo {initialValues?.cycle}
-                </span>
+              <div className="mt-4 flex justify-end">
+                <button type="button" onClick={addTask} className={textActionClass}>
+                  <i className="fi fi-rr-plus flex" aria-hidden="true" /> Adicionar tarefa
+                </button>
               </div>
-              <h2 className="mt-3 text-lg font-semibold tracking-tight text-slate-900 sm:text-xl">
-                {initialValues?.title}
-              </h2>
-              <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
-                Orientador:{' '}
-                {professors.find((professor) => professor.email === advisorEmail)?.name ??
-                  advisorEmail}
-              </p>
-            </section>
+            </FormSection>
           )}
 
           <ProjectArtifactsSection

@@ -105,7 +105,7 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
           visitor: no(),
           student: no(),
           professor: yes('Nos projetos ativos que orienta'),
-          admin: no(),
+          admin: yes('Em qualquer projeto'),
         },
       },
       {
@@ -155,7 +155,7 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
           visitor: no(),
           student: no(),
           professor: partial('Só o orientador principal, em projetos em andamento'),
-          admin: yes('Em projetos em andamento'),
+          admin: yes('Em qualquer projeto'),
         },
       },
       {
@@ -433,15 +433,15 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       },
       {
         icon: 'fi-rr-edit',
-        title: 'Cadastrar projetos e ajustar orientadores',
-        text: 'Cadastre projetos em nome de um professor orientador e, na edição de qualquer projeto, ajuste os orientadores, inclusive o principal, e os links. Dados, equipe e tecnologias ficam com os orientadores.',
+        title: 'Cadastrar e editar qualquer projeto',
+        text: 'Cadastre projetos em nome de um professor orientador e edite todas as informações de qualquer projeto: dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal. Só a indicação do projeto fica com os orientadores.',
         where: 'Novo projeto e página do projeto',
       },
       {
         icon: 'fi-rr-list-check',
         title: 'Gerenciar o cronograma',
-        text: 'Crie e edite qualquer tarefa dos projetos em andamento, inclusive as criadas por professores.',
-        where: 'Página do projeto em andamento',
+        text: 'Crie e edite qualquer tarefa de qualquer projeto, inclusive dos concluídos e das criadas por professores.',
+        where: 'Página do projeto',
       },
       {
         icon: 'fi-rr-eye-crossed',
@@ -471,12 +471,11 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
     flow: [
       'Cadastre ou importe os usuários do semestre, mantenha os cursos em dia e confira se as contas estão ativas.',
       'Acompanhe pelo painel institucional os projetos em andamento, atrasos e concluídos.',
-      'Dê suporte aos professores: ajuste orientadores e links, gerencie tarefas e corrija cadastros de usuários.',
+      'Dê suporte aos professores: corrija dados de projetos, ajuste orientadores, gerencie tarefas e corrija cadastros de usuários.',
       'Mantenha o acervo organizado, desativando o que não deve aparecer publicamente, e escolha o Melhor PI de cada semestre.',
     ],
     limits: [
       'A indicação de PIs como referência técnica é feita só pelos professores orientadores.',
-      'Dados, equipe e tecnologias de um projeto são editados pelos orientadores. Você ajusta os orientadores e os links.',
       'Na lista de usuários, você não desativa a própria conta nem altera o seu próprio perfil ou e-mail. Peça a outro administrador.',
     ],
   },
