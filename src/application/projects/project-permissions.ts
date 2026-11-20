@@ -83,10 +83,6 @@ export function canViewProgress(
   return viewer.role === 'professor' || isMemberOf(project, viewer)
 }
 
-export function canViewAllProgressTasks(viewer: Pick<ProjectViewer, 'role'>) {
-  return viewer.role === 'admin' || viewer.role === 'professor'
-}
-
 export function canVerifyProject(
   project: ProjectSubject,
   viewer: Pick<ProjectViewer, 'role' | 'email'>,

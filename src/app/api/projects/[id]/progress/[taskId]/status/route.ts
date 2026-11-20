@@ -55,7 +55,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       }
       return jsonError(
         access.user.role === 'student'
-          ? 'Você só pode atualizar as tarefas do seu grupo ou as atribuídas a você.'
+          ? 'Esta tarefa foi atribuída a outro integrante. Só o responsável ou o professor pode atualizar o andamento.'
           : 'Somente o orientador principal ou o administrador pode alterar o status.',
         403,
       )

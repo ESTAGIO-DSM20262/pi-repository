@@ -102,38 +102,25 @@ export async function GET(request: Request, context: RouteContext) {
     const access = await resolveProjectProgressAccess(request, id)
     if (!access.ok) return jsonError(access.message, access.status)
 
-    const allTasks = await db
+    const projectTasks = await db
       .select()
       .from(projectProgressTasks)
       .where(eq(projectProgressTasks.projectId, id))
       .orderBy(desc(projectProgressTasks.versionMajor), desc(projectProgressTasks.createdAt))
 
-    const visibleTasks = access.canViewAllTasks
-      ? allTasks
-      : allTasks.filter(
-          (task) =>
-            !task.targetStudentEmail || task.targetStudentEmail.toLowerCase() === access.user.email,
-        )
-    const visibleIds = visibleTasks.map((task) => task.id)
-    const allRevisions =
-      visibleIds.length > 0
+    const taskIds = projectTasks.map((task) => task.id)
+    const revisions =
+      taskIds.length > 0
         ? await db
             .select()
             .from(projectProgressRevisions)
-            .where(inArray(projectProgressRevisions.taskId, visibleIds))
+            .where(inArray(projectProgressRevisions.taskId, taskIds))
             .orderBy(desc(projectProgressRevisions.changedAt))
         : []
-    const revisions = access.canViewAllTasks
-      ? allRevisions
-      : allRevisions.filter(
-          (revision) =>
-            !revision.targetStudentEmail ||
-            revision.targetStudentEmail.toLowerCase() === access.user.email,
-        )
 
     const personIds = [
       ...new Set([
-        ...visibleTasks.map((task) => task.createdByUserId),
+        ...projectTasks.map((task) => task.createdByUserId),
         ...revisions.map((revision) => revision.changedByUserId),
       ]),
     ]
@@ -147,7 +134,7 @@ export async function GET(request: Request, context: RouteContext) {
     const nameById = new Map(people.map((person) => [person.id, person.name]))
     const viewer = { id: access.user.id, email: access.user.email, role: access.user.role }
 
-    const tasks = visibleTasks.map((task) => {
+    const tasks = projectTasks.map((task) => {
       const lastEdit = revisions.find(
         (revision) => revision.taskId === task.id && revision.action === 'updated',
       )

@@ -504,8 +504,7 @@ export function ProjectFormPage({
                 />
                 <FieldError message={errors.title?.message} />
                 <p className={hintClass}>
-                  Use títulos concisos com acrônimo inicial quando aplicável e objetivo
-                  funcional.
+                  Use títulos concisos com acrônimo inicial quando aplicável e objetivo funcional.
                 </p>
               </div>
 
@@ -514,12 +513,7 @@ export function ProjectFormPage({
                   <label className={labelClass} htmlFor="project-course">
                     Curso superior de graduação
                   </label>
-                  <input
-                    id="project-course"
-                    className={fieldClass}
-                    value={COURSE_LABEL}
-                    readOnly
-                  />
+                  <input id="project-course" className={fieldClass} value={COURSE_LABEL} readOnly />
                 </div>
                 <div>
                   <span className={labelClass}>
@@ -710,8 +704,8 @@ export function ProjectFormPage({
             >
               <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-text-secondary">
-                  As tarefas e entregas são gerenciadas na seção de progresso da página do
-                  projeto, com histórico de revisões.
+                  As tarefas e entregas são gerenciadas na seção de progresso da página do projeto,
+                  com histórico de revisões.
                 </p>
                 {projectId && (
                   <Link
@@ -732,10 +726,7 @@ export function ProjectFormPage({
             >
               {tasks.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-8 text-center">
-                  <i
-                    className="fi fi-rr-document text-xl text-text-muted"
-                    aria-hidden="true"
-                  />
+                  <i className="fi fi-rr-document text-xl text-text-muted" aria-hidden="true" />
                   <p className="mt-2 text-sm text-text-secondary">
                     O projeto será criado sem tarefas.
                   </p>
@@ -814,8 +805,8 @@ export function ProjectFormPage({
                               }
                             />
                             <p className={hintClass}>
-                              Tarefas individuais ficam visíveis apenas ao aluno
-                              selecionado.
+                              Todos veem a tarefa, mas só o responsável é notificado e atualiza o
+                              andamento.
                             </p>
                           </div>
                           <div>

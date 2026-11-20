@@ -6,7 +6,6 @@ import {
   canManageActivation,
   canManageProgress,
   canVerifyProject,
-  canViewAllProgressTasks,
   canViewProgress,
   canViewProject,
   resolveProjectEditScope,
@@ -186,12 +185,6 @@ describe('canViewProgress', () => {
     expect(canViewProgress(inactive, principal)).toBe(false)
     expect(canViewProgress(inactive, outsider)).toBe(false)
     expect(canViewProgress(inactive, member)).toBe(false)
-  })
-
-  it('só professores e administrador veem as tarefas de todos os integrantes', () => {
-    expect(canViewAllProgressTasks(admin)).toBe(true)
-    expect(canViewAllProgressTasks(outsider)).toBe(true)
-    expect(canViewAllProgressTasks(member)).toBe(false)
   })
 
   it('ver o cronograma não dá permissão de editar para professor de fora do projeto', () => {

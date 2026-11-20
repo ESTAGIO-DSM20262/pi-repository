@@ -325,7 +325,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-list-check',
         title: 'Acompanhar o seu PI',
-        text: 'Veja as tarefas da equipe e as atribuídas a você, com a barra de andamento, os prazos e o aviso de atraso. Marque uma tarefa como iniciada, concluída ou reabra-a quando precisar. Tarefas atribuídas a outros integrantes não aparecem, e quem cria e edita as tarefas é o professor.',
+        text: 'Veja todas as tarefas da equipe, inclusive as atribuídas a outros integrantes, com a barra de andamento, os prazos e o aviso de atraso. Você marca como iniciada, concluída ou reabre as tarefas do grupo e as atribuídas a você; as de um colega só ele (ou o professor) atualiza. Quem cria e edita as tarefas é o professor.',
         where: 'Página do projeto',
       },
       {
@@ -349,7 +349,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
     ],
     limits: [
       'Cadastrar e editar projetos é feito pelo professor orientador.',
-      'Você atualiza o status das tarefas do seu grupo ou atribuídas a você, mas criar ou editar tarefas é responsabilidade do professor orientador ou da administração.',
+      'Você atualiza o status das tarefas do grupo ou atribuídas a você, e vê as dos colegas apenas para consulta. Criar ou editar tarefas é responsabilidade do professor orientador ou da administração.',
       'Indicar PIs, escolher o Melhor PI do semestre e administrar usuários e cursos não fazem parte do perfil de aluno.',
       'Projetos desativados não aparecem para alunos.',
     ],
