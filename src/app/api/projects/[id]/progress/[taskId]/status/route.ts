@@ -8,6 +8,7 @@ import {
   PROJECT_PROGRESS_STATUSES,
   type ProjectProgressTaskStatus,
 } from '@/domain/enterprise/entities/project-progress'
+import { notifyTaskEvent } from '@/infrastructure/notifications/notify-task-event'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
 
 interface RouteContext {
@@ -91,6 +92,16 @@ export async function PATCH(request: Request, context: RouteContext) {
       changeNote: userNote ? `${autoNote} ${userNote}` : autoNote,
       changedByUserId: access.user.id,
       changedAt: now,
+    })
+
+    await notifyTaskEvent({
+      event: 'status_changed',
+      projectId: id,
+      taskId: updated.id,
+      project: access.project,
+      task: { title: updated.title, targetStudentEmail: updated.targetStudentEmail },
+      actor: access.user,
+      newStatus: updated.status,
     })
 
     return NextResponse.json({ task: updated }, { headers: { 'Cache-Control': 'no-store' } })

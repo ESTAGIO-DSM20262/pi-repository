@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import type {
+  TaskEventNotification,
+  TaskEventNotifier,
+} from '@/application/notifications/task-event-notifier'
 import type { Project } from '@/domain/enterprise/entities/project'
 import { InMemoryProjectReader } from '@/test/repositories/in-memory-project-reader'
 import { InMemoryProjectTaskRepository } from '@/test/repositories/in-memory-project-task-repository'
@@ -65,6 +69,38 @@ function setup(projects: Project[]) {
   const useCase = new AssignTaskToProjectsUseCase(new InMemoryProjectReader(projects), tasks, users)
   return { tasks, useCase }
 }
+
+describe('AssignTaskToProjectsUseCase — notificações', () => {
+  it('avisa uma vez por projeto em que a tarefa foi criada e não avisa os ignorados', async () => {
+    const sent: TaskEventNotification[] = []
+    const notifier: TaskEventNotifier = {
+      notify: async (event) => {
+        sent.push(event)
+      },
+    }
+    const users = new InMemoryProjectUserDirectory([principal, satellite, admin, student], [], [])
+    const useCase = new AssignTaskToProjectsUseCase(
+      new InMemoryProjectReader([
+        makeProject('a'),
+        makeProject('done', { status: 'publicado' }),
+      ]),
+      new InMemoryProjectTaskRepository(),
+      users,
+      notifier,
+    )
+
+    await useCase.execute({ sessionUserId: principal.id, projectIds: ['a', 'done'], body })
+
+    expect(sent).toHaveLength(1)
+    expect(sent[0].projectId).toBe('a')
+    expect(sent[0].event).toBe('created')
+    expect(sent[0].actor).toEqual({
+      email: principal.email,
+      name: principal.name,
+      role: 'professor',
+    })
+  })
+})
 
 describe('AssignTaskToProjectsUseCase', () => {
   it('cria a mesma tarefa em cada projeto selecionado, para o grupo todo', async () => {

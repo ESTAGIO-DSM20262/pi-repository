@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AssignTaskToProjectsUseCase } from '@/application/projects/assign-task-to-projects-use-case'
+import { DbTaskEventNotifier } from '@/infrastructure/notifications/notify-task-event'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { DbProjectTaskRepository } from '@/infrastructure/projects/db-project-task-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
       new CompositeProjectRepository(),
       new DbProjectTaskRepository(),
       new DbProjectUserDirectory(),
+      new DbTaskEventNotifier(),
     )
     const result = await useCase.execute({ sessionUserId, projectIds: data.projectIds, body })
     if (result.isLeft()) return jsonError(result.value.message, result.value.status)

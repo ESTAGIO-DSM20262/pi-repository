@@ -1,20 +1,18 @@
 import { randomUUID } from 'node:crypto'
 import { inArray, sql } from 'drizzle-orm'
+import type {
+  TaskEventNotification,
+  TaskEventNotifier,
+} from '@/application/notifications/task-event-notifier'
 import {
   buildTaskNotificationContent,
   resolveTaskNotificationRecipients,
-  type TaskNotificationInput,
 } from '@/application/notifications/task-notifications'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import { DbNotificationRepository } from './db-notification-repository'
 
-export type NotifyTaskEventInput = TaskNotificationInput & {
-  projectId: string
-  taskId: string
-}
-
-export async function notifyTaskEvent(input: NotifyTaskEventInput): Promise<void> {
+export async function notifyTaskEvent(input: TaskEventNotification): Promise<void> {
   try {
     const emails = resolveTaskNotificationRecipients(input)
     if (emails.length === 0) return
@@ -41,5 +39,11 @@ export async function notifyTaskEvent(input: NotifyTaskEventInput): Promise<void
     )
   } catch (error) {
     console.error('[notificações] Não foi possível registrar a notificação da tarefa.', error)
+  }
+}
+
+export class DbTaskEventNotifier implements TaskEventNotifier {
+  notify(event: TaskEventNotification): Promise<void> {
+    return notifyTaskEvent(event)
   }
 }

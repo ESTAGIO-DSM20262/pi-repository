@@ -8,6 +8,7 @@ import {
 import { canChangeTaskStatus } from '@/application/projects/task-status'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks, users } from '@/db/schema'
+import { notifyTaskEvent } from '@/infrastructure/notifications/notify-task-event'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
 
 interface RouteContext {
@@ -250,6 +251,15 @@ export async function POST(request: Request, context: RouteContext) {
       changeNote: parsed.value.changeNote ?? 'Tarefa criada',
       changedByUserId: access.user.id,
       changedAt: now,
+    })
+
+    await notifyTaskEvent({
+      event: 'created',
+      projectId: id,
+      taskId: task.id,
+      project: access.project,
+      task: { title: task.title, targetStudentEmail: task.targetStudentEmail },
+      actor: access.user,
     })
 
     return NextResponse.json({ task }, { status: 201, headers: { 'Cache-Control': 'no-store' } })

@@ -1,3 +1,4 @@
+import type { TaskEventNotifier } from '@/application/notifications/task-event-notifier'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import type { Project } from '@/domain/enterprise/entities/project'
@@ -56,6 +57,7 @@ export class AssignTaskToProjectsUseCase
     private readonly reader: ProjectReader,
     private readonly tasks: ProjectTaskRepository,
     private readonly users: ProjectUserDirectory,
+    private readonly notifier?: TaskEventNotifier,
   ) {}
 
   async execute({
@@ -162,6 +164,22 @@ export class AssignTaskToProjectsUseCase
     }
 
     await this.tasks.createMany(tasks, revisions)
+
+    const notifier = this.notifier
+    if (notifier) {
+      await Promise.all(
+        eligible.map((project, index) =>
+          notifier.notify({
+            event: 'created',
+            projectId: project.id,
+            taskId: tasks[index].id,
+            project,
+            task: { title: tasks[index].title, targetStudentEmail: null },
+            actor: { email: account.email, name: account.name, role: account.role },
+          }),
+        ),
+      )
+    }
 
     return right({
       created: eligible.map((project, index) => ({
