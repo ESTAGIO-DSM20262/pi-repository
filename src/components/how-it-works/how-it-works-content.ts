@@ -159,6 +159,15 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
         },
       },
       {
+        ability: 'Atualizar o status das tarefas',
+        cells: {
+          visitor: no(),
+          student: partial('Só as do grupo ou atribuídas a ele, em projetos em andamento'),
+          professor: partial('Só o orientador principal, em projetos em andamento'),
+          admin: yes('Qualquer tarefa'),
+        },
+      },
+      {
         ability: 'Editar tarefas',
         cells: {
           visitor: no(),
@@ -298,7 +307,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-list-check',
         title: 'Acompanhar o seu PI',
-        text: 'Veja as tarefas da equipe e as atribuídas a você, com prazos e andamento. Tarefas atribuídas a outros integrantes não aparecem. Você consulta o cronograma, mas quem o altera é o professor.',
+        text: 'Veja as tarefas da equipe e as atribuídas a você, com a barra de andamento, os prazos e o aviso de atraso. Marque uma tarefa como iniciada, concluída ou reabra-a quando precisar. Tarefas atribuídas a outros integrantes não aparecem, e quem cria e edita as tarefas é o professor.',
         where: 'Página do projeto',
       },
       {
@@ -317,12 +326,12 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
     flow: [
       'Entre com a conta institucional criada pela administração. Se esquecer a senha, use Esqueci minha senha na tela de login.',
       'Explore o acervo e favorite os projetos que servem de referência para o seu PI.',
-      'Abra o projeto do seu grupo para acompanhar etapas e tarefas definidas pelo professor.',
+      'Abra o projeto do seu grupo, acompanhe as tarefas definidas pelo professor e atualize o andamento das suas.',
       'Use o seu painel para reencontrar seus projetos, prazos e favoritos e mantenha o seu perfil atualizado.',
     ],
     limits: [
       'Cadastrar e editar projetos é feito pelo professor orientador.',
-      'Criar ou alterar tarefas do cronograma é responsabilidade do professor orientador ou da administração.',
+      'Você atualiza o status das tarefas do seu grupo ou atribuídas a você, mas criar ou editar tarefas é responsabilidade do professor orientador ou da administração.',
       'Indicar PIs, escolher o Melhor PI do semestre e administrar usuários e cursos não fazem parte do perfil de aluno.',
       'Projetos desativados não aparecem para alunos.',
     ],

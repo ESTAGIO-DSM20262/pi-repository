@@ -5,6 +5,7 @@ import {
   canEditProgressTask,
   isPrincipalAdvisorOf,
 } from '@/application/projects/project-permissions'
+import { canChangeTaskStatus } from '@/application/projects/task-status'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks, users } from '@/db/schema'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
@@ -157,6 +158,7 @@ export async function GET(request: Request, context: RouteContext) {
           : null,
         lastEditedAt: lastEdit?.changedAt ?? null,
         canEdit: canEditProgressTask(access.project, viewer, task),
+        canChangeStatus: canChangeTaskStatus(access.project, viewer, task),
       }
     })
 

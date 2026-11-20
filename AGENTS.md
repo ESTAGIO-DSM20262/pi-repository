@@ -859,6 +859,32 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **API:** `POST /api/projects/bulk` (`multipart/form-data`, campo `file`) devolve
   `{ summary, created, skipped, errors }`.
 
+## 26. Tarefas do projeto: status automático, indicadores e atualização pelos alunos
+
+- **Status armazenado x exibido:** o banco guarda só `pending`, `in_progress` e `completed`.
+  **Atrasada** não é um status gravado: é calculada na hora (`getTaskDisplayStatus`, em
+  `application/projects/task-status.ts`, reaproveitando `isTaskOverdue` do dashboard) quando a
+  tarefa não está concluída e o prazo é anterior a hoje no fuso de São Paulo (`todayInSaoPaulo`).
+  Quem muda o prazo ou conclui a tarefa tira o aviso sem nenhuma edição manual de status.
+  Significado: Pendente = ainda não iniciada; Em andamento = já iniciada; Concluída = entregue;
+  Atrasada = prazo vencido sem conclusão. A legenda aparece na própria lista de tarefas.
+- **Barra de andamento:** no topo de "Progresso do Projeto" (`ProjectProgressSection`), para qualquer
+  perfil que veja o cronograma: "X de Y tarefas concluídas", percentual, barra segmentada
+  (concluídas, atrasadas, em andamento, pendentes, sem contar nenhuma duas vezes), contadores por
+  situação e quantas vencem em 7 dias (`buildTaskProgressBar`). Quando tudo está concluído e o
+  projeto ainda está em andamento, o orientador principal e o administrador recebem o aviso para
+  concluir o projeto na edição. A lista tem filtros Todas, Em aberto, Atrasadas e Concluídas, e cada
+  item mostra "Atrasada há N dias", "Vence hoje", "Vence amanhã" ou "Vence em N dias" (até 7 dias).
+- **Quem muda o status** (`canChangeTaskStatus`): administrador (qualquer tarefa de qualquer
+  projeto), orientador principal (projeto ativo em andamento) e **aluno da equipe** (somente
+  tarefas do grupo ou atribuídas a ele, em projeto ativo em andamento). Satélites e alunos de outra
+  equipe não mudam. O detalhe da tarefa mostra a ação principal conforme o estado (Iniciar tarefa,
+  Marcar como concluída, Reabrir tarefa) e a secundária (Voltar para pendente).
+- **API:** `PATCH /api/projects/[id]/progress/[taskId]/status` (`{ status, changeNote? }`). Grava a
+  mudança como revisão menor (`vX.Y+1`) com a observação automática "Status alterado de A para B.",
+  atribuída a quem mudou. `GET /api/projects/[id]/progress` devolve `canChangeStatus` por tarefa.
+  Criar e editar tarefas continua só com o orientador principal e o administrador (seção 17).
+
 ## Acessibilidade (branch `feat/acessibilidade`)
 
 - **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.
@@ -881,5 +907,5 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 
 - `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
 - O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone; só o administrador a vê na página) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
-- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno só consulta tarefas (as da equipe e as atribuídas a ele); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno vê as tarefas da equipe e as atribuídas a ele e atualiza o status delas (não cria nem edita); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

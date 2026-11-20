@@ -38,6 +38,7 @@ export interface ProgressTask {
   lastEditedByName: string | null
   lastEditedAt: string | null
   canEdit: boolean
+  canChangeStatus: boolean
   createdAt: string
   updatedAt: string
 }
@@ -338,6 +339,9 @@ export function ProgressTaskDialog({
                   options={STATUS_OPTIONS}
                   onChange={(value) => setStatus(value as ProjectProgressTaskStatus)}
                 />
+                <p className="mt-1 text-[0.625rem] text-slate-500">
+                  A tarefa não concluída com prazo vencido aparece como Atrasada automaticamente.
+                </p>
               </div>
             )}
 

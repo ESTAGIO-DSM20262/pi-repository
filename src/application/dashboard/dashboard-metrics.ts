@@ -165,7 +165,10 @@ export function isTaskDueSoon(task: Pick<DashboardTask, 'status' | 'dueDate'>, t
   return days >= 0 && days <= DUE_SOON_DAYS
 }
 
-export function summarizeTasks(tasks: DashboardTask[], today: string): TaskSummary {
+export function summarizeTasks(
+  tasks: Array<Pick<DashboardTask, 'status' | 'dueDate'>>,
+  today: string,
+): TaskSummary {
   let pending = 0
   let inProgress = 0
   let completed = 0
