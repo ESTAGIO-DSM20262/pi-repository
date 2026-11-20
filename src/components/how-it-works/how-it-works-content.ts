@@ -159,6 +159,15 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
         },
       },
       {
+        ability: 'Atribuir a mesma tarefa a vários projetos',
+        cells: {
+          visitor: no(),
+          student: no(),
+          professor: partial('Só aos projetos em andamento em que é orientador principal'),
+          admin: yes('A qualquer projeto ativo'),
+        },
+      },
+      {
         ability: 'Atualizar o status das tarefas',
         cells: {
           visitor: no(),
@@ -361,6 +370,12 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
         where: 'Página do projeto em andamento',
       },
       {
+        icon: 'fi-rr-copy-alt',
+        title: 'Atribuir a mesma tarefa a vários projetos',
+        text: 'Quando a tarefa é igual para várias equipes, escolha os projetos (por semestre, ciclo ou todos os que você orienta) e crie a tarefa de uma só vez. Você só vê os projetos que acompanha e só atribui aos que orienta como principal e que estão em andamento.',
+        where: 'Painel · Tarefas em lote',
+      },
+      {
         icon: 'fi-rr-shield-check',
         title: 'Indicar PIs',
         text: 'Marque os critérios que fazem de um projeto concluído uma referência. O selo Indicado só aparece quando todos os orientadores indicam. Você pode atualizar ou remover a sua indicação.',
@@ -451,6 +466,12 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
         title: 'Gerenciar o cronograma',
         text: 'Crie e edite qualquer tarefa de qualquer projeto, inclusive dos concluídos e das criadas por professores.',
         where: 'Página do projeto',
+      },
+      {
+        icon: 'fi-rr-copy-alt',
+        title: 'Atribuir a mesma tarefa a vários projetos',
+        text: 'Crie a mesma tarefa para vários projetos de uma vez, filtrando por semestre, ciclo, orientador ou situação, ou escolhendo os projetos um a um. Você enxerga todos os projetos ativos do sistema.',
+        where: 'Painel · Tarefas em lote',
       },
       {
         icon: 'fi-rr-eye-crossed',

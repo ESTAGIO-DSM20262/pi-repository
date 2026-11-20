@@ -885,6 +885,36 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   atribuída a quem mudou. `GET /api/projects/[id]/progress` devolve `canChangeStatus` por tarefa.
   Criar e editar tarefas continua só com o orientador principal e o administrador (seção 17).
 
+## 27. Atribuir a mesma tarefa a vários projetos
+
+- **Onde:** aba "Tarefas em lote" do painel do professor e do administrador
+  (`BulkTaskAssignmentSection`, bloco `tarefas-em-lote` em `RoleDashboard`, entre "Melhor PI" e
+  "Projetos e favoritos"). O professor só vê o bloco se acompanha algum projeto.
+- **Fluxo:** 1) escolher os projetos (checkbox por projeto, "Selecionar os listados", "Limpar
+  seleção" e o atalho "Todos em andamento"); 2) preencher título, descrição e prazo opcional; o
+  botão abre um `ConfirmationDialog` com a lista dos projetos e, ao final, um `Modal` e um relatório
+  com os projetos atendidos e os ignorados (com o motivo). Sucesso limpa o formulário e atualiza os
+  indicadores (`router.refresh()`).
+- **O que o professor vê e filtra:** só os projetos ativos que acompanha (principal ou satélite),
+  com filtros de busca, semestre, ciclo e função (todos que acompanho, sou principal, sou
+  satélite). Projetos de satélite aparecem desabilitados com o motivo. **O administrador** vê todos
+  os projetos ativos do sistema e filtra também por orientador principal e por situação
+  (padrão: em andamento). A regra de seleção e de filtro está em
+  `application/projects/bulk-task-selection.ts`.
+- **Quem pode atribuir** (`AssignTaskToProjectsUseCase`, mesma regra de `canManageProgress`):
+  orientador principal em projeto ativo e em andamento; administrador em qualquer projeto. A
+  verificação é refeita no servidor para cada projeto: projeto ignorado nunca impede os demais e
+  vem com o motivo ("Projeto concluído", "Projeto desativado", "Somente o orientador principal cria
+  tarefas", "Você não é orientador deste projeto", "Projeto não encontrado").
+- **O que é criado:** uma tarefa independente por projeto, para o grupo todo (sem aluno
+  específico), pendente, com a próxima versão principal do projeto (`vN.0`) e a revisão "Tarefa
+  criada em lote para vários projetos". Depois de criada, cada cópia é editada separadamente. Limite
+  de 100 projetos por envio. As tarefas e revisões são gravadas em um único `db.batch`
+  (`DbProjectTaskRepository`), então o lote é atômico.
+- **API:** `POST /api/projects/bulk-tasks` com `{ projectIds, title, description, dueDate? }` devolve
+  `{ summary, created, skipped }`. A validação de título (3 a 160), descrição (5 a 5.000) e data
+  (`AAAA-MM-DD` real) fica em `application/projects/task-fields.ts`.
+
 ## Acessibilidade (branch `feat/acessibilidade`)
 
 - **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.

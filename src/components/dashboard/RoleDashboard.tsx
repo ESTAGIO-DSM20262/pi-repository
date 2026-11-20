@@ -31,6 +31,7 @@ import {
   RECENT_SEMESTER_LIMIT,
 } from '@/presentation/projects/semester-dropdown'
 import { AdminInsights } from './AdminInsights'
+import { BulkTaskAssignmentSection } from './BulkTaskAssignmentSection'
 import { DashboardBlock, DashboardSectionNav } from './DashboardBlock'
 import { DashboardFiltersBar } from './DashboardFiltersBar'
 import { formatMetric, StatCard } from './DashboardWidgets'
@@ -725,6 +726,8 @@ export function RoleDashboard({
       projects.some(
         (project) => project.advisor.email.trim().toLowerCase() === email.trim().toLowerCase(),
       ))
+  const showBulkTasks =
+    role === 'admin' || (role === 'professor' && projects.some((project) => project.related))
   const blockLinks = [
     ...(showFilters || role === 'admin' || monitoringVisible
       ? [
@@ -742,6 +745,9 @@ export function RoleDashboard({
       ? [{ id: 'gestao', label: 'Usuários e cursos', icon: 'fi-rr-users' }]
       : []),
     ...(showAwards ? [{ id: 'melhor-pi', label: 'Melhor PI', icon: 'fi-rr-badge-check' }] : []),
+    ...(showBulkTasks
+      ? [{ id: 'tarefas-em-lote', label: 'Tarefas em lote', icon: 'fi-rr-list-check' }]
+      : []),
     { id: 'projetos', label: 'Projetos e favoritos', icon: 'fi-rr-folder-open' },
   ]
 
@@ -874,6 +880,25 @@ export function RoleDashboard({
             icon="fi-rr-badge-check"
           >
             <SemesterAwardsSection />
+          </DashboardBlock>
+        )}
+
+        {showBulkTasks && (
+          <DashboardBlock
+            id="tarefas-em-lote"
+            title="Tarefas em lote"
+            description={
+              role === 'admin'
+                ? 'Atribua a mesma tarefa a vários projetos de qualquer orientador'
+                : 'Atribua a mesma tarefa a vários dos projetos que você acompanha'
+            }
+            icon="fi-rr-list-check"
+          >
+            <BulkTaskAssignmentSection
+              role={role === 'admin' ? 'admin' : 'professor'}
+              email={email}
+              projects={projects}
+            />
           </DashboardBlock>
         )}
 
