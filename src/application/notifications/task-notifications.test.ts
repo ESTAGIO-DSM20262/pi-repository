@@ -92,7 +92,8 @@ describe('buildTaskNotificationContent', () => {
     expect(buildTaskNotificationContent(input())).toEqual({
       type: 'task_created',
       title: 'Nova tarefa',
-      message: 'Profa. Principal criou a tarefa “Entrega do relatório” no projeto SALA — Agendamento.',
+      message:
+        'Profa. Principal criou a tarefa “Entrega do relatório” no projeto SALA — Agendamento.',
     })
   })
 

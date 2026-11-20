@@ -129,7 +129,10 @@ export function MobileNavMenu({ pathname, user, loading, onSignOut }: MobileNavM
                       aria-current={current ? 'page' : undefined}
                       className={`flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold transition ${current ? 'border-primary/30 bg-primary-light text-primary' : 'border-transparent text-slate-800 hover:border-primary/30 hover:bg-primary-light hover:text-primary'}`}
                     >
-                      <i className={`fi ${link.icon} flex text-lg text-primary`} aria-hidden="true" />
+                      <i
+                        className={`fi ${link.icon} flex text-lg text-primary`}
+                        aria-hidden="true"
+                      />
                       {link.label}
                     </Link>
                   )
@@ -159,7 +162,10 @@ export function MobileNavMenu({ pathname, user, loading, onSignOut }: MobileNavM
                         onClick={() => setOpen(false)}
                         className="flex min-h-12 items-center gap-3 rounded-xl border border-border bg-surface px-4 text-sm font-semibold text-slate-800 transition hover:border-primary/40 hover:bg-primary-light hover:text-primary"
                       >
-                        <i className="fi fi-rr-id-badge flex text-lg text-primary" aria-hidden="true" />
+                        <i
+                          className="fi fi-rr-id-badge flex text-lg text-primary"
+                          aria-hidden="true"
+                        />
                         Acessar perfil
                       </Link>
                       <button

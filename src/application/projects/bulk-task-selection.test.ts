@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { Project } from '@/domain/enterprise/entities/project'
 import {
   bulkTaskCandidates,
-  dedupeBulkTaskProjects,
   DEFAULT_BULK_TASK_FILTERS,
+  dedupeBulkTaskProjects,
   explainBulkTaskIneligibility,
   filterBulkTaskProjects,
   listBulkTaskAdvisors,

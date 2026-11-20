@@ -60,7 +60,8 @@ describe('parseProjectGrid', () => {
         Situação: 'Concluído',
         'Orientador principal': ' Prof@CPS.sp.gov.br ',
         'Orientadores adicionais': 'x@cps.sp.gov.br; y@cps.sp.gov.br',
-        'E-mails dos alunos *': 'A@aluno.cps.sp.gov.br, b@aluno.cps.sp.gov.br\nA@aluno.cps.sp.gov.br',
+        'E-mails dos alunos *':
+          'A@aluno.cps.sp.gov.br, b@aluno.cps.sp.gov.br\nA@aluno.cps.sp.gov.br',
         'Líder do grupo': 'B@aluno.cps.sp.gov.br',
         Linguagens: 'TypeScript, Python',
         'Tecnologias e ferramentas': 'React; Node.js',

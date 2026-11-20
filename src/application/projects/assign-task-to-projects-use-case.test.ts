@@ -80,10 +80,7 @@ describe('AssignTaskToProjectsUseCase — notificações', () => {
     }
     const users = new InMemoryProjectUserDirectory([principal, satellite, admin, student], [], [])
     const useCase = new AssignTaskToProjectsUseCase(
-      new InMemoryProjectReader([
-        makeProject('a'),
-        makeProject('done', { status: 'publicado' }),
-      ]),
+      new InMemoryProjectReader([makeProject('a'), makeProject('done', { status: 'publicado' })]),
       new InMemoryProjectTaskRepository(),
       users,
       notifier,
