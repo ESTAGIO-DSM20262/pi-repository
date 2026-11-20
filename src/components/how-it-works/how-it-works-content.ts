@@ -177,6 +177,15 @@ export const PERMISSION_MATRIX: MatrixGroup[] = [
         },
       },
       {
+        ability: 'Receber notificações de tarefas no sistema',
+        cells: {
+          visitor: no(),
+          student: yes('Tarefa nova ou atualizada na equipe'),
+          professor: yes('Tarefas dos projetos que orienta e mudanças feitas pelos alunos'),
+          admin: no(),
+        },
+      },
+      {
         ability: 'Editar tarefas',
         cells: {
           visitor: no(),

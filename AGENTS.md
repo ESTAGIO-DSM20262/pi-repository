@@ -969,6 +969,16 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   só a contagem, usada no recarregamento periódico) e `PATCH /api/notifications` com `{ all: true }`
   ou `{ ids: [...] }` (1 a 100) para marcar como lidas. Sempre `Cache-Control: no-store` e só atua
   nas notificações do próprio usuário da sessão.
+- **Interface** (`components/NotificationCenter.tsx`, dentro do `Header`, para aluno e professor;
+  oculto para administrador e na tela de primeiro acesso): sino com contador (`99+` no máximo) e
+  `aria-label` com a quantidade; painel com as 30 mais recentes (não lidas com fundo claro e selo
+  "Nova", tempo relativo), "Marcar todas como lidas" e clique que marca como lida e abre
+  `/projetos/[id]#progresso` (a seção de tarefas tem `id="progresso"`). No celular o painel ocupa a
+  largura da tela. Ao entrar, se houver notificações não lidas, aparece um aviso ("Você tem N novas
+  notificações", com "Ver notificações", fecha sozinho em 9 s) **uma vez por sessão do navegador**
+  (`libs/notification-announcement.ts`, chave por usuário no `sessionStorage`, limpa ao sair). A
+  contagem é atualizada a cada 60 s com a aba visível; se aumentar, mostra o aviso "Você recebeu uma
+  nova notificação". O aviso usa `role="status"` e as cores e sombras do sistema.
 
 ## 28. Tela 404 personalizada
 

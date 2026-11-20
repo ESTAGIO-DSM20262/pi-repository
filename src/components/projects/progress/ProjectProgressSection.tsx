@@ -230,7 +230,8 @@ export function ProjectProgressSection({
 
   return (
     <section
-      className="mt-5 rounded-xl border border-[#e9c9c5] bg-white p-4 shadow-sm sm:p-5 lg:p-6"
+      id="progresso"
+      className="mt-5 scroll-mt-6 rounded-xl border border-[#e9c9c5] bg-white p-4 shadow-sm sm:p-5 lg:p-6"
       aria-labelledby="project-progress-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">

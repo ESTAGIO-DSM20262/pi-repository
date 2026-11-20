@@ -8,10 +8,12 @@ import { createPortal } from 'react-dom'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { INVITE_PATH } from '@/libs/account-invite'
 import { getNameInitials } from '@/libs/initials'
+import { clearNotificationAnnouncement } from '@/libs/notification-announcement'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
 import { useAuth } from '@/presentation/auth/auth-context'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 import { MobileNavMenu } from './MobileNavMenu'
+import { NotificationCenter } from './NotificationCenter'
 
 const linkClass =
   'group relative py-1 text-sm text-text-secondary transition-colors duration-300 hover:text-primary focus-visible:text-primary ' +
@@ -275,6 +277,7 @@ export function Header() {
 
   async function handleSignOut() {
     showAuthAction('Estamos encerrando sua sessão com segurança…')
+    clearNotificationAnnouncement()
     try {
       await signOut()
       router.push('/')
@@ -396,6 +399,7 @@ export function Header() {
               {desktopAuthItem}
             </nav>
           )}
+          {!focusMode && <NotificationCenter />}
           <span className="hidden h-10 w-px bg-border sm:block" aria-hidden="true" />
           <Image
             src="/brand/cps-cor.png"
