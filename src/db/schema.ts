@@ -13,6 +13,7 @@ import {
   unique,
   uniqueIndex,
 } from 'drizzle-orm/pg-core'
+import type { NotificationType } from '@/domain/enterprise/entities/notification'
 import type {
   ProjectAdvisor,
   ProjectPublicDetails,
@@ -322,4 +323,29 @@ export const userAuditEvents = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [index('user_audit_events_user_idx').on(table.userId, table.createdAt.desc())],
+)
+
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: text('type').$type<NotificationType>().notNull(),
+    title: text('title').notNull(),
+    message: text('message').notNull(),
+    projectId: text('project_id'),
+    taskId: text('task_id'),
+    readAt: timestamp('read_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('notifications_user_created_idx').on(table.userId, table.createdAt.desc()),
+    index('notifications_user_unread_idx').on(table.userId).where(sql`${table.readAt} IS NULL`),
+    check(
+      'notifications_type_check',
+      sql`${table.type} IN ('task_created', 'task_updated', 'task_status_changed')`,
+    ),
+  ],
 )

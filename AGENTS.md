@@ -939,6 +939,31 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   `{ summary, created, skipped }`. A validação de título (3 a 160), descrição (5 a 5.000) e data
   (`AAAA-MM-DD` real) fica em `application/projects/task-fields.ts`.
 
+## 29. Notificações no sistema
+
+- **Escopo:** só notificações dentro da plataforma (sem e-mail), para **alunos e professores**. O
+  administrador não recebe notificações: avisar tudo de todos os projetos seria ruído, e ele já tem
+  o painel com indicadores. `GET /api/notifications` devolve lista vazia para ele e a interface não
+  mostra o sino.
+- **Tabela `notifications`** (`src/db/migrations/20261120_notifications.sql`, espelhada em
+  `db/schema.ts`): uma linha por destinatário (`user_id`, `type`, `title`, `message`, `project_id`,
+  `task_id`, `read_at`, `created_at`), `ON DELETE CASCADE` com o usuário, índice por usuário e data
+  e índice parcial das não lidas. Tipos: `task_created`, `task_updated`, `task_status_changed`
+  (`domain/enterprise/entities/notification.ts`).
+- **Regras puras** (`application/notifications/task-notifications.ts`, com testes):
+  `resolveTaskNotificationRecipients` e `buildTaskNotificationContent`. Nunca avisa quem fez a ação.
+  Tarefa criada ou editada avisa o aluno responsável (ou toda a equipe, se for do grupo) e os
+  orientadores do projeto. Mudança de status por **aluno** avisa só os orientadores; por
+  **professor** avisa só os alunos; por **administrador** avisa alunos e orientadores.
+  `relative-time.ts` formata "há 5 min" e o rótulo de quantidade para a interface.
+- **Gravação:** `infrastructure/notifications/notify-task-event.ts` resolve e-mails para contas
+  ativas (nunca administrador) e grava com `DbNotificationRepository`. Falha ao notificar só vai
+  para o log e **nunca** desfaz a operação da tarefa.
+- **API:** `GET /api/notifications` (lista as 30 mais recentes e `unreadCount`; `?resumo=1` devolve
+  só a contagem, usada no recarregamento periódico) e `PATCH /api/notifications` com `{ all: true }`
+  ou `{ ids: [...] }` (1 a 100) para marcar como lidas. Sempre `Cache-Control: no-store` e só atua
+  nas notificações do próprio usuário da sessão.
+
 ## 28. Tela 404 personalizada
 
 - `src/app/not-found.tsx` substitui a página padrão do Next para qualquer rota inexistente e para os
