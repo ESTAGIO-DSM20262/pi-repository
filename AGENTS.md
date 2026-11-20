@@ -937,7 +937,19 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Dropdowns**: `SelectDropdown` aceita `searchable` (campo de pesquisa sem acento e sem diferenciar maiúsculas, `searchPlaceholder`, `emptyMessage`). Use em toda seleção de pessoa (professor, aluno, responsável). O seletor de modo de cores do painel também usa `SelectDropdown`; o painel ignora cliques dentro de `[role="listbox"]` ao decidir se fecha.
 - **Daltonismo e marca**: os modos também trocam `--primary`, `--secondary` e `--accent` (e variantes) para o sistema inteiro, não só os tons dos dashboards; no escuro, `text-primary` e `text-secondary` usam `--cb-primary-text` e `--cb-secondary-text`.
 - **Scrollbars**: `globals.css` define barras finas na cor primária para todos os elementos (exceções: `.modal-scrollbar` e `.scrollbar-success|warning|danger`) e esconde a barra principal da página em telas até 767px.
-- **Menu da conta no mobile**: `Header.tsx` mantém o dropdown ancorado no desktop e usa um bottom sheet próprio em telas menores, renderizado via portal no `document.body` para escapar de `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de fundo.
+- **Menu da conta no desktop e no modo foco**: `Header.tsx` mantém o dropdown ancorado no desktop (a
+  partir de `sm`). No modo foco (`/definir-senha`) o menu da conta continua sendo um bottom sheet
+  próprio em telas menores, renderizado via portal no `document.body` para escapar de
+  `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de
+  fundo.
+- **Navegação no mobile (menu hambúrguer)**: abaixo de `sm` o `Header` não tem mais a segunda linha
+  de links. O botão de menu (`MobileNavMenu.tsx`) fica ao lado do logo do CPS e abre uma gaveta pela
+  direita, via portal, com Início, Como Funciona e Painel (com o item atual marcado por
+  `aria-current`), e no rodapé da gaveta os dados da conta com "Acessar perfil" e "Sair da conta",
+  ou o botão "Entrar" para visitantes. A gaveta prende o foco, fecha com Escape, toque fora, troca de
+  rota ou ao ampliar a tela para `sm`, bloqueia a rolagem de fundo e devolve o foco ao botão
+  (`useRestoreFocus`). O fallback de carregamento no `app/layout.tsx` acompanha a altura de 64px do
+  cabeçalho mobile.
 - **Listagem administrativa**: `AdminUsersSection.tsx` mostra cartões com ações acessíveis em telas menores e preserva a tabela com rolagem horizontal a partir do breakpoint `sm`.
 - **Filtros do catálogo**: tecnologias selecionadas usam o fundo `bg-primary` e texto branco, seguindo a mesma cor ativa dos demais filtros.
 - **Arrastar para fechar**: `useSwipeToClose` (`src/libs/useSwipeToClose.ts`) fecha as folhas inferiores no celular. Dentro da área rolável (`scrollRef`) o gesto só começa quando ela está no topo; no cabeçalho e no rodapé da folha vale sempre.
