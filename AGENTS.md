@@ -959,6 +959,12 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Gravação:** `infrastructure/notifications/notify-task-event.ts` resolve e-mails para contas
   ativas (nunca administrador) e grava com `DbNotificationRepository`. Falha ao notificar só vai
   para o log e **nunca** desfaz a operação da tarefa.
+- **Onde dispara:** `POST /api/projects/[id]/progress` (criada), `PATCH .../[taskId]` (editada),
+  `PATCH .../[taskId]/status` (status), `AssignTaskToProjectsUseCase` (lote, uma por projeto) e
+  `CreateProjectUseCase` (tarefas iniciais do cadastro pelo formulário; a importação em massa de
+  projetos não tem tarefas e não passa notificador). Os casos de uso recebem o notificador pela porta
+  opcional `TaskEventNotifier` (`application/notifications/task-event-notifier.ts`), implementada
+  por `DbTaskEventNotifier`.
 - **API:** `GET /api/notifications` (lista as 30 mais recentes e `unreadCount`; `?resumo=1` devolve
   só a contagem, usada no recarregamento periódico) e `PATCH /api/notifications` com `{ all: true }`
   ou `{ ids: [...] }` (1 a 100) para marcar como lidas. Sempre `Cache-Control: no-store` e só atua

@@ -1,3 +1,4 @@
+import type { TaskEventNotifier } from '@/application/notifications/task-event-notifier'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import {
@@ -30,6 +31,7 @@ export class CreateProjectUseCase
   constructor(
     private readonly projects: ProjectRepository,
     private readonly users: ProjectUserDirectory,
+    private readonly notifier?: TaskEventNotifier,
   ) {}
 
   async execute({
@@ -172,6 +174,28 @@ export class CreateProjectUseCase
     }))
 
     await this.projects.create(project, tasks, revisions)
+
+    const notifier = this.notifier
+    if (notifier && tasks.length > 0) {
+      const subject = {
+        title: project.title,
+        advisor: { email: project.advisorEmail },
+        coAdvisors: project.coAdvisors,
+        memberEmails: project.memberEmails,
+      }
+      await Promise.all(
+        tasks.map((task) =>
+          notifier.notify({
+            event: 'created',
+            projectId: id,
+            taskId: task.id,
+            project: subject,
+            task: { title: task.title, targetStudentEmail: task.targetStudentEmail },
+            actor: { email: account.email, name: account.name, role: account.role },
+          }),
+        ),
+      )
+    }
     return right({ id, tasksCreated: tasks.length })
   }
 }
