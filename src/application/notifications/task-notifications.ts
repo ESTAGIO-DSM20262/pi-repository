@@ -7,7 +7,7 @@ export type TaskNotificationEvent = 'created' | 'updated' | 'status_changed'
 export interface TaskNotificationProject {
   title: string
   advisor: { email: string }
-  coAdvisors: Array<{ email: string }>
+  coAdvisors?: Array<{ email: string }>
   memberEmails: string[]
 }
 
@@ -49,7 +49,7 @@ function studentRecipients(input: TaskNotificationInput) {
 }
 
 function advisorRecipients(project: TaskNotificationProject) {
-  return [project.advisor.email, ...project.coAdvisors.map((advisor) => advisor.email)]
+  return [project.advisor.email, ...(project.coAdvisors ?? []).map((advisor) => advisor.email)]
 }
 
 function candidateEmails(input: TaskNotificationInput): string[] {

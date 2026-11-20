@@ -249,7 +249,7 @@ export function ProjectProgressSection({
               : canManage
                 ? 'Organize entregas, atribua responsáveis e mantenha um histórico de cada revisão.'
                 : canUpdateAnyStatus
-                  ? 'Acompanhe os prazos e atualize o andamento das tarefas do seu grupo.'
+                  ? 'Acompanhe as tarefas de toda a equipe e atualize o andamento das suas.'
                   : 'Acompanhe as orientações, os prazos e a evolução das entregas deste projeto.'}
           </p>
         </div>
@@ -331,7 +331,9 @@ export function ProjectProgressSection({
                 key={item.status}
                 className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold ${item.count > 0 || item.status !== 'overdue' ? STATUS[item.status].badge : 'border-slate-200 bg-white text-slate-500'}`}
               >
-                <span className={`h-1.5 w-1.5 rounded-full ${STATUS[item.status].dot.split(' ')[0]}`} />
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${STATUS[item.status].dot.split(' ')[0]}`}
+                />
                 {item.count} {item.label}
               </li>
             ))}
@@ -623,7 +625,8 @@ export function ProjectProgressSection({
                 {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}
               </span>
             </div>
-            <div role="group" aria-label="Filtrar tarefas" className="mb-3 flex flex-wrap gap-1.5">
+            <fieldset className="m-0 mb-3 flex min-w-0 flex-wrap gap-1.5 border-0 p-0">
+              <legend className="sr-only">Filtrar tarefas</legend>
               {FILTERS.map((item) => (
                 <button
                   key={item.id}
@@ -635,7 +638,7 @@ export function ProjectProgressSection({
                   {item.label}
                 </button>
               ))}
-            </div>
+            </fieldset>
             {visibleTasks.length === 0 && (
               <p className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500">
                 Nenhuma tarefa neste filtro.
