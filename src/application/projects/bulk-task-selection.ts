@@ -36,10 +36,30 @@ function normalizeText(value: string) {
     .toLocaleLowerCase('pt-BR')
 }
 
+function projectIdentity(project: Project) {
+  return [normalizeText(project.title), project.cycle, project.semester].join('|')
+}
+
+export function dedupeBulkTaskProjects(projects: Project[]): Project[] {
+  const seenIds = new Set<string>()
+  const seenIdentities = new Set<string>()
+  const unique: Project[] = []
+  for (const project of projects) {
+    const identity = projectIdentity(project)
+    if (seenIds.has(project.id) || seenIdentities.has(identity)) continue
+    seenIds.add(project.id)
+    seenIdentities.add(identity)
+    unique.push(project)
+  }
+  return unique
+}
+
 export function bulkTaskCandidates(projects: Project[], viewer: BulkTaskViewer): Project[] {
-  return projects.filter(
-    (project) =>
-      isProjectActive(project) && (viewer.role === 'admin' || isAdvisorOf(project, viewer)),
+  return dedupeBulkTaskProjects(
+    projects.filter(
+      (project) =>
+        isProjectActive(project) && (viewer.role === 'admin' || isAdvisorOf(project, viewer)),
+    ),
   )
 }
 

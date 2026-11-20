@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { AssignTaskToProjectsUseCase } from '@/application/projects/assign-task-to-projects-use-case'
-import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
+import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { DbProjectTaskRepository } from '@/infrastructure/projects/db-project-task-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
 import { auth } from '@/libs/auth'
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const data = body && typeof body === 'object' ? (body as Record<string, unknown>) : {}
 
     const useCase = new AssignTaskToProjectsUseCase(
-      new DbProjectRepository(),
+      new CompositeProjectRepository(),
       new DbProjectTaskRepository(),
       new DbProjectUserDirectory(),
     )

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Project } from '@/domain/enterprise/entities/project'
 import {
   bulkTaskCandidates,
+  dedupeBulkTaskProjects,
   DEFAULT_BULK_TASK_FILTERS,
   explainBulkTaskIneligibility,
   filterBulkTaskProjects,
@@ -65,6 +66,33 @@ describe('bulkTaskCandidates', () => {
       'satellite',
       'foreign',
     ])
+  })
+})
+
+describe('projetos repetidos na lista', () => {
+  it('mantém uma só entrada quando o mesmo id aparece duas vezes', () => {
+    const repeated = [own, ownSecondSemester, { ...own }]
+
+    expect(dedupeBulkTaskProjects(repeated).map((project) => project.id)).toEqual(['own', 'own-2'])
+  })
+
+  it('mantém a primeira entrada quando título, ciclo e semestre coincidem com outro id', () => {
+    const stored = makeProject('uuid-real', { title: 'SALA — Agendamento' })
+    const demo = makeProject('1', { title: 'sala — agendamento' })
+    const otherSemester = makeProject('uuid-outro', { title: 'SALA — Agendamento', semester: 4 })
+
+    expect(
+      dedupeBulkTaskProjects([stored, demo, otherSemester]).map((project) => project.id),
+    ).toEqual(['uuid-real', 'uuid-outro'])
+  })
+
+  it('os candidatos da atribuição em lote não repetem projetos', () => {
+    const candidates = bulkTaskCandidates(
+      [own, { ...own }, makeProject('copy', { title: own.title })],
+      professor,
+    )
+
+    expect(candidates.map((project) => project.id)).toEqual(['own'])
   })
 })
 

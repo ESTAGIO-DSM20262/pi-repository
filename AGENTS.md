@@ -901,6 +901,14 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   os projetos ativos do sistema e filtra também por orientador principal e por situação
   (padrão: em andamento). A regra de seleção e de filtro está em
   `application/projects/bulk-task-selection.ts`.
+- **Projetos repetidos na lista:** a lista do painel vem de `CompositeProjectRepository` (banco +
+  projetos demonstrativos). Um mesmo projeto podia aparecer duas vezes (id repetido ou projeto real
+  com o mesmo título, ciclo e semestre de um demonstrativo) e, como a API só consultava o banco, a
+  cópia demonstrativa era ignorada com "Projeto não encontrado". `bulkTaskCandidates` agora passa
+  por `dedupeBulkTaskProjects` (mantém a primeira entrada por id e por título normalizado + ciclo +
+  semestre, e o banco vem antes dos demonstrativos) e `POST /api/projects/bulk-tasks` usa
+  `CompositeProjectRepository`, a mesma fonte do painel e do acesso ao progresso, então todo projeto
+  listado é atribuível.
 - **Quem pode atribuir** (`AssignTaskToProjectsUseCase`, mesma regra de `canManageProgress`):
   orientador principal em projeto ativo e em andamento; administrador em qualquer projeto. A
   verificação é refeita no servidor para cada projeto: projeto ignorado nunca impede os demais e
