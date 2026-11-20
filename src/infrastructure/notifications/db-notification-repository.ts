@@ -69,4 +69,8 @@ export class DbNotificationRepository {
       .set({ readAt: new Date() })
       .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)))
   }
+
+  async deleteAll(userId: string): Promise<void> {
+    await db.delete(notifications).where(eq(notifications.userId, userId))
+  }
 }

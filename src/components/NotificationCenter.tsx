@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
 import { formatRelativeTime, unreadCountLabel } from '@/application/notifications/relative-time'
+import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import type { AppNotification, NotificationType } from '@/domain/enterprise/entities/notification'
 import { markAnnouncedThisSession, wasAnnouncedThisSession } from '@/libs/notification-announcement'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
@@ -33,6 +34,9 @@ export function NotificationCenter() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false)
+  const [clearing, setClearing] = useState(false)
+  const [clearError, setClearError] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const lastCount = useRef(0)
   const panelId = useId()
@@ -58,9 +62,7 @@ export function NotificationCenter() {
         if (initial && !wasAnnouncedThisSession(userId)) {
           markAnnouncedThisSession(userId)
           setToast(
-            count === 1
-              ? 'Você tem 1 nova notificação.'
-              : `Você tem ${count} novas notificações.`,
+            count === 1 ? 'Você tem 1 nova notificação.' : `Você tem ${count} novas notificações.`,
           )
         } else if (!initial && grew) {
           setToast('Você recebeu uma nova notificação.')
@@ -87,13 +89,13 @@ export function NotificationCenter() {
   }, [toast])
 
   useEffect(() => {
-    if (!open) return
+    if (!open || confirmClearOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false)
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open])
+  }, [open, confirmClearOpen])
 
   async function loadList() {
     setLoading(true)
@@ -118,6 +120,7 @@ export function NotificationCenter() {
   function togglePanel() {
     setToast(null)
     const next = !open
+    setClearError(false)
     setOpen(next)
     if (next) loadList()
   }
@@ -141,6 +144,24 @@ export function NotificationCenter() {
   async function markAllRead() {
     setItems((current) => current.map((item) => ({ ...item, read: true })))
     await markRead({ all: true })
+  }
+
+  async function clearAll() {
+    setClearing(true)
+    setClearError(false)
+    try {
+      const response = await fetch('/api/notifications', { method: 'DELETE' })
+      if (!response.ok) throw new Error('Falha ao limpar')
+      setItems([])
+      setUnread(0)
+      lastCount.current = 0
+      setConfirmClearOpen(false)
+    } catch {
+      setClearError(true)
+      setConfirmClearOpen(false)
+    } finally {
+      setClearing(false)
+    }
   }
 
   async function openNotification(notification: AppNotification) {
@@ -229,15 +250,33 @@ export function NotificationCenter() {
                 <h2 className="text-sm font-semibold text-slate-900">Notificações</h2>
                 <p className="text-[0.6875rem] text-text-secondary">{unreadCountLabel(unread)}</p>
               </div>
-              <button
-                type="button"
-                onClick={markAllRead}
-                disabled={unread === 0}
-                className="cursor-pointer text-xs font-semibold text-primary transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
-              >
-                Marcar todas como lidas
-              </button>
+              <div className="flex flex-col items-end gap-1">
+                <button
+                  type="button"
+                  onClick={markAllRead}
+                  disabled={unread === 0}
+                  className="cursor-pointer text-xs font-semibold text-primary transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
+                >
+                  Marcar todas como lidas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClearOpen(true)}
+                  disabled={items.length === 0}
+                  className="cursor-pointer text-xs font-semibold text-text-secondary transition hover:text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
+                >
+                  Limpar notificações
+                </button>
+              </div>
             </div>
+            {clearError && (
+              <p
+                role="alert"
+                className="border-b border-border-light bg-primary-light/50 px-4 py-2 text-[0.6875rem] font-medium text-primary"
+              >
+                Não foi possível limpar as notificações. Tente novamente.
+              </p>
+            )}
 
             <div className="max-h-[min(420px,calc(100vh-10rem))] overflow-y-auto">
               {loading && items.length === 0 ? (
@@ -304,6 +343,19 @@ export function NotificationCenter() {
           </section>
         </>
       )}
+
+      <ConfirmationDialog
+        open={confirmClearOpen}
+        title="Limpar notificações?"
+        description="Todas as suas notificações serão removidas, lidas ou não. Essa ação não pode ser desfeita."
+        icon="fi-rr-bell"
+        tone="danger"
+        confirmLabel="Limpar notificações"
+        cancelLabel="Manter notificações"
+        pending={clearing}
+        onCancel={() => setConfirmClearOpen(false)}
+        onConfirm={clearAll}
+      />
     </div>
   )
 }

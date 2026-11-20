@@ -90,3 +90,17 @@ export async function PATCH(request: Request) {
     return jsonError('Não foi possível atualizar suas notificações.', 500)
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await resolveRecipient(request)
+    if (!user) return jsonError('Entre no sistema para limpar suas notificações.', 401)
+    if (user.role === 'admin') return NextResponse.json({ unreadCount: 0 }, { headers: NO_STORE })
+
+    await new DbNotificationRepository().deleteAll(user.id)
+    return NextResponse.json({ unreadCount: 0 }, { headers: NO_STORE })
+  } catch (error) {
+    console.error('[DELETE /api/notifications]', error)
+    return jsonError('Não foi possível limpar suas notificações.', 500)
+  }
+}
