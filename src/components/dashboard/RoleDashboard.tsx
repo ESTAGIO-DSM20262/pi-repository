@@ -501,6 +501,7 @@ function ProjectsSection({
   emptyText,
   filterable = false,
   includeInactiveFilter = false,
+  ongoingFirst = false,
 }: {
   title: string
   subtitle: string
@@ -512,6 +513,7 @@ function ProjectsSection({
   emptyText: string
   filterable?: boolean
   includeInactiveFilter?: boolean
+  ongoingFirst?: boolean
 }) {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
@@ -527,9 +529,15 @@ function ProjectsSection({
   }, [projects])
 
   const filteredProjects = useMemo(() => {
-    if (!filterable) return projects
+    const ordered = ongoingFirst
+      ? [...projects].sort(
+          (first, second) =>
+            Number(second.status === 'em_andamento') - Number(first.status === 'em_andamento'),
+        )
+      : projects
+    if (!filterable) return ordered
     const normalized = normalizeText(query)
-    return projects.filter((project) => {
+    return ordered.filter((project) => {
       const matchesText =
         !normalized ||
         normalizeText(
@@ -543,7 +551,7 @@ function ProjectsSection({
       const matchesCycle = cycleFilter === 'all' || project.cycle === cycleFilter
       return matchesText && matchesStatus && matchesSemester && matchesCycle
     })
-  }, [projects, filterable, query, statusFilter, semesterFilter, cycleFilter])
+  }, [projects, filterable, ongoingFirst, query, statusFilter, semesterFilter, cycleFilter])
 
   const hasActiveFilters =
     query.trim() !== '' ||
@@ -928,6 +936,7 @@ export function RoleDashboard({
             action={newProjectAction}
             filterable={role !== 'student'}
             includeInactiveFilter={role === 'admin'}
+            ongoingFirst={role === 'professor'}
             emptyText={
               role === 'admin'
                 ? 'Ainda não há projetos cadastrados no acervo.'
