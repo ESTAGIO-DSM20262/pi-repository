@@ -1,3 +1,4 @@
+import { dedupeProjects } from '@/application/projects/dedupe-projects'
 import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
 import { getProjectAdvisors, isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import type { ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
@@ -380,7 +381,7 @@ export function buildProfessorDashboardMetrics({
   now,
   advisorEmail,
 }: ProfessorMetricsInput): ProfessorDashboardMetrics {
-  const followed = projects.filter(isProjectActive)
+  const followed = dedupeProjects(projects.filter(isProjectActive))
   const taskProjects = advisorEmail
     ? followed.filter(
         (project) => normalizeEmail(project.advisor.email) === normalizeEmail(advisorEmail),
@@ -443,7 +444,7 @@ export function buildAdminDashboardMetrics({
   today,
   now,
 }: AdminMetricsInput): AdminDashboardMetrics {
-  const active = projects.filter(isProjectActive)
+  const active = dedupeProjects(projects.filter(isProjectActive))
   const activeIds = new Set(active.map((project) => project.id))
   const activeTasks = tasks.filter((task) => activeIds.has(task.projectId))
   const tasksByProject = groupTasksByProject(activeTasks)
@@ -493,7 +494,7 @@ export function buildAdminDashboardMetrics({
       ongoing: ongoing.length,
       completed: completed.length,
       indicated: completed.filter((project) => project.verified).length,
-      deactivated: projects.length - active.length,
+      deactivated: projects.filter((project) => !isProjectActive(project)).length,
       awaitingIndication: completed.filter((project) => !project.verified).length,
       ongoingWithTasks: rows.filter((row) => row.total > 0).length,
       ongoingWithoutTasks: rows.filter((row) => row.withoutTasks).length,
@@ -552,7 +553,7 @@ export function buildStudentDashboardMetrics({
   now,
 }: StudentMetricsInput): StudentDashboardMetrics {
   const mine = normalizeEmail(email)
-  const followed = projects.filter(isProjectActive)
+  const followed = dedupeProjects(projects.filter(isProjectActive))
   const followedIds = new Set(followed.map((project) => project.id))
   const projectTasks = tasks.filter((task) => followedIds.has(task.projectId))
   const myTasks = projectTasks.filter(

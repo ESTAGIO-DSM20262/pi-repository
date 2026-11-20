@@ -1,5 +1,6 @@
 import type { Project } from '@/domain/enterprise/entities/project'
 import { isProjectActive } from '@/domain/enterprise/entities/project-advisors'
+import { dedupeProjects } from './dedupe-projects'
 import { canManageProgress, isAdvisorOf, isPrincipalAdvisorOf } from './project-permissions'
 
 export interface BulkTaskViewer {
@@ -36,22 +37,8 @@ function normalizeText(value: string) {
     .toLocaleLowerCase('pt-BR')
 }
 
-function projectIdentity(project: Project) {
-  return [normalizeText(project.title), project.cycle, project.semester].join('|')
-}
-
 export function dedupeBulkTaskProjects(projects: Project[]): Project[] {
-  const seenIds = new Set<string>()
-  const seenIdentities = new Set<string>()
-  const unique: Project[] = []
-  for (const project of projects) {
-    const identity = projectIdentity(project)
-    if (seenIds.has(project.id) || seenIdentities.has(identity)) continue
-    seenIds.add(project.id)
-    seenIdentities.add(identity)
-    unique.push(project)
-  }
-  return unique
+  return dedupeProjects(projects)
 }
 
 export function bulkTaskCandidates(projects: Project[], viewer: BulkTaskViewer): Project[] {

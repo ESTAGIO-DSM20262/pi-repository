@@ -1,3 +1,4 @@
+import { omitExamplesAlreadyStored } from '@/application/projects/dedupe-projects'
 import type { Project } from '@/domain/enterprise/entities/project'
 import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
 import { DbProjectRepository } from './db-project-repository'
@@ -11,7 +12,7 @@ export class CompositeProjectRepository implements ProjectReader {
 
   async findAll(): Promise<Project[]> {
     const [stored, examples] = await Promise.all([this.stored.findAll(), this.examples.findAll()])
-    return [...stored, ...examples]
+    return [...stored, ...omitExamplesAlreadyStored(stored, examples)]
   }
 
   async findById(id: string): Promise<Project | null> {
