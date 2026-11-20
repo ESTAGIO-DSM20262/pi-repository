@@ -39,8 +39,8 @@ const STATUS: Record<TaskDisplayStatus, { label: string; badge: string; dot: str
   },
   in_progress: {
     label: 'Em andamento',
-    badge: 'border-amber-200 bg-amber-50 text-amber-800',
-    dot: 'bg-amber-500 ring-amber-100',
+    badge: 'border-amber-100 bg-amber-50/70 text-amber-700',
+    dot: 'bg-amber-400 ring-amber-100',
   },
   completed: {
     label: 'Concluída',
@@ -279,7 +279,7 @@ export function ProjectProgressSection({
       </div>
 
       {!loading && !error && bar.total > 0 && (
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3.5 sm:p-4">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <p className="text-xs font-bold uppercase tracking-wide text-slate-700">
@@ -292,7 +292,7 @@ export function ProjectProgressSection({
                 {bar.total === 1 ? 'tarefa concluída' : 'tarefas concluídas'}
               </p>
             </div>
-            <span className="text-2xl font-extrabold leading-none text-primary">
+            <span className="text-xl font-semibold leading-none tabular-nums text-primary/90">
               {bar.completionRate}%
             </span>
           </div>
@@ -302,13 +302,13 @@ export function ProjectProgressSection({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={bar.completionRate}
-            className="mt-3 flex h-2.5 w-full overflow-hidden rounded-full bg-slate-200"
+            className="mt-3 flex h-2 w-full gap-px overflow-hidden rounded-full bg-slate-200/70"
           >
             {[
-              { key: 'completed', count: bar.completed, color: 'bg-emerald-500' },
-              { key: 'overdue', count: bar.overdue, color: 'bg-rose-500' },
-              { key: 'in_progress', count: bar.inProgress, color: 'bg-amber-400' },
-              { key: 'pending', count: bar.pending, color: 'bg-slate-400' },
+              { key: 'completed', count: bar.completed, color: 'bg-emerald-400' },
+              { key: 'overdue', count: bar.overdue, color: 'bg-rose-400' },
+              { key: 'in_progress', count: bar.inProgress, color: 'bg-amber-300' },
+              { key: 'pending', count: bar.pending, color: 'bg-slate-300' },
             ]
               .filter((segment) => segment.count > 0)
               .map((segment) => (
@@ -328,7 +328,7 @@ export function ProjectProgressSection({
             ].map((item) => (
               <li
                 key={item.status}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-bold ${item.count > 0 || item.status !== 'overdue' ? STATUS[item.status].badge : 'border-slate-200 bg-white text-slate-500'}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold ${item.count > 0 || item.status !== 'overdue' ? STATUS[item.status].badge : 'border-slate-200 bg-white text-slate-500'}`}
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${STATUS[item.status].dot.split(' ')[0]}`} />
                 {item.count} {item.label}
@@ -418,11 +418,11 @@ export function ProjectProgressSection({
             {selectedTask ? (
               <>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-primary px-2 py-1 text-[0.625rem] font-extrabold tracking-wide text-white">
+                  <span className="rounded bg-primary px-2 py-1 text-[0.625rem] font-bold tracking-wide text-white">
                     {versionLabel(selectedTask)}
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.625rem] font-bold ${STATUS[selectedDisplay].badge}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.625rem] font-semibold ${STATUS[selectedDisplay].badge}`}
                   >
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${STATUS[selectedDisplay].dot.split(' ')[0]}`}
@@ -430,7 +430,7 @@ export function ProjectProgressSection({
                     {STATUS[selectedDisplay].label}
                   </span>
                   {selectedDeadline && selectedDisplay !== 'overdue' && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[0.625rem] font-bold text-amber-800">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50/70 px-2.5 py-1 text-[0.625rem] font-semibold text-amber-700">
                       <i className="fi fi-rr-calendar flex" aria-hidden="true" />
                       {selectedDeadline}
                     </span>
@@ -552,7 +552,7 @@ export function ProjectProgressSection({
                               className="rounded-md border border-slate-200 bg-white p-3"
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-[0.6875rem] font-extrabold text-primary">
+                                <span className="text-[0.6875rem] font-bold text-primary">
                                   v{revision.versionMajor}.{revision.versionMinor}
                                 </span>
                                 <span className="text-[0.625rem] text-slate-500">
@@ -567,7 +567,7 @@ export function ProjectProgressSection({
                               </p>
                               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                                 <span
-                                  className={`rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold ${STATUS[revision.status].badge}`}
+                                  className={`rounded-full border px-2 py-0.5 text-[0.5625rem] font-semibold ${STATUS[revision.status].badge}`}
                                 >
                                   {STATUS[revision.status].label}
                                 </span>
@@ -654,7 +654,7 @@ export function ProjectProgressSection({
                       className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${STATUS[display].dot}`}
                     >
                       <i
-                        className={`fi ${statusIcon(display)} flex text-[0.6875rem] text-white`}
+                        className={`fi ${statusIcon(display)} flex text-[0.6875rem] ${display === 'in_progress' ? 'text-amber-950' : 'text-white'}`}
                         aria-hidden="true"
                       />
                     </span>
@@ -666,7 +666,7 @@ export function ProjectProgressSection({
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[0.625rem] font-extrabold ${selected ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'}`}
+                          className={`rounded px-1.5 py-0.5 text-[0.625rem] font-bold ${selected ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'}`}
                         >
                           {versionLabel(task)}
                         </span>
@@ -681,7 +681,7 @@ export function ProjectProgressSection({
                       </p>
                       {deadline && (
                         <p
-                          className={`mt-1 flex items-center gap-1 text-[0.625rem] font-bold ${display === 'overdue' ? 'text-rose-700' : 'text-amber-700'}`}
+                          className={`mt-1 flex items-center gap-1 text-[0.625rem] font-semibold ${display === 'overdue' ? 'text-rose-700' : 'text-amber-700'}`}
                         >
                           <i className="fi fi-rr-calendar flex" aria-hidden="true" /> {deadline}
                         </p>

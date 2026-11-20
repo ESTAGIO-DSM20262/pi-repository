@@ -894,6 +894,12 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   mudança como revisão menor (`vX.Y+1`) com a observação automática "Status alterado de A para B.",
   atribuída a quem mudou. `GET /api/projects/[id]/progress` devolve `canChangeStatus` por tarefa.
   Criar e editar tarefas continua só com o orientador principal e o administrador (seção 17).
+- **Visual calmo (sem mudar o layout):** em `ProjectProgressSection` o amarelo de "Em andamento"
+  é suave (`amber-50/70`, borda e texto `amber-100`/`amber-700`, ponto `amber-400` com ícone
+  `amber-950` para manter o contraste, segmento da barra `amber-300`), os demais segmentos da barra
+  ficam um tom mais claro e finos (`h-2`, com separação de 1px), o percentual usa `text-xl`,
+  `font-semibold` e algarismos tabulares em vez de `font-extrabold`, e selos de situação, prazos e
+  versões usam `font-semibold`/`font-bold` no lugar de `font-extrabold`.
 
 ## 27. Atribuir a mesma tarefa a vários projetos
 
