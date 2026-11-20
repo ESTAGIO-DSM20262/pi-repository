@@ -832,9 +832,19 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   desenho da tela de cadastro de usuários: área de arrastar arquivo, relatório com criados,
   ignorados e inválidos, `ConfirmationDialog` antes de enviar). Aluno é redirecionado ao painel.
 - **Modelo:** `public/modelo-cadastro-projetos-acervo.xlsx` tem a aba **Projetos** (uma linha por
-  projeto; cabeçalho vermelho = obrigatória, cinza = opcional; Semestre e Situação com lista na
-  célula; Ciclo em formato texto para o Excel não converter em data) e a aba **Instruções** (não é
-  importada). Colunas: título, resumo, descrição detalhada, ciclo, semestre, tema, situação,
+  projeto; cabeçalho vermelho = obrigatória, cinza = opcional; Ciclo em formato texto para o Excel
+  não converter em data; colunas obrigatórias com fundo levemente avermelhado e bordas nas 100
+  linhas), a aba **Instruções** e a aba **Listas** (nenhuma das duas é importada, pois não têm as
+  colunas Título e Resumo). **Listas suspensas** nas células: Ciclo (2025/1 a 2029/2, aceita outro
+  valor com aviso), Semestre ("1º semestre" a "6º semestre", só esses valores; a leitura extrai o
+  número), Situação (só Em andamento ou Concluído), Tema (os temas sugeridos do formulário),
+  Linguagens e Tecnologias e ferramentas (nomes de `TECHNOLOGY_CATALOG`). Em Ciclo, Tema, Linguagens
+  e Tecnologias a validação é só um aviso, então dá para digitar outro valor; para mais de uma
+  linguagem ou tecnologia, o usuário acrescenta as demais separadas por vírgula. Cada coluna com
+  lista tem uma nota no cabeçalho e uma mensagem ao selecionar a célula. E-mails (orientadores,
+  alunos, líder) e links continuam digitados, pois dependem de quem está cadastrado. O arquivo é
+  binário: ao mudar os temas ou o catálogo de tecnologias, atualize também a aba **Listas** e as
+  referências das listas na aba **Projetos**. Colunas: título, resumo, descrição detalhada, ciclo, semestre, tema, situação,
   orientador principal, orientadores adicionais, e-mails dos alunos, líder do grupo, linguagens,
   tecnologias e ferramentas e os links de repositório, site, protótipo e vídeo. **Imagens e tarefas
   não fazem parte da planilha.**

@@ -401,12 +401,13 @@ export function ProjectBulkImportPage({ role, backHref }: ProjectBulkImportPageP
 
             <ol className="space-y-4">
               <Step number={1} title="Baixe o modelo">
-                A planilha já vem com a aba Projetos e uma aba Instruções com exemplos de cada
-                coluna.
+                A planilha já vem com a aba Projetos, uma aba Instruções com exemplos de cada coluna
+                e uma aba Listas com todas as opções das listas suspensas.
               </Step>
               <Step number={2} title="Preencha um projeto por linha">
-                Colunas com título vermelho são obrigatórias. Semestre e Situação têm uma lista de
-                opções na própria célula.
+                Colunas com título vermelho são obrigatórias. Ciclo, Semestre, Tema, Situação,
+                Linguagens e Tecnologias têm uma lista para escolher na própria célula; em Tema,
+                Linguagens e Tecnologias você também pode digitar um valor que não esteja na lista.
               </Step>
               <Step number={3} title="Envie e confira o relatório">
                 Ao final, você vê quantos projetos foram criados, ignorados por duplicidade ou
