@@ -915,6 +915,15 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   `{ summary, created, skipped }`. A validação de título (3 a 160), descrição (5 a 5.000) e data
   (`AAAA-MM-DD` real) fica em `application/projects/task-fields.ts`.
 
+## 28. Tela 404 personalizada
+
+- `src/app/not-found.tsx` substitui a página padrão do Next para qualquer rota inexistente e para os
+  `notFound()` das páginas de projeto (projeto que não existe ou que a conta não pode ver). Ela
+  renderiza dentro do layout (cabeçalho, rodapé e acessibilidade), usa o cartão e os botões do
+  sistema e oferece "Voltar ao acervo" (`/`) e "Ir para o meu painel" (`/painel`, que redireciona
+  conforme o perfil ou leva ao login). O número 404 é decorativo (`aria-hidden`); o título da
+  página é o `h1`.
+
 ## Acessibilidade (branch `feat/acessibilidade`)
 
 - **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.
