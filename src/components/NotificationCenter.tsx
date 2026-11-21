@@ -97,6 +97,15 @@ export function NotificationCenter() {
     return () => document.removeEventListener('keydown', onKeyDown)
   }, [open, confirmClearOpen])
 
+  useEffect(() => {
+    if (!open || !window.matchMedia('(max-width: 639px)').matches) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previousOverflow
+    }
+  }, [open])
+
   async function loadList() {
     setLoading(true)
     setFailed(false)
@@ -190,11 +199,25 @@ export function NotificationCenter() {
         aria-label={`Notificações. ${unreadCountLabel(unread)}`}
         className="relative inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-primary transition hover:bg-primary-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <i className="fi fi-rr-bell flex text-lg" aria-hidden="true" />
+        {open ? (
+          <svg
+            viewBox="0 0 300 300"
+            fill="currentColor"
+            aria-hidden="true"
+            className="h-[1.125rem] w-[1.125rem]"
+          >
+            <path
+              transform="translate(0 300) scale(1 -1)"
+              d="M93 38Q100 20 115.5 10.0Q131 0 150.0 0.0Q169 0 184.5 10.0Q200 20 207 38ZM280 143 258 215Q251 240 234.0 259.5Q217 279 193.0 290.0Q169 301 143.0 300.0Q117 299 93.5 287.5Q70 276 54.0 255.5Q38 235 32 209L15 140Q12 126 15.0 112.0Q18 98 27.0 86.5Q36 75 49.0 69.0Q62 63 76 63H220Q235 62 248.0 69.0Q261 76 270.0 88.0Q279 100 281.5 114.5Q284 129 280 143Z"
+            />
+          </svg>
+        ) : (
+          <i className="fi fi-rr-bell flex text-lg" aria-hidden="true" />
+        )}
         {unread > 0 && (
           <span
             aria-hidden="true"
-            className="absolute right-0.5 top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] font-bold leading-none text-white ring-2 ring-white"
+            className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[0.6875rem] font-bold leading-none text-white ring-2 ring-white"
           >
             {badge}
           </span>
@@ -237,37 +260,49 @@ export function NotificationCenter() {
             type="button"
             aria-hidden="true"
             tabIndex={-1}
-            className="fixed inset-0 z-40 cursor-default"
+            className="fixed inset-0 z-40 cursor-default max-sm:z-[70] max-sm:bg-slate-950/50"
             onClick={() => setOpen(false)}
           />
           <section
             id={panelId}
             aria-label="Notificações"
-            className="fixed inset-x-3 top-[4.75rem] z-50 overflow-hidden rounded-xl border border-border bg-white shadow-lg animate-in fade-in slide-in-from-top-1 duration-150 sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+10px)] sm:w-[380px]"
+            className="fixed inset-y-0 right-0 z-[80] flex w-[min(320px,calc(100vw-2.5rem))] flex-col overflow-hidden border-l border-border bg-white shadow-lg max-sm:animate-in max-sm:slide-in-from-right max-sm:duration-200 max-sm:pb-[env(safe-area-inset-bottom)] motion-reduce:animate-none sm:absolute sm:inset-y-auto sm:bottom-auto sm:right-0 sm:top-[calc(100%+10px)] sm:z-50 sm:w-[380px] sm:rounded-xl sm:border sm:animate-in sm:fade-in sm:slide-in-from-top-1 sm:duration-150"
           >
             <div className="flex items-center justify-between gap-3 border-b border-border-light bg-surface-secondary/70 px-4 py-3">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900">Notificações</h2>
-                <p className="text-[0.6875rem] text-text-secondary">{unreadCountLabel(unread)}</p>
+              <div className="min-w-0">
+                <h2 className="font-slab text-base font-medium text-foreground sm:font-sans sm:text-sm sm:font-semibold sm:text-slate-900">
+                  Notificações
+                </h2>
+                <p className="text-xs text-text-secondary sm:text-[0.6875rem]">
+                  {unreadCountLabel(unread)}
+                </p>
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <button
-                  type="button"
-                  onClick={markAllRead}
-                  disabled={unread === 0}
-                  className="cursor-pointer text-xs font-semibold text-primary transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
-                >
-                  Marcar todas como lidas
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmClearOpen(true)}
-                  disabled={items.length === 0}
-                  className="cursor-pointer text-xs font-semibold text-text-secondary transition hover:text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline"
-                >
-                  Limpar notificações
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Fechar notificações"
+                className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-text-secondary transition hover:bg-border-light hover:text-foreground sm:hidden"
+              >
+                <i className="fi fi-rr-cross-small flex text-xl" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-b border-border-light px-4 py-1 sm:py-1.5">
+              <button
+                type="button"
+                onClick={markAllRead}
+                disabled={unread === 0}
+                className="min-h-10 cursor-pointer text-xs font-semibold text-primary transition hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline sm:min-h-8"
+              >
+                Marcar todas como lidas
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmClearOpen(true)}
+                disabled={items.length === 0}
+                className="min-h-10 cursor-pointer text-xs font-semibold text-text-secondary transition hover:text-primary hover:underline disabled:cursor-not-allowed disabled:opacity-50 disabled:no-underline sm:min-h-8"
+              >
+                Limpar notificações
+              </button>
             </div>
             {clearError && (
               <p
@@ -278,7 +313,7 @@ export function NotificationCenter() {
               </p>
             )}
 
-            <div className="max-h-[min(420px,calc(100vh-10rem))] overflow-y-auto">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain sm:max-h-[420px] sm:flex-none">
               {loading && items.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-text-secondary">Carregando…</p>
               ) : failed ? (
@@ -306,7 +341,7 @@ export function NotificationCenter() {
                       <button
                         type="button"
                         onClick={() => openNotification(notification)}
-                        className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition hover:bg-surface-secondary ${notification.read ? '' : 'bg-primary-light/40'}`}
+                        className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3.5 text-left sm:py-3 transition hover:bg-surface-secondary ${notification.read ? '' : 'bg-primary-light/40'}`}
                       >
                         <span
                           className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${notification.read ? 'bg-surface-secondary text-text-secondary' : 'bg-primary-light text-primary'}`}
@@ -318,7 +353,7 @@ export function NotificationCenter() {
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-slate-900">
+                            <span className="text-[0.8125rem] font-semibold text-slate-900 sm:text-xs">
                               {notification.title}
                             </span>
                             {!notification.read && (
@@ -327,7 +362,7 @@ export function NotificationCenter() {
                               </span>
                             )}
                           </span>
-                          <span className="mt-0.5 block break-words text-xs leading-relaxed text-slate-700">
+                          <span className="mt-0.5 block break-words text-[0.8125rem] leading-relaxed text-slate-700 sm:text-xs">
                             {notification.message}
                           </span>
                           <span className="mt-1 block text-[0.6875rem] text-text-secondary">
