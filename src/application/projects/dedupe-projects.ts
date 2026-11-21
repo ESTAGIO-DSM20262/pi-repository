@@ -14,10 +14,6 @@ export function projectIdentity(project: ProjectIdentitySubject) {
   return [normalizeText(project.title), project.cycle, project.semester].join('|')
 }
 
-/**
- * Remove projetos repetidos (mesmo id, ou mesmo título + ciclo + semestre), mantendo sempre a
- * primeira ocorrência. Quem chama deve colocar primeiro os projetos reais do banco.
- */
 export function dedupeProjects<T extends Pick<Project, 'id' | 'title' | 'cycle' | 'semester'>>(
   projects: T[],
 ): T[] {
@@ -34,10 +30,6 @@ export function dedupeProjects<T extends Pick<Project, 'id' | 'title' | 'cycle' 
   return unique
 }
 
-/**
- * Descarta os projetos de exemplo que já existem no banco (mesmo id, ou mesmo título + ciclo +
- * semestre), para o exemplo não aparecer duplicado ao lado do projeto real.
- */
 export function omitExamplesAlreadyStored<
   T extends Pick<Project, 'id' | 'title' | 'cycle' | 'semester'>,
 >(stored: T[], examples: T[]): T[] {
