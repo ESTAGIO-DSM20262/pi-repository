@@ -7,9 +7,11 @@
  * Intended for use by external widgets, such as the display widget
  * on the Fatec Itaquera WordPress site.
  *
- * Cache : CDN/Edge for 5 min, client for 2 min, stale-while-revalidate 10 min.
- * CORS  : open to any origin (Access-Control-Allow-Origin: *).
- * ISR   : revalidate = 300 s via Next.js App Router.
+ * dynamic = 'force-dynamic' prevents Next.js from attempting to statically
+ * generate this route at build time. Caching is delegated to the CDN via
+ * the Cache-Control response header.
+ *
+ * CORS: open to any origin (Access-Control-Allow-Origin: *).
  */
 
 import { NextResponse } from 'next/server'
@@ -17,8 +19,8 @@ import { desc, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { projects, semesterAwards } from '@/db/schema'
 
-/** Revalidates the CDN cache every 5 minutes. */
-export const revalidate = 300
+// Always render dynamically — do not pre-generate at build time.
+export const dynamic = 'force-dynamic'
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
