@@ -149,3 +149,230 @@ Para exibir os cards dos projetos no site da Fatec Itaquera, use um bloco "HTML 
 - Exibe cada projeto como um card com titulo, descricao resumida, ciclo, semestre, orientador, tecnologias e link para o projeto original
 - Ordena automaticamente pelos projetos premiados mais recentemente
 - Possui fallback para dados estaticos caso o endpoint esteja indisponivel
+
+---
+
+## Guia de deploy e configuracao
+
+Este guia cobre tudo o que e necessario para uma pessoa que nao conhece o projeto conseguir instalar as dependencias, configurar o ambiente, conectar ao banco de dados e ao servico de e-mail, e publicar a aplicacao na Vercel.
+
+### Pre-requisitos
+
+- Node.js 18 ou superior (`node -v` para verificar)
+- npm 9 ou superior (vem junto com o Node.js)
+- Conta no GitHub com acesso ao repositorio
+- Conta na Vercel (para deploy em producao)
+- Conta na Neon ou em outro provedor PostgreSQL compativel
+- Conta no Resend (para envio de e-mail)
+
+### Instalacao local
+
+```bash
+# 1. Clone o repositorio
+git clone https://github.com/ESTAGIO-DSM20262/pi-repository.git
+cd pi-repository
+
+# 2. Instale as dependencias
+npm install
+
+# 3. Copie o arquivo de variaveis de ambiente
+cp .env.example .env.local
+```
+
+Preencha `.env.local` conforme descrito nas proximas secoes.
+
+### Variaveis de ambiente
+
+O arquivo `.env.example` lista todas as variaveis necessarias. As obrigatorias para a aplicacao funcionar sao:
+
+| Variavel | Descricao |
+|---|---|
+| `DATABASE_URL` | String de conexao PostgreSQL |
+| `BETTER_AUTH_SECRET` | Chave secreta de sessao (minimo 32 caracteres) |
+| `BETTER_AUTH_URL` | URL base da aplicacao, ex.: `http://localhost:3000` |
+| `RESEND_API_KEY` | Chave da API do Resend para envio de e-mail |
+| `RESEND_FROM_EMAIL` | Endereco remetente, ex.: `noreply@seudominio.com` |
+
+As variaveis de autenticacao Microsoft Entra ID sao opcionais e so precisam ser preenchidas se o login via conta Microsoft for utilizado.
+
+Para gerar um valor seguro para `BETTER_AUTH_SECRET`, use:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+---
+
+### Banco de dados
+
+A aplicacao usa PostgreSQL com Drizzle ORM. Qualquer provedor PostgreSQL compativel funciona. Abaixo estao as instrucoes para os mais comuns.
+
+#### Neon (configuracao atual do projeto)
+
+O Neon oferece um banco PostgreSQL serverless com plano gratuito permanente (0,5 GB de armazenamento, sem limite de tempo).
+
+1. Acesse [neon.tech](https://neon.tech) e crie uma conta
+2. Crie um novo projeto e, dentro dele, um banco de dados
+3. No painel do Neon, va em **Connection Details** e copie a string de conexao no formato:
+   ```
+   postgresql://usuario:senha@ep-xxxx.us-east-2.aws.neon.tech/nomebanco?sslmode=require
+   ```
+4. Cole essa string em `DATABASE_URL` no `.env.local`
+
+A flag `?sslmode=require` e obrigatoria no Neon. Sem ela, a conexao sera recusada.
+
+#### Supabase
+
+O Supabase oferece um banco PostgreSQL com plano gratuito (500 MB, projetos pausam apos 7 dias sem atividade no plano gratuito).
+
+1. Acesse [supabase.com](https://supabase.com) e crie um projeto
+2. Va em **Project Settings > Database > Connection string > URI**
+3. Copie a string e cole em `DATABASE_URL`
+
+A string do Supabase ja vem com `?sslmode=require` incluido.
+
+#### Railway
+
+O Railway oferece um plano gratuito com limite mensal de horas de execucao.
+
+1. Acesse [railway.app](https://railway.app) e crie um servico PostgreSQL
+2. Na aba **Variables** do servico, copie o valor de `DATABASE_URL`
+3. Cole em `DATABASE_URL` no seu `.env.local`
+
+#### PostgreSQL local (desenvolvimento)
+
+Para desenvolvimento sem depender de servicos externos:
+
+```bash
+# Com Docker
+docker run -d \
+  --name pi-postgres \
+  -e POSTGRES_USER=pi \
+  -e POSTGRES_PASSWORD=pi \
+  -e POSTGRES_DB=pi \
+  -p 5432:5432 \
+  postgres:16
+
+# String de conexao resultante
+DATABASE_URL=postgresql://pi:pi@localhost:5432/pi
+```
+
+#### Outros provedores PostgreSQL
+
+Qualquer provedor que aceite conexoes PostgreSQL padrao funciona. O formato da string de conexao e sempre:
+
+```
+postgresql://USUARIO:SENHA@HOST:PORTA/BANCO?opcoes
+```
+
+Substitua os valores de acordo com o seu provedor. A flag `?sslmode=require` e recomendada em producao.
+
+#### Aplicando as migrations
+
+Apos configurar `DATABASE_URL`, crie as tabelas no banco:
+
+```bash
+npm run db:migrate
+```
+
+Este comando aplica as migrations do Drizzle e os scripts SQL adicionais em ordem. Cada script roda uma unica vez e e seguro executar mais de uma vez (idempotente).
+
+---
+
+### Envio de e-mail com Resend
+
+O projeto usa o [Resend](https://resend.com) para envio de e-mails transacionais (confirmacao de conta, redefinicao de senha). O plano gratuito permite ate 3.000 e-mails por mes e 100 por dia, sem necessidade de cartao de credito.
+
+1. Acesse [resend.com](https://resend.com) e crie uma conta
+2. Va em **API Keys** e gere uma nova chave
+3. Cole o valor em `RESEND_API_KEY` no `.env.local`
+4. Em `RESEND_FROM_EMAIL`, coloque o endereco remetente
+
+No plano gratuito do Resend, e-mails so podem ser enviados a partir do dominio `onboarding@resend.dev` ou de um dominio proprio verificado. Para testes iniciais, use `onboarding@resend.dev`.
+
+Para usar um dominio proprio:
+1. Va em **Domains** no painel do Resend
+2. Adicione seu dominio e siga as instrucoes para configurar os registros DNS (MX, SPF, DKIM)
+3. Apos verificado, use `noreply@seudominio.com` como remetente
+
+---
+
+### Deploy na Vercel
+
+A Vercel e o provedor de hospedagem atual do projeto. O plano gratuito (Hobby) e suficiente para a aplicacao.
+
+#### Via painel web (recomendado para o primeiro deploy)
+
+1. Acesse [vercel.com](https://vercel.com) e faca login com sua conta GitHub
+2. Clique em **Add New > Project**
+3. Importe o repositorio `ESTAGIO-DSM20262/pi-repository`
+4. Na tela de configuracao, expanda **Environment Variables** e adicione todas as variaveis listadas na secao anterior
+5. Clique em **Deploy**
+
+A Vercel detecta automaticamente que o projeto usa Next.js e configura o build sem nenhuma mudanca.
+
+#### Via Vercel CLI
+
+```bash
+# Instalar a CLI globalmente
+npm install -g vercel
+
+# Autenticar
+vercel login
+
+# Fazer deploy a partir da pasta do projeto
+vercel
+
+# Para deploy em producao (branch main)
+vercel --prod
+```
+
+#### Configuracao das variaveis de ambiente na Vercel
+
+Apos o primeiro deploy, as variaveis podem ser gerenciadas em:
+
+**Vercel Dashboard > Projeto > Settings > Environment Variables**
+
+Defina cada variavel para os ambientes **Production**, **Preview** e **Development** conforme necessario. A variavel `BETTER_AUTH_URL` deve apontar para a URL real do projeto em producao, ex.: `https://projetos.alvarosena.com.br`.
+
+#### Dominio personalizado
+
+1. Va em **Project Settings > Domains**
+2. Adicione seu dominio e siga as instrucoes para configurar os registros DNS no seu provedor (geralmente um registro CNAME apontando para `cname.vercel-dns.com`)
+3. A Vercel provisiona o certificado SSL automaticamente
+
+---
+
+### Executando localmente
+
+Apos configurar as variaveis de ambiente e rodar as migrations:
+
+```bash
+npm run dev
+```
+
+A aplicacao estara disponivel em `http://localhost:3000`.
+
+Outros comandos uteis:
+
+| Comando | Descricao |
+|---|---|
+| `npm run build` | Gera o build de producao |
+| `npm run start` | Inicia o servidor com o build de producao |
+| `npm run lint` | Verifica o codigo com ESLint |
+| `npm run db:studio` | Abre o Drizzle Studio (interface visual do banco) |
+| `npm run db:generate` | Gera arquivos de migration a partir do schema |
+| `npm run db:migrate` | Aplica as migrations no banco configurado |
+
+---
+
+## Integrantes
+
+| Nome | GitHub |
+|---|---|
+| Alvaro Barbosa Sena | [AlvaroSena](https://github.com/AlvaroSena) |
+| Amanda Ianes da Fonseca | [Ianesamanda](https://github.com/Ianesamanda) |
+| Danilo da Silva Paulino | [deletrr](https://github.com/deletrr) |
+| Felipe Rocha de Oliveira | [FelipeRCod](https://github.com/FelipeRCod) |
+| Gustavo de Souza Costa Joia | [GustavoJoia](https://github.com/GustavoJoia) |
+| Lucas Retanero Almeida Rodrigues de Oliveira | [Lucas-Retanero](https://github.com/Lucas-Retanero) |
