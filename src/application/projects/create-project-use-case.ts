@@ -1,4 +1,3 @@
-import type { TaskEventNotifier } from '@/application/notifications/task-event-notifier'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import {
@@ -12,6 +11,7 @@ import type {
   ProjectTaskCreateRecord,
 } from '@/domain/enterprise/repositories/project-repository'
 import type { ProjectUserDirectory } from '@/domain/enterprise/repositories/project-user-directory'
+import type { TaskEventNotifier } from '@/domain/enterprise/repositories/task-event-notifier'
 import { parseCreateProjectInput } from './create-project'
 import { ProjectOperationError } from './project-operation-error'
 

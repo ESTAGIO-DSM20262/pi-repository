@@ -1,8 +1,10 @@
 'use client'
 
+import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import {
   type BulkTaskFilters,
   type BulkTaskRelation,
@@ -19,6 +21,7 @@ import type { ListedProject } from '@/application/projects/list-projects'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import { Modal, type Notice } from '@/components/ui/Modal'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
+import { type BulkTaskValues, bulkTaskSchema } from '@/presentation/projects/validation'
 
 interface BulkTaskAssignmentSectionProps {
   role: 'professor' | 'admin'
@@ -54,6 +57,7 @@ const SITUATION_OPTIONS = [
 const inputClass =
   'mt-1.5 block min-h-11 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-text-muted focus:border-primary focus:ring-2 focus:ring-primary/15'
 const labelClass = 'block text-xs font-bold text-slate-800'
+const fieldErrorClass = 'mt-1 text-xs font-medium text-rose-700'
 
 function projectCountLabel(count: number) {
   return count === 1 ? '1 projeto' : `${count} projetos`
@@ -69,14 +73,25 @@ export function BulkTaskAssignmentSection({
   const viewer = useMemo(() => ({ role, email: email.trim().toLowerCase() }), [role, email])
   const [filters, setFilters] = useState<BulkTaskFilters>(DEFAULT_BULK_TASK_FILTERS)
   const [selected, setSelected] = useState<string[]>([])
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [dueDate, setDueDate] = useState('')
   const [confirmationOpen, setConfirmationOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
   const [notice, setNotice] = useState<Notice | null>(null)
   const [result, setResult] = useState<AssignmentResult | null>(null)
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    clearErrors,
+    watch,
+    formState: { errors, isSubmitting: saving },
+  } = useForm<BulkTaskValues>({
+    resolver: zodResolver(bulkTaskSchema),
+    mode: 'onTouched',
+    defaultValues: { title: '', description: '', dueDate: '' },
+  })
+  const title = watch('title')
+  const dueDate = watch('dueDate')
+  const serverError = errors.root?.server?.message
 
   const candidates = useMemo(() => bulkTaskCandidates(projects, viewer), [projects, viewer])
   const visible = useMemo(
@@ -141,35 +156,19 @@ export function BulkTaskAssignmentSection({
     )
   }
 
-  function requestAssignment() {
-    setError('')
-    if (selectedProjects.length === 0) {
-      setError('Selecione pelo menos um projeto.')
-      return
-    }
-    if (title.trim().length < 3) {
-      setError('Informe o título da tarefa, com pelo menos 3 caracteres.')
-      return
-    }
-    if (description.trim().length < 5) {
-      setError('Descreva a tarefa com pelo menos 5 caracteres.')
-      return
-    }
+  const requestAssignment = handleSubmit(() => {
+    clearErrors('root.server')
     setConfirmationOpen(true)
-  }
+  })
 
-  async function assignTask() {
-    setSaving(true)
-    setError('')
+  const assignTask = handleSubmit(async (values) => {
     try {
       const response = await fetch('/api/projects/bulk-tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectIds: selectedProjects.map((project) => project.id),
-          title,
-          description,
-          dueDate,
+          ...values,
         }),
       })
       const data = (await response.json().catch(() => null)) as
@@ -183,9 +182,7 @@ export function BulkTaskAssignmentSection({
       const createdCount = data.created.length
       const skippedCount = data.skipped.length
       if (createdCount > 0) {
-        setTitle('')
-        setDescription('')
-        setDueDate('')
+        reset()
         setSelected([])
         router.refresh()
       }
@@ -207,12 +204,13 @@ export function BulkTaskAssignmentSection({
             },
       )
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Erro inesperado ao atribuir a tarefa.')
+      setError('root.server', {
+        message: caught instanceof Error ? caught.message : 'Erro inesperado ao atribuir a tarefa.',
+      })
     } finally {
-      setSaving(false)
       setConfirmationOpen(false)
     }
-  }
+  })
 
   if (candidates.length === 0) {
     return (
@@ -422,7 +420,7 @@ export function BulkTaskAssignmentSection({
             A mesma tarefa é criada para o grupo todo de cada projeto escolhido.
           </p>
 
-          <div className="mt-4 space-y-4">
+          <form className="mt-4 space-y-4" onSubmit={requestAssignment} noValidate>
             <div>
               <label className={labelClass} htmlFor="bulk-task-title">
                 Título da tarefa
@@ -430,11 +428,17 @@ export function BulkTaskAssignmentSection({
               <input
                 id="bulk-task-title"
                 className={inputClass}
-                value={title}
                 maxLength={160}
-                onChange={(event) => setTitle(event.target.value)}
+                aria-invalid={Boolean(errors.title)}
+                aria-describedby={errors.title ? 'bulk-task-title-error' : undefined}
                 placeholder="Ex.: Entrega do relatório parcial"
+                {...register('title')}
               />
+              {errors.title && (
+                <p id="bulk-task-title-error" role="alert" className={fieldErrorClass}>
+                  {errors.title.message}
+                </p>
+              )}
             </div>
             <div>
               <label className={labelClass} htmlFor="bulk-task-description">
@@ -443,11 +447,17 @@ export function BulkTaskAssignmentSection({
               <textarea
                 id="bulk-task-description"
                 className={`${inputClass} min-h-32 resize-y`}
-                value={description}
                 maxLength={5000}
-                onChange={(event) => setDescription(event.target.value)}
+                aria-invalid={Boolean(errors.description)}
+                aria-describedby={errors.description ? 'bulk-task-description-error' : undefined}
                 placeholder="Explique o que deve ser entregue e como será avaliado."
+                {...register('description')}
               />
+              {errors.description && (
+                <p id="bulk-task-description-error" role="alert" className={fieldErrorClass}>
+                  {errors.description.message}
+                </p>
+              )}
             </div>
             <div>
               <label className={labelClass} htmlFor="bulk-task-due-date">
@@ -457,23 +467,28 @@ export function BulkTaskAssignmentSection({
                 id="bulk-task-due-date"
                 type="date"
                 className={inputClass}
-                value={dueDate}
-                onChange={(event) => setDueDate(event.target.value)}
+                aria-invalid={Boolean(errors.dueDate)}
+                aria-describedby={errors.dueDate ? 'bulk-task-due-date-error' : undefined}
+                {...register('dueDate')}
               />
+              {errors.dueDate && (
+                <p id="bulk-task-due-date-error" role="alert" className={fieldErrorClass}>
+                  {errors.dueDate.message}
+                </p>
+              )}
             </div>
 
-            {error && (
+            {serverError && (
               <p
                 role="alert"
                 className="rounded-lg border border-rose-200 bg-rose-50 px-3.5 py-3 text-xs leading-relaxed text-rose-900"
               >
-                {error}
+                {serverError}
               </p>
             )}
 
             <button
-              type="button"
-              onClick={requestAssignment}
+              type="submit"
               disabled={saving || selectedProjects.length === 0}
               className="cursor-pointer inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -482,7 +497,7 @@ export function BulkTaskAssignmentSection({
                 ? `Atribuir a ${projectCountLabel(selectedProjects.length)}`
                 : 'Selecione os projetos'}
             </button>
-          </div>
+          </form>
 
           {result && (
             <div className="mt-5 space-y-3 rounded-xl border border-border bg-white p-4">

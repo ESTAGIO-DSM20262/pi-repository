@@ -1,23 +1,9 @@
 import type { NotificationType } from '@/domain/enterprise/entities/notification'
 import type { ProjectProgressTaskStatus } from '@/domain/enterprise/entities/project-progress'
-import type { Role } from '@/domain/enterprise/entities/role'
-
-export type TaskNotificationEvent = 'created' | 'updated' | 'status_changed'
-
-export interface TaskNotificationProject {
-  title: string
-  advisor: { email: string }
-  coAdvisors?: Array<{ email: string }>
-  memberEmails: string[]
-}
-
-export interface TaskNotificationInput {
-  event: TaskNotificationEvent
-  project: TaskNotificationProject
-  task: { title: string; targetStudentEmail: string | null }
-  actor: { email: string; name: string; role: Role }
-  newStatus?: ProjectProgressTaskStatus
-}
+import type {
+  TaskNotificationInput,
+  TaskNotificationProject,
+} from '@/domain/enterprise/repositories/task-event-notifier'
 
 export interface TaskNotificationContent {
   type: NotificationType

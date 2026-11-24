@@ -37,12 +37,8 @@ function normalizeText(value: string) {
     .toLocaleLowerCase('pt-BR')
 }
 
-export function dedupeBulkTaskProjects(projects: Project[]): Project[] {
-  return dedupeProjects(projects)
-}
-
 export function bulkTaskCandidates(projects: Project[], viewer: BulkTaskViewer): Project[] {
-  return dedupeBulkTaskProjects(
+  return dedupeProjects(
     projects.filter(
       (project) =>
         isProjectActive(project) && (viewer.role === 'admin' || isAdvisorOf(project, viewer)),

@@ -47,3 +47,19 @@ export const projectVerificationSchema = z.object({
 })
 
 export type ProjectVerificationValues = z.infer<typeof projectVerificationSchema>
+
+export const bulkTaskSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, 'O título deve ter entre 3 e 160 caracteres.')
+    .max(160, 'O título deve ter entre 3 e 160 caracteres.'),
+  description: z
+    .string()
+    .trim()
+    .min(5, 'A descrição deve ter entre 5 e 5.000 caracteres.')
+    .max(5000, 'A descrição deve ter entre 5 e 5.000 caracteres.'),
+  dueDate: z.union([z.literal(''), z.iso.date('Informe uma data de entrega válida.')]),
+})
+
+export type BulkTaskValues = z.infer<typeof bulkTaskSchema>

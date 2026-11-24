@@ -4,6 +4,7 @@ import type { ProjectReader } from '@/domain/enterprise/repositories/project-rea
 import type { ProjectRepository } from '@/domain/enterprise/repositories/project-repository'
 import type { ProjectUserDirectory } from '@/domain/enterprise/repositories/project-user-directory'
 import { CreateProjectUseCase } from './create-project-use-case'
+import { projectIdentity } from './dedupe-projects'
 import type { ImportedProjectRow } from './project-import'
 import { ProjectOperationError } from './project-operation-error'
 
@@ -42,13 +43,7 @@ function normalize(value: string) {
 }
 
 export function projectDuplicateKey(title: string, cycle: string, semester: number) {
-  const normalizedTitle = title
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR')
-    .replace(/\s+/g, ' ')
-    .trim()
-  return `${normalizedTitle}|${cycle.trim()}|${semester}`
+  return projectIdentity({ title, cycle, semester })
 }
 
 function missingFrom(requested: string[], found: Set<string>) {

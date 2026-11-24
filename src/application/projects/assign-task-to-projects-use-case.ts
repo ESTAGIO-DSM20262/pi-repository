@@ -1,4 +1,3 @@
-import type { TaskEventNotifier } from '@/application/notifications/task-event-notifier'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import type { Project } from '@/domain/enterprise/entities/project'
@@ -10,6 +9,7 @@ import type {
 } from '@/domain/enterprise/repositories/project-repository'
 import type { ProjectTaskRepository } from '@/domain/enterprise/repositories/project-task-repository'
 import type { ProjectUserDirectory } from '@/domain/enterprise/repositories/project-user-directory'
+import type { TaskEventNotifier } from '@/domain/enterprise/repositories/task-event-notifier'
 import { ProjectOperationError } from './project-operation-error'
 import { canManageProgress, isAdvisorOf } from './project-permissions'
 import { parseTaskFields } from './task-fields'

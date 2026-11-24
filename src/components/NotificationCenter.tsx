@@ -2,12 +2,12 @@
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useId, useRef, useState } from 'react'
-import { formatRelativeTime, unreadCountLabel } from '@/application/notifications/relative-time'
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog'
 import type { AppNotification, NotificationType } from '@/domain/enterprise/entities/notification'
 import { markAnnouncedThisSession, wasAnnouncedThisSession } from '@/libs/notification-announcement'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
 import { useAuth } from '@/presentation/auth/auth-context'
+import { formatRelativeTime, unreadCountLabel } from '@/presentation/notifications/relative-time'
 
 const POLL_INTERVAL_MS = 60_000
 const TOAST_DURATION_MS = 9_000
@@ -331,7 +331,10 @@ export function NotificationCenter() {
                 </div>
               ) : items.length === 0 ? (
                 <div className="px-4 py-10 text-center">
-                  <i className="fi fi-rr-bell flex justify-center text-2xl text-text-muted" />
+                  <i
+                    className="fi fi-rr-bell flex justify-center text-2xl text-text-muted"
+                    aria-hidden="true"
+                  />
                   <p className="mt-2 text-sm text-text-secondary">Você não tem notificações.</p>
                 </div>
               ) : (

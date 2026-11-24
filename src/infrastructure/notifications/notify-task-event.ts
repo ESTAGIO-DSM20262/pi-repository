@@ -1,15 +1,15 @@
 import { randomUUID } from 'node:crypto'
 import { inArray, sql } from 'drizzle-orm'
-import type {
-  TaskEventNotification,
-  TaskEventNotifier,
-} from '@/application/notifications/task-event-notifier'
 import {
   buildTaskNotificationContent,
   resolveTaskNotificationRecipients,
 } from '@/application/notifications/task-notifications'
 import { db } from '@/db'
 import { users } from '@/db/schema'
+import type {
+  TaskEventNotification,
+  TaskEventNotifier,
+} from '@/domain/enterprise/repositories/task-event-notifier'
 import { DbNotificationRepository } from './db-notification-repository'
 
 export async function notifyTaskEvent(input: TaskEventNotification): Promise<void> {

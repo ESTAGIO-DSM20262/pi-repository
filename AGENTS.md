@@ -538,9 +538,10 @@ documente aqui.
   editam nem as tarefas que criaram antes da mudança. `createdByName` continua exibido em cada
   tarefa.
 - **Quem vê o cronograma:** administrador e qualquer professor veem as tarefas e o histórico de
-  todos os projetos ativos (`canViewProgress`, `canViewAllProgressTasks`); o administrador também vê
-  os desativados. Aluno vê apenas o projeto da própria equipe, com as tarefas da equipe e as
-  atribuídas a ele. A edição não mudou: `POST` e `PATCH` devolvem 403 para aluno e para professor que
+  todos os projetos ativos (`canViewProgress`); o administrador também vê os desativados. Aluno vê
+  apenas o projeto da própria equipe, com **todas** as tarefas e todo o histórico dele, inclusive as
+  atribuídas a outros integrantes (o status ele só muda nas do grupo e nas atribuídas a ele; veja a
+  seção 26). A edição não mudou: `POST` e `PATCH` devolvem 403 para aluno e para professor que
   não é o orientador principal do projeto (`isPrincipalAdvisorOf`), e o histórico continua
   registrando quem alterou o quê (`changedByName`). O painel do professor (`DashboardPage`)
   continua considerando só os projetos em que ele é orientador principal.
@@ -921,7 +922,7 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   projetos demonstrativos). Um mesmo projeto podia aparecer duas vezes (id repetido ou projeto real
   com o mesmo título, ciclo e semestre de um demonstrativo) e, como a API só consultava o banco, a
   cópia demonstrativa era ignorada com "Projeto não encontrado". `bulkTaskCandidates` agora passa
-  por `dedupeBulkTaskProjects` (mantém a primeira entrada por id e por título normalizado + ciclo +
+  por `dedupeProjects` (`application/projects/dedupe-projects.ts`, mantém a primeira entrada por id e por título normalizado + ciclo +
   semestre, e o banco vem antes dos demonstrativos) e `POST /api/projects/bulk-tasks` usa
   `CompositeProjectRepository`, a mesma fonte do painel e do acesso ao progresso, então todo projeto
   listado é atribuível.
@@ -937,9 +938,11 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   (`DbProjectTaskRepository`), então o lote é atômico.
 - **API:** `POST /api/projects/bulk-tasks` com `{ projectIds, title, description, dueDate? }` devolve
   `{ summary, created, skipped }`. A validação de título (3 a 160), descrição (5 a 5.000) e data
-  (`AAAA-MM-DD` real) fica em `application/projects/task-fields.ts`.
+  (`AAAA-MM-DD` real) fica em `application/projects/task-fields.ts`. O formulário usa React Hook Form + `bulkTaskSchema`
+  (`presentation/projects/validation.ts`, `mode: 'onTouched'`) com as mesmas regras; a confirmação
+  revalida antes de enviar.
 
-## 29. Notificações no sistema
+## 28. Notificações no sistema
 
 - **Escopo:** só notificações dentro da plataforma (sem e-mail), para **alunos e professores**. O
   administrador não recebe notificações: avisar tudo de todos os projetos seria ruído, e ele já tem
@@ -955,7 +958,8 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   Tarefa criada ou editada avisa o aluno responsável (ou toda a equipe, se for do grupo) e os
   orientadores do projeto. Mudança de status por **aluno** avisa só os orientadores; por
   **professor** avisa só os alunos; por **administrador** avisa alunos e orientadores.
-  `relative-time.ts` formata "há 5 min" e o rótulo de quantidade para a interface.
+  `presentation/notifications/relative-time.ts` formata "há 5 min" e o rótulo de quantidade para a
+  interface.
 - **Gravação:** `infrastructure/notifications/notify-task-event.ts` resolve e-mails para contas
   ativas (nunca administrador) e grava com `DbNotificationRepository`. Falha ao notificar só vai
   para o log e **nunca** desfaz a operação da tarefa.
@@ -963,11 +967,12 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   `PATCH .../[taskId]/status` (status), `AssignTaskToProjectsUseCase` (lote, uma por projeto) e
   `CreateProjectUseCase` (tarefas iniciais do cadastro pelo formulário; a importação em massa de
   projetos não tem tarefas e não passa notificador). Os casos de uso recebem o notificador pela porta
-  opcional `TaskEventNotifier` (`application/notifications/task-event-notifier.ts`), implementada
-  por `DbTaskEventNotifier`.
+  opcional `TaskEventNotifier` (`domain/enterprise/repositories/task-event-notifier.ts`, junto com os
+  tipos do evento), implementada por `DbTaskEventNotifier`.
 - **API:** `GET /api/notifications` (lista as 30 mais recentes e `unreadCount`; `?resumo=1` devolve
   só a contagem, usada no recarregamento periódico) e `PATCH /api/notifications` com `{ all: true }`
-  ou `{ ids: [...] }` (1 a 100) para marcar como lidas. Sempre `Cache-Control: no-store` e só atua
+  ou `{ ids: [...] }` (1 a 100) para marcar como lidas e `DELETE /api/notifications` para apagar
+  todas (botão "Limpar notificações", com `ConfirmationDialog`). Sempre `Cache-Control: no-store` e só atua
   nas notificações do próprio usuário da sessão.
 - **Interface** (`components/NotificationCenter.tsx`, dentro do `Header`, para aluno e professor;
   oculto para administrador e na tela de primeiro acesso): sino com contador (`99+` no máximo) e
@@ -980,7 +985,7 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   contagem é atualizada a cada 60 s com a aba visível; se aumentar, mostra o aviso "Você recebeu uma
   nova notificação". O aviso usa `role="status"` e as cores e sombras do sistema.
 
-## 28. Tela 404 personalizada
+## 29. Tela 404 personalizada
 
 - `src/app/not-found.tsx` substitui a página padrão do Next para qualquer rota inexistente e para os
   `notFound()` das páginas de projeto (projeto que não existe ou que a conta não pode ver). Ela
@@ -1023,5 +1028,5 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 
 - `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
 - O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone; só o administrador a vê na página) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
-- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno vê as tarefas da equipe e as atribuídas a ele e atualiza o status delas (não cria nem edita); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno vê todas as tarefas do projeto da sua equipe e atualiza o status das do grupo e das atribuídas a ele (não cria nem edita); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

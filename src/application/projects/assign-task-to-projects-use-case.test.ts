@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import type { Project } from '@/domain/enterprise/entities/project'
 import type {
   TaskEventNotification,
   TaskEventNotifier,
-} from '@/application/notifications/task-event-notifier'
-import type { Project } from '@/domain/enterprise/entities/project'
+} from '@/domain/enterprise/repositories/task-event-notifier'
 import { InMemoryProjectReader } from '@/test/repositories/in-memory-project-reader'
 import { InMemoryProjectTaskRepository } from '@/test/repositories/in-memory-project-task-repository'
 import { InMemoryProjectUserDirectory } from '@/test/repositories/in-memory-project-user-directory'
