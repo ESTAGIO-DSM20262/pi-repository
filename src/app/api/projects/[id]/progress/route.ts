@@ -5,8 +5,10 @@ import {
   canEditProgressTask,
   isPrincipalAdvisorOf,
 } from '@/application/projects/project-permissions'
+import { canChangeTaskStatus } from '@/application/projects/task-status'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks, users } from '@/db/schema'
+import { notifyTaskEvent } from '@/infrastructure/notifications/notify-task-event'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
 
 interface RouteContext {
@@ -100,38 +102,25 @@ export async function GET(request: Request, context: RouteContext) {
     const access = await resolveProjectProgressAccess(request, id)
     if (!access.ok) return jsonError(access.message, access.status)
 
-    const allTasks = await db
+    const projectTasks = await db
       .select()
       .from(projectProgressTasks)
       .where(eq(projectProgressTasks.projectId, id))
       .orderBy(desc(projectProgressTasks.versionMajor), desc(projectProgressTasks.createdAt))
 
-    const visibleTasks = access.canViewAllTasks
-      ? allTasks
-      : allTasks.filter(
-          (task) =>
-            !task.targetStudentEmail || task.targetStudentEmail.toLowerCase() === access.user.email,
-        )
-    const visibleIds = visibleTasks.map((task) => task.id)
-    const allRevisions =
-      visibleIds.length > 0
+    const taskIds = projectTasks.map((task) => task.id)
+    const revisions =
+      taskIds.length > 0
         ? await db
             .select()
             .from(projectProgressRevisions)
-            .where(inArray(projectProgressRevisions.taskId, visibleIds))
+            .where(inArray(projectProgressRevisions.taskId, taskIds))
             .orderBy(desc(projectProgressRevisions.changedAt))
         : []
-    const revisions = access.canViewAllTasks
-      ? allRevisions
-      : allRevisions.filter(
-          (revision) =>
-            !revision.targetStudentEmail ||
-            revision.targetStudentEmail.toLowerCase() === access.user.email,
-        )
 
     const personIds = [
       ...new Set([
-        ...visibleTasks.map((task) => task.createdByUserId),
+        ...projectTasks.map((task) => task.createdByUserId),
         ...revisions.map((revision) => revision.changedByUserId),
       ]),
     ]
@@ -145,7 +134,7 @@ export async function GET(request: Request, context: RouteContext) {
     const nameById = new Map(people.map((person) => [person.id, person.name]))
     const viewer = { id: access.user.id, email: access.user.email, role: access.user.role }
 
-    const tasks = visibleTasks.map((task) => {
+    const tasks = projectTasks.map((task) => {
       const lastEdit = revisions.find(
         (revision) => revision.taskId === task.id && revision.action === 'updated',
       )
@@ -157,6 +146,7 @@ export async function GET(request: Request, context: RouteContext) {
           : null,
         lastEditedAt: lastEdit?.changedAt ?? null,
         canEdit: canEditProgressTask(access.project, viewer, task),
+        canChangeStatus: canChangeTaskStatus(access.project, viewer, task),
       }
     })
 
@@ -192,7 +182,7 @@ export async function POST(request: Request, context: RouteContext) {
     ) {
       return jsonError('Somente o orientador principal ou o administrador pode criar tarefas.', 403)
     }
-    if (access.project.status !== 'em_andamento') {
+    if (access.project.status !== 'em_andamento' && access.user.role !== 'admin') {
       return jsonError(
         'Projetos concluídos são somente para consulta. Não é possível adicionar tarefas.',
         409,
@@ -248,6 +238,15 @@ export async function POST(request: Request, context: RouteContext) {
       changeNote: parsed.value.changeNote ?? 'Tarefa criada',
       changedByUserId: access.user.id,
       changedAt: now,
+    })
+
+    await notifyTaskEvent({
+      event: 'created',
+      projectId: id,
+      taskId: task.id,
+      project: access.project,
+      task: { title: task.title, targetStudentEmail: task.targetStudentEmail },
+      actor: access.user,
     })
 
     return NextResponse.json({ task }, { status: 201, headers: { 'Cache-Control': 'no-store' } })

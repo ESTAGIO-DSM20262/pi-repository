@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx'
+import { cellText, findColumn, normalizeHeader } from '@/application/spreadsheet/sheet-cells'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { formatPersonName } from './person-name'
 
@@ -16,25 +17,6 @@ export interface ImportParseResult {
   rows: ImportedUserRow[]
   errors: Array<{ sheet: string; rowNumber: number; reason: string }>
   sheetNames: string[]
-}
-
-function normalizeHeader(value: unknown): string {
-  return String(value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR')
-    .replace(/[^a-z0-9]/g, '')
-}
-
-function cellText(value: unknown): string {
-  return String(value ?? '')
-    .replace(/\u00a0/g, ' ')
-    .trim()
-}
-
-function findColumn(headers: string[], candidates: string[]): number {
-  const normalizedCandidates = candidates.map(normalizeHeader)
-  return headers.findIndex((header) => normalizedCandidates.includes(header))
 }
 
 function parseRole(value: string, sheetName: string): Role | null {

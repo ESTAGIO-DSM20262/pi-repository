@@ -31,6 +31,7 @@ import {
   RECENT_SEMESTER_LIMIT,
 } from '@/presentation/projects/semester-dropdown'
 import { AdminInsights } from './AdminInsights'
+import { BulkTaskAssignmentSection } from './BulkTaskAssignmentSection'
 import { DashboardBlock, DashboardSectionNav } from './DashboardBlock'
 import { DashboardFiltersBar } from './DashboardFiltersBar'
 import { formatMetric, StatCard } from './DashboardWidgets'
@@ -500,6 +501,7 @@ function ProjectsSection({
   emptyText,
   filterable = false,
   includeInactiveFilter = false,
+  ongoingFirst = false,
 }: {
   title: string
   subtitle: string
@@ -511,6 +513,7 @@ function ProjectsSection({
   emptyText: string
   filterable?: boolean
   includeInactiveFilter?: boolean
+  ongoingFirst?: boolean
 }) {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
@@ -526,9 +529,15 @@ function ProjectsSection({
   }, [projects])
 
   const filteredProjects = useMemo(() => {
-    if (!filterable) return projects
+    const ordered = ongoingFirst
+      ? [...projects].sort(
+          (first, second) =>
+            Number(second.status === 'em_andamento') - Number(first.status === 'em_andamento'),
+        )
+      : projects
+    if (!filterable) return ordered
     const normalized = normalizeText(query)
-    return projects.filter((project) => {
+    return ordered.filter((project) => {
       const matchesText =
         !normalized ||
         normalizeText(
@@ -542,7 +551,7 @@ function ProjectsSection({
       const matchesCycle = cycleFilter === 'all' || project.cycle === cycleFilter
       return matchesText && matchesStatus && matchesSemester && matchesCycle
     })
-  }, [projects, filterable, query, statusFilter, semesterFilter, cycleFilter])
+  }, [projects, filterable, ongoingFirst, query, statusFilter, semesterFilter, cycleFilter])
 
   const hasActiveFilters =
     query.trim() !== '' ||
@@ -725,6 +734,8 @@ export function RoleDashboard({
       projects.some(
         (project) => project.advisor.email.trim().toLowerCase() === email.trim().toLowerCase(),
       ))
+  const showBulkTasks =
+    role === 'admin' || (role === 'professor' && projects.some((project) => project.related))
   const blockLinks = [
     ...(showFilters || role === 'admin' || monitoringVisible
       ? [
@@ -742,17 +753,28 @@ export function RoleDashboard({
       ? [{ id: 'gestao', label: 'Usuários e cursos', icon: 'fi-rr-users' }]
       : []),
     ...(showAwards ? [{ id: 'melhor-pi', label: 'Melhor PI', icon: 'fi-rr-badge-check' }] : []),
+    ...(showBulkTasks
+      ? [{ id: 'tarefas-em-lote', label: 'Tarefas em lote', icon: 'fi-rr-list-check' }]
+      : []),
     { id: 'projetos', label: 'Projetos e favoritos', icon: 'fi-rr-folder-open' },
   ]
 
   const newProjectAction =
     role !== 'student' ? (
-      <Link
-        href="/projetos/novo"
-        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
-      >
-        <i className="fi fi-rr-plus flex" aria-hidden="true" /> Novo Projeto
-      </Link>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href="/projetos/importar"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-primary/30 bg-white px-3.5 text-xs font-semibold text-primary transition hover:bg-primary-light sm:h-10 sm:px-4"
+        >
+          <i className="fi fi-rr-file-import flex" aria-hidden="true" /> Cadastrar em massa
+        </Link>
+        <Link
+          href="/projetos/novo"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-primary px-3.5 text-xs font-semibold text-white transition hover:bg-primary-hover sm:h-10 sm:px-4"
+        >
+          <i className="fi fi-rr-plus flex" aria-hidden="true" /> Novo Projeto
+        </Link>
+      </div>
     ) : undefined
 
   return (
@@ -869,6 +891,25 @@ export function RoleDashboard({
           </DashboardBlock>
         )}
 
+        {showBulkTasks && (
+          <DashboardBlock
+            id="tarefas-em-lote"
+            title="Tarefas em lote"
+            description={
+              role === 'admin'
+                ? 'Atribua a mesma tarefa a vários projetos de qualquer orientador'
+                : 'Atribua a mesma tarefa a vários dos projetos que você acompanha'
+            }
+            icon="fi-rr-list-check"
+          >
+            <BulkTaskAssignmentSection
+              role={role === 'admin' ? 'admin' : 'professor'}
+              email={email}
+              projects={projects}
+            />
+          </DashboardBlock>
+        )}
+
         <DashboardBlock
           id="projetos"
           title="Projetos e favoritos"
@@ -895,6 +936,7 @@ export function RoleDashboard({
             action={newProjectAction}
             filterable={role !== 'student'}
             includeInactiveFilter={role === 'admin'}
+            ongoingFirst={role === 'professor'}
             emptyText={
               role === 'admin'
                 ? 'Ainda não há projetos cadastrados no acervo.'

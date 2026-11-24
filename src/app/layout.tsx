@@ -64,8 +64,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   fallback={
                     <header className="border-b border-border bg-white">
                       <div className="h-1.5 bg-primary" />
-                      <div className="h-[72px]" />
-                      <div className="h-10 border-t border-gray-100 sm:hidden" />
+                      <div className="h-16 sm:h-[72px]" />
                     </header>
                   }
                 >

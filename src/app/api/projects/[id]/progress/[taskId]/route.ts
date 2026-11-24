@@ -7,6 +7,7 @@ import {
 } from '@/application/projects/project-permissions'
 import { db } from '@/db'
 import { projectProgressRevisions, projectProgressTasks } from '@/db/schema'
+import { notifyTaskEvent } from '@/infrastructure/notifications/notify-task-event'
 import { resolveProjectProgressAccess } from '@/libs/project-progress-access'
 
 interface RouteContext {
@@ -47,7 +48,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         403,
       )
     }
-    if (access.project.status !== 'em_andamento') {
+    if (access.project.status !== 'em_andamento' && access.user.role !== 'admin') {
       return jsonError(
         'Projetos concluídos são somente para consulta. Não é possível editar tarefas.',
         409,
@@ -139,6 +140,15 @@ export async function PATCH(request: Request, context: RouteContext) {
       changeNote: changeNote || 'Tarefa atualizada',
       changedByUserId: access.user.id,
       changedAt: now,
+    })
+
+    await notifyTaskEvent({
+      event: 'updated',
+      projectId: id,
+      taskId: updated.id,
+      project: access.project,
+      task: { title: updated.title, targetStudentEmail: updated.targetStudentEmail },
+      actor: access.user,
     })
 
     return NextResponse.json({ task: updated }, { headers: { 'Cache-Control': 'no-store' } })

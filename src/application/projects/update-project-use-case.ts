@@ -75,7 +75,7 @@ export class UpdateProjectUseCase
     const { advisor, coAdvisors } = resolvedAdvisors.value
 
     const currentDetails = project.publicDetails ?? {}
-    const nextStatus = input.scope === 'full' ? input.fields.status : project.status
+    const nextStatus = input.fields.status
     const currentEmails = [project.advisor, ...(project.coAdvisors ?? [])].map((item) =>
       normalize(item.email),
     )
@@ -87,22 +87,6 @@ export class UpdateProjectUseCase
       [advisor, ...coAdvisors],
       removedEmails,
     )
-
-    if (input.scope === 'admin') {
-      await this.projects.updateAsAdministrator(project.id, {
-        advisorEmail: normalize(advisor.email),
-        advisorName: advisor.name,
-        coAdvisors,
-        publicDetails: {
-          ...currentDetails,
-          externalLinks: buildProjectLinks(input.links),
-          ...(input.images ? { images: input.images } : {}),
-        },
-        verified,
-      })
-      await this.cleanVerifications(project, nextStatus, removedEmails)
-      return right({ id: project.id })
-    }
 
     const fields = input.fields
     const students = await this.users.findActiveStudentsByEmails(fields.studentEmails)
@@ -161,6 +145,8 @@ export class UpdateProjectUseCase
       status: fields.status,
       languages: fields.languages,
       stack: fields.stack,
+      advisorEmail: normalize(advisor.email),
+      advisorName: advisor.name,
       coAdvisors,
       memberEmails: teamMembers.map((member) => member.studentEmail ?? ''),
       teamMembers,

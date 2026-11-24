@@ -11,6 +11,7 @@ import type {
   ProjectTaskCreateRecord,
 } from '@/domain/enterprise/repositories/project-repository'
 import type { ProjectUserDirectory } from '@/domain/enterprise/repositories/project-user-directory'
+import type { TaskEventNotifier } from '@/domain/enterprise/repositories/task-event-notifier'
 import { parseCreateProjectInput } from './create-project'
 import { ProjectOperationError } from './project-operation-error'
 
@@ -30,6 +31,7 @@ export class CreateProjectUseCase
   constructor(
     private readonly projects: ProjectRepository,
     private readonly users: ProjectUserDirectory,
+    private readonly notifier?: TaskEventNotifier,
   ) {}
 
   async execute({
@@ -172,6 +174,28 @@ export class CreateProjectUseCase
     }))
 
     await this.projects.create(project, tasks, revisions)
+
+    const notifier = this.notifier
+    if (notifier && tasks.length > 0) {
+      const subject = {
+        title: project.title,
+        advisor: { email: project.advisorEmail },
+        coAdvisors: project.coAdvisors,
+        memberEmails: project.memberEmails,
+      }
+      await Promise.all(
+        tasks.map((task) =>
+          notifier.notify({
+            event: 'created',
+            projectId: id,
+            taskId: task.id,
+            project: subject,
+            task: { title: task.title, targetStudentEmail: task.targetStudentEmail },
+            actor: { email: account.email, name: account.name, role: account.role },
+          }),
+        ),
+      )
+    }
     return right({ id, tasksCreated: tasks.length })
   }
 }

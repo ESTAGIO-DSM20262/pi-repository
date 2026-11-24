@@ -1,6 +1,15 @@
 'use client'
 
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  buildTaskProgressBar,
+  describeTaskDeadline,
+  getTaskDisplayStatus,
+  TASK_STATUS_ACTIONS,
+  type TaskDisplayStatus,
+  todayInSaoPaulo,
+} from '@/application/projects/task-status'
 import { formatPersonName } from '@/libs/initials'
 import {
   type ProgressMember,
@@ -17,7 +26,12 @@ interface ProjectProgressSectionProps {
   members: ProgressMember[]
 }
 
-const STATUS: Record<ProgressTask['status'], { label: string; badge: string; dot: string }> = {
+const STATUS: Record<TaskDisplayStatus, { label: string; badge: string; dot: string }> = {
+  overdue: {
+    label: 'Atrasada',
+    badge: 'border-rose-200 bg-rose-50 text-rose-800',
+    dot: 'bg-rose-500 ring-rose-100',
+  },
   pending: {
     label: 'Pendente',
     badge: 'border-slate-200 bg-slate-100 text-slate-700',
@@ -25,14 +39,30 @@ const STATUS: Record<ProgressTask['status'], { label: string; badge: string; dot
   },
   in_progress: {
     label: 'Em andamento',
-    badge: 'border-amber-200 bg-amber-50 text-amber-800',
-    dot: 'bg-amber-500 ring-amber-100',
+    badge: 'border-amber-100 bg-amber-50/70 text-amber-700',
+    dot: 'bg-amber-400 ring-amber-100',
   },
   completed: {
     label: 'Concluída',
     badge: 'border-emerald-200 bg-emerald-50 text-emerald-800',
     dot: 'bg-emerald-500 ring-emerald-100',
   },
+}
+
+type TaskFilter = 'all' | 'open' | 'overdue' | 'completed'
+
+const FILTERS: Array<{ id: TaskFilter; label: string }> = [
+  { id: 'all', label: 'Todas' },
+  { id: 'open', label: 'Em aberto' },
+  { id: 'overdue', label: 'Atrasadas' },
+  { id: 'completed', label: 'Concluídas' },
+]
+
+function statusIcon(status: TaskDisplayStatus) {
+  if (status === 'completed') return 'fi-rr-check'
+  if (status === 'overdue') return 'fi-rr-exclamation'
+  if (status === 'in_progress') return 'fi-rr-hourglass-start'
+  return 'fi-rr-clock'
 }
 
 function formatDateTime(value: string | null | undefined) {
@@ -75,10 +105,13 @@ export function ProjectProgressSection({
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<ProgressTask | null>(null)
   const [showHistory, setShowHistory] = useState(false)
+  const [filter, setFilter] = useState<TaskFilter>('all')
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null)
+  const [statusError, setStatusError] = useState('')
 
   const loadTasks = useCallback(
-    async (preferredTaskId?: string) => {
-      setLoading(true)
+    async (preferredTaskId?: string, silent = false) => {
+      if (!silent) setLoading(true)
       setError('')
       try {
         const response = await fetch(`/api/projects/${encodeURIComponent(projectId)}/progress`, {
@@ -124,7 +157,14 @@ export function ProjectProgressSection({
     setShowHistory(false)
   }, [])
 
+  const today = todayInSaoPaulo()
   const selectedTask = tasks.find((task) => task.id === selectedTaskId) ?? null
+  const selectedDisplay: TaskDisplayStatus = selectedTask
+    ? getTaskDisplayStatus(selectedTask, today)
+    : 'pending'
+  const selectedDeadline = selectedTask ? describeTaskDeadline(selectedTask, today) : null
+  const overdueSuffix =
+    selectedDisplay === 'overdue' && selectedDeadline ? ` · ${selectedDeadline}` : ''
   const taskRevisions = useMemo(
     () => (selectedTask ? revisions.filter((revision) => revision.taskId === selectedTask.id) : []),
     [revisions, selectedTask],
@@ -135,6 +175,42 @@ export function ProjectProgressSection({
       new Map(members.map((member) => [member.email.toLowerCase(), formatPersonName(member.name)])),
     [members],
   )
+
+  const bar = useMemo(() => buildTaskProgressBar(tasks, today), [tasks, today])
+  const canUpdateAnyStatus = tasks.some((task) => task.canChangeStatus)
+  const visibleTasks = tasks.filter((task) => {
+    const display = getTaskDisplayStatus(task, today)
+    if (filter === 'open') return display !== 'completed'
+    if (filter === 'overdue') return display === 'overdue'
+    if (filter === 'completed') return display === 'completed'
+    return true
+  })
+
+  async function changeStatus(task: ProgressTask, status: ProgressTask['status']) {
+    setStatusUpdatingId(task.id)
+    setStatusError('')
+    try {
+      const response = await fetch(
+        `/api/projects/${encodeURIComponent(projectId)}/progress/${encodeURIComponent(task.id)}/status`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status }),
+        },
+      )
+      const data = (await response.json().catch(() => null)) as { error?: string } | null
+      if (!response.ok) {
+        throw new Error(data?.error ?? 'Não foi possível atualizar o status da tarefa.')
+      }
+      await loadTasks(task.id, true)
+    } catch (caught) {
+      setStatusError(
+        caught instanceof Error ? caught.message : 'Não foi possível atualizar o status da tarefa.',
+      )
+    } finally {
+      setStatusUpdatingId(null)
+    }
+  }
 
   function openCreateDialog() {
     setEditingTask(null)
@@ -154,7 +230,8 @@ export function ProjectProgressSection({
 
   return (
     <section
-      className="mt-5 rounded-xl border border-[#e9c9c5] bg-white p-4 shadow-sm sm:p-5 lg:p-6"
+      id="progresso"
+      className="mt-5 scroll-mt-6 rounded-xl border border-[#e9c9c5] bg-white p-4 shadow-sm sm:p-5 lg:p-6"
       aria-labelledby="project-progress-title"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -171,16 +248,23 @@ export function ProjectProgressSection({
               ? 'Histórico das tarefas e orientações registradas durante o desenvolvimento deste projeto.'
               : canManage
                 ? 'Organize entregas, atribua responsáveis e mantenha um histórico de cada revisão.'
-                : 'Acompanhe as orientações, os prazos e a evolução das entregas deste projeto.'}
+                : canUpdateAnyStatus
+                  ? 'Acompanhe as tarefas de toda a equipe e atualize o andamento das suas.'
+                  : 'Acompanhe as orientações, os prazos e a evolução das entregas deste projeto.'}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {!canManage && (
             <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 text-[0.6875rem] font-semibold text-slate-600">
-              <i className="fi fi-rr-lock flex" aria-hidden="true" />
+              <i
+                className={`fi ${canUpdateAnyStatus && projectStatus !== 'publicado' ? 'fi-rr-edit' : 'fi-rr-lock'} flex`}
+                aria-hidden="true"
+              />
               {projectStatus === 'publicado'
                 ? 'Projeto concluído · somente consulta'
-                : 'Somente acompanhamento'}
+                : canUpdateAnyStatus
+                  ? 'Você atualiza o andamento das tarefas'
+                  : 'Somente acompanhamento'}
             </span>
           )}
           {canManage && (
@@ -194,6 +278,87 @@ export function ProjectProgressSection({
           )}
         </div>
       </div>
+
+      {!loading && !error && bar.total > 0 && (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50/60 p-3.5 sm:p-4">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-slate-700">
+                Andamento das tarefas
+              </p>
+              <p className="mt-0.5 text-[0.8125rem] text-slate-600">
+                <strong className="text-slate-900">
+                  {bar.completed} de {bar.total}
+                </strong>{' '}
+                {bar.total === 1 ? 'tarefa concluída' : 'tarefas concluídas'}
+              </p>
+            </div>
+            <span className="text-xl font-semibold leading-none tabular-nums text-primary/90">
+              {bar.completionRate}%
+            </span>
+          </div>
+          <div
+            role="progressbar"
+            aria-label="Tarefas concluídas"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={bar.completionRate}
+            className="mt-3 flex h-2 w-full gap-px overflow-hidden rounded-full bg-slate-200/70"
+          >
+            {[
+              { key: 'completed', count: bar.completed, color: 'bg-emerald-400' },
+              { key: 'overdue', count: bar.overdue, color: 'bg-rose-400' },
+              { key: 'in_progress', count: bar.inProgress, color: 'bg-amber-300' },
+              { key: 'pending', count: bar.pending, color: 'bg-slate-300' },
+            ]
+              .filter((segment) => segment.count > 0)
+              .map((segment) => (
+                <span
+                  key={segment.key}
+                  className={`${segment.color} h-full`}
+                  style={{ width: `${(segment.count / bar.total) * 100}%` }}
+                />
+              ))}
+          </div>
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {[
+              { status: 'completed' as const, count: bar.completed, label: 'Concluídas' },
+              { status: 'in_progress' as const, count: bar.inProgress, label: 'Em andamento' },
+              { status: 'pending' as const, count: bar.pending, label: 'Pendentes' },
+              { status: 'overdue' as const, count: bar.overdue, label: 'Atrasadas' },
+            ].map((item) => (
+              <li
+                key={item.status}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.6875rem] font-semibold ${item.count > 0 || item.status !== 'overdue' ? STATUS[item.status].badge : 'border-slate-200 bg-white text-slate-500'}`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${STATUS[item.status].dot.split(' ')[0]}`}
+                />
+                {item.count} {item.label}
+              </li>
+            ))}
+            {bar.dueSoon > 0 && (
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[0.6875rem] font-bold text-slate-700">
+                <i className="fi fi-rr-calendar flex text-primary" aria-hidden="true" />
+                {bar.dueSoon} {bar.dueSoon === 1 ? 'vence' : 'vencem'} em até 7 dias
+              </li>
+            )}
+          </ul>
+          {bar.allCompleted && canManage && projectStatus === 'em_andamento' && (
+            <p className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-relaxed text-emerald-900">
+              Todas as tarefas foram concluídas. Se o projeto está pronto, altere a situação para
+              Concluído na{' '}
+              <Link
+                href={`/projetos/${encodeURIComponent(projectId)}/editar`}
+                className="font-bold underline underline-offset-2"
+              >
+                edição do projeto
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+      )}
 
       {error && (
         <div className="mt-4 flex flex-col gap-3 rounded-lg border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -256,17 +421,23 @@ export function ProjectProgressSection({
             {selectedTask ? (
               <>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-primary px-2 py-1 text-[0.625rem] font-extrabold tracking-wide text-white">
+                  <span className="rounded bg-primary px-2 py-1 text-[0.625rem] font-bold tracking-wide text-white">
                     {versionLabel(selectedTask)}
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.625rem] font-bold ${STATUS[selectedTask.status].badge}`}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.625rem] font-semibold ${STATUS[selectedDisplay].badge}`}
                   >
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${STATUS[selectedTask.status].dot.split(' ')[0]}`}
+                      className={`h-1.5 w-1.5 rounded-full ${STATUS[selectedDisplay].dot.split(' ')[0]}`}
                     />
-                    {STATUS[selectedTask.status].label}
+                    {STATUS[selectedDisplay].label}
                   </span>
+                  {selectedDeadline && selectedDisplay !== 'overdue' && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50/70 px-2.5 py-1 text-[0.625rem] font-semibold text-amber-700">
+                      <i className="fi fi-rr-calendar flex" aria-hidden="true" />
+                      {selectedDeadline}
+                    </span>
+                  )}
                 </div>
                 <h3 className="mt-3 text-base font-bold leading-snug text-slate-900 sm:text-lg">
                   {selectedTask.title}
@@ -292,11 +463,45 @@ export function ProjectProgressSection({
                     <dt className="flex items-center gap-1.5 text-[0.625rem] font-bold uppercase tracking-wide text-slate-500">
                       <i className="fi fi-rr-calendar flex text-primary" aria-hidden="true" /> Prazo
                     </dt>
-                    <dd className="mt-1.5 font-semibold text-slate-800">
+                    <dd
+                      className={`mt-1.5 font-semibold ${selectedDisplay === 'overdue' ? 'text-rose-700' : 'text-slate-800'}`}
+                    >
                       {formatDateOnly(selectedTask.dueDate)}
+                      {overdueSuffix}
                     </dd>
                   </div>
                 </dl>
+
+                {selectedTask.canChangeStatus && (
+                  <div className="mt-4 rounded-md border border-slate-200 bg-white p-3">
+                    <p className="text-[0.625rem] font-bold uppercase tracking-wide text-slate-500">
+                      Atualizar andamento
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {TASK_STATUS_ACTIONS[selectedTask.status].map((action) => (
+                        <button
+                          key={action.to}
+                          type="button"
+                          disabled={statusUpdatingId !== null}
+                          onClick={() => {
+                            void changeStatus(selectedTask, action.to)
+                          }}
+                          className={`cursor-pointer inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border px-3 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${action.primary ? 'border-primary bg-primary text-white hover:bg-primary-hover' : 'border-slate-300 bg-white text-slate-700 hover:border-primary hover:text-primary'}`}
+                        >
+                          {statusUpdatingId === selectedTask.id && action.primary && (
+                            <i className="fi fi-rr-spinner flex animate-spin" aria-hidden="true" />
+                          )}
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                    {statusError && (
+                      <p role="alert" className="mt-2 text-xs font-semibold text-rose-700">
+                        {statusError}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div className="mt-auto pt-4">
                   <div className="flex flex-wrap items-center justify-between gap-2 text-[0.625rem] text-slate-500">
@@ -350,7 +555,7 @@ export function ProjectProgressSection({
                               className="rounded-md border border-slate-200 bg-white p-3"
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-[0.6875rem] font-extrabold text-primary">
+                                <span className="text-[0.6875rem] font-bold text-primary">
                                   v{revision.versionMajor}.{revision.versionMinor}
                                 </span>
                                 <span className="text-[0.625rem] text-slate-500">
@@ -365,7 +570,7 @@ export function ProjectProgressSection({
                               </p>
                               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                                 <span
-                                  className={`rounded-full border px-2 py-0.5 text-[0.5625rem] font-bold ${STATUS[revision.status].badge}`}
+                                  className={`rounded-full border px-2 py-0.5 text-[0.5625rem] font-semibold ${STATUS[revision.status].badge}`}
                                 >
                                   {STATUS[revision.status].label}
                                 </span>
@@ -420,19 +625,40 @@ export function ProjectProgressSection({
                 {tasks.length} {tasks.length === 1 ? 'tarefa' : 'tarefas'}
               </span>
             </div>
+            <fieldset className="m-0 mb-3 flex min-w-0 flex-wrap gap-1.5 border-0 p-0">
+              <legend className="sr-only">Filtrar tarefas</legend>
+              {FILTERS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={filter === item.id}
+                  onClick={() => setFilter(item.id)}
+                  className={`cursor-pointer min-h-8 rounded-full border px-3 text-[0.6875rem] font-bold transition ${filter === item.id ? 'border-primary bg-primary text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-primary/40 hover:text-primary'}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </fieldset>
+            {visibleTasks.length === 0 && (
+              <p className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500">
+                Nenhuma tarefa neste filtro.
+              </p>
+            )}
             <ol className="max-h-[490px] space-y-2 overflow-y-auto pr-0.5">
-              {tasks.map((task) => {
+              {visibleTasks.map((task) => {
                 const selected = task.id === selectedTaskId
+                const display = getTaskDisplayStatus(task, today)
+                const deadline = describeTaskDeadline(task, today)
                 return (
                   <li
                     key={task.id}
                     className={`relative flex min-w-0 items-stretch gap-2 rounded-lg border p-2 transition sm:gap-2.5 ${selected ? 'border-primary/35 bg-primary-light/30' : 'border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white'}`}
                   >
                     <span
-                      className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${STATUS[task.status].dot}`}
+                      className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ring-2 ${STATUS[display].dot}`}
                     >
                       <i
-                        className={`fi ${task.status === 'completed' ? 'fi-rr-check' : task.status === 'in_progress' ? 'fi-rr-hourglass-start' : 'fi-rr-clock'} flex text-[0.6875rem] text-white`}
+                        className={`fi ${statusIcon(display)} flex text-[0.6875rem] ${display === 'in_progress' ? 'text-amber-950' : 'text-white'}`}
                         aria-hidden="true"
                       />
                     </span>
@@ -444,17 +670,26 @@ export function ProjectProgressSection({
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[0.625rem] font-extrabold ${selected ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'}`}
+                          className={`rounded px-1.5 py-0.5 text-[0.625rem] font-bold ${selected ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'}`}
                         >
                           {versionLabel(task)}
                         </span>
-                        <span className="text-[0.5625rem] font-semibold text-slate-500">
-                          {STATUS[task.status].label}
+                        <span
+                          className={`text-[0.5625rem] font-semibold ${display === 'overdue' ? 'text-rose-700' : 'text-slate-500'}`}
+                        >
+                          {STATUS[display].label}
                         </span>
                       </div>
                       <p className="mt-1 line-clamp-2 break-words text-xs font-bold leading-snug text-slate-900 sm:text-[0.8125rem]">
                         {task.title}
                       </p>
+                      {deadline && (
+                        <p
+                          className={`mt-1 flex items-center gap-1 text-[0.625rem] font-semibold ${display === 'overdue' ? 'text-rose-700' : 'text-amber-700'}`}
+                        >
+                          <i className="fi fi-rr-calendar flex" aria-hidden="true" /> {deadline}
+                        </p>
+                      )}
                       <p className="mt-1 flex items-center gap-1 text-[0.625rem] text-slate-500">
                         <i className="fi fi-rr-clock flex" aria-hidden="true" /> Atualizada em{' '}
                         {formatDateTime(task.updatedAt)}
@@ -484,8 +719,15 @@ export function ProjectProgressSection({
                 className="fi fi-rr-info inline-flex align-[-2px] text-primary"
                 aria-hidden="true"
               />{' '}
-              Cada nova tarefa recebe uma versão principal (1.0, 2.0…). Editar uma tarefa gera uma
-              revisão menor (1.1, 1.2…), mantendo o histórico.
+              Cada nova tarefa recebe uma versão principal (1.0, 2.0…). Editar uma tarefa ou mudar o
+              status gera uma revisão menor (1.1, 1.2…), mantendo o histórico.
+            </p>
+            <p className="mt-2 text-[0.625rem] leading-relaxed text-slate-500">
+              <strong className="text-slate-700">Pendente:</strong> ainda não iniciada ·{' '}
+              <strong className="text-slate-700">Em andamento:</strong> já iniciada ·{' '}
+              <strong className="text-slate-700">Concluída:</strong> entregue ·{' '}
+              <strong className="text-slate-700">Atrasada:</strong> o prazo venceu sem a conclusão
+              (marcada automaticamente).
             </p>
           </div>
         </div>

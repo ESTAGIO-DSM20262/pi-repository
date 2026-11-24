@@ -109,6 +109,7 @@ export function ProjectAdvisorsSection({
                 ariaLabel="Professor orientador principal"
                 width="full"
                 tone="muted"
+                placeholder="Selecione o professor orientador"
                 options={principalOptions}
                 onChange={onPrincipalChange}
               />

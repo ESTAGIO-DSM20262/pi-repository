@@ -6,8 +6,6 @@ import type { ProjectPersonOption } from '@/presentation/projects/project-person
 import { Badge, FormSection, fieldClass, hintClass } from './ProjectFormPrimitives'
 
 interface ProjectTeamSectionProps {
-  canEditDetails: boolean
-  canEditTeam: boolean
   students: ProjectPersonOption[]
   selectedStudents: ProjectPersonOption[]
   studentQuery: string
@@ -25,8 +23,6 @@ interface ProjectTeamSectionProps {
 }
 
 export function ProjectTeamSection({
-  canEditDetails,
-  canEditTeam,
   students,
   selectedStudents,
   studentQuery,
@@ -53,79 +49,70 @@ export function ProjectTeamSection({
         </Badge>
       }
     >
-      {canEditDetails && (
-        <div className="relative">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <label className="relative block min-w-0 flex-1">
-              <span className="sr-only">Buscar aluno por RA, nome ou e-mail</span>
-              <i
-                className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-secondary"
-                aria-hidden="true"
-              />
-              <input
-                value={studentQuery}
-                onChange={(event) => {
-                  onStudentQueryChange(event.target.value)
-                }}
-                onKeyDown={onStudentKeyDown}
-                placeholder="Buscar aluno por RA, nome ou e-mail..."
-                className={`${fieldClass} pl-9`}
-              />
-            </label>
-            <button
-              type="button"
-              onClick={onAddStudentFromQuery}
-              className="cursor-pointer inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover sm:h-10 sm:w-auto"
-            >
-              <i className="fi fi-rr-user-add flex" aria-hidden="true" /> Adicionar discente
-            </button>
-          </div>
-
-          {suggestions.length > 0 && (
-            <ul className="mt-2 divide-y divide-border-light overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-              {suggestions.map((student) => (
-                <li key={student.email}>
-                  <button
-                    type="button"
-                    onClick={() => onAddStudent(student.email)}
-                    className="cursor-pointer flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-surface-secondary"
-                  >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[0.625rem] font-bold text-primary">
-                      {getNameInitials(student.name)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[0.8125rem] font-semibold text-slate-900">
-                        {formatPersonName(student.name)}
-                      </span>
-                      <span className="block truncate text-[0.6875rem] text-text-secondary">
-                        {student.registrationNumber ? `RA ${student.registrationNumber} · ` : ''}
-                        {student.email}
-                      </span>
-                    </span>
-                    <i
-                      className="fi fi-rr-plus flex shrink-0 text-sm text-primary"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {studentNotice && (
-            <p role="status" className="mt-2 text-xs font-semibold text-primary">
-              {studentNotice}
-            </p>
-          )}
-          {students.length === 0 && <p className={hintClass}>Nenhum aluno ativo cadastrado.</p>}
+      <div className="relative">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <label className="relative block min-w-0 flex-1">
+            <span className="sr-only">Buscar aluno por RA, nome ou e-mail</span>
+            <i
+              className="fi fi-rr-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-text-secondary"
+              aria-hidden="true"
+            />
+            <input
+              value={studentQuery}
+              onChange={(event) => {
+                onStudentQueryChange(event.target.value)
+              }}
+              onKeyDown={onStudentKeyDown}
+              placeholder="Buscar aluno por RA, nome ou e-mail..."
+              className={`${fieldClass} pl-9`}
+            />
+          </label>
+          <button
+            type="button"
+            onClick={onAddStudentFromQuery}
+            className="cursor-pointer inline-flex h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-primary-hover sm:h-10 sm:w-auto"
+          >
+            <i className="fi fi-rr-user-add flex" aria-hidden="true" /> Adicionar discente
+          </button>
         </div>
-      )}
 
-      {!canEditDetails && (
-        <p className={hintClass}>
-          Como administrador, você pode editar somente os links dos artefatos. A equipe e as funções
-          dos integrantes não podem ser alteradas por este perfil.
-        </p>
-      )}
+        {suggestions.length > 0 && (
+          <ul className="mt-2 divide-y divide-border-light overflow-hidden rounded-lg border border-border bg-white shadow-sm">
+            {suggestions.map((student) => (
+              <li key={student.email}>
+                <button
+                  type="button"
+                  onClick={() => onAddStudent(student.email)}
+                  className="cursor-pointer flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-surface-secondary"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-[0.625rem] font-bold text-primary">
+                    {getNameInitials(student.name)}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[0.8125rem] font-semibold text-slate-900">
+                      {formatPersonName(student.name)}
+                    </span>
+                    <span className="block truncate text-[0.6875rem] text-text-secondary">
+                      {student.registrationNumber ? `RA ${student.registrationNumber} · ` : ''}
+                      {student.email}
+                    </span>
+                  </span>
+                  <i
+                    className="fi fi-rr-plus flex shrink-0 text-sm text-primary"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {studentNotice && (
+          <p role="status" className="mt-2 text-xs font-semibold text-primary">
+            {studentNotice}
+          </p>
+        )}
+        {students.length === 0 && <p className={hintClass}>Nenhum aluno ativo cadastrado.</p>}
+      </div>
 
       {selectedStudents.length > 0 ? (
         <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -162,16 +149,14 @@ export function ProjectTeamSection({
                       </span>
                     )}
                   </span>
-                  {canEditDetails && (
-                    <button
-                      type="button"
-                      onClick={() => onRemoveStudent(student.email)}
-                      aria-label={`Remover ${formatPersonName(student.name)}`}
-                      className="cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
-                    >
-                      <i className="fi fi-rr-cross-small flex text-base" aria-hidden="true" />
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => onRemoveStudent(student.email)}
+                    aria-label={`Remover ${formatPersonName(student.name)}`}
+                    className="cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-rose-50 hover:text-rose-800"
+                  >
+                    <i className="fi fi-rr-cross-small flex text-base" aria-hidden="true" />
+                  </button>
                 </div>
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
                   <div>
@@ -183,9 +168,8 @@ export function ProjectTeamSection({
                     </label>
                     <input
                       id={memberRoleId}
-                      className={`${fieldClass} h-9 text-xs disabled:cursor-not-allowed disabled:opacity-70`}
+                      className={`${fieldClass} h-9 text-xs`}
                       value={memberTitles[normalizedEmail] ?? ''}
-                      disabled={!canEditTeam}
                       onChange={(event) => onMemberTitleChange(normalizedEmail, event.target.value)}
                       maxLength={40}
                       placeholder="Ex.: Front-end, UX/UI, Banco de dados"
@@ -194,9 +178,8 @@ export function ProjectTeamSection({
                   <button
                     type="button"
                     aria-pressed={isLeader}
-                    disabled={!canEditTeam}
                     onClick={() => onToggleLeader(normalizedEmail)}
-                    className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                    className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition ${
                       isLeader
                         ? 'border-primary bg-primary text-white hover:bg-primary-hover'
                         : 'border-rose-200 bg-rose-50 text-primary hover:bg-rose-100'
@@ -215,9 +198,7 @@ export function ProjectTeamSection({
         </ul>
       ) : (
         <p className="mt-4 rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-6 text-center text-sm text-text-secondary">
-          {canEditDetails
-            ? 'Nenhum aluno atribuído ainda. Busque pelo RA, nome ou e-mail para adicionar.'
-            : 'Nenhum integrante cadastrado neste projeto.'}
+          Nenhum aluno atribuído ainda. Busque pelo RA, nome ou e-mail para adicionar.
         </p>
       )}
     </FormSection>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { CreateProjectUseCase } from '@/application/projects/create-project-use-case'
+import { DbTaskEventNotifier } from '@/infrastructure/notifications/notify-task-event'
 import { DbProjectCommandRepository } from '@/infrastructure/projects/db-project-command-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
 import { auth } from '@/libs/auth'
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
     const useCase = new CreateProjectUseCase(
       new DbProjectCommandRepository(),
       new DbProjectUserDirectory(),
+      new DbTaskEventNotifier(),
     )
     const result = await useCase.execute({ sessionUserId, body })
     if (result.isLeft()) {

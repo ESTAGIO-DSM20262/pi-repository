@@ -6,7 +6,6 @@ import {
   canManageActivation,
   canManageProgress,
   canVerifyProject,
-  canViewAllProgressTasks,
   canViewProgress,
   canViewProject,
   resolveProjectEditScope,
@@ -90,12 +89,21 @@ describe('permissões de tarefas do progresso', () => {
     expect(canEditProgressTask(makeProject(), admin, task)).toBe(true)
   })
 
-  it('ninguém edita tarefas de projeto concluído e aluno nunca edita', () => {
+  it('professor não edita tarefas de projeto concluído e aluno nunca edita', () => {
     const done = makeProject({ status: 'publicado' })
 
     expect(canEditProgressTask(done, principal, task)).toBe(false)
     expect(canEditProgressTask(makeProject(), member, task)).toBe(false)
-    expect(canManageProgress(done, admin)).toBe(false)
+  })
+
+  it('o administrador gerencia as tarefas de qualquer projeto, mesmo concluído ou desativado', () => {
+    const done = makeProject({ status: 'publicado' })
+    const inactive = makeProject({ active: false })
+
+    expect(canManageProgress(done, admin)).toBe(true)
+    expect(canManageProgress(inactive, admin)).toBe(true)
+    expect(canEditProgressTask(done, admin, task)).toBe(true)
+    expect(canManageProgress(inactive, principal)).toBe(false)
   })
 
   it('só o orientador principal e o administrador gerenciam o progresso', () => {
@@ -177,12 +185,6 @@ describe('canViewProgress', () => {
     expect(canViewProgress(inactive, principal)).toBe(false)
     expect(canViewProgress(inactive, outsider)).toBe(false)
     expect(canViewProgress(inactive, member)).toBe(false)
-  })
-
-  it('só professores e administrador veem as tarefas de todos os integrantes', () => {
-    expect(canViewAllProgressTasks(admin)).toBe(true)
-    expect(canViewAllProgressTasks(outsider)).toBe(true)
-    expect(canViewAllProgressTasks(member)).toBe(false)
   })
 
   it('ver o cronograma não dá permissão de editar para professor de fora do projeto', () => {

@@ -1,9 +1,5 @@
 import { eq } from 'drizzle-orm'
-import {
-  canManageProgress,
-  canViewAllProgressTasks,
-  canViewProgress,
-} from '@/application/projects/project-permissions'
+import { canManageProgress, canViewProgress } from '@/application/projects/project-permissions'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Project } from '@/domain/enterprise/entities/project'
@@ -16,7 +12,6 @@ export type ProgressAccess =
       project: Project
       user: { id: string; email: string; name: string; role: 'student' | 'professor' | 'admin' }
       canManage: boolean
-      canViewAllTasks: boolean
     }
   | {
       ok: false
@@ -66,7 +61,6 @@ export async function resolveProjectProgressAccess(
     return { ok: false, status: 404, message: 'O projeto não foi encontrado.' }
   }
 
-  const canViewAllTasks = canViewAllProgressTasks(viewer)
   const canManage = canManageProgress(project, viewer)
 
   return {
@@ -74,6 +68,5 @@ export async function resolveProjectProgressAccess(
     project,
     user: { id: user.id, email, name: user.name, role: user.role },
     canManage,
-    canViewAllTasks,
   }
 }

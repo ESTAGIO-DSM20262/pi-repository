@@ -450,7 +450,9 @@ documente aqui.
   normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. O formulário usa
   React Hook Form + Zod (`presentation/projects/validation.ts`, `mode: 'onTouched'`) e também valida
   no servidor. Exige título, resumo, ciclo `AAAA/1|2`, semestre 1–6, tema, orientador principal e ao menos um
-  aluno. Orientadores adicionais são opcionais (veja a seção 18). As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
+  aluno. Ao cadastrar como administrador, o campo de orientador principal começa **vazio**
+  (placeholder "Selecione o professor orientador"); o professor sempre entra como orientador
+  principal e o campo fica travado. Orientadores adicionais são opcionais (veja a seção 18). As tarefas iniciais são opcionais e o responsável precisa pertencer à equipe.
 - **Aplicação e persistência:** `CreateProjectUseCase` (`application/projects/create-project-use-case.ts`)
   valida o papel do usuário, revalida orientador e alunos ativos e monta as tarefas iniciais.
   `ProjectRepository` é a porta de escrita; `DbProjectCommandRepository` grava projeto, tarefas
@@ -480,10 +482,13 @@ documente aqui.
   única fonte da regra, usada por `libs/project-edit-access.ts` (`resolveProjectEditAccess`) e pela
   página do projeto. **Qualquer** professor orientador do projeto (principal ou adicional) tem escopo
   `full` (todos os dados, equipe, tecnologias, orientadores adicionais e artefatos). O administrador
-  tem escopo `admin` em qualquer projeto: edita os professores orientadores, os links e as imagens;
-  funções/liderança da equipe e os demais campos do corpo são ignorados. Aluno nunca edita. Projetos
-  demonstrativos (`mock-projects.ts`) não existem na tabela `projects` e por isso não são editáveis.
-  Projeto desativado só pode ser editado por administrador.
+  tem escopo `admin` em qualquer projeto e edita **tudo** o que o escopo `full` edita (título, resumo,
+  descrição, ciclo, semestre, tema, situação, equipe com funções e liderança, tecnologias, links e
+  imagens) e ainda troca o orientador principal. O corpo do `PATCH` é o mesmo nos dois escopos
+  (`parseUpdateProjectInput`); a única diferença é que, no `admin`, `advisorEmail` é aceito.
+  Indicar o projeto continua exclusivo dos orientadores (`canVerifyProject`). Aluno nunca edita.
+  Projetos demonstrativos (`mock-projects.ts`) não existem na tabela `projects` e por isso não são
+  editáveis. Projeto desativado só pode ser editado por administrador.
 - **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
   `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
   mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro.
@@ -525,16 +530,18 @@ documente aqui.
 - **Tarefas por autor:** `GET /api/projects/[id]/progress` devolve `createdByName`,
   `lastEditedByName`, `lastEditedAt` e `canEdit` por tarefa, e `changedByName` nas revisões. O
   professor só edita as tarefas que ele mesmo criou (`canEditProgressTask`, 403 no `PATCH` caso
-  contrário); o administrador edita qualquer uma. Tarefas criadas por um administrador (por exemplo,
+  contrário); o administrador edita qualquer uma, em qualquer projeto (inclusive concluído ou
+  desativado). Tarefas criadas por um administrador (por exemplo,
   as iniciais de um projeto criado por ele) só o administrador edita. Desde a reunião de 09/11/2026
   só o orientador principal (`project.advisor`) e o administrador criam e editam tarefas
   (`canManageProgress`); orientadores adicionais (satélites) apenas acompanham o cronograma e não
   editam nem as tarefas que criaram antes da mudança. `createdByName` continua exibido em cada
   tarefa.
 - **Quem vê o cronograma:** administrador e qualquer professor veem as tarefas e o histórico de
-  todos os projetos ativos (`canViewProgress`, `canViewAllProgressTasks`); o administrador também vê
-  os desativados. Aluno vê apenas o projeto da própria equipe, com as tarefas da equipe e as
-  atribuídas a ele. A edição não mudou: `POST` e `PATCH` devolvem 403 para aluno e para professor que
+  todos os projetos ativos (`canViewProgress`); o administrador também vê os desativados. Aluno vê
+  apenas o projeto da própria equipe, com **todas** as tarefas e todo o histórico dele, inclusive as
+  atribuídas a outros integrantes (o status ele só muda nas do grupo e nas atribuídas a ele; veja a
+  seção 26). A edição não mudou: `POST` e `PATCH` devolvem 403 para aluno e para professor que
   não é o orientador principal do projeto (`isPrincipalAdvisorOf`), e o histórico continua
   registrando quem alterou o quê (`changedByName`). O painel do professor (`DashboardPage`)
   continua considerando só os projetos em que ele é orientador principal.
@@ -819,6 +826,174 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - Fora do escopo: o campo "Curso superior de graduação" do formulário de projeto continua fixo e
   somente leitura (projetos não guardam curso).
 
+## 25. Cadastro de projetos em massa por planilha
+
+- **Quem usa:** professor e administrador. O botão "Cadastrar em massa" fica ao lado de "Novo Projeto"
+  na seção de projetos do painel e leva a `/projetos/importar` (`ProjectBulkImportPage`, mesmo
+  desenho da tela de cadastro de usuários: área de arrastar arquivo, relatório com criados,
+  ignorados e inválidos, `ConfirmationDialog` antes de enviar). Aluno é redirecionado ao painel.
+- **Modelo:** `public/modelo-cadastro-projetos-acervo.xlsx` tem a aba **Projetos** (uma linha por
+  projeto; cabeçalho vermelho = obrigatória, cinza = opcional; Ciclo em formato texto para o Excel
+  não converter em data; colunas obrigatórias com fundo levemente avermelhado e bordas nas 100
+  linhas), a aba **Instruções** e a aba **Listas** (nenhuma das duas é importada, pois não têm as
+  colunas Título e Resumo). **Listas suspensas** nas células: Ciclo (2025/1 a 2029/2, aceita outro
+  valor com aviso), Semestre ("1º semestre" a "6º semestre", só esses valores; a leitura extrai o
+  número), Situação (só Em andamento ou Concluído), Tema (os temas sugeridos do formulário),
+  Linguagens e Tecnologias e ferramentas (nomes de `TECHNOLOGY_CATALOG`). Em Ciclo, Tema, Linguagens
+  e Tecnologias a validação é só um aviso, então dá para digitar outro valor; para mais de uma
+  linguagem ou tecnologia, o usuário acrescenta as demais separadas por vírgula. Cada coluna com
+  lista tem uma nota no cabeçalho e uma mensagem ao selecionar a célula. E-mails (orientadores,
+  alunos, líder) e links continuam digitados, pois dependem de quem está cadastrado. O arquivo é
+  binário: ao mudar os temas ou o catálogo de tecnologias, atualize também a aba **Listas** e as
+  referências das listas na aba **Projetos**. Colunas: título, resumo, descrição detalhada, ciclo, semestre, tema, situação,
+  orientador principal, orientadores adicionais, e-mails dos alunos, líder do grupo, linguagens,
+  tecnologias e ferramentas e os links de repositório, site, protótipo e vídeo. **Imagens e tarefas
+  não fazem parte da planilha.**
+- **Leitura:** `application/projects/project-import.ts` (`parseProjectGrid` e
+  `parseProjectWorkbook`) reconhece os cabeçalhos sem acento, caixa ou asterisco (os helpers
+  compartilhados com a importação de usuários estão em `application/spreadsheet/sheet-cells.ts`),
+  converte semestre (`3`, `3º semestre`), situação (em branco = em andamento; concluído = publicado),
+  ciclo (`2026-2` vira `2026/2`) e listas separadas por vírgula, ponto e vírgula ou quebra de linha.
+  Links sem `https://` recebem o prefixo. O limite é `MAX_PROJECT_IMPORT_ROWS` (100 projetos) e 5 MB
+  por envio; o limite fica em `project-import-limits.ts` para a tela não carregar a biblioteca
+  `xlsx` no navegador.
+- **Criação:** `BulkCreateProjectsUseCase` consulta uma única vez os alunos e professores ativos do
+  lote, valida cada linha e delega a gravação ao `CreateProjectUseCase`, então valem exatamente as
+  mesmas regras do formulário. O professor é sempre o orientador principal (deixar a coluna em
+  branco; informar outro e-mail é erro de linha). O administrador precisa informar o e-mail do
+  orientador principal em cada linha. O líder precisa estar entre os alunos.
+- **Duplicidade e erros (mesmo modelo da importação de usuários):** projeto com o mesmo título
+  (sem acento, caixa ou espaços repetidos), ciclo e semestre de um já cadastrado, ou repetido na
+  própria planilha, é **ignorado**. Linha com dado inválido (semestre, situação, pessoa inexistente
+  ou inativa, validação do projeto) é **inválida** e traz o motivo; uma linha com problema nunca
+  impede as demais. Não há transação do lote: cada projeto é gravado de forma independente.
+- **API:** `POST /api/projects/bulk` (`multipart/form-data`, campo `file`) devolve
+  `{ summary, created, skipped, errors }`.
+
+## 26. Tarefas do projeto: status automático, indicadores e atualização pelos alunos
+
+- **Status armazenado x exibido:** o banco guarda só `pending`, `in_progress` e `completed`.
+  **Atrasada** não é um status gravado: é calculada na hora (`getTaskDisplayStatus`, em
+  `application/projects/task-status.ts`, reaproveitando `isTaskOverdue` do dashboard) quando a
+  tarefa não está concluída e o prazo é anterior a hoje no fuso de São Paulo (`todayInSaoPaulo`).
+  Quem muda o prazo ou conclui a tarefa tira o aviso sem nenhuma edição manual de status.
+  Significado: Pendente = ainda não iniciada; Em andamento = já iniciada; Concluída = entregue;
+  Atrasada = prazo vencido sem conclusão. A legenda aparece na própria lista de tarefas.
+- **Barra de andamento:** no topo de "Progresso do Projeto" (`ProjectProgressSection`), para qualquer
+  perfil que veja o cronograma: "X de Y tarefas concluídas", percentual, barra segmentada
+  (concluídas, atrasadas, em andamento, pendentes, sem contar nenhuma duas vezes), contadores por
+  situação e quantas vencem em 7 dias (`buildTaskProgressBar`). Quando tudo está concluído e o
+  projeto ainda está em andamento, o orientador principal e o administrador recebem o aviso para
+  concluir o projeto na edição. A lista tem filtros Todas, Em aberto, Atrasadas e Concluídas, e cada
+  item mostra "Atrasada há N dias", "Vence hoje", "Vence amanhã" ou "Vence em N dias" (até 7 dias).
+- **Quem muda o status** (`canChangeTaskStatus`): administrador (qualquer tarefa de qualquer
+  projeto), orientador principal (projeto ativo em andamento) e **aluno da equipe** (somente
+  tarefas do grupo ou atribuídas a ele, em projeto ativo em andamento). Satélites e alunos de outra
+  equipe não mudam. O detalhe da tarefa mostra a ação principal conforme o estado (Iniciar tarefa,
+  Marcar como concluída, Reabrir tarefa) e a secundária (Voltar para pendente).
+- **API:** `PATCH /api/projects/[id]/progress/[taskId]/status` (`{ status, changeNote? }`). Grava a
+  mudança como revisão menor (`vX.Y+1`) com a observação automática "Status alterado de A para B.",
+  atribuída a quem mudou. `GET /api/projects/[id]/progress` devolve `canChangeStatus` por tarefa.
+  Criar e editar tarefas continua só com o orientador principal e o administrador (seção 17).
+- **Visual calmo (sem mudar o layout):** em `ProjectProgressSection` o amarelo de "Em andamento"
+  é suave (`amber-50/70`, borda e texto `amber-100`/`amber-700`, ponto `amber-400` com ícone
+  `amber-950` para manter o contraste, segmento da barra `amber-300`), os demais segmentos da barra
+  ficam um tom mais claro e finos (`h-2`, com separação de 1px), o percentual usa `text-xl`,
+  `font-semibold` e algarismos tabulares em vez de `font-extrabold`, e selos de situação, prazos e
+  versões usam `font-semibold`/`font-bold` no lugar de `font-extrabold`.
+
+## 27. Atribuir a mesma tarefa a vários projetos
+
+- **Onde:** aba "Tarefas em lote" do painel do professor e do administrador
+  (`BulkTaskAssignmentSection`, bloco `tarefas-em-lote` em `RoleDashboard`, entre "Melhor PI" e
+  "Projetos e favoritos"). O professor só vê o bloco se acompanha algum projeto.
+- **Fluxo:** 1) escolher os projetos (checkbox por projeto, "Selecionar os listados", "Limpar
+  seleção" e o atalho "Todos em andamento"); 2) preencher título, descrição e prazo opcional; o
+  botão abre um `ConfirmationDialog` com a lista dos projetos e, ao final, um `Modal` e um relatório
+  com os projetos atendidos e os ignorados (com o motivo). Sucesso limpa o formulário e atualiza os
+  indicadores (`router.refresh()`).
+- **O que o professor vê e filtra:** só os projetos ativos que acompanha (principal ou satélite),
+  com filtros de busca, semestre, ciclo e função (todos que acompanho, sou principal, sou
+  satélite). Projetos de satélite aparecem desabilitados com o motivo. **O administrador** vê todos
+  os projetos ativos do sistema e filtra também por orientador principal e por situação
+  (padrão: em andamento). A regra de seleção e de filtro está em
+  `application/projects/bulk-task-selection.ts`.
+- **Projetos repetidos na lista:** a lista do painel vem de `CompositeProjectRepository` (banco +
+  projetos demonstrativos). Um mesmo projeto podia aparecer duas vezes (id repetido ou projeto real
+  com o mesmo título, ciclo e semestre de um demonstrativo) e, como a API só consultava o banco, a
+  cópia demonstrativa era ignorada com "Projeto não encontrado". `bulkTaskCandidates` agora passa
+  por `dedupeProjects` (`application/projects/dedupe-projects.ts`, mantém a primeira entrada por id e por título normalizado + ciclo +
+  semestre, e o banco vem antes dos demonstrativos) e `POST /api/projects/bulk-tasks` usa
+  `CompositeProjectRepository`, a mesma fonte do painel e do acesso ao progresso, então todo projeto
+  listado é atribuível.
+- **Quem pode atribuir** (`AssignTaskToProjectsUseCase`, mesma regra de `canManageProgress`):
+  orientador principal em projeto ativo e em andamento; administrador em qualquer projeto. A
+  verificação é refeita no servidor para cada projeto: projeto ignorado nunca impede os demais e
+  vem com o motivo ("Projeto concluído", "Projeto desativado", "Somente o orientador principal cria
+  tarefas", "Você não é orientador deste projeto", "Projeto não encontrado").
+- **O que é criado:** uma tarefa independente por projeto, para o grupo todo (sem aluno
+  específico), pendente, com a próxima versão principal do projeto (`vN.0`) e a revisão "Tarefa
+  criada em lote para vários projetos". Depois de criada, cada cópia é editada separadamente. Limite
+  de 100 projetos por envio. As tarefas e revisões são gravadas em um único `db.batch`
+  (`DbProjectTaskRepository`), então o lote é atômico.
+- **API:** `POST /api/projects/bulk-tasks` com `{ projectIds, title, description, dueDate? }` devolve
+  `{ summary, created, skipped }`. A validação de título (3 a 160), descrição (5 a 5.000) e data
+  (`AAAA-MM-DD` real) fica em `application/projects/task-fields.ts`. O formulário usa React Hook Form + `bulkTaskSchema`
+  (`presentation/projects/validation.ts`, `mode: 'onTouched'`) com as mesmas regras; a confirmação
+  revalida antes de enviar.
+
+## 28. Notificações no sistema
+
+- **Escopo:** só notificações dentro da plataforma (sem e-mail), para **alunos e professores**. O
+  administrador não recebe notificações: avisar tudo de todos os projetos seria ruído, e ele já tem
+  o painel com indicadores. `GET /api/notifications` devolve lista vazia para ele e a interface não
+  mostra o sino.
+- **Tabela `notifications`** (`src/db/migrations/20261120_notifications.sql`, espelhada em
+  `db/schema.ts`): uma linha por destinatário (`user_id`, `type`, `title`, `message`, `project_id`,
+  `task_id`, `read_at`, `created_at`), `ON DELETE CASCADE` com o usuário, índice por usuário e data
+  e índice parcial das não lidas. Tipos: `task_created`, `task_updated`, `task_status_changed`
+  (`domain/enterprise/entities/notification.ts`).
+- **Regras puras** (`application/notifications/task-notifications.ts`, com testes):
+  `resolveTaskNotificationRecipients` e `buildTaskNotificationContent`. Nunca avisa quem fez a ação.
+  Tarefa criada ou editada avisa o aluno responsável (ou toda a equipe, se for do grupo) e os
+  orientadores do projeto. Mudança de status por **aluno** avisa só os orientadores; por
+  **professor** avisa só os alunos; por **administrador** avisa alunos e orientadores.
+  `presentation/notifications/relative-time.ts` formata "há 5 min" e o rótulo de quantidade para a
+  interface.
+- **Gravação:** `infrastructure/notifications/notify-task-event.ts` resolve e-mails para contas
+  ativas (nunca administrador) e grava com `DbNotificationRepository`. Falha ao notificar só vai
+  para o log e **nunca** desfaz a operação da tarefa.
+- **Onde dispara:** `POST /api/projects/[id]/progress` (criada), `PATCH .../[taskId]` (editada),
+  `PATCH .../[taskId]/status` (status), `AssignTaskToProjectsUseCase` (lote, uma por projeto) e
+  `CreateProjectUseCase` (tarefas iniciais do cadastro pelo formulário; a importação em massa de
+  projetos não tem tarefas e não passa notificador). Os casos de uso recebem o notificador pela porta
+  opcional `TaskEventNotifier` (`domain/enterprise/repositories/task-event-notifier.ts`, junto com os
+  tipos do evento), implementada por `DbTaskEventNotifier`.
+- **API:** `GET /api/notifications` (lista as 30 mais recentes e `unreadCount`; `?resumo=1` devolve
+  só a contagem, usada no recarregamento periódico) e `PATCH /api/notifications` com `{ all: true }`
+  ou `{ ids: [...] }` (1 a 100) para marcar como lidas e `DELETE /api/notifications` para apagar
+  todas (botão "Limpar notificações", com `ConfirmationDialog`). Sempre `Cache-Control: no-store` e só atua
+  nas notificações do próprio usuário da sessão.
+- **Interface** (`components/NotificationCenter.tsx`, dentro do `Header`, para aluno e professor;
+  oculto para administrador e na tela de primeiro acesso): sino com contador (`99+` no máximo) e
+  `aria-label` com a quantidade; painel com as 30 mais recentes (não lidas com fundo claro e selo
+  "Nova", tempo relativo), "Marcar todas como lidas" e clique que marca como lida e abre
+  `/projetos/[id]#progresso` (a seção de tarefas tem `id="progresso"`). No celular o painel ocupa a
+  largura da tela. Ao entrar, se houver notificações não lidas, aparece um aviso ("Você tem N novas
+  notificações", com "Ver notificações", fecha sozinho em 9 s) **uma vez por sessão do navegador**
+  (`libs/notification-announcement.ts`, chave por usuário no `sessionStorage`, limpa ao sair). A
+  contagem é atualizada a cada 60 s com a aba visível; se aumentar, mostra o aviso "Você recebeu uma
+  nova notificação". O aviso usa `role="status"` e as cores e sombras do sistema.
+
+## 29. Tela 404 personalizada
+
+- `src/app/not-found.tsx` substitui a página padrão do Next para qualquer rota inexistente e para os
+  `notFound()` das páginas de projeto (projeto que não existe ou que a conta não pode ver). Ela
+  renderiza dentro do layout (cabeçalho, rodapé e acessibilidade), usa o cartão e os botões do
+  sistema e oferece "Voltar ao acervo" (`/`) e "Ir para o meu painel" (`/painel`, que redireciona
+  conforme o perfil ou leva ao login). O número 404 é decorativo (`aria-hidden`); o título da
+  página é o `h1`.
+
 ## Acessibilidade (branch `feat/acessibilidade`)
 
 - **Preferências globais**: `src/presentation/accessibility/` guarda tipos, validação e atributos (`preferences.ts`), o `AccessibilityProvider` (`accessibility-context.tsx`, `useSyncExternalStore` sobre `localStorage`, chave `acervo:a11y:v1`) e o script que aplica os atributos antes da hidratação (`no-flash-script.ts`, carregado com `next/script` `beforeInteractive` no `layout.tsx`). O `<html>` usa `suppressHydrationWarning` e já nasce com os atributos padrão. Qualquer mudança nos atributos deve ser feita nos dois lugares; `preferences.test.ts` compara o script com `preferencesToAttributes`.
@@ -832,7 +1007,19 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Dropdowns**: `SelectDropdown` aceita `searchable` (campo de pesquisa sem acento e sem diferenciar maiúsculas, `searchPlaceholder`, `emptyMessage`). Use em toda seleção de pessoa (professor, aluno, responsável). O seletor de modo de cores do painel também usa `SelectDropdown`; o painel ignora cliques dentro de `[role="listbox"]` ao decidir se fecha.
 - **Daltonismo e marca**: os modos também trocam `--primary`, `--secondary` e `--accent` (e variantes) para o sistema inteiro, não só os tons dos dashboards; no escuro, `text-primary` e `text-secondary` usam `--cb-primary-text` e `--cb-secondary-text`.
 - **Scrollbars**: `globals.css` define barras finas na cor primária para todos os elementos (exceções: `.modal-scrollbar` e `.scrollbar-success|warning|danger`) e esconde a barra principal da página em telas até 767px.
-- **Menu da conta no mobile**: `Header.tsx` mantém o dropdown ancorado no desktop e usa um bottom sheet próprio em telas menores, renderizado via portal no `document.body` para escapar de `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de fundo.
+- **Menu da conta no desktop e no modo foco**: `Header.tsx` mantém o dropdown ancorado no desktop (a
+  partir de `sm`). No modo foco (`/definir-senha`) o menu da conta continua sendo um bottom sheet
+  próprio em telas menores, renderizado via portal no `document.body` para escapar de
+  `overflow: clip`; o painel prende o foco, fecha com Escape/toque fora e bloqueia a rolagem de
+  fundo.
+- **Navegação no mobile (menu hambúrguer)**: abaixo de `sm` o `Header` não tem mais a segunda linha
+  de links. O botão de menu (`MobileNavMenu.tsx`) fica ao lado do logo do CPS e abre uma gaveta pela
+  direita, via portal, com Início, Como Funciona e Painel (com o item atual marcado por
+  `aria-current`), e no rodapé da gaveta os dados da conta com "Acessar perfil" e "Sair da conta",
+  ou o botão "Entrar" para visitantes. A gaveta prende o foco, fecha com Escape, toque fora, troca de
+  rota ou ao ampliar a tela para `sm`, bloqueia a rolagem de fundo e devolve o foco ao botão
+  (`useRestoreFocus`). O fallback de carregamento no `app/layout.tsx` acompanha a altura de 64px do
+  cabeçalho mobile.
 - **Listagem administrativa**: `AdminUsersSection.tsx` mostra cartões com ações acessíveis em telas menores e preserva a tabela com rolagem horizontal a partir do breakpoint `sm`.
 - **Filtros do catálogo**: tecnologias selecionadas usam o fundo `bg-primary` e texto branco, seguindo a mesma cor ativa dos demais filtros.
 - **Arrastar para fechar**: `useSwipeToClose` (`src/libs/useSwipeToClose.ts`) fecha as folhas inferiores no celular. Dentro da área rolável (`scrollRef`) o gesto só começa quando ela está no topo; no cabeçalho e no rodapé da folha vale sempre.
@@ -841,5 +1028,5 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 
 - `app/como-funciona/page.tsx` lê a sessão e entrega o papel a `components/how-it-works/HowItWorksPage.tsx`. Visitante vê só a aba "Sobre o acervo"; aluno, professor e administrador também veem os guias dos perfis que lhes cabem (aluno vê o seu; professor, aluno e professor; administrador, os três).
 - O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone; só o administrador a vê na página) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
-- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita orientadores e links de qualquer projeto, mas dados, equipe, tecnologias e conclusão ficam com os orientadores; aluno só consulta tarefas (as da equipe e as atribuídas a ele); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
+- Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno vê todas as tarefas do projeto da sua equipe e atualiza o status das do grupo e das atribuídas a ele (não cria nem edita); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.

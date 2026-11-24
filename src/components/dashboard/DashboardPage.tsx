@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ListProjectsUseCase } from '@/application/projects/list-projects'
+import { todayInSaoPaulo } from '@/application/projects/task-status'
 import { db } from '@/db'
 import { users } from '@/db/schema'
 import type { Role } from '@/domain/enterprise/entities/role'
@@ -22,10 +23,6 @@ import {
   RoleDashboard,
   type StudentDashboardData,
 } from './RoleDashboard'
-
-function todayInSaoPaulo(now: Date) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(now)
-}
 
 export async function DashboardPage({ requiredRole }: { requiredRole: Role }) {
   const session = await auth.api.getSession({ headers: await headers() })

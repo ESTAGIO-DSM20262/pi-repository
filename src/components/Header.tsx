@@ -8,9 +8,12 @@ import { createPortal } from 'react-dom'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { INVITE_PATH } from '@/libs/account-invite'
 import { getNameInitials } from '@/libs/initials'
+import { clearNotificationAnnouncement } from '@/libs/notification-announcement'
 import { useRestoreFocus } from '@/libs/useRestoreFocus'
 import { useAuth } from '@/presentation/auth/auth-context'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
+import { MobileNavMenu } from './MobileNavMenu'
+import { NotificationCenter } from './NotificationCenter'
 
 const linkClass =
   'group relative py-1 text-sm text-text-secondary transition-colors duration-300 hover:text-primary focus-visible:text-primary ' +
@@ -274,6 +277,7 @@ export function Header() {
 
   async function handleSignOut() {
     showAuthAction('Estamos encerrando sua sessão com segurança…')
+    clearNotificationAnnouncement()
     try {
       await signOut()
       router.push('/')
@@ -292,20 +296,6 @@ export function Header() {
       role={user.role}
       onSignOut={handleSignOut}
       variant="desktop"
-    />
-  ) : loading ? null : (
-    <Link href="/login" className={linkClass}>
-      Entrar
-    </Link>
-  )
-
-  const mobileAuthItem = user ? (
-    <AccountMenu
-      name={user.name}
-      email={user.emailAddress}
-      role={user.role}
-      onSignOut={handleSignOut}
-      variant="mobile"
     />
   ) : loading ? null : (
     <Link href="/login" className={linkClass}>
@@ -409,6 +399,7 @@ export function Header() {
               {desktopAuthItem}
             </nav>
           )}
+          {!focusMode && <NotificationCenter />}
           <span className="hidden h-10 w-px bg-border sm:block" aria-hidden="true" />
           <Image
             src="/brand/cps-cor.png"
@@ -417,28 +408,25 @@ export function Header() {
             height={167}
             className="h-8 w-auto sm:h-11"
           />
+          {!focusMode && (
+            <MobileNavMenu
+              pathname={pathname}
+              loading={loading}
+              onSignOut={handleSignOut}
+              user={
+                user
+                  ? {
+                      name: user.name,
+                      email: user.emailAddress,
+                      role: user.role,
+                      panelHref: PROFILE_ROUTE[user.role],
+                    }
+                  : null
+              }
+            />
+          )}
         </div>
       </div>
-
-      {!focusMode && (
-        <nav
-          aria-label="Menu principal"
-          className="flex min-h-11 flex-wrap items-center justify-center gap-x-3 gap-y-2 border-t border-border-light px-3 py-2 sm:hidden"
-        >
-          <NavLink href="/" pathname={pathname}>
-            Início
-          </NavLink>
-          <NavLink href="/como-funciona" pathname={pathname}>
-            Como Funciona
-          </NavLink>
-          {user && (
-            <NavLink href={PROFILE_ROUTE[user.role]} pathname={pathname}>
-              Painel
-            </NavLink>
-          )}
-          {mobileAuthItem}
-        </nav>
-      )}
     </header>
   )
 }
