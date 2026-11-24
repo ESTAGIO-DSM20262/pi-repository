@@ -1,7 +1,7 @@
 import { desc, eq } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 import { db } from '@/db'
-import { projects, semesterAwards } from '@/db/schema'
+import { projects } from '@/db/schema'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,12 +31,10 @@ export async function GET(request: Request) {
         stack: projects.stack,
         theme: projects.theme,
         status: projects.status,
-        selectedAt: semesterAwards.selectedAt,
       })
-      .from(semesterAwards)
-      .innerJoin(projects, eq(projects.id, semesterAwards.projectId))
-      .where(eq(projects.active, true))
-      .orderBy(desc(semesterAwards.selectedAt))
+      .from(projects)
+      .where(eq(projects.verified, true))
+      .orderBy(desc(projects.cycle), desc(projects.semester))
 
     const data = rows.map((row) => ({
       ...row,
@@ -47,7 +45,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('[GET /api/projects/recommended]', error)
     return NextResponse.json(
-      { error: 'Não foi possível carregar os projetos premiados.' },
+      { error: 'Nao foi possivel carregar os projetos premiados.' },
       { status: 500, headers: { ...corsHeaders, 'Cache-Control': 'no-store' } },
     )
   }
