@@ -78,46 +78,47 @@ O provedor opera em modo **multi-tenant** (`organizations`) por padrão. O e-mai
 
 ---
 
-## Endpoint publico: GET /api/projects/recommended
+## Endpoint público: GET /api/projects/recommended
 
 Localização: `src/app/api/projects/recommended/route.ts`
 
-Endpoint sem autenticação que retorna os projetos selecionados como "Melhor PI" de cada par ciclo/semestre. Criado para uso pelo widget de exibição no site da Fatec Itaquera (WordPress), mas pode ser consumido por qualquer cliente.
+Endpoint sem autenticação que devolve os projetos escolhidos como "Melhor PI" de cada par ciclo/semestre. Foi criado para o widget de exibição no site da Fatec Itaquera (WordPress), mas pode ser consumido por qualquer cliente.
 
 ### Como funciona
 
-A rota faz um `INNER JOIN` entre `semester_awards` e `projects`, filtrando apenas projetos ativos (`active = true`). Os resultados são ordenados por `selectedAt DESC`, ou seja, os projetos premiados mais recentemente aparecem primeiro.
+A rota faz um `INNER JOIN` entre `semester_awards` e `projects` e mantém só os projetos ativos (`active = true`). Os resultados são ordenados por `selectedAt` decrescente, então os projetos premiados mais recentemente aparecem primeiro.
 
 Nenhuma autenticação é exigida. O endpoint responde ao preflight CORS (`OPTIONS`) sem consultar o banco.
 
 ### Cache e CORS
 
-| Configuracao | Valor |
+| Configuração | Valor |
 |---|---|
 | `Access-Control-Allow-Origin` | `*` (qualquer origem) |
-| `Cache-Control` cliente | `max-age=120` (2 min) |
-| `Cache-Control` CDN/Edge | `s-maxage=300` (5 min) |
+| `Cache-Control` no navegador | `max-age=120` (2 min) |
+| `Cache-Control` na CDN | `s-maxage=300` (5 min) |
 | `stale-while-revalidate` | 600 s (10 min) |
-| ISR (Next.js) | `revalidate = 300` |
+
+A consulta roda a cada requisição no servidor; o cache acontece no navegador e na CDN pelos cabeçalhos acima. Respostas de erro (500) usam `Cache-Control: no-store`, para que uma falha temporária não fique em cache.
 
 ### Campos retornados por projeto
 
-| Campo | Tipo | Descricao |
+| Campo | Tipo | Descrição |
 |---|---|---|
-| `id` | `string` | Identificador unico do projeto |
-| `title` | `string` | Titulo do projeto |
-| `summary` | `string` | Descricao resumida |
+| `id` | `string` | Identificador único do projeto |
+| `title` | `string` | Título do projeto |
+| `summary` | `string` | Resumo do projeto |
 | `cycle` | `string` | Ciclo letivo, ex.: `2026/2` |
 | `semester` | `number` | Semestre do curso (1 a 6) |
 | `advisorName` | `string` | Nome do orientador principal |
-| `languages` | `string[]` | Linguagens de programacao utilizadas |
-| `stack` | `string[]` | Frameworks e bibliotecas utilizados |
-| `theme` | `string` | Tema ou categoria do projeto |
-| `status` | `string` | `publicado` ou `em_andamento` |
-| `selectedAt` | `string` | Data ISO em que o projeto foi premiado |
-| `projectUrl` | `string` | URL direta ao projeto no sistema |
+| `languages` | `string[]` | Linguagens de programação |
+| `stack` | `string[]` | Tecnologias e ferramentas |
+| `theme` | `string` | Tema do projeto |
+| `status` | `string` | Situação do projeto (sempre `publicado`, pois só projetos concluídos podem ser escolhidos) |
+| `selectedAt` | `string` | Data ISO em que o projeto foi escolhido |
+| `projectUrl` | `string` | Endereço da página do projeto, montado a partir do domínio que recebeu a requisição |
 
-Campos sensiveis como `advisorEmail`, `memberEmails` e `createdByUserId` nao sao expostos.
+Dados pessoais como `advisorEmail`, `memberEmails` e `createdByUserId` não são expostos.
 
 ### Exemplo de resposta
 
@@ -125,126 +126,91 @@ Campos sensiveis como `advisorEmail`, `memberEmails` e `createdByUserId` nao sao
 [
   {
     "id": "c69a7c21-34c8-4d1c-88b6-6c44956cdada",
-    "title": "SALA - Sistema de Agendamento de Laboratorios",
-    "summary": "Plataforma web para agendamento de laboratorios academicos.",
+    "title": "SALA - Sistema de Agendamento de Laboratórios",
+    "summary": "Plataforma web para agendamento de laboratórios acadêmicos.",
     "cycle": "2026/1",
     "semester": 6,
     "advisorName": "Prof. Dr. Carlos Oliveira",
     "languages": ["TypeScript"],
     "stack": ["React", "Node.js", "PostgreSQL"],
-    "theme": "Gestao de laboratorios",
+    "theme": "Gestão de laboratórios",
     "status": "publicado",
     "selectedAt": "2026-07-15T10:30:00.000Z",
-    "projectUrl": "https://projetos.alvarosena.com.br/projetos/c69a7c21-34c8-4d1c-88b6-6c44956cdada"
+    "projectUrl": "https://seu-dominio/projetos/c69a7c21-34c8-4d1c-88b6-6c44956cdada"
   }
 ]
 ```
 
 ### Widget WordPress
 
-Para exibir os cards dos projetos no site da Fatec Itaquera, use um bloco "HTML Personalizado" (Custom HTML) no editor Gutenberg com o snippet disponivel em `pi-widget-wordpress-dynamic.html`. O widget:
+Para exibir os projetos no site da Fatec Itaquera, use um bloco "HTML personalizado" no editor Gutenberg que busque os dados neste endpoint. O widget deve:
 
-- Busca os dados dinamicamente neste endpoint
-- Aplica o design visual do site da Fatec Itaquera (cores, tipografia, divisores)
-- Exibe cada projeto como um card com titulo, descricao resumida, ciclo, semestre, orientador, tecnologias e link para o projeto original
-- Ordena automaticamente pelos projetos premiados mais recentemente
-- Possui fallback para dados estaticos caso o endpoint esteja indisponivel
+- Buscar os dados dinamicamente neste endpoint
+- Seguir o visual do site da Fatec Itaquera (cores, tipografia, divisores)
+- Exibir cada projeto como um card com título, resumo, ciclo, semestre, orientador, tecnologias e link para a página do projeto (`projectUrl`)
+- Manter a ordem da resposta (premiados mais recentes primeiro)
+
+O código do widget não está neste repositório.
 
 ---
 
-## Guia de deploy e configuracao
+## Guia de deploy e configuração
 
-Este guia cobre tudo o que e necessario para uma pessoa que nao conhece o projeto conseguir instalar as dependencias, configurar o ambiente, conectar ao banco de dados e ao servico de e-mail, e publicar a aplicacao na Vercel.
+Este guia reúne o necessário para alguém que não conhece o projeto instalar as dependências, configurar o ambiente, conectar o banco de dados e o serviço de e-mail e publicar a aplicação na Vercel.
 
-### Pre-requisitos
+### Pré-requisitos
 
-- Node.js 18 ou superior (`node -v` para verificar)
-- npm 9 ou superior (vem junto com o Node.js)
-- Conta no GitHub com acesso ao repositorio
-- Conta na Vercel (para deploy em producao)
-- Conta na Neon ou em outro provedor PostgreSQL compativel
-- Conta no Resend (para envio de e-mail)
+- Node.js 20.9 ou superior (exigido pelo Next.js 16; confira com `node -v`)
+- npm (vem junto com o Node.js)
+- Conta no GitHub com acesso ao repositório
+- Conta na Vercel (para o deploy em produção)
+- Banco PostgreSQL (o projeto usa o Neon)
+- Conta no Resend (para envio de e-mail em produção)
 
-### Instalacao local
+### Instalação local
 
 ```bash
-# 1. Clone o repositorio
 git clone https://github.com/ESTAGIO-DSM20262/pi-repository.git
 cd pi-repository
-
-# 2. Instale as dependencias
 npm install
-
-# 3. Copie o arquivo de variaveis de ambiente
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-Preencha `.env.local` conforme descrito nas proximas secoes.
+Use o arquivo `.env` (não `.env.local`): os scripts do banco (`db:migrate`, `db:seed`) carregam só o `.env`.
 
-### Variaveis de ambiente
+### Variáveis de ambiente
 
-O arquivo `.env.example` lista todas as variaveis necessarias. As obrigatorias para a aplicacao funcionar sao:
+A lista completa e o papel de cada variável estão em [Como executar](#como-executar) e no `.env.example`. Em produção são obrigatórias `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `RESEND_API_KEY` e `EMAIL_FROM`. As variáveis `MICROSOFT_*` só são necessárias se o login com a conta Microsoft for usado.
 
-| Variavel | Descricao |
-|---|---|
-| `DATABASE_URL` | String de conexao PostgreSQL |
-| `BETTER_AUTH_SECRET` | Chave secreta de sessao (minimo 32 caracteres) |
-| `BETTER_AUTH_URL` | URL base da aplicacao, ex.: `http://localhost:3000` |
-| `RESEND_API_KEY` | Chave da API do Resend para envio de e-mail |
-| `RESEND_FROM_EMAIL` | Endereco remetente, ex.: `noreply@seudominio.com` |
-
-As variaveis de autenticacao Microsoft Entra ID sao opcionais e so precisam ser preenchidas se o login via conta Microsoft for utilizado.
-
-Para gerar um valor seguro para `BETTER_AUTH_SECRET`, use:
+Para gerar um valor seguro para `BETTER_AUTH_SECRET`:
 
 ```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+openssl rand -base64 32
 ```
 
 ---
 
 ### Banco de dados
 
-A aplicacao usa PostgreSQL com Drizzle ORM. Qualquer provedor PostgreSQL compativel funciona. Abaixo estao as instrucoes para os mais comuns.
+A aplicação usa PostgreSQL com Drizzle ORM.
 
-#### Neon (configuracao atual do projeto)
-
-O Neon oferece um banco PostgreSQL serverless com plano gratuito permanente (0,5 GB de armazenamento, sem limite de tempo).
+#### Neon (configuração atual do projeto)
 
 1. Acesse [neon.tech](https://neon.tech) e crie uma conta
-2. Crie um novo projeto e, dentro dele, um banco de dados
-3. No painel do Neon, va em **Connection Details** e copie a string de conexao no formato:
+2. Crie um projeto e, dentro dele, um banco de dados
+3. Em **Connection Details**, copie a string de conexão no formato:
    ```
    postgresql://usuario:senha@ep-xxxx.us-east-2.aws.neon.tech/nomebanco?sslmode=require
    ```
-4. Cole essa string em `DATABASE_URL` no `.env.local`
+4. Cole essa string em `DATABASE_URL` no `.env`
 
-A flag `?sslmode=require` e obrigatoria no Neon. Sem ela, a conexao sera recusada.
-
-#### Supabase
-
-O Supabase oferece um banco PostgreSQL com plano gratuito (500 MB, projetos pausam apos 7 dias sem atividade no plano gratuito).
-
-1. Acesse [supabase.com](https://supabase.com) e crie um projeto
-2. Va em **Project Settings > Database > Connection string > URI**
-3. Copie a string e cole em `DATABASE_URL`
-
-A string do Supabase ja vem com `?sslmode=require` incluido.
-
-#### Railway
-
-O Railway oferece um plano gratuito com limite mensal de horas de execucao.
-
-1. Acesse [railway.app](https://railway.app) e crie um servico PostgreSQL
-2. Na aba **Variables** do servico, copie o valor de `DATABASE_URL`
-3. Cole em `DATABASE_URL` no seu `.env.local`
+O Neon exige `?sslmode=require`.
 
 #### PostgreSQL local (desenvolvimento)
 
-Para desenvolvimento sem depender de servicos externos:
+Para desenvolver sem depender de serviços externos:
 
 ```bash
-# Com Docker
 docker run -d \
   --name pi-postgres \
   -e POSTGRES_USER=pi \
@@ -252,117 +218,86 @@ docker run -d \
   -e POSTGRES_DB=pi \
   -p 5432:5432 \
   postgres:16
-
-# String de conexao resultante
-DATABASE_URL=postgresql://pi:pi@localhost:5432/pi
 ```
 
-#### Outros provedores PostgreSQL
-
-Qualquer provedor que aceite conexoes PostgreSQL padrao funciona. O formato da string de conexao e sempre:
-
-```
-postgresql://USUARIO:SENHA@HOST:PORTA/BANCO?opcoes
-```
-
-Substitua os valores de acordo com o seu provedor. A flag `?sslmode=require` e recomendada em producao.
+String de conexão resultante: `DATABASE_URL=postgresql://pi:pi@localhost:5432/pi`.
 
 #### Aplicando as migrations
 
-Apos configurar `DATABASE_URL`, crie as tabelas no banco:
+Depois de configurar `DATABASE_URL`, crie as tabelas no banco:
 
 ```bash
 npm run db:migrate
 ```
 
-Este comando aplica as migrations do Drizzle e os scripts SQL adicionais em ordem. Cada script roda uma unica vez e e seguro executar mais de uma vez (idempotente).
+O comando aplica as migrations do Drizzle e depois os scripts SQL de `src/db/migrations/`, em ordem. Cada script roda uma única vez e pode ser executado de novo com segurança.
 
 ---
 
 ### Envio de e-mail com Resend
 
-O projeto usa o [Resend](https://resend.com) para envio de e-mails transacionais (confirmacao de conta, redefinicao de senha). O plano gratuito permite ate 3.000 e-mails por mes e 100 por dia, sem necessidade de cartao de credito.
+O projeto usa o [Resend](https://resend.com) para os e-mails de convite de conta (definir a senha inicial) e de redefinição de senha.
 
-1. Acesse [resend.com](https://resend.com) e crie uma conta
-2. Va em **API Keys** e gere uma nova chave
-3. Cole o valor em `RESEND_API_KEY` no `.env.local`
-4. Em `RESEND_FROM_EMAIL`, coloque o endereco remetente
+1. Crie uma conta em [resend.com](https://resend.com)
+2. Em **API Keys**, gere uma chave e cole em `RESEND_API_KEY`
+3. Em **Domains**, adicione e verifique o domínio do remetente (registros DNS indicados pelo Resend)
+4. Preencha `EMAIL_FROM` com um remetente desse domínio, ex.: `Acervo Acadêmico <no-reply@seu-dominio>`
 
-No plano gratuito do Resend, e-mails so podem ser enviados a partir do dominio `onboarding@resend.dev` ou de um dominio proprio verificado. Para testes iniciais, use `onboarding@resend.dev`.
-
-Para usar um dominio proprio:
-1. Va em **Domains** no painel do Resend
-2. Adicione seu dominio e siga as instrucoes para configurar os registros DNS (MX, SPF, DKIM)
-3. Apos verificado, use `noreply@seudominio.com` como remetente
+Em desenvolvimento, sem essas variáveis, os links são impressos no console do `npm run dev`. Em produção, sem elas, o envio falha.
 
 ---
 
 ### Deploy na Vercel
 
-A Vercel e o provedor de hospedagem atual do projeto. O plano gratuito (Hobby) e suficiente para a aplicacao.
+A Vercel é o provedor de hospedagem atual do projeto.
 
-#### Via painel web (recomendado para o primeiro deploy)
+#### Pelo painel web (recomendado para o primeiro deploy)
 
-1. Acesse [vercel.com](https://vercel.com) e faca login com sua conta GitHub
+1. Acesse [vercel.com](https://vercel.com) e entre com a conta do GitHub
 2. Clique em **Add New > Project**
-3. Importe o repositorio `ESTAGIO-DSM20262/pi-repository`
-4. Na tela de configuracao, expanda **Environment Variables** e adicione todas as variaveis listadas na secao anterior
+3. Importe o repositório `ESTAGIO-DSM20262/pi-repository`
+4. Em **Environment Variables**, adicione as variáveis da seção anterior
 5. Clique em **Deploy**
 
-A Vercel detecta automaticamente que o projeto usa Next.js e configura o build sem nenhuma mudanca.
+A Vercel detecta o Next.js e configura o build automaticamente. As migrations não rodam no deploy: execute `npm run db:migrate` apontando para o banco de produção sempre que houver migrations novas.
 
-#### Via Vercel CLI
+#### Pela Vercel CLI
 
 ```bash
-# Instalar a CLI globalmente
 npm install -g vercel
-
-# Autenticar
 vercel login
-
-# Fazer deploy a partir da pasta do projeto
-vercel
-
-# Para deploy em producao (branch main)
-vercel --prod
+vercel          # deploy de preview
+vercel --prod   # deploy de produção
 ```
 
-#### Configuracao das variaveis de ambiente na Vercel
+#### Variáveis de ambiente na Vercel
 
-Apos o primeiro deploy, as variaveis podem ser gerenciadas em:
+Depois do primeiro deploy, as variáveis ficam em **Project > Settings > Environment Variables**. Defina cada uma para **Production**, **Preview** e **Development** conforme necessário. `BETTER_AUTH_URL` deve apontar para a URL real de produção.
 
-**Vercel Dashboard > Projeto > Settings > Environment Variables**
+#### Domínio personalizado
 
-Defina cada variavel para os ambientes **Production**, **Preview** e **Development** conforme necessario. A variavel `BETTER_AUTH_URL` deve apontar para a URL real do projeto em producao, ex.: `https://projetos.alvarosena.com.br`.
+1. Vá em **Project Settings > Domains**
+2. Adicione o domínio e configure os registros DNS indicados pela Vercel
+3. A Vercel emite o certificado SSL automaticamente
 
-#### Dominio personalizado
-
-1. Va em **Project Settings > Domains**
-2. Adicione seu dominio e siga as instrucoes para configurar os registros DNS no seu provedor (geralmente um registro CNAME apontando para `cname.vercel-dns.com`)
-3. A Vercel provisiona o certificado SSL automaticamente
+Ao trocar o domínio, atualize `BETTER_AUTH_URL` e, se usar o login Microsoft, a URL de redirecionamento no Entra ID.
 
 ---
 
-### Executando localmente
+### Comandos úteis
 
-Apos configurar as variaveis de ambiente e rodar as migrations:
-
-```bash
-npm run dev
-```
-
-A aplicacao estara disponivel em `http://localhost:3000`.
-
-Outros comandos uteis:
-
-| Comando | Descricao |
+| Comando | Descrição |
 |---|---|
-| `npm run build` | Gera o build de producao |
-| `npm run start` | Inicia o servidor com o build de producao |
-| `npm run lint` | Verifica o codigo com ESLint |
-| `npm run db:studio` | Abre o Drizzle Studio (interface visual do banco) |
-| `npm run db:generate` | Gera arquivos de migration a partir do schema |
+| `npm run dev` | Servidor de desenvolvimento em `http://localhost:3000` |
+| `npm run build` | Build de produção |
+| `npm run start` | Servidor com o build de produção |
+| `npm run lint` | Verifica o código com o Biome (`npm run lint:fix` corrige) |
+| `npm test` | Roda os testes (Vitest) |
 | `npm run db:migrate` | Aplica as migrations no banco configurado |
+| `npm run db:seed` | Cria as contas de desenvolvimento |
+| `npm run db:generate` | Gera migrations a partir do schema |
+| `npm run db:studio` | Abre o Drizzle Studio |
+| `npm run email:dev` | Pré-visualiza os templates de e-mail em `http://localhost:3001` |
 
 ---
 

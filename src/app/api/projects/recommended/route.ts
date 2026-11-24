@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server'
 import { desc, eq } from 'drizzle-orm'
+import { NextResponse } from 'next/server'
 import { db } from '@/db'
 import { projects, semesterAwards } from '@/db/schema'
 
@@ -7,14 +7,17 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+}
+
+const cacheHeaders = {
   'Cache-Control': 'public, max-age=120, s-maxage=300, stale-while-revalidate=600',
 }
 
 export function OPTIONS() {
-  return new Response(null, { status: 204, headers: corsHeaders })
+  return new Response(null, { status: 204, headers: { ...corsHeaders, ...cacheHeaders } })
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const rows = await db
       .select({
@@ -37,15 +40,15 @@ export async function GET() {
 
     const data = rows.map((row) => ({
       ...row,
-      projectUrl: `https://projetos.alvarosena.com.br/projetos/${row.id}`,
+      projectUrl: new URL(`/projetos/${encodeURIComponent(row.id)}`, request.url).toString(),
     }))
 
-    return NextResponse.json(data, { headers: corsHeaders })
+    return NextResponse.json(data, { headers: { ...corsHeaders, ...cacheHeaders } })
   } catch (error) {
     console.error('[GET /api/projects/recommended]', error)
     return NextResponse.json(
-      { error: 'Could not load recommended projects.' },
-      { status: 500, headers: corsHeaders },
+      { error: 'Não foi possível carregar os projetos premiados.' },
+      { status: 500, headers: { ...corsHeaders, 'Cache-Control': 'no-store' } },
     )
   }
 }
