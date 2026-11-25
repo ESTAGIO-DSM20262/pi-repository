@@ -6,7 +6,6 @@ import { eq } from 'drizzle-orm'
 import { SendPasswordResetEmailUseCase } from '@/application/auth/send-password-reset-email'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
-import { isRole } from '@/domain/enterprise/entities/role'
 import { makePasswordResetNotifier } from '@/infrastructure/email/make-password-reset-notifier'
 
 const sendPasswordResetEmail = new SendPasswordResetEmailUseCase(makePasswordResetNotifier())
@@ -22,6 +21,7 @@ const socialProviders =
           clientSecret: microsoftClientSecret,
           tenantId: process.env.MICROSOFT_TENANT_ID ?? 'organizations',
           prompt: 'select_account' as const,
+          disableSignUp: true,
           mapProfileToUser: (profile: { email?: string; preferred_username?: string }) => ({
             email: (profile.email ?? profile.preferred_username ?? '').toLowerCase(),
           }),
@@ -84,9 +84,13 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (newUser) => ({
-          data: { ...newUser, role: isRole(newUser.role) ? newUser.role : 'student' },
-        }),
+        before: async () => {
+          throw new APIError('FORBIDDEN', {
+            code: 'SIGNUP_DISABLED',
+            message:
+              'Não há uma conta cadastrada para este e-mail. Procure a secretaria da Fatec para solicitar o cadastro.',
+          })
+        },
       },
     },
     session: {
