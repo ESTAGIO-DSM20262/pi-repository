@@ -73,6 +73,14 @@ export const auth = betterAuth({
 
   socialProviders,
 
+  rateLimit: {
+    customRules: {
+      '/sign-in/email': { window: 60, max: 10 },
+      '/request-password-reset': { window: 300, max: 5 },
+      '/reset-password': { window: 300, max: 10 },
+    },
+  },
+
   account: {
     accountLinking: {
       enabled: true,
