@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { resolveLoginErrorNotice } from './login-error-notice'
 
+const NOT_REGISTERED_CODES = ['signup_disabled', 'SIGNUP_DISABLED', 'unable_to_create_user']
+const DISABLED_CODES = ['USER_DISABLED', 'unable_to_create_session']
+
 describe('resolveLoginErrorNotice', () => {
-  it.each([
-    'signup_disabled',
-    'SIGNUP_DISABLED',
-    'unable_to_create_user',
-  ])('orienta a procurar a secretaria quando o erro é %s', (code) => {
+  it.each(NOT_REGISTERED_CODES)('orienta a procurar a secretaria quando o erro é %s', (code) => {
     const notice = resolveLoginErrorNotice(code)
 
     expect(notice.variant).toBe('warning')
@@ -15,15 +14,12 @@ describe('resolveLoginErrorNotice', () => {
     expect(notice.description).toContain('cadastro')
   })
 
-  it.each(['USER_DISABLED', 'unable_to_create_session'])(
-    'informa conta desativada quando o erro é %s',
-    (code) => {
-      const notice = resolveLoginErrorNotice(code)
+  it.each(DISABLED_CODES)('informa conta desativada quando o erro é %s', (code) => {
+    const notice = resolveLoginErrorNotice(code)
 
-      expect(notice.variant).toBe('error')
-      expect(notice.title).toBe('Conta desativada')
-    },
-  )
+    expect(notice.variant).toBe('error')
+    expect(notice.title).toBe('Conta desativada')
+  })
 
   it('traduz códigos conhecidos do fluxo OAuth', () => {
     const notice = resolveLoginErrorNotice('invalid_code')
