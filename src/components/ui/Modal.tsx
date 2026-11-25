@@ -19,26 +19,22 @@ export interface Notice {
   description: string
 }
 
-const VARIANT: Record<ModalVariant, { icon: string; halo: string; core: string }> = {
+const VARIANT: Record<ModalVariant, { icon: string; circle: string }> = {
   success: {
     icon: 'fi-rr-check',
-    halo: 'border border-emerald-200/80 bg-emerald-50',
-    core: 'border border-emerald-200 bg-emerald-100 text-emerald-700',
+    circle: 'border border-emerald-200 bg-emerald-100 text-emerald-700',
   },
   error: {
     icon: 'fi-rr-exclamation',
-    halo: 'border border-primary/15 bg-primary-light/60',
-    core: 'border border-primary/25 bg-primary-light text-primary',
+    circle: 'border border-primary/25 bg-primary-light text-primary',
   },
   award: {
     icon: 'fi-rr-trophy',
-    halo: 'border border-accent/25 bg-accent-light/60',
-    core: 'border border-accent/40 bg-accent-light text-secondary-hover',
+    circle: 'border border-accent/40 bg-accent-light text-secondary-hover',
   },
   warning: {
     icon: 'fi-rr-triangle-warning',
-    halo: 'border border-primary/15 bg-primary-light/60',
-    core: 'border border-primary/25 bg-primary-light text-primary',
+    circle: 'border border-primary/25 bg-primary-light text-primary',
   },
 }
 
@@ -120,7 +116,7 @@ export function Modal({
   }, [open])
 
   if (!open || typeof document === 'undefined') return null
-  const { icon, halo, core } = VARIANT[variant]
+  const { icon, circle } = VARIANT[variant]
 
   return createPortal(
     <div
@@ -153,13 +149,9 @@ export function Modal({
         )}
 
         <div
-          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full sm:h-20 sm:w-20 ${halo}`}
+          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full sm:h-[4.5rem] sm:w-[4.5rem] ${circle}`}
         >
-          <div
-            className={`flex h-12 w-12 items-center justify-center rounded-full sm:h-14 sm:w-14 ${core}`}
-          >
-            <i className={`fi ${icon} flex text-2xl leading-none`} aria-hidden="true" />
-          </div>
+          <i className={`fi ${icon} flex text-3xl leading-none`} aria-hidden="true" />
         </div>
 
         <h2 id="modal-title" className="mt-5 text-xl font-semibold text-slate-900 sm:text-2xl">

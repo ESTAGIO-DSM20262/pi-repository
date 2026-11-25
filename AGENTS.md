@@ -688,7 +688,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   usuário usam esse conjunto; `Modal` (aviso centralizado) usa o mesmo fundo e botão de fechar.
   Tons: `danger` e `primary` usam ícone vermelho claro; `award` usa ícone ciano/verde-azulado (positivo,
   como o `Modal` de sucesso). O botão de confirmar é sempre o vermelho primário; no celular o rodapé
-  empilha os botões.
+  empilha os botões. O ícone do `Modal` é um único círculo colorido por variante (sucesso, erro,
+  aviso e prêmio), sem o halo externo que existia antes.
 - **Organização em blocos (reunião de 09/11/2026):** `RoleDashboard` agrupa as seções em
   `DashboardBlock` (cabeçalho com ícone e descrição, âncora `#id`) e mostra `DashboardSectionNav`
   (atalhos horizontais) no topo. Admin: `acompanhamento` (indicadores, com os filtros), `graficos`,
