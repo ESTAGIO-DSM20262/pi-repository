@@ -267,6 +267,20 @@ select:disabled {
   }
 }
 
+.scrollbar-x-spaced {
+  --scroll-x-gap: 2px;
+  padding-bottom: var(--scroll-x-gap);
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .scrollbar-x-spaced {
+    --scroll-x-gap: 8px;
+  }
+}
+
 .active-filter-chip-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;

@@ -323,8 +323,8 @@ para leitura de sessão a cada requisição (bloqueia a rota).
 2. `SignInWithMicrosoftUseCase` → `AuthRepository.signInWithMicrosoft` →
    `authClient.signIn.social({ provider: 'microsoft', ... })`.
 3. `callbackURL = /painel`, `errorCallbackURL = /login`.
-4. No servidor, o better-auth usa `mapProfileToUser` (fallback do UPN `preferred_username` quando falta o claim `email`). O papel persistido da conta é mantido; contas criadas por autenticação social sem um papel explícito recebem `student` como padrão. O formato do e-mail é validado sem restrição de domínio.
-5. `LoginFeedback` traduz os códigos de erro do callback OAuth em mensagens PT.
+4. No servidor, o better-auth usa `mapProfileToUser` (fallback do UPN `preferred_username` quando falta o claim `email`). O login com Microsoft **só entra em contas já cadastradas**: o provedor usa `disableSignUp: true` e `databaseHooks.user.create.before` em `src/libs/auth.ts` rejeita qualquer criação de usuário feita pelo better-auth (contas nascem apenas pelo cadastro do administrador ou pelo seed, que gravam direto no banco). Se o e-mail da conta Microsoft não existir em `users`, o callback volta para `/login?error=signup_disabled`. O papel persistido da conta é mantido.
+5. `LoginFeedback` traduz os códigos de erro do callback OAuth com `resolveLoginErrorNotice` (`src/presentation/auth/login-error-notice.ts`). `signup_disabled`, `SIGNUP_DISABLED` e `unable_to_create_user` abrem o modal "Conta não cadastrada" (procure a secretaria e peça o cadastro); `USER_DISABLED` e `unable_to_create_session` abrem "Conta desativada". Textos vindos da URL (`error_description`) nunca são exibidos.
 
 ### Redefinição de senha (e-mail via Resend)
 
@@ -688,7 +688,8 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
   usuário usam esse conjunto; `Modal` (aviso centralizado) usa o mesmo fundo e botão de fechar.
   Tons: `danger` e `primary` usam ícone vermelho claro; `award` usa ícone ciano/verde-azulado (positivo,
   como o `Modal` de sucesso). O botão de confirmar é sempre o vermelho primário; no celular o rodapé
-  empilha os botões.
+  empilha os botões. O ícone do `Modal` é um único círculo colorido por variante (sucesso, erro,
+  aviso e prêmio), sem o halo externo que existia antes.
 - **Organização em blocos (reunião de 09/11/2026):** `RoleDashboard` agrupa as seções em
   `DashboardBlock` (cabeçalho com ícone e descrição, âncora `#id`) e mostra `DashboardSectionNav`
   (atalhos horizontais) no topo. Admin: `acompanhamento` (indicadores, com os filtros), `graficos`,
@@ -1008,6 +1009,17 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Dropdowns**: `SelectDropdown` aceita `searchable` (campo de pesquisa sem acento e sem diferenciar maiúsculas, `searchPlaceholder`, `emptyMessage`). Use em toda seleção de pessoa (professor, aluno, responsável). O seletor de modo de cores do painel também usa `SelectDropdown`; o painel ignora cliques dentro de `[role="listbox"]` ao decidir se fecha.
 - **Daltonismo e marca**: os modos também trocam `--primary`, `--secondary` e `--accent` (e variantes) para o sistema inteiro, não só os tons dos dashboards; no escuro, `text-primary` e `text-secondary` usam `--cb-primary-text` e `--cb-secondary-text`.
 - **Scrollbars**: `globals.css` define barras finas na cor primária para todos os elementos (exceções: `.modal-scrollbar` e `.scrollbar-success|warning|danger`) e esconde a barra principal da página em telas até 767px.
+- **Responsividade do `SelectDropdown` e rolagem horizontal no mobile**: o rótulo do gatilho usa
+  `w-0 flex-1 truncate` quando `width="full"` e a raiz tem `min-w-0 max-w-full`, então um nome longo
+  (ex.: "Desenvolvimento de Software Multiplataforma") é cortado com reticências em vez de esticar a
+  coluna do grid e alargar a página. As opções do menu quebram linha. Contêineres com rolagem
+  horizontal (atalhos de `DashboardSectionNav`, tabelas de `AdminInsights` e da matriz de permissões)
+  usam `.scrollbar-x-spaced`, que só define `scrollbar-width: thin`, `scrollbar-color` (primária) e um
+  espaço inferior (`--scroll-x-gap`). Não use `::-webkit-scrollbar` nesses contêineres: estilizar a
+  barra desliga a barra nativa, que no celular aparece ao rolar e some em seguida, e pode exibir
+  setas. No desktop a barra ocupa espaço próprio e o espaço inferior é de 2px; em telas de toque
+  (`hover: none` e `pointer: coarse`) a barra flutua sobre o conteúdo, então o espaço sobe para 8px
+  para ela não cobrir os itens. Ajuste esse valor em `globals.css`.
 - **Menu da conta no desktop e no modo foco**: `Header.tsx` mantém o dropdown ancorado no desktop (a
   partir de `sm`). No modo foco (`/definir-senha`) o menu da conta continua sendo um bottom sheet
   próprio em telas menores, renderizado via portal no `document.body` para escapar de
@@ -1031,3 +1043,11 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - O texto fica em `how-it-works-content.ts`: `ROLE_GUIDES` (permissões, fluxo e limites por perfil), `PERMISSION_MATRIX` (tabela "Quem pode o quê", com `yes`, `partial` e `no`, sempre com texto além do ícone; só o administrador a vê na página) e `ACCESSIBILITY_FEATURES`. Ao mudar uma regra de permissão no código, atualize os três.
 - Fonte de verdade das regras: `application/projects/project-permissions.ts`, não os textos antigos das seções 18 e 19 deste arquivo. Hoje: só professor orientador indica PI (o administrador não indica); desativar e reativar é do orientador principal e do administrador; excluir é só do administrador e só com o projeto desativado; o administrador edita todas as informações de qualquer projeto (dados, equipe, tecnologias, links, imagens e orientadores, inclusive o principal) e gerencia as tarefas de qualquer projeto, mas não indica; aluno vê todas as tarefas do projeto da sua equipe e atualiza o status das do grupo e das atribuídas a ele (não cria nem edita); só o orientador principal cria e edita tarefas (apenas as que criou); satélites só acompanham.
 - O upload de imagens está desligado (`PROJECT_IMAGE_UPLOAD_ENABLED`), por isso a tela não promete envio de imagens.
+
+## Segurança (branch `chore/seguranca-login-microsoft`)
+
+- **Next.js 16.4.6.** A versão 16.4.0 tinha vulnerabilidade conhecida. `package.json` fixa `16.4.6`; depois de qualquer alteração de versão rode `npm install` para o `package-lock.json` acompanhar.
+- **Login Microsoft só para contas cadastradas.** Ver a seção 10. O tenant padrão é `organizations`; `MICROSOFT_TENANT_ID` vazio também resulta em `organizations` (`src/libs/microsoft-tenant.ts`; antes um valor vazio caía em `common`, que aceita contas pessoais). Em produção, informe o Tenant ID da Fatec: o e-mail do token do Entra não é verificado pela Microsoft e, com a vinculação automática de contas (`trustedProviders: ['microsoft']`), um tenant aberto permite que outra organização declare o e-mail de um usuário cadastrado. Com tenant aberto em produção o servidor registra um aviso no log.
+- **Cabeçalhos HTTP** (`next.config.ts`): `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security` e uma CSP enxuta (`frame-ancestors 'none'`, `base-uri`, `object-src`, `form-action`). A CSP não restringe `script-src` de propósito: o VLibras e os scripts inline do Next precisariam de nonce e de testes visuais antes.
+- **Origem das escritas na API** (`src/proxy.ts` + `src/libs/request-origin.ts`): `POST/PUT/PATCH/DELETE` em `/api/*` (exceto `/api/auth/*`, protegida pelo better-auth) com `Origin` diferente do host respondem 403. `GET` e o CORS aberto de `/api/projects/recommended` não mudam.
+- **Limite de tentativas** (`rateLimit.customRules` em `src/libs/auth.ts`): login por e-mail 10/min, pedido de redefinição 5/5 min, redefinição 10/5 min, por IP. O better-auth só aplica o limite em produção e, por padrão, guarda os contadores na memória de cada instância (na Vercel o limite vale por instância). Para um limite global será preciso `storage: 'database'` com a tabela de rate limit e uma migration SQL.

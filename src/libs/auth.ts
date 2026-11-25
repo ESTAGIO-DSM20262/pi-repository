@@ -6,13 +6,26 @@ import { eq } from 'drizzle-orm'
 import { SendPasswordResetEmailUseCase } from '@/application/auth/send-password-reset-email'
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
-import { isRole } from '@/domain/enterprise/entities/role'
 import { makePasswordResetNotifier } from '@/infrastructure/email/make-password-reset-notifier'
+import { isMultiTenantAuthority, resolveMicrosoftTenant } from '@/libs/microsoft-tenant'
 
 const sendPasswordResetEmail = new SendPasswordResetEmailUseCase(makePasswordResetNotifier())
 
 const microsoftClientId = process.env.MICROSOFT_CLIENT_ID
 const microsoftClientSecret = process.env.MICROSOFT_CLIENT_SECRET
+const microsoftTenantId = resolveMicrosoftTenant(process.env.MICROSOFT_TENANT_ID)
+
+if (
+  microsoftClientId &&
+  microsoftClientSecret &&
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_PHASE !== 'phase-production-build' &&
+  isMultiTenantAuthority(microsoftTenantId)
+) {
+  console.warn(
+    `MICROSOFT_TENANT_ID está como "${microsoftTenantId}": qualquer organização Microsoft pode iniciar o login. Informe o Tenant ID da Fatec para restringir o acesso.`,
+  )
+}
 
 const socialProviders =
   microsoftClientId && microsoftClientSecret
@@ -20,8 +33,9 @@ const socialProviders =
         microsoft: {
           clientId: microsoftClientId,
           clientSecret: microsoftClientSecret,
-          tenantId: process.env.MICROSOFT_TENANT_ID ?? 'organizations',
+          tenantId: microsoftTenantId,
           prompt: 'select_account' as const,
+          disableSignUp: true,
           mapProfileToUser: (profile: { email?: string; preferred_username?: string }) => ({
             email: (profile.email ?? profile.preferred_username ?? '').toLowerCase(),
           }),
@@ -59,6 +73,14 @@ export const auth = betterAuth({
 
   socialProviders,
 
+  rateLimit: {
+    customRules: {
+      '/sign-in/email': { window: 60, max: 10 },
+      '/request-password-reset': { window: 300, max: 5 },
+      '/reset-password': { window: 300, max: 10 },
+    },
+  },
+
   account: {
     accountLinking: {
       enabled: true,
@@ -84,9 +106,13 @@ export const auth = betterAuth({
   databaseHooks: {
     user: {
       create: {
-        before: async (newUser) => ({
-          data: { ...newUser, role: isRole(newUser.role) ? newUser.role : 'student' },
-        }),
+        before: async () => {
+          throw new APIError('FORBIDDEN', {
+            code: 'SIGNUP_DISABLED',
+            message:
+              'Não há uma conta cadastrada para este e-mail. Procure a secretaria da Fatec para solicitar o cadastro.',
+          })
+        },
       },
     },
     session: {

@@ -87,7 +87,7 @@ function AdvisorLoadList({ rows }: { rows: AdminDashboardMetrics['advisorLoad'] 
 
   return (
     <>
-      <div className="overflow-x-auto rounded-lg border border-border-light">
+      <div className="scrollbar-x-spaced overflow-x-auto rounded-lg border border-border-light">
         <table className="w-full min-w-[460px] border-collapse text-left">
           <caption className="sr-only">
             Projetos em andamento, concluídos e tarefas atrasadas por orientador

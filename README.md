@@ -51,7 +51,7 @@ Preencha o `.env`:
 - `BETTER_AUTH_SECRET` — gere com `openssl rand -base64 32`.
 - `BETTER_AUTH_URL` — URL base da aplicação (ex.: `http://localhost:3000`).
 - `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` — credenciais do app no Microsoft Entra ID (opcionais em desenvolvimento).
-- `MICROSOFT_TENANT_ID` — opcional; escopo do provedor. Padrão `organizations` (qualquer tenant corporativo/escolar). Informe um Tenant ID/domínio para restringir a um único tenant.
+- `MICROSOFT_TENANT_ID` — escopo do provedor. Padrão `organizations` (qualquer tenant corporativo/escolar). **Em produção, informe o Tenant ID da Fatec** para restringir o login a um único tenant. O login com Microsoft só funciona para e-mails já cadastrados no sistema; quem não tem cadastro vê o aviso para procurar a secretaria.
 - `RESEND_API_KEY` — chave da API do Resend, usada no e-mail de redefinição de senha. Opcional em desenvolvimento: sem ela, o link de redefinição é impresso no console do `npm run dev`.
 - `EMAIL_FROM` — remetente dos e-mails, de um domínio verificado no Resend (ex.: `Acervo Acadêmico <no-reply@seu-dominio>`). Obrigatório em produção junto com `RESEND_API_KEY`.
 

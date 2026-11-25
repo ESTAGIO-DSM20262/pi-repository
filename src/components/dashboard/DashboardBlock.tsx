@@ -62,7 +62,10 @@ export function DashboardSectionNav({ links }: { links: DashboardBlockLink[] }) 
   if (links.length < 2) return null
 
   return (
-    <nav aria-label="Seções do painel" className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+    <nav
+      aria-label="Seções do painel"
+      className="scrollbar-x-spaced -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+    >
       <ul className="flex w-max gap-2 sm:w-auto sm:flex-wrap">
         {links.map((link) => (
           <li key={link.id}>
