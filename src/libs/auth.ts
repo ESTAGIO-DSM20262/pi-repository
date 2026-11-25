@@ -7,11 +7,25 @@ import { SendPasswordResetEmailUseCase } from '@/application/auth/send-password-
 import { db } from '@/db'
 import { accounts, sessions, users, verifications } from '@/db/schema'
 import { makePasswordResetNotifier } from '@/infrastructure/email/make-password-reset-notifier'
+import { isMultiTenantAuthority, resolveMicrosoftTenant } from '@/libs/microsoft-tenant'
 
 const sendPasswordResetEmail = new SendPasswordResetEmailUseCase(makePasswordResetNotifier())
 
 const microsoftClientId = process.env.MICROSOFT_CLIENT_ID
 const microsoftClientSecret = process.env.MICROSOFT_CLIENT_SECRET
+const microsoftTenantId = resolveMicrosoftTenant(process.env.MICROSOFT_TENANT_ID)
+
+if (
+  microsoftClientId &&
+  microsoftClientSecret &&
+  process.env.NODE_ENV === 'production' &&
+  process.env.NEXT_PHASE !== 'phase-production-build' &&
+  isMultiTenantAuthority(microsoftTenantId)
+) {
+  console.warn(
+    `MICROSOFT_TENANT_ID está como "${microsoftTenantId}": qualquer organização Microsoft pode iniciar o login. Informe o Tenant ID da Fatec para restringir o acesso.`,
+  )
+}
 
 const socialProviders =
   microsoftClientId && microsoftClientSecret
@@ -19,7 +33,7 @@ const socialProviders =
         microsoft: {
           clientId: microsoftClientId,
           clientSecret: microsoftClientSecret,
-          tenantId: process.env.MICROSOFT_TENANT_ID ?? 'organizations',
+          tenantId: microsoftTenantId,
           prompt: 'select_account' as const,
           disableSignUp: true,
           mapProfileToUser: (profile: { email?: string; preferred_username?: string }) => ({
