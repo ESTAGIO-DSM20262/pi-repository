@@ -1014,8 +1014,12 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   (ex.: "Desenvolvimento de Software Multiplataforma") é cortado com reticências em vez de esticar a
   coluna do grid e alargar a página. As opções do menu quebram linha. Contêineres com rolagem
   horizontal (atalhos de `DashboardSectionNav`, tabelas de `AdminInsights` e da matriz de permissões)
-  usam `.scrollbar-x-spaced`: barra de 3px na cor primária e `padding-bottom: 2px`, deixando 2px
-  entre o conteúdo e a barra.
+  usam `.scrollbar-x-spaced`, que só define `scrollbar-width: thin`, `scrollbar-color` (primária) e um
+  espaço inferior (`--scroll-x-gap`). Não use `::-webkit-scrollbar` nesses contêineres: estilizar a
+  barra desliga a barra nativa, que no celular aparece ao rolar e some em seguida, e pode exibir
+  setas. No desktop a barra ocupa espaço próprio e o espaço inferior é de 2px; em telas de toque
+  (`hover: none` e `pointer: coarse`) a barra flutua sobre o conteúdo, então o espaço sobe para 8px
+  para ela não cobrir os itens. Ajuste esse valor em `globals.css`.
 - **Menu da conta no desktop e no modo foco**: `Header.tsx` mantém o dropdown ancorado no desktop (a
   partir de `sm`). No modo foco (`/definir-senha`) o menu da conta continua sendo um bottom sheet
   próprio em telas menores, renderizado via portal no `document.body` para escapar de

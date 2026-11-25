@@ -268,29 +268,16 @@ select:disabled {
 }
 
 .scrollbar-x-spaced {
-  padding-bottom: 2px;
+  --scroll-x-gap: 2px;
+  padding-bottom: var(--scroll-x-gap);
   overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
 }
 
-@supports selector(::-webkit-scrollbar) {
-  .scrollbar-x-spaced::-webkit-scrollbar {
-    height: 3px;
-  }
-
-  .scrollbar-x-spaced::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-x-spaced::-webkit-scrollbar-thumb {
-    border-radius: 9999px;
-    background-color: var(--primary);
-  }
-}
-
-@supports not selector(::-webkit-scrollbar) {
+@media (hover: none) and (pointer: coarse) {
   .scrollbar-x-spaced {
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary) transparent;
+    --scroll-x-gap: 8px;
   }
 }
 
