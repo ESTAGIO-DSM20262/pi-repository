@@ -365,7 +365,7 @@ function PermissionMatrix({ role }: { role: Role | null }) {
         Compare o que cada perfil faz no sistema. Em parte indica uma permissão com condição, que
         aparece descrita abaixo do rótulo.
       </p>
-      <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
+      <div className="scrollbar-x-spaced overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
         <table className="w-full min-w-[56rem] border-collapse text-left">
           <caption className="sr-only">
             Permissões de visitantes, alunos, professores e administradores no Acervo Acadêmico

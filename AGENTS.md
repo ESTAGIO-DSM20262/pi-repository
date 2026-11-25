@@ -1008,6 +1008,13 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
 - **Dropdowns**: `SelectDropdown` aceita `searchable` (campo de pesquisa sem acento e sem diferenciar maiúsculas, `searchPlaceholder`, `emptyMessage`). Use em toda seleção de pessoa (professor, aluno, responsável). O seletor de modo de cores do painel também usa `SelectDropdown`; o painel ignora cliques dentro de `[role="listbox"]` ao decidir se fecha.
 - **Daltonismo e marca**: os modos também trocam `--primary`, `--secondary` e `--accent` (e variantes) para o sistema inteiro, não só os tons dos dashboards; no escuro, `text-primary` e `text-secondary` usam `--cb-primary-text` e `--cb-secondary-text`.
 - **Scrollbars**: `globals.css` define barras finas na cor primária para todos os elementos (exceções: `.modal-scrollbar` e `.scrollbar-success|warning|danger`) e esconde a barra principal da página em telas até 767px.
+- **Responsividade do `SelectDropdown` e rolagem horizontal no mobile**: o rótulo do gatilho usa
+  `w-0 flex-1 truncate` quando `width="full"` e a raiz tem `min-w-0 max-w-full`, então um nome longo
+  (ex.: "Desenvolvimento de Software Multiplataforma") é cortado com reticências em vez de esticar a
+  coluna do grid e alargar a página. As opções do menu quebram linha. Contêineres com rolagem
+  horizontal (atalhos de `DashboardSectionNav`, tabelas de `AdminInsights` e da matriz de permissões)
+  usam `.scrollbar-x-spaced`: barra de 3px na cor primária e `padding-bottom: 2px`, deixando 2px
+  entre o conteúdo e a barra.
 - **Menu da conta no desktop e no modo foco**: `Header.tsx` mantém o dropdown ancorado no desktop (a
   partir de `sm`). No modo foco (`/definir-senha`) o menu da conta continua sendo um bottom sheet
   próprio em telas menores, renderizado via portal no `document.body` para escapar de

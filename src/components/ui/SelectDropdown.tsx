@@ -85,6 +85,7 @@ export function SelectDropdown({
   const showLimitHint = searchable && !isSearching && baseOptions.length < options.length
   const selectedOption = options.find((option) => option.value === value)
   const widthClass = width === 'full' ? 'w-full' : 'w-auto'
+  const labelWidthClass = width === 'full' ? 'w-0 flex-1' : 'flex-1'
   const sizeClass =
     size === 'compact' ? 'h-9 min-w-[168px] px-2.5 text-[0.8125rem]' : 'h-10 px-3.5 text-sm'
   const toneClass = tone === 'muted' ? 'bg-surface-secondary' : 'bg-white'
@@ -266,7 +267,7 @@ export function SelectDropdown({
   }
 
   return (
-    <div ref={rootRef} className={`relative ${widthClass}`}>
+    <div ref={rootRef} className={`relative min-w-0 max-w-full ${widthClass}`}>
       <button
         ref={triggerRef}
         type="button"
@@ -277,9 +278,9 @@ export function SelectDropdown({
         data-open={isOpen}
         onClick={toggleMenu}
         onKeyDown={handleTriggerKeyDown}
-        className={`group inline-flex ${widthClass} ${sizeClass} cursor-pointer items-center justify-between gap-3 rounded-lg border border-border ${toneClass} font-medium text-slate-800 shadow-sm outline-none transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 data-[open=true]:border-primary data-[open=true]:ring-2 data-[open=true]:ring-primary/10 ${className}`}
+        className={`group inline-flex max-w-full ${widthClass} ${sizeClass} cursor-pointer items-center justify-between gap-3 rounded-lg border border-border ${toneClass} font-medium text-slate-800 shadow-sm outline-none transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 data-[open=true]:border-primary data-[open=true]:ring-2 data-[open=true]:ring-primary/10 ${className}`}
       >
-        <span className="min-w-0 truncate text-left">
+        <span className={`min-w-0 ${labelWidthClass} truncate text-left`}>
           {selectedOption?.label ?? placeholder ?? ''}
         </span>
         <i
@@ -351,7 +352,7 @@ export function SelectDropdown({
                         : 'text-slate-700 hover:bg-surface-secondary hover:text-slate-950'
                     } ${activeIndex === index && isOpen ? 'outline-none ring-2 ring-inset ring-primary/15' : ''}`}
                   >
-                    <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                    <span className="min-w-0 flex-1 break-words">{option.label}</span>
                     {option.count !== undefined && (
                       <span
                         className={`ml-auto shrink-0 text-[0.6875rem] ${selected ? 'text-primary/75' : 'text-text-muted'}`}

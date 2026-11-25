@@ -267,6 +267,33 @@ select:disabled {
   }
 }
 
+.scrollbar-x-spaced {
+  padding-bottom: 2px;
+  overscroll-behavior-x: contain;
+}
+
+@supports selector(::-webkit-scrollbar) {
+  .scrollbar-x-spaced::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .scrollbar-x-spaced::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-x-spaced::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--primary);
+  }
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .scrollbar-x-spaced {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+  }
+}
+
 .active-filter-chip-scroll {
   scrollbar-width: none;
   -ms-overflow-style: none;
