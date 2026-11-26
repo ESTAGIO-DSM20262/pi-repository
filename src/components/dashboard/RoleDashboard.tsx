@@ -184,8 +184,7 @@ function AdminOverviewCards({
           Visão geral do sistema
         </h2>
         <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
-          Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
-          banco. Projetos desativados ficam fora das contagens do acervo.
+          Indicadores atualizados a partir dos projetos e das contas registradas no banco. Projetos desativados ficam fora das contagens do acervo.
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
@@ -960,13 +959,6 @@ export function RoleDashboard({
             }
           />
         </DashboardBlock>
-
-        {role === 'admin' && (
-          <p className="rounded-xl border border-border bg-white px-4 py-3 text-center text-[0.625rem] text-text-muted shadow-sm">
-            Usuários, permissões e projetos cadastrados são gerenciados no banco. Os projetos
-            demonstrativos do acervo continuam sendo exibidos junto com os novos cadastros.
-          </p>
-        )}
       </div>
     </div>
   )

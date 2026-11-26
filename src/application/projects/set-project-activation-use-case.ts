@@ -41,7 +41,7 @@ export class SetProjectActivationUseCase
     if (!project) {
       return left(
         new ProjectOperationError(
-          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser desativados.',
+          'Projeto não encontrado.',
           404,
         ),
       )

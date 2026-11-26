@@ -442,11 +442,12 @@ documente aqui.
 ## 16. Cadastro de projetos e filtros do painel
 
 - **Persistência:** projetos criados pela interface ficam na tabela `projects`
-  (`src/db/migrations/20261021_projects.sql`, espelhada em `db/schema.ts`). Os projetos
-  demonstrativos continuam em `mock-projects.ts`. `DbProjectRepository`
+  (`src/db/migrations/20261021_projects.sql`, espelhada em `db/schema.ts`). Não há projetos
+  demonstrativos (os arquivos `mock-projects.ts` e `mock-project-repository.ts` foram removidos).
+  `DbProjectRepository`
   (`infrastructure/projects/db-project-repository.ts`) lê somente registros persistidos e faz
-  a busca por ID diretamente no banco. `CompositeProjectRepository` combina o adaptador de banco
-  com `MockProjectRepository` na raiz de composição. Erros de banco não são ocultados.
+  a busca por ID diretamente no banco. `CompositeProjectRepository` apenas delega ao adaptador de banco
+  e é a raiz de composição usada pelas telas e APIs. Erros de banco não são ocultados.
 - **Validação:** `application/projects/create-project.ts` (`parseCreateProjectInput`) valida e
   normaliza a entrada e devolve `Either<InvalidProjectError, CreateProjectInput>`. O formulário usa
   React Hook Form + Zod (`presentation/projects/validation.ts`, `mode: 'onTouched'`) e também valida
@@ -488,8 +489,7 @@ documente aqui.
   imagens) e ainda troca o orientador principal. O corpo do `PATCH` é o mesmo nos dois escopos
   (`parseUpdateProjectInput`); a única diferença é que, no `admin`, `advisorEmail` é aceito.
   Indicar o projeto continua exclusivo dos orientadores (`canVerifyProject`). Aluno nunca edita.
-  Projetos demonstrativos (`mock-projects.ts`) não existem na tabela `projects` e por isso não são
-  editáveis. Projeto desativado só pode ser editado por administrador.
+  Projeto desativado só pode ser editado por administrador.
 - **Rota e tela:** `/projetos/[id]/editar` (servidor) carrega o projeto e renderiza
   `ProjectFormPage` com `mode="edit"` e o `scope` devolvido pelo acesso. A página do projeto
   mostra o botão vermelho "Editar projeto" quando `canEditProject` é verdadeiro.
@@ -920,14 +920,11 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   os projetos ativos do sistema e filtra também por orientador principal e por situação
   (padrão: em andamento). A regra de seleção e de filtro está em
   `application/projects/bulk-task-selection.ts`.
-- **Projetos repetidos na lista:** a lista do painel vem de `CompositeProjectRepository` (banco +
-  projetos demonstrativos). Um mesmo projeto podia aparecer duas vezes (id repetido ou projeto real
-  com o mesmo título, ciclo e semestre de um demonstrativo) e, como a API só consultava o banco, a
-  cópia demonstrativa era ignorada com "Projeto não encontrado". `bulkTaskCandidates` agora passa
-  por `dedupeProjects` (`application/projects/dedupe-projects.ts`, mantém a primeira entrada por id e por título normalizado + ciclo +
-  semestre, e o banco vem antes dos demonstrativos) e `POST /api/projects/bulk-tasks` usa
-  `CompositeProjectRepository`, a mesma fonte do painel e do acesso ao progresso, então todo projeto
-  listado é atribuível.
+- **Projetos repetidos na lista:** a lista do painel vem de `CompositeProjectRepository` (somente
+  banco). `bulkTaskCandidates` passa por `dedupeProjects` (`application/projects/dedupe-projects.ts`,
+  mantém a primeira entrada por id e por título normalizado + ciclo + semestre) e
+  `POST /api/projects/bulk-tasks` usa a mesma fonte do painel e do acesso ao progresso, então todo
+  projeto listado é atribuível.
 - **Quem pode atribuir** (`AssignTaskToProjectsUseCase`, mesma regra de `canManageProgress`):
   orientador principal em projeto ativo e em andamento; administrador em qualquer projeto. A
   verificação é refeita no servidor para cada projeto: projeto ignorado nunca impede os demais e

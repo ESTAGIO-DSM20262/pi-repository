@@ -191,7 +191,7 @@ describe('VerifyProjectUseCase', () => {
     expect(verifications.records.size).toBe(0)
   })
 
-  it('devolve não encontrado para projeto inexistente ou demonstrativo', async () => {
+  it('devolve não encontrado para projeto inexistente', async () => {
     const { useCase } = setup()
     const result = await useCase.execute({
       viewer: ana,

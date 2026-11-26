@@ -520,7 +520,7 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
           <i className="fi fi-rr-folder-open text-xl text-text-muted" aria-hidden="true" />
           <p className="mt-2 text-sm text-text-secondary">
             {candidates.length === 0
-              ? 'Nenhum projeto cadastrado para escolher. Projetos demonstrativos não participam.'
+              ? 'Nenhum projeto cadastrado para escolher.'
               : 'Nenhum projeto encontrado neste ciclo e semestre. Tente outra combinação.'}
           </p>
         </div>

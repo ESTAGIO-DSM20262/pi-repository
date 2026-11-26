@@ -30,7 +30,7 @@ export class DeleteProjectUseCase
     if (!project) {
       return left(
         new ProjectOperationError(
-          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser excluídos.',
+          'Projeto não encontrado.',
           404,
         ),
       )

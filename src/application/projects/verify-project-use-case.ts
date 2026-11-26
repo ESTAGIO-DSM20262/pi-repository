@@ -42,7 +42,7 @@ export class VerifyProjectUseCase
     if (!project || !canViewProject(project, viewer)) {
       return left(
         new ProjectOperationError(
-          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser indicados.',
+          'Projeto não encontrado.',
           404,
         ),
       )
