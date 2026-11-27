@@ -1,4 +1,5 @@
 FROM node:24-alpine AS base
+LABEL org.opencontainers.image.source=https://github.com/ESTAGIO-DSM20262/pi-repository
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache libc6-compat
