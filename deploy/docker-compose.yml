@@ -1,0 +1,59 @@
+name: acervo
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: '5'
+
+services:
+  app:
+    image: ${IMAGE:-ghcr.io/estagio-dsm20262/pi-repository}:${TAG:?TAG is required}
+    env_file: .env
+    restart: unless-stopped
+    expose:
+      - '3000'
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - next-cache:/app/.next/cache
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging: *logging
+
+  migrate:
+    image: ${IMAGE:-ghcr.io/estagio-dsm20262/pi-repository}:${TAG:?TAG is required}-migrate
+    env_file: .env
+    profiles:
+      - migrate
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?APP_DOMAIN is required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  next-cache:
+  caddy-data:
+  caddy-config:

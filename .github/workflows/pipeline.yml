@@ -1,0 +1,136 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: ghcr.io/estagio-dsm20262/pi-repository
+
+jobs:
+  quality:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+        env:
+          HUSKY: '0'
+      - run: npm run lint
+      - run: npm test
+
+  image:
+    name: Build image
+    needs: quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build app image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: runner
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha,scope=runner
+          cache-to: type=gha,mode=max,scope=runner
+      - name: Build migration image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: migrate
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}-migrate
+            ${{ env.IMAGE }}:latest-migrate
+          cache-from: type=gha,scope=migrate
+          cache-to: type=gha,mode=max,scope=migrate
+
+  deploy:
+    name: Deploy to DigitalOcean
+    needs: image
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ vars.APP_DOMAIN }}
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+      - name: Upload deploy files
+        env:
+          TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            deploy/docker-compose.yml deploy/Caddyfile deploy/deploy.sh \
+            "$TARGET:/opt/acervo/"
+      - name: Migrate and roll out
+        env:
+          TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+          TAG: ${{ needs.image.outputs.tag }}
+          REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REGISTRY_USER: ${{ github.actor }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$TARGET" \
+            "docker login ghcr.io -u '$REGISTRY_USER' --password-stdin >/dev/null && \
+             trap 'docker logout ghcr.io >/dev/null' EXIT && \
+             chmod +x /opt/acervo/deploy.sh && /opt/acervo/deploy.sh '$TAG'"
+      - name: Smoke test
+        env:
+          APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS -o /dev/null "https://$APP_DOMAIN/login"; then
+              echo "OK"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Smoke test failed" >&2
+          exit 1
+      - if: always()
+        run: rm -f ~/.ssh/deploy_key

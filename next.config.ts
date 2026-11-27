@@ -16,6 +16,7 @@ const securityHeaders = [
 ]
 
 const nextConfig = {
+  output: 'standalone',
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,

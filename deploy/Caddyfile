@@ -1,0 +1,17 @@
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	request_body {
+		max_size 10MB
+	}
+
+	reverse_proxy app:3000 {
+		health_uri /login
+		health_interval 30s
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
