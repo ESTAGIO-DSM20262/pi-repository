@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { CreateProjectUseCase } from '@/application/projects/create-project-use-case'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { DbTaskEventNotifier } from '@/infrastructure/notifications/notify-task-event'
 import { DbProjectCommandRepository } from '@/infrastructure/projects/db-project-command-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
       new DbProjectUserDirectory(),
       new DbTaskEventNotifier(),
     )
-    const result = await useCase.execute({ sessionUserId, body })
+    const result = await useCase.execute({ sessionUserId, body, courses: await listCourses() })
     if (result.isLeft()) {
       return jsonError(result.value.message, result.value.status)
     }

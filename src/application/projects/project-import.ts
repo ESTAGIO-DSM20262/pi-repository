@@ -21,6 +21,7 @@ export interface ImportedProjectRow {
   overview: string
   cycle: string
   semester: number
+  course: string
   theme: string
   status: ProjectStatus
   advisorEmail: string
@@ -54,8 +55,9 @@ const COLUMN_HEADERS = {
   title: ['Título do projeto', 'Título', 'Nome do projeto', 'Projeto'],
   summary: ['Resumo', 'Resumo do projeto'],
   overview: ['Descrição detalhada', 'Descrição', 'Descrição do projeto'],
-  cycle: ['Ciclo', 'Ciclo letivo'],
+  cycle: ['Ciclo', 'Ciclo letivo', 'Período letivo'],
   semester: ['Semestre', 'Semestre letivo'],
+  course: ['Curso', 'Curso do projeto'],
   theme: ['Tema', 'Tema do projeto'],
   status: ['Situação', 'Status'],
   advisor: ['Orientador principal', 'E-mail do orientador principal', 'Orientador'],
@@ -118,6 +120,7 @@ export function parseProjectGrid(grid: unknown[][], sheetName: string): ParsedGr
     overview: findColumn(headers, [...COLUMN_HEADERS.overview]),
     cycle: findColumn(headers, [...COLUMN_HEADERS.cycle]),
     semester: findColumn(headers, [...COLUMN_HEADERS.semester]),
+    course: findColumn(headers, [...COLUMN_HEADERS.course]),
     theme: findColumn(headers, [...COLUMN_HEADERS.theme]),
     status: findColumn(headers, [...COLUMN_HEADERS.status]),
     advisor: findColumn(headers, [...COLUMN_HEADERS.advisor]),
@@ -170,6 +173,7 @@ export function parseProjectGrid(grid: unknown[][], sheetName: string): ParsedGr
       overview: read(row, columns.overview),
       cycle: normalizeCycle(read(row, columns.cycle)),
       semester,
+      course: read(row, columns.course),
       theme: read(row, columns.theme),
       status,
       advisorEmail: read(row, columns.advisor).toLowerCase(),

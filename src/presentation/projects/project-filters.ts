@@ -6,6 +6,7 @@ export interface Filters {
   verified: boolean
   bestOfSemester: boolean
   cycle: string
+  course: string
   semesters: number[]
   stack: string[]
   languages: string[]
@@ -18,6 +19,7 @@ export const EMPTY_FILTERS: Filters = {
   verified: false,
   bestOfSemester: false,
   cycle: '',
+  course: '',
   semesters: [],
   stack: [],
   languages: [],
@@ -56,6 +58,7 @@ export function applyFilters(list: ListedProject[], f: Filters): ListedProject[]
     if (f.verified && !p.verified) return false
     if (f.bestOfSemester && p.bestOfSemester !== true) return false
     if (f.cycle && p.cycle !== f.cycle) return false
+    if (f.course && p.course !== f.course) return false
     if (f.semesters.length && !f.semesters.includes(p.semester)) return false
     if (f.stack.length && !f.stack.some((s) => p.stack.includes(s))) return false
     if (f.languages.length && !f.languages.some((l) => p.languages.includes(l))) return false
@@ -84,6 +87,7 @@ export interface Option<T> {
 }
 export interface Facets {
   cycles: Option<string>[]
+  courses: Option<string>[]
   semesters: Option<number>[]
   stack: Option<string>[]
   languages: Option<string>[]
@@ -117,6 +121,7 @@ export function getFacets(list: ListedProject[]): Facets {
   })
   return {
     cycles: tally(list.map((p) => p.cycle)).sort((a, b) => b.value.localeCompare(a.value)),
+    courses: tally(list.flatMap((p) => (p.course ? [p.course] : []))),
     semesters: [1, 2, 3, 4, 5, 6].map((n) => ({
       value: n,
       count: list.filter((p) => p.semester === n).length,
@@ -135,15 +140,26 @@ export interface Chip {
   bestOfSemester?: boolean
 }
 
-export function getChips(f: Filters, advisors: Facets['advisors']): Chip[] {
+export function getChips(
+  f: Filters,
+  advisors: Facets['advisors'],
+  courses: { value: string; label: string }[] = [],
+): Chip[] {
   const chips: Chip[] = []
 
   if (f.query) chips.push({ id: 'q', label: `Busca: “${f.query}”` })
 
   if (f.cycle) chips.push({ id: 'cycle', label: f.cycle })
 
+  if (f.course) {
+    chips.push({
+      id: 'course',
+      label: courses.find((course) => course.value === f.course)?.label ?? f.course,
+    })
+  }
+
   f.semesters.forEach((s) => {
-    chips.push({ id: `sem:${s}`, label: `DSM ${s}º` })
+    chips.push({ id: `sem:${s}`, label: `${s}º semestre` })
   })
 
   f.stack.forEach((s) => {
@@ -188,6 +204,8 @@ export function removeChip(f: Filters, id: string): Filters {
       return { ...f, bestOfSemester: false }
     case 'cycle':
       return { ...f, cycle: '' }
+    case 'course':
+      return { ...f, course: '' }
     case 'sem':
       return { ...f, semesters: f.semesters.filter((x) => String(x) !== v) }
     case 'stack':

@@ -1,7 +1,9 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ProjectFormPage } from '@/components/projects/ProjectFormPage'
+import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'
 import { auth } from '@/libs/auth'
 import { ROLE_DASHBOARD_PATH } from '@/presentation/auth/role-path'
@@ -17,9 +19,10 @@ export default async function NewProjectPage() {
   if (!user) redirect('/login')
   if (user.role === 'student') redirect(ROLE_DASHBOARD_PATH.student)
 
-  const [students, professors] = await Promise.all([
+  const [students, professors, courses] = await Promise.all([
     listActiveProjectPeople('student'),
     listActiveProjectPeople('professor'),
+    listCourses(),
   ])
 
   return (
@@ -29,6 +32,7 @@ export default async function NewProjectPage() {
       currentUserEmail={user.emailAddress.toLowerCase()}
       students={students}
       professors={professors}
+      courses={buildCourseSelectOptions(courses)}
       backHref={ROLE_DASHBOARD_PATH[user.role]}
     />
   )

@@ -82,3 +82,38 @@ describe('filtro de melhor PI do semestre', () => {
     expect(removeChip(filters, 'best').bestOfSemester).toBe(false)
   })
 })
+
+describe('filtro de curso', () => {
+  const byCourse = [
+    makeProject('a', { course: 'Desenvolvimento de Software Multiplataforma' }),
+    makeProject('b', { course: 'Análise e Desenvolvimento de Sistemas' }),
+    makeProject('c', { course: 'Análise e Desenvolvimento de Sistemas' }),
+    makeProject('d', { course: null }),
+  ]
+
+  it('filtra pelo curso escolhido', () => {
+    const result = applyFilters(byCourse, {
+      ...EMPTY_FILTERS,
+      course: 'Análise e Desenvolvimento de Sistemas',
+    })
+    expect(result.map((project) => project.id)).toEqual(['b', 'c'])
+  })
+
+  it('conta os projetos de cada curso e ignora projetos sem curso', () => {
+    expect(getFacets(byCourse).courses).toEqual([
+      { value: 'Desenvolvimento de Software Multiplataforma', count: 1 },
+      { value: 'Análise e Desenvolvimento de Sistemas', count: 2 },
+    ])
+  })
+
+  it('mostra o rótulo do curso no chip e permite removê-lo', () => {
+    const filters = { ...EMPTY_FILTERS, course: 'Análise e Desenvolvimento de Sistemas' }
+    const chips = getChips(filters, [], [
+      { value: 'Análise e Desenvolvimento de Sistemas', label: 'ADS - Análise e Desenvolvimento de Sistemas' },
+    ])
+    expect(chips).toEqual([
+      { id: 'course', label: 'ADS - Análise e Desenvolvimento de Sistemas' },
+    ])
+    expect(removeChip(filters, 'course').course).toBe('')
+  })
+})

@@ -665,7 +665,7 @@ projeto como referência. O código e o banco mantêm os nomes `verified`, `veri
 - **Importação de usuários:** as listas de linhas inválidas, ignoradas e usuários criados usam
   `scrollbar-danger`, `scrollbar-warning` e `scrollbar-success` (`globals.css`), com a mesma cor do
   cartão. A lista de criados mostra nome, e-mail e perfil, nunca a senha temporária.
-- **Dropdown de semestre letivo (ciclo):** na home (`FilterPanel`), no filtro de ciclo da lista de
+- **Dropdown de período letivo (ciclo):** na home (`FilterPanel`), no filtro de ciclo da lista de
   projetos do painel e na escolha de ciclo da seção Melhor PI, o `SelectDropdown` é `searchable` e
   lista só os 6 mais recentes (`RECENT_SEMESTER_LIMIT`, opção "Todos" fixa via `pinnedCount`),
   com a dica "Pesquise para ver os demais". A pesquisa percorre todos os ciclos existentes; um ciclo
@@ -992,6 +992,25 @@ Como o sistema já era orientado a tokens, a repaginação concentra-se em `src/
   sistema e oferece "Voltar ao acervo" (`/`) e "Ir para o meu painel" (`/painel`, que redireciona
   conforme o perfil ou leva ao login). O número 404 é decorativo (`aria-hidden`); o título da
   página é o `h1`.
+
+## 30. Correções da reunião de 26/11/26
+
+- **Sem projetos mocados:** `mock-projects.ts` e `mock-project-repository.ts` foram removidos. `CompositeProjectRepository` só delega ao `DbProjectRepository`, e a página do projeto não consulta mais exemplos para liberar editar, indicar, ativar/desativar, excluir e Melhor PI.
+- **Nome padronizado "Período letivo":** é o termo da interface para o ano/semestre do calendário (ex. 2026/2) na home, no painel, na seção Melhor PI, no cadastro de projeto, nos cards e nos textos de ajuda. "Semestre" é só a etapa do curso (1º a 6º). Internamente o campo continua `cycle`. Na importação por planilha, a coluna `Ciclo` segue válida e `Período letivo` é aceito como apelido.
+- **Curso do projeto:** a migration `20261126_project_course.sql` cria `projects.course` (nome do curso, como `users.course`) e preenche os projetos existentes com DSM. `resolveProjectCourse` (`application/courses/course-rules.ts`) valida o curso: com um único curso ativo ele é usado automaticamente; com mais de um, a escolha é obrigatória; curso desativado só é aceito se já for o do projeto. `CreateProjectUseCase`, `UpdateProjectUseCase` e `BulkCreateProjectsUseCase` recebem `courses` das rotas. No formulário, o campo Curso vira dropdown quando há mais de um curso ativo. A planilha aceita a coluna opcional `Curso`.
+- **Filtros da home:** o grupo "Semestre" substitui "Matriz & semestre DSM" (opções "1º Semestre" a "6º Semestre"). O dropdown "Curso" só aparece quando há mais de um curso ativo (`FilterPanel`, `Filters.course`).
+- **Paginação nos painéis:** `ProjectsSection` (Projetos Cadastrados, Seus Projetos e Favoritos) divide a lista em páginas de 4 projetos no mobile e 8 a partir de 640px (`PROJECTS_PAGE_SIZE`, `libs/usePageSize.ts`), com o `Pagination` da home. Mudar qualquer filtro volta à página 1.
+- **Dropdown de curso no mobile:** os grids de edição e de cadastro de usuário usam `grid-cols-1` com `min-w-0`, e o `SelectDropdown` e o corpo dos modais não deixam rótulos longos alargarem a tela.
+- **Limitação conhecida:** `semester_awards` é único por período letivo e semestre; com mais de um curso, o Melhor PI ainda não é separado por curso.
+
+## 30. Correções da reunião de 26/11/2026
+
+- **Sem dados mocados:** `mock-projects.ts` e `mock-project-repository.ts` foram removidos. `CompositeProjectRepository` apenas delega ao `DbProjectRepository`; a página do projeto não consulta mais mocks para decidir permissões. Projetos reais vivem só na tabela `projects`.
+- **Nomenclatura:** o período do ano (ex.: 2026/2) chama-se sempre **período letivo** na interface (home, painel, Melhor PI, cadastro, importação). No código continua `cycle`. **Semestre** é a etapa do curso (1º a 6º). A planilha de importação aceita as colunas "Ciclo", "Ciclo letivo" ou "Período letivo".
+- **Curso do projeto:** `projects.course` guarda o nome do curso (migration `20261126_project_course.sql`, que preenche projetos antigos com DSM). `resolveProjectCourse` (`application/courses/course-rules.ts`) valida: só curso ativo, ou manter o atual na edição; com um único curso ativo ele é usado quando o campo vem vazio; com vários, a escolha é obrigatória. `POST /api/projects`, `PATCH /api/projects/[id]` e `POST /api/projects/bulk` passam a lista de `listCourses()` aos casos de uso. O formulário mostra um dropdown quando há mais de um curso ativo e um campo somente leitura quando há um só. A planilha tem a coluna opcional "Curso". Limitação: `semester_awards` continua único por período letivo e semestre, sem separar por curso.
+- **Filtro da home:** o grupo "Semestre" lista 1º a 6º. O filtro "Curso" só aparece quando há mais de um curso ativo (`courses` vem de `listCourses()` na página inicial); o chip e a remoção usam o id `course`.
+- **Paginação dos painéis:** "Projetos Cadastrados"/"Seus Projetos" e "Favoritos" paginam com o componente `Pagination`: 4 por página abaixo de 640px e 8 a partir dele (`PROJECTS_PAGE_SIZE`, `libs/usePageSize.ts`). Mudar qualquer filtro volta à página 1.
+- **Dropdown de curso no mobile:** grids de formulários com `SelectDropdown` usam `grid-cols-1 sm:grid-cols-2` e filhos com `min-w-0`; o botão do dropdown e o corpo dos modais cortam o excesso de largura.
 
 ## Acessibilidade (branch `feat/acessibilidade`)
 

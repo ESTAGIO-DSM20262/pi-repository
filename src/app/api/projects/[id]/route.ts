@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { DeleteProjectUseCase } from '@/application/projects/delete-project-use-case'
 import { UpdateProjectUseCase } from '@/application/projects/update-project-use-case'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { DbProjectCommandRepository } from '@/infrastructure/projects/db-project-command-repository'
 import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
@@ -42,6 +43,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       viewer: access.user,
       scope: access.scope,
       body,
+      courses: await listCourses(),
     })
     if (result.isLeft()) return jsonError(result.value.message, result.value.status)
 

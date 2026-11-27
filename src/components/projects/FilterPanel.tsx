@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import type { CourseSelectOption } from '@/application/courses/course-rules'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import { useSwipeToClose } from '@/libs/useSwipeToClose'
 import {
@@ -18,6 +19,7 @@ import {
 
 interface FilterPanelProps {
   facets: Facets
+  courses: CourseSelectOption[]
   filters: Filters
   onChange: (partial: Partial<Filters>) => void
   open: boolean
@@ -84,13 +86,13 @@ const RAIL = [
   },
   {
     icon: 'fi-rr-calendar',
-    title: 'Semestre letivo',
+    title: 'Período letivo',
     active: (f: Filters) => f.cycle !== '',
     on: 'border-primary/25 bg-primary-light text-primary',
   },
   {
     icon: 'fi-rr-layers',
-    title: 'Semestre DSM',
+    title: 'Semestre',
     active: (f: Filters) => f.semesters.length > 0,
     on: 'border-primary/25 bg-primary-light text-primary',
   },
@@ -111,9 +113,10 @@ const SORT_OPTIONS: { value: SortKey; label: string }[] = [
 
 function FilterFields({
   facets,
+  courses,
   filters = EMPTY_FILTERS,
   onChange,
-}: Pick<FilterPanelProps, 'facets' | 'filters' | 'onChange'>) {
+}: Pick<FilterPanelProps, 'facets' | 'courses' | 'filters' | 'onChange'>) {
   return (
     <>
       <div className="mt-5 space-y-2.5">
@@ -166,18 +169,18 @@ function FilterFields({
         </label>
       </div>
 
-      <Group title="Semestre letivo">
+      <Group title="Período letivo">
         <SelectDropdown
           searchable
-          searchPlaceholder="Pesquisar semestre..."
+          searchPlaceholder="Pesquisar período letivo..."
           visibleLimit={RECENT_SEMESTER_LIMIT}
           pinnedCount={1}
           limitHint={RECENT_SEMESTER_HINT}
-          ariaLabel="Semestre letivo"
+          ariaLabel="Período letivo"
           value={filters.cycle}
           onChange={(cycle) => onChange({ cycle })}
           options={[
-            { value: '', label: 'Todos os semestres letivos' },
+            { value: '', label: 'Todos os períodos letivos' },
             ...facets.cycles.map((option) => ({
               value: option.value,
               label: option.value,
@@ -187,11 +190,29 @@ function FilterFields({
         />
       </Group>
 
-      <Group title="Matriz & semestre DSM">
+      {courses.length > 1 && (
+        <Group title="Curso">
+          <SelectDropdown
+            ariaLabel="Curso"
+            value={filters.course}
+            onChange={(course) => onChange({ course })}
+            options={[
+              { value: '', label: 'Todos os cursos' },
+              ...courses.map((course) => ({
+                value: course.value,
+                label: course.label,
+                count: facets.courses.find((item) => item.value === course.value)?.count ?? 0,
+              })),
+            ]}
+          />
+        </Group>
+      )}
+
+      <Group title="Semestre">
         {facets.semesters.map((o) => (
           <CheckRow
             key={o.value}
-            label={`DSM ${o.value}º Semestre`}
+            label={`${o.value}º Semestre`}
             count={o.count}
             checked={filters.semesters.includes(o.value)}
             onChange={() => onChange({ semesters: toggleValue(filters.semesters, o.value) })}
@@ -270,6 +291,7 @@ function FilterFields({
 
 export function FilterPanel({
   facets,
+  courses,
   filters: filtersProp,
   onChange,
   open,
@@ -394,7 +416,7 @@ export function FilterPanel({
           <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
             <i className="fi fi-rr-filter flex text-primary" aria-hidden="true" /> Filtros de Busca
           </h2>
-          <FilterFields facets={facets} filters={filters} onChange={onChange} />
+          <FilterFields facets={facets} courses={courses} filters={filters} onChange={onChange} />
         </aside>
 
         <div
@@ -562,7 +584,7 @@ export function FilterPanel({
                 <i className="fi fi-rr-filter flex text-primary" aria-hidden="true" />
                 Filtros de Busca
               </h2>
-              <FilterFields facets={facets} filters={filters} onChange={onChange} />
+              <FilterFields facets={facets} courses={courses} filters={filters} onChange={onChange} />
             </div>
           </div>
 

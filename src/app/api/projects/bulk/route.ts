@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { BulkCreateProjectsUseCase } from '@/application/projects/bulk-create-projects-use-case'
 import { parseProjectWorkbook } from '@/application/projects/project-import'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { DbProjectCommandRepository } from '@/infrastructure/projects/db-project-command-repository'
 import { DbProjectRepository } from '@/infrastructure/projects/db-project-repository'
 import { DbProjectUserDirectory } from '@/infrastructure/projects/db-project-user-directory'
@@ -42,7 +43,11 @@ export async function POST(request: Request) {
       new DbProjectUserDirectory(),
       new DbProjectRepository(),
     )
-    const result = await useCase.execute({ sessionUserId, rows: parsed.rows })
+    const result = await useCase.execute({
+      sessionUserId,
+      rows: parsed.rows,
+      courses: await listCourses(),
+    })
     if (result.isLeft()) return jsonError(result.value.message, result.value.status)
 
     const { created, skipped, errors } = result.value

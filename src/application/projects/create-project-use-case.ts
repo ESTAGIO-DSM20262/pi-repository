@@ -1,3 +1,4 @@
+import { type CourseRecord, resolveProjectCourse } from '@/application/courses/course-rules'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import {
@@ -18,6 +19,7 @@ import { ProjectOperationError } from './project-operation-error'
 interface CreateProjectRequest {
   sessionUserId: string
   body: unknown
+  courses?: CourseRecord[]
 }
 
 interface CreateProjectResponse {
@@ -37,6 +39,7 @@ export class CreateProjectUseCase
   async execute({
     sessionUserId,
     body,
+    courses,
   }: CreateProjectRequest): Promise<Either<ProjectOperationError, CreateProjectResponse>> {
     if (!sessionUserId) {
       return left(new ProjectOperationError('É necessário entrar no sistema.', 401))
@@ -57,6 +60,11 @@ export class CreateProjectUseCase
       return left(new ProjectOperationError(parsed.value.message, 400))
     }
     const input = parsed.value
+    if (courses) {
+      const course = resolveProjectCourse({ input: input.course, courses })
+      if (!course.ok) return left(new ProjectOperationError(course.error, 400))
+      input.course = course.course
+    }
 
     const advisorEmail =
       account.role === 'professor' ? account.email.toLowerCase() : input.advisorEmail
@@ -122,6 +130,7 @@ export class CreateProjectUseCase
       summary: input.summary,
       cycle: input.cycle,
       semester: input.semester,
+      course: input.course,
       advisorEmail: advisor.email.toLowerCase(),
       advisorName: advisor.name,
       coAdvisors,

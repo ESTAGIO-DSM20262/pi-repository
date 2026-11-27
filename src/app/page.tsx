@@ -1,7 +1,9 @@
 import { headers } from 'next/headers'
 import { ListProjectsUseCase } from '@/application/projects/list-projects'
 import { ProjectsExplorer } from '@/components/projects/ProjectsExplorer'
+import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { auth } from '@/libs/auth'
 
@@ -12,15 +14,19 @@ export default async function Home() {
   const user = session ? toDomainUser(session.user) : null
 
   const useCase = new ListProjectsUseCase(new CompositeProjectRepository())
-  const { projects } = await useCase.execute({
-    viewer: user ? { email: user.emailAddress, role: user.role } : null,
-  })
+  const [{ projects }, courses] = await Promise.all([
+    useCase.execute({
+      viewer: user ? { email: user.emailAddress, role: user.role } : null,
+    }),
+    listCourses().catch(() => []),
+  ])
 
   return (
     <ProjectsExplorer
       projects={projects}
       viewerRole={user?.role ?? null}
       isAuthenticated={Boolean(session)}
+      courses={buildCourseSelectOptions(courses)}
     />
   )
 }

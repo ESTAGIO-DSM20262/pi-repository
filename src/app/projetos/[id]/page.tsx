@@ -19,6 +19,7 @@ import { users } from '@/db/schema'
 import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
 import { getProjectAdvisors, isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import type { ProjectVerificationSummary } from '@/domain/enterprise/entities/project-verification'
+import { findCourseAbbreviation } from '@/infrastructure/courses/course-queries'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { DbProjectVerificationRepository } from '@/infrastructure/projects/db-project-verification-repository'
 import { auth } from '@/libs/auth'
@@ -183,6 +184,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       canDelete={canDeleteInactiveProject}
       verification={verification}
       viewerEmail={viewer?.email ?? null}
+      courseName={project.course ? await findCourseAbbreviation(project.course) : null}
     />
   )
 }

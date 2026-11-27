@@ -55,6 +55,7 @@ function makeRow(overrides: Partial<ImportedProjectRow> = {}): ImportedProjectRo
     overview: '',
     cycle: '2026/2',
     semester: 3,
+    course: '',
     theme: 'Educação',
     status: 'em_andamento',
     advisorEmail: '',

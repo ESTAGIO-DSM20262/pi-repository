@@ -13,6 +13,7 @@ export function toDomainProject(row: ProjectRow, bestOfSemester = false): Projec
     summary: row.summary,
     cycle: row.cycle,
     semester: row.semester,
+    course: row.course,
     advisor: { email: row.advisorEmail, name: row.advisorName },
     coAdvisors: row.coAdvisors,
     memberEmails: row.memberEmails,

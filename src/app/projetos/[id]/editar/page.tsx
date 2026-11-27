@@ -4,8 +4,10 @@ import {
   type ProjectFormInitialValues,
   ProjectFormPage,
 } from '@/components/projects/ProjectFormPage'
+import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
 import { toProjectLinkInputs } from '@/domain/enterprise/entities/project-details'
+import { listCourses } from '@/infrastructure/courses/course-queries'
 import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'
 import { auth } from '@/libs/auth'
 import { resolveProjectEditAccess } from '@/libs/project-edit-access'
@@ -32,9 +34,10 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
   }
 
   const { project, user } = access
-  const [activeStudents, professors] = await Promise.all([
+  const [activeStudents, professors, courses] = await Promise.all([
     listActiveProjectPeople('student'),
     listActiveProjectPeople('professor'),
+    listCourses(),
   ])
   const advisors = getProjectAdvisors(project)
   const sourceTeam = project.teamMembers?.length
@@ -51,6 +54,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
     overview: project.publicDetails?.overview ?? '',
     cycle: project.cycle,
     semester: project.semester,
+    course: project.course ?? '',
     theme: project.theme,
     status: project.status,
     advisorEmail: project.advisor.email.trim().toLowerCase(),
@@ -96,6 +100,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
       currentUserEmail={user.email}
       students={students}
       professors={knownProfessors}
+      courses={buildCourseSelectOptions(courses, project.course)}
       backHref={`/projetos/${encodeURIComponent(project.id)}`}
       projectId={project.id}
       initialValues={initialValues}

@@ -126,3 +126,56 @@ export function resolveUserCourse(params: {
     error: `O curso "${value}" não está cadastrado ou está desativado. Cadastre-o na seção Cursos do painel administrativo.`,
   }
 }
+
+export function resolveProjectCourse(params: {
+  input: unknown
+  courses: CourseRecord[]
+  currentCourse?: string | null
+}): UserCourseResult {
+  const value = normalizeCourseText(params.input)
+  const active = params.courses.filter((course) => course.active)
+
+  if (value && params.currentCourse && value === params.currentCourse) {
+    return { ok: true, course: value }
+  }
+
+  if (!value) {
+    if (active.length === 1) return { ok: true, course: active[0].name }
+    if (active.length === 0) {
+      return {
+        ok: false,
+        error: 'Cadastre um curso na seção Cursos do painel administrativo antes de continuar.',
+      }
+    }
+    return { ok: false, error: 'Selecione o curso do projeto.' }
+  }
+
+  const found = findCourse(value, active)
+  if (found) return { ok: true, course: found.name }
+  return {
+    ok: false,
+    error: `O curso "${value}" não está cadastrado ou está desativado. Cadastre-o na seção Cursos do painel administrativo.`,
+  }
+}
+
+export interface CourseSelectOption {
+  value: string
+  label: string
+}
+
+export function buildCourseSelectOptions(
+  courses: CourseRecord[],
+  currentValue?: string | null,
+): CourseSelectOption[] {
+  const result = courses
+    .filter((course) => course.active)
+    .map((course) => ({ value: course.name, label: formatCourseLabel(course) }))
+  if (currentValue && !result.some((option) => option.value === currentValue)) {
+    const known = courses.find((course) => course.name === currentValue)
+    result.push({
+      value: currentValue,
+      label: known ? `${formatCourseLabel(known)} — desativado` : `${currentValue} — não cadastrado`,
+    })
+  }
+  return result
+}
