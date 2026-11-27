@@ -278,7 +278,7 @@ export function SelectDropdown({
         data-open={isOpen}
         onClick={toggleMenu}
         onKeyDown={handleTriggerKeyDown}
-        className={`group inline-flex max-w-full ${widthClass} ${sizeClass} cursor-pointer items-center justify-between gap-3 rounded-lg border border-border ${toneClass} font-medium text-slate-800 shadow-sm outline-none transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 data-[open=true]:border-primary data-[open=true]:ring-2 data-[open=true]:ring-primary/10 ${className}`}
+        className={`group inline-flex min-w-0 max-w-full overflow-hidden ${widthClass} ${sizeClass} cursor-pointer items-center justify-between gap-3 rounded-lg border border-border ${toneClass} font-medium text-slate-800 shadow-sm outline-none transition-[border-color,box-shadow,background-color] duration-150 hover:border-primary/50 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/15 data-[open=true]:border-primary data-[open=true]:ring-2 data-[open=true]:ring-primary/10 ${className}`}
       >
         <span className={`min-w-0 ${labelWidthClass} truncate text-left`}>
           {selectedOption?.label ?? placeholder ?? ''}
