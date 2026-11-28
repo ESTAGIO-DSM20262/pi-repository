@@ -1,3 +1,4 @@
+import { type CourseRecord, resolveProjectCourse } from '@/application/courses/course-rules'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import type {
@@ -21,6 +22,7 @@ import { type ProjectEditScope, parseUpdateProjectInput } from './update-project
 interface ExistingProjectForUpdate {
   id: string
   status: ProjectStatus
+  course?: string | null | undefined
   advisor: ProjectAdvisor
   coAdvisors?: ProjectAdvisor[] | undefined
   memberEmails: string[]
@@ -32,6 +34,7 @@ interface UpdateProjectRequest {
   viewer: Pick<ProjectViewer, 'role' | 'email'>
   scope: ProjectEditScope
   body: unknown
+  courses?: CourseRecord[]
 }
 
 interface ResolvedAdvisors {
@@ -57,6 +60,7 @@ export class UpdateProjectUseCase
     viewer,
     scope,
     body,
+    courses,
   }: UpdateProjectRequest): Promise<Either<ProjectOperationError, { id: string }>> {
     const parsed = parseUpdateProjectInput(body, scope)
     if (parsed.isLeft()) {
@@ -89,6 +93,15 @@ export class UpdateProjectUseCase
     )
 
     const fields = input.fields
+    if (courses) {
+      const course = resolveProjectCourse({
+        input: fields.course,
+        courses,
+        currentCourse: project.course,
+      })
+      if (!course.ok) return left(new ProjectOperationError(course.error, 400))
+      fields.course = course.course
+    }
     const students = await this.users.findActiveStudentsByEmails(fields.studentEmails)
     const found = new Set(students.map((student) => student.email.toLowerCase()))
     const invalid = fields.studentEmails.filter((email) => !found.has(email))
@@ -141,6 +154,7 @@ export class UpdateProjectUseCase
       summary: fields.summary,
       cycle: fields.cycle,
       semester: fields.semester,
+      course: fields.course,
       theme: fields.theme,
       status: fields.status,
       languages: fields.languages,

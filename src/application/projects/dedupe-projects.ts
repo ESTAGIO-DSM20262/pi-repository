@@ -30,13 +30,3 @@ export function dedupeProjects<T extends Pick<Project, 'id' | 'title' | 'cycle' 
   }
   return unique
 }
-
-export function omitExamplesAlreadyStored<
-  T extends Pick<Project, 'id' | 'title' | 'cycle' | 'semester'>,
->(stored: T[], examples: T[]): T[] {
-  const storedIds = new Set(stored.map((project) => project.id))
-  const storedIdentities = new Set(stored.map(projectIdentity))
-  return examples.filter(
-    (example) => !storedIds.has(example.id) && !storedIdentities.has(projectIdentity(example)),
-  )
-}

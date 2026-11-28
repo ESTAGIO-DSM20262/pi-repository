@@ -4,6 +4,7 @@ import {
   courseMatchKey,
   findCourse,
   formatCourseLabel,
+  resolveProjectCourse,
   resolveUserCourse,
   validateCourseInput,
 } from './course-rules'
@@ -124,5 +125,40 @@ describe('resolveUserCourse', () => {
       ok: true,
       course: null,
     })
+  })
+})
+
+describe('resolveProjectCourse', () => {
+  it('aceita um curso ativo pelo nome ou pela sigla', () => {
+    expect(resolveProjectCourse({ input: 'ads', courses: [DSM, ADS] })).toEqual({
+      ok: true,
+      course: ADS.name,
+    })
+  })
+
+  it('usa o único curso ativo quando o campo vem vazio', () => {
+    expect(resolveProjectCourse({ input: '', courses: [DSM, OLD] })).toEqual({
+      ok: true,
+      course: DSM.name,
+    })
+  })
+
+  it('exige escolha quando há mais de um curso ativo', () => {
+    expect(resolveProjectCourse({ input: '', courses: [DSM, ADS] }).ok).toBe(false)
+  })
+
+  it('recusa curso inexistente ou desativado', () => {
+    expect(resolveProjectCourse({ input: 'Medicina', courses: [DSM, ADS] }).ok).toBe(false)
+    expect(resolveProjectCourse({ input: OLD.name, courses: [DSM, OLD] }).ok).toBe(false)
+  })
+
+  it('mantém o curso atual do projeto mesmo desativado', () => {
+    expect(
+      resolveProjectCourse({ input: OLD.name, courses: [DSM, OLD], currentCourse: OLD.name }),
+    ).toEqual({ ok: true, course: OLD.name })
+  })
+
+  it('pede o cadastro de um curso quando não há nenhum ativo', () => {
+    expect(resolveProjectCourse({ input: '', courses: [OLD] }).ok).toBe(false)
   })
 })

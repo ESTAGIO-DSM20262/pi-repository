@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type KeyboardEvent, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { CourseSelectOption } from '@/application/courses/course-rules'
 import { ProjectAdvisorsSection } from '@/components/projects/form/ProjectAdvisorsSection'
 import { ProjectArtifactsSection } from '@/components/projects/form/ProjectArtifactsSection'
 import {
@@ -42,6 +43,7 @@ export interface ProjectFormInitialValues {
   overview: string
   cycle: string
   semester: number
+  course: string
   theme: string
   status: ProjectStatus
   advisorEmail: string
@@ -60,6 +62,7 @@ interface ProjectFormPageProps {
   currentUserEmail: string
   students: ProjectPersonOption[]
   professors: ProjectPersonOption[]
+  courses: CourseSelectOption[]
   backHref: string
   projectId?: string
   initialValues?: ProjectFormInitialValues
@@ -72,8 +75,6 @@ interface DraftTask {
   targetStudentEmail: string
   dueDate: string
 }
-
-const COURSE_LABEL = 'Desenvolvimento de Software Multiplataforma (DSM)'
 
 const THEME_SUGGESTIONS = [
   'Gestão & Processos',
@@ -117,6 +118,7 @@ export function ProjectFormPage({
   currentUserEmail,
   students,
   professors,
+  courses,
   backHref,
   projectId,
   initialValues,
@@ -141,6 +143,7 @@ export function ProjectFormPage({
       overview: initialValues?.overview ?? '',
       cycle: initialValues?.cycle ?? defaultCycle(),
       semester: String(initialValues?.semester ?? 1) as ProjectFormValues['semester'],
+      course: initialValues?.course || (courses.length === 1 ? courses[0].value : ''),
       theme: initialValues?.theme ?? '',
       status: initialValues?.status ?? 'em_andamento',
       advisorEmail: initialValues?.advisorEmail ?? (role === 'professor' ? currentUserEmail : ''),
@@ -160,6 +163,7 @@ export function ProjectFormPage({
   const overview = watch('overview')
   const cycle = watch('cycle')
   const semester = watch('semester')
+  const course = watch('course')
   const theme = watch('theme')
   const status = watch('status')
   const advisorEmail = watch('advisorEmail')
@@ -357,6 +361,7 @@ export function ProjectFormPage({
       overview,
       cycle,
       semester: Number(semester),
+      course,
       theme,
       status,
       languages,
@@ -513,11 +518,37 @@ export function ProjectFormPage({
                   <label className={labelClass} htmlFor="project-course">
                     Curso superior de graduação
                   </label>
-                  <input id="project-course" className={fieldClass} value={COURSE_LABEL} readOnly />
+                  {courses.length > 1 ? (
+                    <>
+                      <SelectDropdown
+                        value={course}
+                        ariaLabel="Curso do projeto"
+                        placeholder="Selecione o curso"
+                        width="full"
+                        tone="muted"
+                        options={courses}
+                        onChange={(value) =>
+                          setValue('course', value, { shouldDirty: true, shouldValidate: true })
+                        }
+                      />
+                      <FieldError message={errors.course?.message} />
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        id="project-course"
+                        className={fieldClass}
+                        value={courses[0]?.label ?? ''}
+                        placeholder="Nenhum curso cadastrado"
+                        readOnly
+                      />
+                      <FieldError message={errors.course?.message} />
+                    </>
+                  )}
                 </div>
                 <div>
                   <span className={labelClass}>
-                    Semestre letivo <Required />
+                    Semestre <Required />
                   </span>
                   <SelectDropdown
                     value={semester}
@@ -539,7 +570,7 @@ export function ProjectFormPage({
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                   <label className={labelClass} htmlFor="project-cycle">
-                    Ciclo <Required />
+                    Período letivo <Required />
                   </label>
                   <input
                     id="project-cycle"

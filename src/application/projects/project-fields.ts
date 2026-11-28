@@ -33,6 +33,7 @@ export interface ProjectFieldsInput {
   overview: string
   cycle: string
   semester: number
+  course: string | null
   theme: string
   status: ProjectStatus
   languages: string[]
@@ -198,6 +199,7 @@ export function parseProjectFields(
   const summary = text(data.summary)
   const overview = text(data.overview)
   const cycle = text(data.cycle)
+  const course = text(data.course)
   const theme = text(data.theme)
   const semester = Number(data.semester)
   const status = data.status === 'publicado' ? 'publicado' : 'em_andamento'
@@ -214,10 +216,12 @@ export function parseProjectFields(
   if (overview.length > 5000) {
     return fail('A descrição detalhada deve ter no máximo 5.000 caracteres.')
   }
-  if (!CYCLE_PATTERN.test(cycle)) return fail('Informe o ciclo no formato AAAA/1 ou AAAA/2.')
+  if (!CYCLE_PATTERN.test(cycle))
+    return fail('Informe o período letivo no formato AAAA/1 ou AAAA/2.')
   if (!Number.isInteger(semester) || semester < 1 || semester > 6) {
     return fail('Informe um semestre entre 1 e 6.')
   }
+  if (course.length > 160) return fail('Informe um curso válido.')
   if (theme.length < 2 || theme.length > 80) return fail('Informe o tema do projeto.')
   if (studentEmails.length === 0) return fail('Atribua pelo menos um aluno ao projeto.')
 
@@ -239,6 +243,7 @@ export function parseProjectFields(
     overview,
     cycle,
     semester,
+    course: course || null,
     theme,
     status,
     languages,

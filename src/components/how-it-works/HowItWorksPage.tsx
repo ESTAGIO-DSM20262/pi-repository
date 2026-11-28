@@ -73,7 +73,7 @@ const LIFECYCLE = [
   {
     icon: 'fi-rr-trophy',
     label: 'Melhor PI do semestre',
-    text: 'Entre os concluídos de cada ciclo e semestre do curso, um é escolhido e segue para a aba Projetos Integradores do site da Fatec Itaquera.',
+    text: 'Entre os concluídos de cada período letivo e semestre do curso, um é escolhido e segue para a aba Projetos Integradores do site da Fatec Itaquera.',
     badge: 'bg-secondary text-white',
   },
 ]

@@ -19,9 +19,9 @@ import { users } from '@/db/schema'
 import type { Project, ProjectTeamMember } from '@/domain/enterprise/entities/project'
 import { getProjectAdvisors, isProjectActive } from '@/domain/enterprise/entities/project-advisors'
 import type { ProjectVerificationSummary } from '@/domain/enterprise/entities/project-verification'
+import { findCourseAbbreviation } from '@/infrastructure/courses/course-queries'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'
 import { DbProjectVerificationRepository } from '@/infrastructure/projects/db-project-verification-repository'
-import { MockProjectRepository } from '@/infrastructure/projects/mock-project-repository'
 import { auth } from '@/libs/auth'
 import { getSafeSocialProfileUrl } from '@/presentation/profile/social-profile-url'
 
@@ -152,20 +152,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const project = await addRegisteredSocialProfiles(foundProject)
 
   const canViewProjectProgress = viewer !== null && canViewProgress(project, viewer)
-  const isExampleProject = Boolean(await new MockProjectRepository().findById(project.id))
   const canEditProject =
     viewer !== null &&
-    !isExampleProject &&
     (isProjectActive(project) || viewer.role === 'admin') &&
     resolveProjectEditScope(project, viewer) !== null
   const canManageProgress = viewer !== null && canManageProjectProgress(project, viewer)
-  const canVerify = viewer !== null && !isExampleProject && canVerifyProject(project, viewer)
-  const canManageProjectActivation =
-    viewer !== null && !isExampleProject && canManageActivation(project, viewer)
-  const canDeleteInactiveProject = viewer !== null && !isExampleProject && canDeleteProject(viewer)
+  const canVerify = viewer !== null && canVerifyProject(project, viewer)
+  const canManageProjectActivation = viewer !== null && canManageActivation(project, viewer)
+  const canDeleteInactiveProject = viewer !== null && canDeleteProject(viewer)
 
   let verification: ProjectVerificationSummary | null = null
-  if (!isExampleProject && project.status === 'publicado') {
+  if (project.status === 'publicado') {
     verification = await new GetProjectVerificationUseCase(
       new DbProjectVerificationRepository(),
     ).execute({ project })
@@ -179,13 +176,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       showProjectProgress={canViewProjectProgress}
       canEditProject={canEditProject}
       canVerify={canVerify}
-      canManageSemesterAward={
-        viewer !== null && !isExampleProject && canChooseSemesterAward(project, viewer)
-      }
+      canManageSemesterAward={viewer !== null && canChooseSemesterAward(project, viewer)}
       canManageActivation={canManageProjectActivation}
       canDelete={canDeleteInactiveProject}
       verification={verification}
       viewerEmail={viewer?.email ?? null}
+      courseName={project.course ? await findCourseAbbreviation(project.course) : null}
     />
   )
 }

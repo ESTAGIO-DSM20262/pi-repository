@@ -313,7 +313,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-search',
         title: 'Explorar o acervo',
-        text: 'Pesquise, filtre e ordene projetos concluídos e em andamento por tema, tecnologia, semestre letivo, semestre do curso e orientador. A opção Meus projetos mostra só os PIs de que você participa.',
+        text: 'Pesquise, filtre e ordene projetos concluídos e em andamento por tema, tecnologia, período letivo, semestre do curso e orientador. A opção Meus projetos mostra só os PIs de que você participa.',
         where: 'Página inicial',
       },
       {
@@ -363,7 +363,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-plus',
         title: 'Cadastrar projetos',
-        text: 'Registre um novo PI com resumo, ciclo e semestre, tema, alunos, tecnologias, links dos artefatos e, se quiser, tarefas iniciais. Você entra como orientador principal e pode incluir até 4 orientadores adicionais.',
+        text: 'Registre um novo PI com resumo, período letivo e semestre, tema, alunos, tecnologias, links dos artefatos e, se quiser, tarefas iniciais. Você entra como orientador principal e pode incluir até 4 orientadores adicionais.',
         where: 'Novo projeto',
       },
       {
@@ -381,7 +381,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-copy-alt',
         title: 'Atribuir a mesma tarefa a vários projetos',
-        text: 'Quando a tarefa é igual para várias equipes, escolha os projetos (por semestre, ciclo ou todos os que você orienta) e crie a tarefa de uma só vez. Você só vê os projetos que acompanha e só atribui aos que orienta como principal e que estão em andamento.',
+        text: 'Quando a tarefa é igual para várias equipes, escolha os projetos (por semestre, período letivo ou todos os que você orienta) e crie a tarefa de uma só vez. Você só vê os projetos que acompanha e só atribui aos que orienta como principal e que estão em andamento.',
         where: 'Painel · Tarefas em lote',
       },
       {
@@ -393,7 +393,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-trophy',
         title: 'Escolher o melhor PI do semestre',
-        text: 'Se você é o orientador principal, escolha o melhor PI de cada ciclo e semestre do curso, com o apoio da sugestão do sistema, que conta os critérios atendidos. Só os melhores PIs de cada semestre seguem para a aba Projetos Integradores do site da Fatec Itaquera.',
+        text: 'Se você é o orientador principal, escolha o melhor PI de cada período letivo e semestre do curso, com o apoio da sugestão do sistema, que conta os critérios atendidos. Só os melhores PIs de cada semestre seguem para a aba Projetos Integradores do site da Fatec Itaquera.',
         where: 'Painel do professor e página do projeto',
       },
       {
@@ -405,7 +405,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-chart-histogram',
         title: 'Acompanhar pelo painel',
-        text: 'Veja tarefas atrasadas e a vencer, projetos parados ou sem tarefas, os prontos para concluir, a carga de cada aluno e os concluídos que você ainda não indicou. Filtre por semestre, situação e projeto e pesquise por título, aluno, tema ou ciclo.',
+        text: 'Veja tarefas atrasadas e a vencer, projetos parados ou sem tarefas, os prontos para concluir, a carga de cada aluno e os concluídos que você ainda não indicou. Filtre por semestre, situação e projeto e pesquise por título, aluno, tema ou período letivo.',
         where: 'Área do professor',
       },
       {
@@ -479,7 +479,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-copy-alt',
         title: 'Atribuir a mesma tarefa a vários projetos',
-        text: 'Crie a mesma tarefa para vários projetos de uma vez, filtrando por semestre, ciclo, orientador ou situação, ou escolhendo os projetos um a um. Você enxerga todos os projetos ativos do sistema.',
+        text: 'Crie a mesma tarefa para vários projetos de uma vez, filtrando por semestre, período letivo, orientador ou situação, ou escolhendo os projetos um a um. Você enxerga todos os projetos ativos do sistema.',
         where: 'Painel · Tarefas em lote',
       },
       {
@@ -491,7 +491,7 @@ export const ROLE_GUIDES: Record<Role, RoleGuide> = {
       {
         icon: 'fi-rr-trophy',
         title: 'Melhor PI do semestre',
-        text: 'Escolha o melhor PI de cada ciclo e semestre do curso, com o apoio da sugestão do sistema. Só os melhores PIs de cada semestre seguem para a aba Projetos Integradores do site da Fatec Itaquera.',
+        text: 'Escolha o melhor PI de cada período letivo e semestre do curso, com o apoio da sugestão do sistema. Só os melhores PIs de cada semestre seguem para a aba Projetos Integradores do site da Fatec Itaquera.',
         where: 'Painel do administrador e página do projeto',
       },
       {

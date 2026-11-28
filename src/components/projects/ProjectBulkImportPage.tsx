@@ -313,8 +313,8 @@ export function ProjectBulkImportPage({ role, backHref }: ProjectBulkImportPageP
               </section>
 
               <Feedback kind="info">
-                Projetos com o mesmo título, ciclo e semestre de um já cadastrado são ignorados, e
-                os alunos e professores informados precisam estar ativos no sistema.
+                Projetos com o mesmo título, período letivo e semestre de um já cadastrado são
+                ignorados, e os alunos e professores informados precisam estar ativos no sistema.
               </Feedback>
               {error && <Feedback kind="error">{error}</Feedback>}
 
@@ -447,7 +447,7 @@ export function ProjectBulkImportPage({ role, backHref }: ProjectBulkImportPageP
       <ConfirmationDialog
         open={confirmationOpen}
         title="Confirmar importação de projetos?"
-        description={`A planilha “${file?.name ?? 'selecionada'}” será processada agora. Projetos novos serão criados e os que já existem com o mesmo título, ciclo e semestre serão ignorados. O envio pode conter até ${MAX_PROJECT_IMPORT_ROWS} projetos; confira se o arquivo correto foi selecionado.`}
+        description={`A planilha “${file?.name ?? 'selecionada'}” será processada agora. Projetos novos serão criados e os que já existem com o mesmo título, período letivo e semestre serão ignorados. O envio pode conter até ${MAX_PROJECT_IMPORT_ROWS} projetos; confira se o arquivo correto foi selecionado.`}
         icon="fi-rr-file-import"
         tone="primary"
         confirmLabel="Importar projetos"

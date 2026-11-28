@@ -27,7 +27,8 @@ export type DialogTone = 'primary' | 'danger' | 'award'
 export const dialogHeaderClass =
   'flex items-start gap-3 border-b border-border bg-surface-secondary px-5 py-4 sm:px-6 sm:py-5'
 
-export const dialogBodyClass = 'min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6'
+export const dialogBodyClass =
+  'min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 sm:px-6 sm:py-6'
 
 export const dialogFooterClass =
   'flex flex-col-reverse gap-2 border-t border-border bg-surface-secondary px-5 py-4 sm:flex-row sm:justify-end sm:px-6'

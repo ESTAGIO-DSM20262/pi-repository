@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import type { CourseRecord } from '@/application/courses/course-rules'
 import { InMemoryProjectCommandRepository } from '@/test/repositories/in-memory-project-command-repository'
 import { InMemoryProjectUserDirectory } from '@/test/repositories/in-memory-project-user-directory'
 import { CreateProjectUseCase } from './create-project-use-case'
@@ -17,6 +18,18 @@ const student = {
   githubUrl: null,
   linkedinUrl: null,
 }
+const DSM: CourseRecord = {
+  id: 'course-dsm',
+  name: 'Desenvolvimento de Software Multiplataforma',
+  abbreviation: 'DSM',
+  active: true,
+}
+const ADS: CourseRecord = {
+  id: 'course-ads',
+  name: 'Análise e Desenvolvimento de Sistemas',
+  abbreviation: 'ADS',
+  active: true,
+}
 const validBody = {
   title: 'Projeto Integrador',
   summary: 'Resumo suficientemente detalhado do projeto.',
@@ -32,6 +45,38 @@ const validBody = {
 }
 
 describe('CreateProjectUseCase', () => {
+  it('grava o curso escolhido quando há mais de um curso ativo', async () => {
+    const repository = new InMemoryProjectCommandRepository()
+    const users = new InMemoryProjectUserDirectory([professor], [professor], [student])
+    const useCase = new CreateProjectUseCase(repository, users)
+
+    const result = await useCase.execute({
+      sessionUserId: professor.id,
+      body: { ...validBody, course: 'ADS' },
+      courses: [DSM, ADS],
+    })
+
+    expect(result.isRight()).toBe(true)
+    if (result.isRight()) {
+      expect(repository.projects.get(result.value.id)?.course).toBe(ADS.name)
+    }
+  })
+
+  it('recusa o cadastro sem curso quando há mais de um curso ativo', async () => {
+    const repository = new InMemoryProjectCommandRepository()
+    const users = new InMemoryProjectUserDirectory([professor], [professor], [student])
+    const useCase = new CreateProjectUseCase(repository, users)
+
+    const result = await useCase.execute({
+      sessionUserId: professor.id,
+      body: validBody,
+      courses: [DSM, ADS],
+    })
+
+    expect(result.isLeft()).toBe(true)
+    expect(repository.projects.size).toBe(0)
+  })
+
   it('cria o projeto e aceita que as tarefas iniciais sejam opcionais', async () => {
     const repository = new InMemoryProjectCommandRepository()
     const users = new InMemoryProjectUserDirectory([professor], [professor], [student])

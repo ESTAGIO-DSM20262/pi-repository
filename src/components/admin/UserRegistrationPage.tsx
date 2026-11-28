@@ -291,8 +291,8 @@ export function UserRegistrationPage() {
                 />
               </label>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className={labelClass}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <label className={`${labelClass} min-w-0`}>
                   {role === 'student'
                     ? 'R.A. / Registro acadêmico'
                     : role === 'professor'
@@ -334,7 +334,7 @@ export function UserRegistrationPage() {
                   )}
                 </label>
                 {role === 'student' ? (
-                  <div>
+                  <div className="min-w-0">
                     <span className={labelClass}>
                       Curso tecnológico <span className="text-primary">*</span>
                     </span>

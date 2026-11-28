@@ -39,12 +39,7 @@ export class SetProjectActivationUseCase
 
     const project = await this.reader.findById(projectId)
     if (!project) {
-      return left(
-        new ProjectOperationError(
-          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser desativados.',
-          404,
-        ),
-      )
+      return left(new ProjectOperationError('Projeto não encontrado.', 404))
     }
     if (!canManageActivation(project, viewer)) return left(forbidden)
     await this.projects.setActive(projectId, active, this.now())

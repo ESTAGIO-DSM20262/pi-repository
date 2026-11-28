@@ -87,7 +87,7 @@ function HowItWorks() {
           É apenas uma sugestão: o professor decide e pode escolher qualquer projeto concluído, até
           mesmo outro que não seja o sugerido.
         </li>
-        <li>Há um único melhor PI para cada combinação de ciclo e semestre do curso.</li>
+        <li>Há um único melhor PI para cada combinação de período letivo e semestre do curso.</li>
       </ul>
     </details>
   )
@@ -178,7 +178,7 @@ function AwardCard({
 
       {item.winnerTitle && !item.selected && (
         <p className="mt-3 text-xs text-text-secondary">
-          Escolha atual deste ciclo e semestre: <strong>{item.winnerTitle}</strong>.
+          Escolha atual deste período letivo e semestre: <strong>{item.winnerTitle}</strong>.
         </p>
       )}
 
@@ -215,8 +215,8 @@ function ChoiceDetails({ pending }: { pending: PendingChoice }) {
   if (item.selected) {
     return (
       <p>
-        Este ciclo e semestre ficará sem melhor PI, e o projeto deixa de ser elegível para o site da
-        Fatec Itaquera, até que você escolha outro projeto.
+        Este período letivo e semestre ficará sem melhor PI, e o projeto deixa de ser elegível para
+        o site da Fatec Itaquera, até que você escolha outro projeto.
       </p>
     )
   }
@@ -391,7 +391,7 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
   }
 
   const busy = pending || loading
-  const projectsText = `${group.length} ${group.length === 1 ? 'projeto' : 'projetos'} neste ciclo e semestre`
+  const projectsText = `${group.length} ${group.length === 1 ? 'projeto' : 'projetos'} neste período letivo e semestre`
   const eligibleText =
     summary.eligibleCount === 1
       ? '1 concluído pode ser escolhido'
@@ -418,8 +418,8 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
           </h2>
           <p className="mt-0.5 text-xs text-text-secondary sm:text-[0.8125rem]">
             {projectId
-              ? 'Escolha este projeto como o melhor do ciclo e semestre dele. O sistema apenas sugere; a decisão é sua.'
-              : 'Escolha o melhor projeto de cada semestre do curso em cada ciclo. O sistema apenas sugere; a decisão é sua.'}
+              ? 'Escolha este projeto como o melhor do período letivo e semestre dele. O sistema apenas sugere; a decisão é sua.'
+              : 'Escolha o melhor projeto de cada semestre do curso em cada período letivo. O sistema apenas sugere; a decisão é sua.'}
           </p>
         </div>
       </div>
@@ -430,11 +430,11 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
       {!projectId && candidates.length > 0 && (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <span className={labelClass}>Ciclo</span>
+            <span className={labelClass}>Período letivo</span>
             <SelectDropdown
-              ariaLabel="Escolher o ciclo"
+              ariaLabel="Escolher o período letivo"
               searchable
-              searchPlaceholder="Pesquisar semestre..."
+              searchPlaceholder="Pesquisar período letivo..."
               visibleLimit={RECENT_SEMESTER_LIMIT}
               limitHint={RECENT_SEMESTER_HINT}
               value={cycle}
@@ -520,8 +520,8 @@ export function SemesterAwardsSection({ projectId }: { projectId?: string }) {
           <i className="fi fi-rr-folder-open text-xl text-text-muted" aria-hidden="true" />
           <p className="mt-2 text-sm text-text-secondary">
             {candidates.length === 0
-              ? 'Nenhum projeto cadastrado para escolher. Projetos demonstrativos não participam.'
-              : 'Nenhum projeto encontrado neste ciclo e semestre. Tente outra combinação.'}
+              ? 'Nenhum projeto cadastrado para escolher.'
+              : 'Nenhum projeto encontrado neste período letivo e semestre. Tente outra combinação.'}
           </p>
         </div>
       )}

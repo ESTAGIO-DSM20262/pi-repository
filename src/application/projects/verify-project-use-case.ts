@@ -40,12 +40,7 @@ export class VerifyProjectUseCase
   > {
     const project = await this.reader.findById(projectId)
     if (!project || !canViewProject(project, viewer)) {
-      return left(
-        new ProjectOperationError(
-          'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser indicados.',
-          404,
-        ),
-      )
+      return left(new ProjectOperationError('Projeto não encontrado.', 404))
     }
     if (!isProjectActive(project)) {
       return left(new ProjectOperationError('Reative o projeto antes de indicá-lo.', 409))

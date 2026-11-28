@@ -39,7 +39,7 @@ export async function resolveProjectEditAccess({
     return {
       ok: false,
       status: 404,
-      message: 'Projeto não encontrado. Projetos demonstrativos do acervo não podem ser editados.',
+      message: 'Projeto não encontrado.',
     }
   }
 

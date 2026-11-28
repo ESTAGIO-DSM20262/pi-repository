@@ -1,3 +1,4 @@
+import type { CourseRecord } from '@/application/courses/course-rules'
 import type { UseCase } from '@/core/application/use-case'
 import { type Either, left, right } from '@/core/either'
 import type { ProjectReader } from '@/domain/enterprise/repositories/project-reader'
@@ -11,6 +12,7 @@ import { ProjectOperationError } from './project-operation-error'
 interface BulkCreateProjectsRequest {
   sessionUserId: string
   rows: ImportedProjectRow[]
+  courses?: CourseRecord[]
 }
 
 export interface BulkProjectRowResult {
@@ -35,7 +37,7 @@ export interface BulkCreateProjectsResponse {
 
 export const DUPLICATE_IN_SHEET_REASON = 'Projeto repetido na própria planilha.'
 export const DUPLICATE_EXISTING_REASON =
-  'Já existe um projeto com este título no mesmo ciclo e semestre.'
+  'Já existe um projeto com este título no mesmo período letivo e semestre.'
 export const UNEXPECTED_ROW_REASON = 'Falha inesperada ao cadastrar este projeto.'
 
 function normalize(value: string) {
@@ -64,6 +66,7 @@ export class BulkCreateProjectsUseCase
   async execute({
     sessionUserId,
     rows,
+    courses,
   }: BulkCreateProjectsRequest): Promise<BulkCreateProjectsOutput> {
     if (!sessionUserId) {
       return left(new ProjectOperationError('É necessário entrar no sistema.', 401))
@@ -159,12 +162,14 @@ export class BulkCreateProjectsUseCase
       try {
         const result = await createProject.execute({
           sessionUserId,
+          courses,
           body: {
             title: row.title,
             summary: row.summary,
             overview: row.overview,
             cycle: row.cycle,
             semester: row.semester,
+            course: row.course,
             theme: row.theme,
             status: row.status,
             advisorEmail,

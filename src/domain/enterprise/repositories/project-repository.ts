@@ -15,6 +15,7 @@ export interface ProjectCreateRecord {
   summary: string
   cycle: string
   semester: number
+  course: string | null
   advisorEmail: string
   advisorName: string
   coAdvisors: ProjectAdvisor[]
@@ -67,6 +68,7 @@ export interface ProjectFullUpdateRecord {
   summary: string
   cycle: string
   semester: number
+  course: string | null
   theme: string
   status: ProjectStatus
   languages: string[]

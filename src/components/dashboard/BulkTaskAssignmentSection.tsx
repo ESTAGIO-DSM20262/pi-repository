@@ -105,7 +105,7 @@ export function BulkTaskAssignmentSection({
   )
   const cycleOptions = useMemo(
     () => [
-      { value: 'all', label: 'Todos os ciclos' },
+      { value: 'all', label: 'Todos os períodos letivos' },
       ...listBulkTaskCycles(candidates).map((cycle) => ({ value: cycle, label: cycle })),
     ],
     [candidates],
@@ -282,7 +282,7 @@ export function BulkTaskAssignmentSection({
             <div className="lg:w-[150px]">
               <SelectDropdown
                 value={filters.cycle}
-                ariaLabel="Filtrar por ciclo"
+                ariaLabel="Filtrar por período letivo"
                 size="compact"
                 tone="muted"
                 width="full"

@@ -33,6 +33,7 @@ interface ProjectPublicViewProps {
   canDelete?: boolean
   verification?: ProjectVerificationSummary | null
   viewerEmail?: string | null
+  courseName?: string | null
 }
 
 function GithubIcon() {
@@ -369,6 +370,7 @@ export function ProjectPublicView({
   canDelete = false,
   verification = null,
   viewerEmail = null,
+  courseName = null,
 }: ProjectPublicViewProps) {
   const details = project.publicDetails
   const team = project.teamMembers?.length ? project.teamMembers : (details?.team ?? [])
@@ -388,7 +390,9 @@ export function ProjectPublicView({
   const advisors = getProjectAdvisors(project)
   const active = isProjectActive(project)
   const externalLinks = details?.externalLinks ?? []
-  const courseLabel = details?.courseLabel ?? `DSM — ${project.semester}º Semestre`
+  const courseLabel =
+    details?.courseLabel ??
+    [courseName ?? project.course, `${project.semester}º Semestre`].filter(Boolean).join(' — ')
   const summary = project.summary
   const progressMembers = project.memberEmails
     .map((email) => {

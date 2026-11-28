@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
+import type { CourseSelectOption } from '@/application/courses/course-rules'
 import type { ListedProject, ViewerRole } from '@/application/projects/list-projects'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import {
@@ -114,9 +115,15 @@ interface ProjectsExplorerProps {
   projects: ListedProject[]
   viewerRole: ViewerRole | null
   isAuthenticated: boolean
+  courses: CourseSelectOption[]
 }
 
-export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: ProjectsExplorerProps) {
+export function ProjectsExplorer({
+  projects,
+  viewerRole,
+  isAuthenticated,
+  courses,
+}: ProjectsExplorerProps) {
   const { favoriteIds, toggleFavorite } = useProjectFavorites(isAuthenticated)
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [sort, setSort] = useState<SortKey>('recent')
@@ -125,7 +132,10 @@ export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: Proj
   const [panelOpen, setPanelOpen] = useState(false)
 
   const facets = useMemo(() => getFacets(projects), [projects])
-  const chips = useMemo(() => getChips(filters, facets.advisors), [filters, facets.advisors])
+  const chips = useMemo(
+    () => getChips(filters, facets.advisors, courses),
+    [filters, facets.advisors, courses],
+  )
   const canSeeMine = viewerRole === 'student' || viewerRole === 'professor'
   const mineTotal = projects.filter((p) => p.related).length
   const mineTitle = viewerRole === 'professor' ? 'Sob minha orientação' : 'Meus projetos'
@@ -195,6 +205,7 @@ export function ProjectsExplorer({ projects, viewerRole, isAuthenticated }: Proj
       <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
         <FilterPanel
           facets={facets}
+          courses={courses}
           filters={filters}
           onChange={change}
           open={panelOpen}

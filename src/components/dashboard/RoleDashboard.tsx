@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   EMPTY_DASHBOARD_FILTERS,
   filterDashboardProjects,
@@ -20,10 +20,12 @@ import type { ListedProject } from '@/application/projects/list-projects'
 import { AdminCoursesSection } from '@/components/admin/AdminCoursesSection'
 import { AdminUsersSection } from '@/components/admin/AdminUsersSection'
 import { FavoriteButton } from '@/components/projects/FavoriteButton'
+import { Pagination } from '@/components/projects/Pagination'
 import { SemesterAwardsSection } from '@/components/projects/SemesterAwardsSection'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
 import type { Role } from '@/domain/enterprise/entities/role'
 import { formatPersonName } from '@/libs/initials'
+import { usePageSize } from '@/libs/usePageSize'
 import { useProjectFavorites } from '@/libs/useProjectFavorites'
 import { ROLE_LABEL } from '@/presentation/auth/role-label'
 import {
@@ -184,8 +186,8 @@ function AdminOverviewCards({
           Visão geral do sistema
         </h2>
         <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
-          Indicadores atualizados a partir do acervo demonstrativo e das contas registradas no
-          banco. Projetos desativados ficam fora das contagens do acervo.
+          Indicadores atualizados a partir dos projetos e das contas registradas no banco. Projetos
+          desativados ficam fora das contagens do acervo.
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
@@ -215,6 +217,7 @@ function AdminOverviewCards({
 }
 
 const GRID_CLASS = 'grid grid-cols-1 gap-3 xl:grid-cols-2'
+const PROJECTS_PAGE_SIZE = { mobile: 4, desktop: 8 }
 
 function SectionHeading({
   title,
@@ -464,16 +467,16 @@ function ProjectFilters({
       <div className="lg:w-[170px]">
         <SelectDropdown
           value={cycle}
-          ariaLabel="Filtrar projetos por ciclo"
+          ariaLabel="Filtrar projetos por período letivo"
           size="compact"
           tone="muted"
           width="full"
           searchable
-          searchPlaceholder="Pesquisar semestre..."
+          searchPlaceholder="Pesquisar período letivo..."
           visibleLimit={RECENT_SEMESTER_LIMIT}
           pinnedCount={1}
           limitHint={RECENT_SEMESTER_HINT}
-          options={[{ value: 'all', label: 'Todos os ciclos' }, ...cycleOptions]}
+          options={[{ value: 'all', label: 'Todos os períodos letivos' }, ...cycleOptions]}
           onChange={onCycleChange}
         />
       </div>
@@ -519,6 +522,9 @@ function ProjectsSection({
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
   const [semesterFilter, setSemesterFilter] = useState('all')
   const [cycleFilter, setCycleFilter] = useState('all')
+  const [page, setPage] = useState(1)
+  const pageSize = usePageSize(PROJECTS_PAGE_SIZE)
+  const sectionRef = useRef<HTMLElement>(null)
 
   const cycleOptions = useMemo(() => {
     const counts = new Map<string, number>()
@@ -559,15 +565,28 @@ function ProjectsSection({
     semesterFilter !== 'all' ||
     cycleFilter !== 'all'
 
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const pageProjects = filteredProjects.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
   function clearFilters() {
     setQuery('')
     setStatusFilter('all')
     setSemesterFilter('all')
     setCycleFilter('all')
+    setPage(1)
+  }
+
+  function goToPage(next: number) {
+    setPage(next)
+    sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
-    <section className="rounded-xl bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+    <section
+      ref={sectionRef}
+      className="scroll-mt-4 rounded-xl bg-white p-4 shadow-sm sm:p-6 lg:p-8"
+    >
       <SectionHeading
         title={title}
         subtitle={subtitle}
@@ -579,13 +598,25 @@ function ProjectsSection({
         <>
           <ProjectFilters
             query={query}
-            onQueryChange={setQuery}
+            onQueryChange={(value) => {
+              setQuery(value)
+              setPage(1)
+            }}
             status={statusFilter}
-            onStatusChange={setStatusFilter}
+            onStatusChange={(value) => {
+              setStatusFilter(value)
+              setPage(1)
+            }}
             semester={semesterFilter}
-            onSemesterChange={setSemesterFilter}
+            onSemesterChange={(value) => {
+              setSemesterFilter(value)
+              setPage(1)
+            }}
             cycle={cycleFilter}
-            onCycleChange={setCycleFilter}
+            onCycleChange={(value) => {
+              setCycleFilter(value)
+              setPage(1)
+            }}
             cycleOptions={cycleOptions}
             includeInactive={includeInactiveFilter}
             onClear={clearFilters}
@@ -597,16 +628,28 @@ function ProjectsSection({
         </>
       )}
       {filteredProjects.length > 0 ? (
-        <div className={GRID_CLASS}>
-          {filteredProjects.map((project) => (
-            <DashboardProjectCard
-              key={project.id}
-              project={project}
-              favorite={favoriteIds.includes(project.id)}
-              onToggleFavorite={onToggleFavorite}
-            />
-          ))}
-        </div>
+        <>
+          <div className={GRID_CLASS}>
+            {pageProjects.map((project) => (
+              <DashboardProjectCard
+                key={project.id}
+                project={project}
+                favorite={favoriteIds.includes(project.id)}
+                onToggleFavorite={onToggleFavorite}
+              />
+            ))}
+          </div>
+          {filteredProjects.length > pageSize && (
+            <div className="mt-5">
+              <Pagination
+                page={currentPage}
+                pageSize={pageSize}
+                total={filteredProjects.length}
+                onChange={goToPage}
+              />
+            </div>
+          )}
+        </>
       ) : (
         <div className="rounded-lg border border-dashed border-border bg-surface-secondary/60 px-4 py-8 text-center">
           <i className="fi fi-rr-folder-open text-xl text-text-muted" aria-hidden="true" />
@@ -884,7 +927,7 @@ export function RoleDashboard({
           <DashboardBlock
             id="melhor-pi"
             title="Melhor PI do semestre"
-            description="Escolha dos projetos de destaque de cada ciclo e semestre"
+            description="Escolha dos projetos de destaque de cada período letivo e semestre"
             icon="fi-rr-badge-check"
           >
             <SemesterAwardsSection />
@@ -960,13 +1003,6 @@ export function RoleDashboard({
             }
           />
         </DashboardBlock>
-
-        {role === 'admin' && (
-          <p className="rounded-xl border border-border bg-white px-4 py-3 text-center text-[0.625rem] text-text-muted shadow-sm">
-            Usuários, permissões e projetos cadastrados são gerenciados no banco. Os projetos
-            demonstrativos do acervo continuam sendo exibidos junto com os novos cadastros.
-          </p>
-        )}
       </div>
     </div>
   )

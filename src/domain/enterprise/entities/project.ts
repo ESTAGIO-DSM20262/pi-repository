@@ -57,6 +57,7 @@ export interface Project {
   summary: string
   cycle: string
   semester: number
+  course?: string | null
   advisor: ProjectAdvisor
   coAdvisors?: ProjectAdvisor[]
   memberEmails: string[]

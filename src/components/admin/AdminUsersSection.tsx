@@ -646,8 +646,8 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                     </span>
                   )}
                 </label>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="block text-xs font-semibold text-slate-700">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="block min-w-0 text-xs font-semibold text-slate-700">
                     R.A. / Matrícula
                     <input
                       minLength={
@@ -681,7 +681,7 @@ export function AdminUsersSection({ currentUserId }: { currentUserId: string }) 
                       </span>
                     )}
                   </label>
-                  <div>
+                  <div className="min-w-0">
                     <span className="block text-xs font-semibold text-slate-700">Curso</span>
                     <SelectDropdown
                       value={editForm.course}

@@ -93,7 +93,7 @@ export function ProjectCard({
 
       <div className={`flex flex-1 flex-col p-4 ${inactive ? 'opacity-70 grayscale' : ''}`}>
         <div className="flex items-center justify-between gap-2 text-[0.6875rem] font-medium text-slate-600">
-          <span>Ciclo {p.cycle}</span>
+          <span>Período letivo {p.cycle}</span>
           <span className="text-right">
             {advisorLabel}: {advisorText}
           </span>
