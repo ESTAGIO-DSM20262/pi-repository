@@ -158,8 +158,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     resolveProjectEditScope(project, viewer) !== null
   const canManageProgress = viewer !== null && canManageProjectProgress(project, viewer)
   const canVerify = viewer !== null && canVerifyProject(project, viewer)
-  const canManageProjectActivation =
-    viewer !== null && canManageActivation(project, viewer)
+  const canManageProjectActivation = viewer !== null && canManageActivation(project, viewer)
   const canDeleteInactiveProject = viewer !== null && canDeleteProject(viewer)
 
   let verification: ProjectVerificationSummary | null = null
@@ -177,9 +176,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       showProjectProgress={canViewProjectProgress}
       canEditProject={canEditProject}
       canVerify={canVerify}
-      canManageSemesterAward={
-        viewer !== null && canChooseSemesterAward(project, viewer)
-      }
+      canManageSemesterAward={viewer !== null && canChooseSemesterAward(project, viewer)}
       canManageActivation={canManageProjectActivation}
       canDelete={canDeleteInactiveProject}
       verification={verification}

@@ -1,10 +1,10 @@
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
+import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import {
   type ProjectFormInitialValues,
   ProjectFormPage,
 } from '@/components/projects/ProjectFormPage'
-import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import { getProjectAdvisors } from '@/domain/enterprise/entities/project-advisors'
 import { toProjectLinkInputs } from '@/domain/enterprise/entities/project-details'
 import { listCourses } from '@/infrastructure/courses/course-queries'

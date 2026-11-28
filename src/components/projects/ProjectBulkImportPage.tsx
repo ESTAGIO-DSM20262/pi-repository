@@ -313,8 +313,8 @@ export function ProjectBulkImportPage({ role, backHref }: ProjectBulkImportPageP
               </section>
 
               <Feedback kind="info">
-                Projetos com o mesmo título, período letivo e semestre de um já cadastrado são ignorados, e
-                os alunos e professores informados precisam estar ativos no sistema.
+                Projetos com o mesmo título, período letivo e semestre de um já cadastrado são
+                ignorados, e os alunos e professores informados precisam estar ativos no sistema.
               </Feedback>
               {error && <Feedback kind="error">{error}</Feedback>}
 

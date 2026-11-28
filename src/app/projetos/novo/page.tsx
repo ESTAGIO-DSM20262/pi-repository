@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { ProjectFormPage } from '@/components/projects/ProjectFormPage'
 import { buildCourseSelectOptions } from '@/application/courses/course-rules'
+import { ProjectFormPage } from '@/components/projects/ProjectFormPage'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
 import { listCourses } from '@/infrastructure/courses/course-queries'
 import { listActiveProjectPeople } from '@/infrastructure/projects/list-active-project-people'

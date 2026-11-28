@@ -186,7 +186,8 @@ function AdminOverviewCards({
           Visão geral do sistema
         </h2>
         <p className="mt-1 text-xs text-text-secondary sm:text-[0.8125rem]">
-          Indicadores atualizados a partir dos projetos e das contas registradas no banco. Projetos desativados ficam fora das contagens do acervo.
+          Indicadores atualizados a partir dos projetos e das contas registradas no banco. Projetos
+          desativados ficam fora das contagens do acervo.
         </p>
       </div>
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-4">
@@ -582,7 +583,10 @@ function ProjectsSection({
   }
 
   return (
-    <section ref={sectionRef} className="scroll-mt-4 rounded-xl bg-white p-4 shadow-sm sm:p-6 lg:p-8">
+    <section
+      ref={sectionRef}
+      className="scroll-mt-4 rounded-xl bg-white p-4 shadow-sm sm:p-6 lg:p-8"
+    >
       <SectionHeading
         title={title}
         subtitle={subtitle}

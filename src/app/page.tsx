@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
+import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import { ListProjectsUseCase } from '@/application/projects/list-projects'
 import { ProjectsExplorer } from '@/components/projects/ProjectsExplorer'
-import { buildCourseSelectOptions } from '@/application/courses/course-rules'
 import { toDomainUser } from '@/infrastructure/auth/better-auth-user-mapper'
 import { listCourses } from '@/infrastructure/courses/course-queries'
 import { CompositeProjectRepository } from '@/infrastructure/projects/composite-project-repository'

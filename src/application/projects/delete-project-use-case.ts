@@ -28,12 +28,7 @@ export class DeleteProjectUseCase
     }
     const project = await this.reader.findById(projectId)
     if (!project) {
-      return left(
-        new ProjectOperationError(
-          'Projeto não encontrado.',
-          404,
-        ),
-      )
+      return left(new ProjectOperationError('Projeto não encontrado.', 404))
     }
     if (isProjectActive(project)) {
       return left(

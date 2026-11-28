@@ -108,12 +108,17 @@ describe('filtro de curso', () => {
 
   it('mostra o rótulo do curso no chip e permite removê-lo', () => {
     const filters = { ...EMPTY_FILTERS, course: 'Análise e Desenvolvimento de Sistemas' }
-    const chips = getChips(filters, [], [
-      { value: 'Análise e Desenvolvimento de Sistemas', label: 'ADS - Análise e Desenvolvimento de Sistemas' },
-    ])
-    expect(chips).toEqual([
-      { id: 'course', label: 'ADS - Análise e Desenvolvimento de Sistemas' },
-    ])
+    const chips = getChips(
+      filters,
+      [],
+      [
+        {
+          value: 'Análise e Desenvolvimento de Sistemas',
+          label: 'ADS - Análise e Desenvolvimento de Sistemas',
+        },
+      ],
+    )
+    expect(chips).toEqual([{ id: 'course', label: 'ADS - Análise e Desenvolvimento de Sistemas' }])
     expect(removeChip(filters, 'course').course).toBe('')
   })
 })

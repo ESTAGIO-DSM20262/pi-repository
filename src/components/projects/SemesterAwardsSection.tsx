@@ -215,8 +215,8 @@ function ChoiceDetails({ pending }: { pending: PendingChoice }) {
   if (item.selected) {
     return (
       <p>
-        Este período letivo e semestre ficará sem melhor PI, e o projeto deixa de ser elegível para o site da
-        Fatec Itaquera, até que você escolha outro projeto.
+        Este período letivo e semestre ficará sem melhor PI, e o projeto deixa de ser elegível para
+        o site da Fatec Itaquera, até que você escolha outro projeto.
       </p>
     )
   }

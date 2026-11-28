@@ -584,7 +584,12 @@ export function FilterPanel({
                 <i className="fi fi-rr-filter flex text-primary" aria-hidden="true" />
                 Filtros de Busca
               </h2>
-              <FilterFields facets={facets} courses={courses} filters={filters} onChange={onChange} />
+              <FilterFields
+                facets={facets}
+                courses={courses}
+                filters={filters}
+                onChange={onChange}
+              />
             </div>
           </div>
 

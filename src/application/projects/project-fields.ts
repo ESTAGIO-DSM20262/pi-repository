@@ -216,7 +216,8 @@ export function parseProjectFields(
   if (overview.length > 5000) {
     return fail('A descrição detalhada deve ter no máximo 5.000 caracteres.')
   }
-  if (!CYCLE_PATTERN.test(cycle)) return fail('Informe o período letivo no formato AAAA/1 ou AAAA/2.')
+  if (!CYCLE_PATTERN.test(cycle))
+    return fail('Informe o período letivo no formato AAAA/1 ou AAAA/2.')
   if (!Number.isInteger(semester) || semester < 1 || semester > 6) {
     return fail('Informe um semestre entre 1 e 6.')
   }

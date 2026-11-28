@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { type KeyboardEvent, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import type { CourseSelectOption } from '@/application/courses/course-rules'
 import { ProjectAdvisorsSection } from '@/components/projects/form/ProjectAdvisorsSection'
 import { ProjectArtifactsSection } from '@/components/projects/form/ProjectArtifactsSection'
 import {
@@ -22,7 +23,6 @@ import { ProjectTeamSection } from '@/components/projects/form/ProjectTeamSectio
 import { TechnologyPicker } from '@/components/projects/form/TechnologyPicker'
 import { BackButton } from '@/components/ui/BackButton'
 import { SelectDropdown } from '@/components/ui/SelectDropdown'
-import type { CourseSelectOption } from '@/application/courses/course-rules'
 import type {
   ProjectImage,
   ProjectStatus,

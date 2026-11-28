@@ -174,7 +174,9 @@ export function buildCourseSelectOptions(
     const known = courses.find((course) => course.name === currentValue)
     result.push({
       value: currentValue,
-      label: known ? `${formatCourseLabel(known)} — desativado` : `${currentValue} — não cadastrado`,
+      label: known
+        ? `${formatCourseLabel(known)} — desativado`
+        : `${currentValue} — não cadastrado`,
     })
   }
   return result
