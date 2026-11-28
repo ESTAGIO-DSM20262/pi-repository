@@ -55,6 +55,7 @@ function seed(status: ProjectStatus = 'em_andamento') {
     summary: 'Resumo suficientemente detalhado do projeto.',
     cycle: '2026/2',
     semester: 3,
+    course: null,
     advisorEmail: principal.email,
     advisorName: principal.name,
     coAdvisors: [satellite],
